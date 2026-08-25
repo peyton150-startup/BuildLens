@@ -90,3 +90,23 @@ As the project grows, exercises connect application code to:
 - architecture and tradeoffs.
 
 These topics are introduced only when the current BuildLens phase gives them a concrete use.
+
+
+BuildLens uses a just-in-time learning rule: **the implementation itself triggers the curriculum**. New syntax, processes, serialization, persistence, concurrency, filesystem behavior, and architecture concepts are introduced when a real BuildLens feature first needs them, then revisited at deeper levels later.
+
+
+## Wrong answers trigger adaptive remediation
+
+BuildLens treats incorrect answers as diagnostic evidence, not as a reason to keep increasing pressure.
+
+If a learner misses a problem, the system:
+
+```text
+preserves the exact attempt
+→ identifies the smallest missing prerequisite
+→ gives a simpler one-concept problem
+→ rebuilds complexity one step at a time
+→ returns to a fresh target-level variant
+```
+
+Support is gradually removed after the concept becomes stable.

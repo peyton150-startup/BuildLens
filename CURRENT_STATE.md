@@ -129,3 +129,35 @@ learning/LEARNING_LEDGER.md
 ```
 
 Do not attempt to study them all before beginning. Claude should introduce the relevant sections when the matching project phase arrives.
+
+
+## Just-in-time learning crosswalk
+
+The implementation plan now contains phase-specific adjacent-learning triggers. This does **not** advance the current phase.
+
+During Phase 0/1, if a Python trace is too complex, reduce it to the smallest syntax unit the learner cannot yet read, record the exact attempt, then rebuild complexity gradually.
+
+Formal exercises must use Evidence Records in `learning/LEARNING_LEDGER.md`.
+
+
+## Adaptive remediation is active
+
+During the current early phases, wrong answers should trigger a **simpler prerequisite problem**, not another equally complex problem.
+
+Use the remediation ladder in `learning/LEARNING_RULES.md`:
+
+```text
+R0 syntax
+→ R1 operation
+→ R2 sequential state
+→ R3 one branch
+→ R4 one function
+→ R5 function + branch
+→ R6 composition
+```
+
+If the learner says a line of Python is unreadable, stop the larger trace and remediate that syntax first.
+
+Every attempt remains verbatim in `learning/LEARNING_LEDGER.md` and is linked into a remediation chain.
+
+This does not advance the project phase.

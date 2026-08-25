@@ -72,6 +72,44 @@ technical communication / defense
 This is a map, not permission to front-load all of these topics into early phases.
 
 
+## Just-in-time curriculum rule
+
+The implementation phase is the **trigger** for adjacent learning.
+
+```text
+real BuildLens task introduces a concept/boundary/failure
+→ learn the smallest underlying idea needed to understand it
+→ predict / trace / test before explanation
+→ apply it to the real BuildLens code
+→ solve one different-looking transfer
+→ record exact evidence
+→ continue implementation
+```
+
+Do not assign detached theory just because it appears in `docs/CURRICULUM.md`.
+
+Examples:
+
+```text
+first diff-line classifier
+→ strings, prefixes, branch ordering, function syntax
+
+first subprocess call
+→ child process, stdout/stderr, return code, bytes-vs-text
+
+first SQLite write
+→ parameters, transaction, commit/rollback
+
+first HTTP endpoint
+→ JSON representation, process/network boundary, validation
+
+first safe file publication
+→ hash/version, temp file, replace, crash recovery, atomicity-vs-durability
+```
+
+The same concept may return later at greater depth. That is deliberate spiral learning.
+
+
 # 2. Final Technical Shape
 
 The final architecture is a target, not the starting architecture.
@@ -400,6 +438,112 @@ The learner passes the **concept**, not the literal question.
 
 ---
 
+## Adaptive remediation protocol
+
+This protocol applies to **every phase**.
+
+Wrong answers are expected during BuildLens.
+
+A failed exercise must not automatically produce another exercise at the same complexity.
+
+Use:
+
+```text
+FAILED TARGET
+↓
+preserve exact answer
+↓
+identify smallest blocker
+↓
+DESCEND complexity
+↓
+stabilize one prerequisite
+↓
+fresh near-transfer
+↓
+ASCEND one rung at a time
+↓
+fresh target-level variant
+```
+
+### Standard scaffold rungs
+
+```text
+R0  read one syntax form
+R1  perform one operation
+R2  trace 2–3 sequential steps
+R3  trace one control choice
+R4  trace one function call
+R5  trace one function + one branch
+R6  compose calls/loops/state at phase target
+```
+
+The rungs describe **cognitive complexity**, not project status.
+
+A Phase 9 learner may temporarily need an `R1` exercise for an unfamiliar syntax/API representation.
+
+### Required simplification dimensions
+
+When descending, remove unrelated complexity from some combination of:
+
+```text
+number of lines
+number of active concepts
+number of function calls
+number of branches
+nesting depth
+mutation
+looping
+unfamiliar syntax
+domain vocabulary
+number of values being tracked
+framework/library surface area
+```
+
+Keep the concept being remediated.
+
+### Worked-example escape hatch
+
+If repeated independent attempts remain unproductive:
+
+```text
+solved neighboring micro-example
+→ learner explains each step
+→ partial example
+→ fresh independent micro-example
+```
+
+This is temporary scaffolding.
+
+### Recovery before promotion
+
+Do not call a misconception repaired merely because the learner understood the explanation.
+
+Require:
+
+```text
+independent correct micro-example
++ near-transfer
++ gradual return to target complexity
++ fresh target-level correct variant
+```
+
+All attempts are linked in the Learning Ledger as a remediation chain.
+
+This implements the project's instructional progression:
+
+```text
+modeling / scaffolding
+→ coaching
+→ fading
+→ independent performance
+→ generalization
+```
+
+and keeps retrieval low-stakes: repeated incorrect attempts are expected evidence, not penalties.
+
+---
+
 # 5. Lifecycle
 
 ## Phase 0 — Specification Before Code
@@ -438,6 +582,38 @@ lines_removed = 0
 ### You learn
 
 Define a problem precisely, restate it, produce test cases, and carry out a human version of the algorithm before writing code.
+
+### Adjacent learning triggered here
+
+Phase 0 is adaptive. If a trace is missed, **do not keep issuing equally complex traces**.
+
+Descend until the learner reaches a stable rung:
+
+```text
+R0: read one syntax form
+    `word[-1]`
+
+R1: one operation
+    `number + 1`
+
+R2: two sequential assignments
+
+R3: one `if` / `if-else`, no function
+
+R4: one tiny function call, no branch
+
+R5: one function + one branch
+
+R6: only later, composition
+```
+
+If the learner cannot explain how to *read* a line, treat that as a syntax prerequisite and go to `R0`.
+
+After a correct micro-example, give a fresh same-rung variant before adding one source of complexity.
+
+The learner advances by accurately predicting state, not by starting with a hard exercise. Every formal problem and first committed answer is preserved verbatim in the Learning Ledger and linked through its remediation chain.
+
+**Curriculum:** Strand 1 + Strand 4. **Python:** control flow/functions tutorial.
 
 ### Knowledge gate
 
@@ -488,6 +664,49 @@ Prefer functions that can be viewed in their entirety on one screen.
 ### You learn
 
 Parameters, arguments, local variables, branches, loops, function calls, return values, and deterministic transformation.
+
+### Adjacent learning triggered here
+
+The first real BuildLens functions are also a **Python syntax bridge**. Introduce syntax only when the implementation needs it:
+
+```text
+`str`
+→ characters/indexing (including negative indexing when useful)
+→ equality / `startswith`
+→ `if / elif / else`
+→ specific prefix before general prefix
+→ `def`
+→ parameter vs argument
+→ local variable
+→ `return`
+→ loop only when parsing multiple lines requires it
+```
+
+For `+++` versus `+`, use the real classifier to teach why a more-specific condition may need to be tested first. Do not reveal the finished classifier before the learner predicts the branch behavior.
+
+If the learner misses a Phase 1 trace, remediate the **specific prerequisite** rather than shrinking the whole problem vaguely.
+
+Examples:
+
+```text
+cannot read `line[-1]`
+→ R0 string-indexing problem
+
+does not know whether `"+++"` starts with `"+"`
+→ R1 prefix-membership / `startswith` micro-example
+
+chooses the wrong `if/elif` branch
+→ R3 one branch-ordering problem with no function
+
+loses track of a returned value
+→ R4 one tiny function with no branch
+```
+
+Only combine those concepts again after each required prerequisite is stable.
+
+Arithmetic in these exercises should be deliberately easy so that arithmetic does not hide the programming concept.
+
+**Curriculum:** Strands 1, 1.5, 4. **Python:** control flow/functions + built-in string/sequence behavior.
 
 ### Knowledge gate
 
@@ -547,6 +766,18 @@ Add focused unit tests.
 
 Collections, structured data, representation choice, immutability, edge cases, and test-first thinking.
 
+### Adjacent learning triggered here
+
+When `ChangeSummary` appears, explicitly trace the representation ladder:
+
+```text
+raw text → primitive values → collection → named domain record
+```
+
+Teach dataclass fields and `frozen=True` without calling it deep immutability. Test the representation's normal, empty, boundary, invalid, and invariant cases.
+
+**Curriculum:** Strands 1.5, 2, 4. **Python:** `dataclasses`.
+
 ### Knowledge gate
 
 Before Claude shows tests, design normal, boundary, empty, and invalid cases.
@@ -591,6 +822,12 @@ Add a state-transition representation suitable for later visualization.
 ### You learn
 
 Mutation, aliases, copies, object identity, ownership of mutable state, previous-state → event → new-state reasoning.
+
+### Adjacent learning triggered here
+
+Session state is the reason to learn Python references and mutation. For every state exercise ask: who owns the list, who aliases it, what mutates in place, what creates a new object, and which snapshot could change unexpectedly?
+
+**Curriculum:** Strands 1, 3, 4.
 
 ### Knowledge gate
 
@@ -649,6 +886,12 @@ src/buildlens/
 ### You learn
 
 Top-down design, cohesion, coupling, responsibility boundaries, refactoring versus behavior change.
+
+### Adjacent learning triggered here
+
+Refactoring into files creates the module/import lesson. For each new import, identify the name used, why that dependency exists, and whether it preserves the intended dependency direction. Use the code-reading playbook on every meaningful module.
+
+**Curriculum:** Strands 5, 7, 11.
 
 ### Knowledge gate
 
@@ -717,6 +960,18 @@ Use type hints and explicit domain models.
 
 Interface, contract, dependency direction, representation boundaries.
 
+### Adjacent learning triggered here
+
+Type annotations become explicit here. The learner must understand:
+
+```text
+type hint ≠ runtime validation
+```
+
+For every contract ask what the annotation communicates, what code actually validates, and what happens at runtime if a wrong value arrives. Advanced typing such as `Protocol` is introduced only if a real interface benefits from it.
+
+**Curriculum:** Strands 7, 11, 12. **Python:** `typing`.
+
 ### Knowledge gate
 
 Given a new multi-function example, draw caller/callee frames.
@@ -770,6 +1025,18 @@ Lines removed: 4
 ### You learn
 
 Entry point, call chain, orchestration, end-to-end data flow.
+
+### Adjacent learning triggered here
+
+The CLI introduces a process entry/exit boundary:
+
+```text
+shell → arguments → Python entry point → application → stdout/stderr → exit status
+```
+
+If `argparse` is used, separate argument parsing from domain behavior. Include one bad-input exercise and explain what the user sees and whether the process should succeed.
+
+**Curriculum:** Strands 7, 8, 11. **Python:** `argparse`.
 
 ### Knowledge gate
 
@@ -830,6 +1097,23 @@ existing BuildLens core
 ### You learn
 
 I/O, subprocesses, external-system boundaries, adapters, error handling.
+
+### Adjacent learning triggered here
+
+`subprocess.run()` must stop being magic. Trace:
+
+```text
+BuildLens Python process
+→ child Git process
+→ arguments
+→ stdout/stderr
+→ return code
+→ Python interpretation
+```
+
+Exercise executable-not-found, non-zero exit, timeout, and valid-process/malformed-output cases. Captured output is bytes by default and can be decoded/text mode. Avoid `shell=True` unless a concrete requirement is defended.
+
+**Curriculum:** Strands 6, 7, 8, 9.5. **Python:** `subprocess`, `pathlib`.
 
 ### Knowledge gate
 
@@ -922,6 +1206,18 @@ At this phase BuildLens only observes the Claude worktree. The learner-edit work
 
 Event source, integration adapter, event normalization, lifecycle events, reconciliation.
 
+### Adjacent learning triggered here
+
+Hook payloads create a serialization + trust-boundary lesson:
+
+```text
+hook JSON → Python JSON values → validated adapter input → domain event
+```
+
+Teach JSON object/list/null mappings and that successful parsing is not the same as trusted domain data. When content hashes appear, teach `file bytes → SHA-256 digest → equality/version fingerprint`; do not treat a hash as authorization, authorship, or semantic equivalence.
+
+**Curriculum:** Strands 1.5, 7, 8, 9.5, 9.75. **Python:** `json`, `hashlib`, `pathlib`.
+
 ### Knowledge gate
 
 Given an unfamiliar hook payload, decide:
@@ -1001,6 +1297,22 @@ Do not add the visual editor yet. First prove headlessly that:
 
 Events vs direct calls, state machines, happy path vs failure path, idempotence where needed, failure ownership.
 
+### Adjacent learning triggered here
+
+Tie reliability vocabulary to actual failures:
+
+```text
+duplicate event → idempotence/deduplication
+out-of-order event → ordering/sequence
+stale hash → optimistic concurrency
+missed observation → reconciliation
+interruption/timeout → operation-status ambiguity
+```
+
+A hash detects differing bytes; it cannot explain intent or choose a correct merge. Any performance claim begins with a measurement/hypothesis.
+
+**Curriculum:** Strands 3, 5, 8, 8.5, 9.
+
 ### Knowledge gate
 
 Trace:
@@ -1066,6 +1378,16 @@ The generator uses source-grounded archetypes and creates new surface forms.
 
 Abstraction at the learning-system level, deterministic records vs generated content, evaluation criteria, transfer.
 
+### Adjacent learning triggered here
+
+The learning engine models evidence, not just scores. Every formal attempt preserves the exact exercise, exact first committed learner answer, reasoning if supplied, confidence, help/tools used before commitment, result, misconception, correction added afterward, and transfer/retrieval history.
+
+```text
+generated exercise content ≠ authoritative attempt record
+```
+
+**Curriculum:** Strands 3, 4, 12.
+
 ### Knowledge gate
 
 The learning engine tests *you* on previous phases.
@@ -1125,6 +1447,20 @@ Keep persistence behind narrow repositories/interfaces.
 
 In-memory vs persistent state, database responsibility, schema, transactions, repository boundaries.
 
+### Adjacent learning triggered here
+
+For one persisted object trace:
+
+```text
+Python value → SQL parameters → transaction → row(s) → commit → reopen/query → Python value
+```
+
+Teach parameter binding, schema constraints, commit, rollback, and connection lifetime. Read `sqlite3` docs for the **Python version BuildLens pins** because transaction-control behavior has evolved. Do not say the connection context manager closes the connection; transaction handling and connection lifetime are separate.
+
+Include one two-write failure case and predict what commits/rolls back.
+
+**Curriculum:** Strands 1.5, 7, 9, 9.5. **Python:** `sqlite3`.
+
 ### Knowledge gate
 
 Take one object from Python memory and trace how it becomes a database row and comes back.
@@ -1178,6 +1514,19 @@ repository
 ### You learn
 
 Process boundaries, serialization, request/response, API/domain separation.
+
+### Adjacent learning triggered here
+
+Trace both representation directions:
+
+```text
+Python/domain → response model → JSON-compatible values → HTTP payload
+HTTP payload → JSON parse → request model → domain
+```
+
+Ask where `None` becomes `null`, what Python-specific values JSON cannot encode directly, and where malformed versus semantically invalid input is rejected. Keep transport validation, domain invariants, and authority/authorization conceptually separate.
+
+**Curriculum:** Strands 1.5, 7, 8, 9.5, 9.75. **Python:** `json`.
 
 ### Knowledge gate
 
@@ -1438,6 +1787,27 @@ The learner should always be able to answer:
 - why observation hooks are different from authority;
 - why atomic write is different from conflict resolution.
 
+### Adjacent learning triggered here
+
+Require four distinct mechanisms:
+
+```text
+three-way merge → logical reconciliation
+expected hash → stale-write detection
+temp + replace → complete/atomic destination visibility where supported
+persisted write intent + recovery → application crash recovery
+```
+
+Add the deeper distinction:
+
+```text
+atomic visibility ≠ guaranteed durability after every OS/power failure
+```
+
+Do not claim Python `flush()` alone means physical durability. If stronger durability becomes a product requirement, investigate a platform-specific synchronization protocol before promising it.
+
+**Curriculum:** Strands 3, 6, 8, 9, 9.75, 10, 12. **Python:** `hashlib`, `tempfile`, `os.replace`, `pathlib`.
+
 ### Knowledge gate — collaborative editing architecture
 
 Claude gives a **new** base/human/Claude example.
@@ -1591,6 +1961,18 @@ failure
 
 Architecture views, architectural drivers, quality attributes, risks, sensitivities, and tradeoffs.
 
+### Adjacent learning triggered here
+
+Every important ADR must point back to a real mechanism and evidence:
+
+```text
+requirement/stimulus → mechanism → code/runtime path → test/measurement → tradeoff → reversal condition
+```
+
+At least one quality scenario needs a measurable response rather than a vague adjective like "reliable" or "fast".
+
+**Curriculum:** Strands 8.5, 9.75, 10, 12.
+
 ### Knowledge gate
 
 Rebuild one architecture view from memory.
@@ -1662,6 +2044,19 @@ an unfamiliar transfer problem
 Claude must not simply repeat the reasoning that produced the implementation.
 
 Where possible, use a separate reviewer/examiner context.
+
+### Adjacent learning triggered here
+
+Interview mode changes zoom level on the same feature:
+
+```text
+syntax → function → data structure → module → process/network/database
+→ failure/concurrency → runtime evidence → architecture tradeoff
+```
+
+The learner must label claims as: **known from code, verified from docs, measured, inferred, or not known yet**. The final goal is line-to-system understanding without bluffing.
+
+**Curriculum:** cumulative.
 
 ### Exam sequence
 

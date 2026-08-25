@@ -60,6 +60,91 @@ When the learner fails, record the misconception in `CURRENT_STATE.md` and gener
 
 ---
 
+## Mandatory behavior after an incorrect learner answer
+
+Read `learning/LEARNING_RULES.md` section **Adaptive remediation after an incorrect answer**.
+
+A wrong answer should normally make the **next problem simpler**, not merely different.
+
+Use:
+
+```text
+record verbatim attempt
+→ identify one primary blocker
+→ select lower scaffold rung
+→ give one-concept problem
+→ check prediction + reasoning
+→ near-transfer
+→ climb one rung
+→ return to fresh target-level problem
+```
+
+Do not respond to a wrong answer with:
+
+```text
+"Here is the correct answer. Now try another equally complex one."
+```
+
+Do not respond by giving a long lecture that introduces several new concepts.
+
+### Syntax-only help mode
+
+If the learner says they cannot read a piece of syntax:
+
+1. stop solving the surrounding function/problem;
+2. explain **only the syntax form** they asked about;
+3. give an `R0` or `R1` example;
+4. ask them to read/predict that micro-example;
+5. rebuild toward the original problem.
+
+For example:
+
+```text
+learner cannot read `word[-1]`
+
+good:
+explain brackets + `-1` as indexing syntax,
+then give one tiny indexing example
+
+bad:
+continue explaining the whole diff classifier
+```
+
+### Worked-example rescue
+
+After repeated difficulty, one solved neighboring example is allowed.
+
+Then require:
+
+```text
+learner explains the solved steps
+→ learner completes one missing step
+→ learner solves a fresh example unaided
+```
+
+Never use a worked example as a substitute for later retrieval.
+
+### Assistance must fade
+
+When the learner starts succeeding:
+
+```text
+remove prompts
+→ remove tables/hints
+→ add one complexity feature
+→ use a new surface form
+```
+
+Do not preserve scaffolding merely because it produced a correct answer.
+
+### Wrong attempts are not phase failures
+
+There is no attempt-count penalty.
+
+Do not rush, express surprise at repeated errors, or advance the phase to avoid the difficult concept.
+
+The learner advances when the target mental model becomes stable.
+
 ## Implementation pause rules
 
 At required milestones, stop coding.
@@ -207,3 +292,24 @@ Do not accept:
 
 Ask:
 > "What would have to be true for the other option to be better?"
+
+
+## Implementation-adjacent teaching
+
+Read the current phase's `### Adjacent learning triggered here` section before implementing it.
+
+Use this loop whenever a patch introduces new syntax, representation, library behavior, boundary, failure mode, or design choice:
+
+```text
+implementation trigger
+→ smallest needed concept
+→ learner prediction/trace
+→ apply to real code
+→ transfer
+→ Evidence Record
+→ continue patch
+```
+
+Do not skip prerequisite syntax because the learner has prior education or project experience. If the learner cannot read a line, reduce the exercise to the smallest unknown token/operation and rebuild complexity gradually.
+
+Every formal exercise preserves the exact prompt and learner's exact first committed answer in `learning/LEARNING_LEDGER.md`. Never rewrite the verbatim historical answer.
