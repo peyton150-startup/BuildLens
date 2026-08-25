@@ -159,6 +159,26 @@ Argos, Datum, and Trellis are deliberately deferred until the matching Python/de
 - Active test-design blocker: `classification_return_vs_downstream_effect`.
   Descend to R1 with a generic classifier and one input/expected-return pair;
   return to the BuildLens test only after that distinction is stable.
+- Evidence `EV-P1-TEST-013` correctly identified input `20` and expected return
+  `"adult"`, but confused an alternate input (`18`) with an incorrect returned
+  value and misread the exact boundary. Continue at R1 with one changed-boundary
+  variant before returning to BuildLens. Public evidence sync count: 1 of 5.
+- Evidence `EV-P1-TEST-014` correctly reasoned that `18 <= 18` is true, expected
+  `"child"`, and identified `"adult"` as the competing wrong return. Next: one
+  differently surfaced blind transfer and the shared principle. Public evidence
+  sync count: 2 of 5.
+- Evidence `EV-P1-TEST-015` expressed the blind-transfer contract as an attempted
+  function instead of a test specification and omitted the shared principle.
+  Remain at R1: answer the package test fields without code, then explain the
+  shared boundary-test principle. Public evidence sync count: 3 of 5.
+- Evidence `EV-P1-TEST-016` correctly specified input `10`, expected `"heavy"`,
+  and competing wrong return `"standard"`. Clarified that `10 >= 10` evaluates
+  to Boolean `True`. Require the learner's shared-principle explanation before
+  advancing. Public evidence sync count: 4 of 5.
+- Evidence `EV-P1-TEST-017` did not yet identify the shared exact-boundary
+  principle and conflated comparison direction, `else`/`else if`, and input versus
+  return types. Provide one fresh plain-language boundary variant. The scheduled
+  five-attempt public evidence sync is now due; do not advance the gate.
 
 ## Files I should be able to teach
 

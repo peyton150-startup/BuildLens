@@ -1709,6 +1709,152 @@ stable-at-rung
 
 ```text
 EVIDENCE ID:
+EV-P1-TEST-016
+
+DATE / PHASE / GATE:
+2026-08-25 / Phase 1 / blind-transfer test specification recovery
+
+IMPLEMENTATION TRIGGER:
+The learner must state a test's input, Boolean boundary result, expected return, and competing incorrect return before implementation.
+
+ADJACENT CONCEPT:
+A comparison expression evaluates to the Boolean value `True` or `False` and controls which result applies.
+
+EXERCISE TYPE:
+transfer
+
+SOURCE / CONTEXT:
+blind transfer
+
+PROBLEM — VERBATIM:
+Complete the exercise without writing code:
+
+Input:
+Condition—true or false:
+Expected returned string:
+Incorrect returned string the test catches:
+Why:
+Confidence:
+
+Shared principle with the ticket_type tests:
+
+MY ANSWER — VERBATIM:
+the input is 10, expected return is "heavy" the incorrect return would be "standard" beause the greater than or equal to 10 is for heavy, what do you mean by conditon true or false
+
+MY REASONING — VERBATIM:
+beause the greater than or equal to 10 is for heavy
+
+CONFIDENCE BEFORE CHECK:
+not provided
+
+TOOLS / HELP USED BEFORE COMMITMENT:
+none reported; Codex clarification was requested after the input and return predictions were committed
+
+RESULT:
+partial
+
+MISCONCEPTION / GAP:
+The input, expected return, competing incorrect return, and boundary reasoning were correct. The learner did not yet recognize “condition true or false” as asking for the Boolean result of the comparison expression, and did not provide confidence or the shared principle.
+
+CORRECT MODEL — ADDED AFTER ATTEMPT:
+The relevant condition is `10 >= 10`. It evaluates to the Boolean value `True` because equality is included. Therefore the expected returned string is `"heavy"`, while `"standard"` is the incorrect competing return this test would catch.
+
+WHY THIS MATTERS TO THE REAL IMPLEMENTATION:
+BuildLens branch tests require translating each comparison or prefix check into a Boolean decision and an observable returned label.
+
+TRANSFER / NEXT RETRIEVAL:
+Ask only for the shared principle connecting the ticket and package boundary tests, plus confidence, before introducing another concept.
+
+PARENT EVIDENCE ID:
+EV-P1-TEST-015
+
+PRIMARY BLOCKER:
+BOOLEAN_CONDITION_VOCABULARY
+
+SCAFFOLD RUNG:
+R1
+
+WHY THIS RUNG:
+The observable test result is stable; only the meaning of a single comparison's Boolean result needs clarification.
+
+SUPPORT PROVIDED BEFORE THIS ATTEMPT:
+labeled test-design fields with implementation removed
+
+RECOVERY STATUS:
+awaiting-principle-explanation
+```
+
+```text
+EVIDENCE ID:
+EV-P1-TEST-017
+
+DATE / PHASE / GATE:
+2026-08-25 / Phase 1 / teach-aloud shared-principle attempt
+
+IMPLEMENTATION TRIGGER:
+The learner must explain why exact-boundary tests are chosen before using them to drive implementation.
+
+ADJACENT CONCEPT:
+Inclusive lower and upper boundaries, branch vocabulary, input types, and returned label types.
+
+EXERCISE TYPE:
+oral defense
+
+SOURCE / CONTEXT:
+blind transfer
+
+PROBLEM — VERBATIM:
+What principle do the age-18 test and weight-10 test share?
+Confidence:
+
+MY ANSWER — VERBATIM:
+they both use less than or equal to and they use else if and they return strings that evaluate integers
+
+MY REASONING — VERBATIM:
+they both use less than or equal to and they use else if and they return strings that evaluate integers
+
+CONFIDENCE BEFORE CHECK:
+not provided
+
+TOOLS / HELP USED BEFORE COMMITMENT:
+Codex previously clarified that a comparison evaluates to Boolean `True` or `False`; no interpreter or debugger was reported
+
+RESULT:
+partial
+
+MISCONCEPTION / GAP:
+The two conditions do not both use less-than-or-equal: the ticket variant uses `<=`, while the package variant uses `>=`. The examples use `if` and `else`, not `else if`. Integer inputs are compared, and strings are returned as labels; the returned strings do not evaluate integers. The response did notice that comparison logic and returned strings are common structural elements, but did not identify exact-boundary testing.
+
+CORRECT MODEL — ADDED AFTER ATTEMPT:
+Both tests choose the exact boundary value named by an inclusive comparison: age `18` for `<= 18`, and weight `10` for `>= 10`. Each test verifies which label is returned at equality and catches an off-by-one implementation that puts the boundary in the other branch.
+
+WHY THIS MATTERS TO THE REAL IMPLEMENTATION:
+BuildLens will need tests at exact classification boundaries and precedence boundaries so a one-character comparison or ordering mistake cannot silently return the wrong label.
+
+TRANSFER / NEXT RETRIEVAL:
+Give a fresh plain-language inclusive-boundary contract with no code, then require the Boolean result, expected label, and why the exact boundary is useful.
+
+PARENT EVIDENCE ID:
+EV-P1-TEST-016
+
+PRIMARY BLOCKER:
+BOUNDARY_TEST_PRINCIPLE
+
+SCAFFOLD RUNG:
+R1
+
+WHY THIS RUNG:
+Concrete predictions are improving, but the learner cannot yet abstract the shared principle accurately.
+
+SUPPORT PROVIDED BEFORE THIS ATTEMPT:
+two worked boundary contexts and a Boolean-condition clarification
+
+RECOVERY STATUS:
+unseen-variant-required
+```
+
+```text
+EVIDENCE ID:
 EV-P1-TEST-012
 
 DATE / PHASE / GATE:
@@ -1862,6 +2008,96 @@ none beyond the prior R4 exercise
 
 RECOVERY STATUS:
 climbing
+```
+
+```text
+EVIDENCE ID:
+EV-P1-TEST-013
+
+DATE / PHASE / GATE:
+2026-08-25 / Phase 1 / generic classifier test-design remediation
+
+IMPLEMENTATION TRIGGER:
+Before writing a BuildLens behavior test, the learner must distinguish a test input, the expected returned value, and an incorrect returned value.
+
+ADJACENT CONCEPT:
+Python conditional syntax, boundary comparisons, and the observable return asserted by a test.
+
+EXERCISE TYPE:
+test design
+
+SOURCE / CONTEXT:
+academic
+
+PROBLEM — VERBATIM:
+A function named `ticket_type(age)` must return:
+
+- `"adult"` when `age` is 18 or higher
+- `"child"` otherwise
+
+Design one test using an age of `20`. Before running anything, provide:
+
+Input:
+Expected returned value:
+One incorrect returned value this test would catch:
+Short explanation:
+Confidence:
+
+MY ANSWER — VERBATIM:
+def ticket_type(age):
+if age < 18
+return "child"
+else return "adult"
+
+original = 20
+result = tiecket_type(original)
+
+cna you help me correct the sytax&#x20;
+
+the input is 20 or oringinal, the expected return is adult&#x20;
+it would catch if it was 18 because it is less than
+
+MY REASONING — VERBATIM:
+it would catch if it was 18 because it is less than
+
+CONFIDENCE BEFORE CHECK:
+not provided
+
+TOOLS / HELP USED BEFORE COMMITMENT:
+none reported; Codex syntax help was requested in the same message after the prediction was stated
+
+RESULT:
+partial
+
+MISCONCEPTION / GAP:
+The input `20` and expected return `"adult"` were correct. The response named `18` as what the test catches, but `18` is another input rather than an incorrect returned value. Also, `18 < 18` is false, so age 18 belongs to the adult branch under this contract. The attempted Python omitted required colons and indentation, misspelled the function call, and placed `else` and `return` in invalid form.
+
+CORRECT MODEL — ADDED AFTER ATTEMPT:
+For this test, the input is `20`, the expected returned value is `"adult"`, and an incorrect returned value it would catch is `"child"`. A test compares the observed return with the expected return. Under the stated boundary, age 18 is also classified as `"adult"` because it is not less than 18.
+
+WHY THIS MATTERS TO THE REAL IMPLEMENTATION:
+BuildLens tests must assert the classifier's returned label and must express boundary cases precisely before any implementation is written.
+
+TRANSFER / NEXT RETRIEVAL:
+Use a changed age boundary and require input, expected returned value, incorrect returned value, and branch explanation before running it.
+
+PARENT EVIDENCE ID:
+EV-P1-TEST-012
+
+PRIMARY BLOCKER:
+TEST_ORACLE_AND_BOUNDARY
+
+SCAFFOLD RUNG:
+R1
+
+WHY THIS RUNG:
+The learner can predict a simple returned label but still needs the test oracle separated from alternate inputs and boundary conditions.
+
+SUPPORT PROVIDED BEFORE THIS ATTEMPT:
+explicit contract and labeled test-design fields
+
+RECOVERY STATUS:
+stable-at-rung
 ```
 
 ```text
@@ -2096,4 +2332,183 @@ detailed guiding questions
 
 RECOVERY STATUS:
 climbing
+```
+
+```text
+EVIDENCE ID:
+EV-P1-TEST-014
+
+DATE / PHASE / GATE:
+2026-08-25 / Phase 1 / changed-boundary unseen variant
+
+IMPLEMENTATION TRIGGER:
+Boundary behavior must be predicted correctly before writing classifier tests or implementation.
+
+ADJACENT CONCEPT:
+Inclusive comparison, boundary input, expected return, and incorrect return caught by a test.
+
+EXERCISE TYPE:
+transfer
+
+SOURCE / CONTEXT:
+academic
+
+PROBLEM — VERBATIM:
+def ticket_type(age):
+    if age <= 18:
+        return "child"
+    else:
+        return "adult"
+
+
+original = 18
+result = ticket_type(original)
+
+print(result)
+
+Provide:
+
+Input value:
+Comparison and whether it is true or false:
+Expected returned value:
+One incorrect returned value this test catches:
+Short explanation:
+Confidence:
+
+MY ANSWER — VERBATIM:
+18 is the input you made it less than or equak to so 18 is the child age now instead of adult this would catch the adult variable the exopected return value is child
+
+MY REASONING — VERBATIM:
+you made it less than or equak to so 18 is the child age now instead of adult
+
+CONFIDENCE BEFORE CHECK:
+not provided
+
+TOOLS / HELP USED BEFORE COMMITMENT:
+none reported
+
+RESULT:
+correct
+
+MISCONCEPTION / GAP:
+No conceptual error in the prediction. The phrase `adult variable` refers more precisely to the incorrect returned string `"adult"`; this is a terminology refinement, not a reasoning failure.
+
+CORRECT MODEL — ADDED AFTER ATTEMPT:
+The input value is `18`. The comparison `18 <= 18` is true, so the function returns `"child"`. A test expecting `"child"` would fail if the function incorrectly returned `"adult"`.
+
+WHY THIS MATTERS TO THE REAL IMPLEMENTATION:
+BuildLens boundary and prefix-order tests must state the exact input, expected returned label, and competing wrong label.
+
+TRANSFER / NEXT RETRIEVAL:
+Give a blind transfer in a non-code setting with a different boundary and ask for the shared testing principle.
+
+PARENT EVIDENCE ID:
+EV-P1-TEST-013
+
+PRIMARY BLOCKER:
+TEST_ORACLE_AND_BOUNDARY
+
+SCAFFOLD RUNG:
+R1
+
+WHY THIS RUNG:
+This changes one meaningful comparison while preserving one input and one returned label.
+
+SUPPORT PROVIDED BEFORE THIS ATTEMPT:
+syntax-corrected prior example and labeled response fields
+
+RECOVERY STATUS:
+climbing-to-blind-transfer
+```
+
+```text
+EVIDENCE ID:
+EV-P1-TEST-015
+
+DATE / PHASE / GATE:
+2026-08-25 / Phase 1 / blind-transfer test-design attempt
+
+IMPLEMENTATION TRIGGER:
+The learner must be able to specify a boundary test independently of writing the function under test.
+
+ADJACENT CONCEPT:
+Separating a behavior contract and test oracle from implementation syntax.
+
+EXERCISE TYPE:
+transfer
+
+SOURCE / CONTEXT:
+blind transfer
+
+PROBLEM — VERBATIM:
+A package sorter follows this contract:
+
+- A weight of **10 kg or more** returns the label `"heavy"`.
+- A weight below **10 kg** returns the label `"standard"`.
+
+A test supplies exactly `10` kg.
+
+Provide:
+
+Input:
+Is the “10 or more” condition true or false?
+Expected returned value:
+One incorrect returned value this test catches:
+Short explanation:
+Confidence:
+
+Then answer: **What testing principle does this package problem share with both `ticket_type` variants?**
+
+MY ANSWER — VERBATIM:
+def load_weight(kilos)
+if kilos >= 10&#x20;
+return "heavy"
+else:
+return "standard"
+
+origninal = 10
+result = laod_weight(original)
+print(result)
+
+MY REASONING — VERBATIM:
+not provided
+
+CONFIDENCE BEFORE CHECK:
+not provided
+
+TOOLS / HELP USED BEFORE COMMITMENT:
+none reported
+
+RESULT:
+partial
+
+MISCONCEPTION / GAP:
+The function structure implies the intended boundary branch, but the response implemented a function instead of specifying the requested test oracle. It omitted the explicit truth value, expected return, competing incorrect return, explanation, confidence, and shared principle. The Python also omitted colons after the function definition and `if`, lacked required indentation, and used inconsistent spellings: `origninal`, `original`, and `laod_weight`.
+
+CORRECT MODEL — ADDED AFTER ATTEMPT:
+At the boundary input `10`, the condition “10 or more” is true, so the contract's expected returned label is `"heavy"`; the competing incorrect label is `"standard"`. This can be specified as a test before the function exists. The shared principle still requires a learner explanation before the transfer gate can pass.
+
+WHY THIS MATTERS TO THE REAL IMPLEMENTATION:
+Test-driven development requires BuildLens behavior to be expressed as an input and observable expected result before writing the classifier implementation.
+
+TRANSFER / NEXT RETRIEVAL:
+Keep the same package contract, remove all coding, and require completion of the six test-design fields plus the shared principle.
+
+PARENT EVIDENCE ID:
+EV-P1-TEST-014
+
+PRIMARY BLOCKER:
+TEST_SPECIFICATION_VS_IMPLEMENTATION
+
+SCAFFOLD RUNG:
+R1
+
+WHY THIS RUNG:
+Return to one boundary input and one expected label without asking for function syntax.
+
+SUPPORT PROVIDED BEFORE THIS ATTEMPT:
+plain-language contract and labeled response fields
+
+RECOVERY STATUS:
+stable-at-rung
 ```
