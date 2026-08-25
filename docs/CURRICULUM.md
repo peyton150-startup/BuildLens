@@ -97,6 +97,140 @@ detached theory
 
 ---
 
+## Phase-to-curriculum crosswalk
+
+The curriculum travels with the implementation instead of running as a separate course.
+
+| Phase | Primary | Adjacent learning triggered by the actual build |
+|---|---|---|
+| 0 | tracing/specification | adaptive syntax ladder; evidence recording |
+| 1 | functions/control flow | strings, indexing/prefixes, branch ordering, local scope |
+| 2 | representation/tests | dataclasses, collection choice, shallow-vs-deep immutability |
+| 3 | state/identity | aliasing, mutation ownership, snapshots |
+| 4 | decomposition | modules/imports, dependency graph, code reading |
+| 5 | contracts | type hints vs runtime validation |
+| 6 | CLI vertical slice | arguments, stdout/stderr, exit status |
+| 7 | Git boundary | child processes, bytes/text, return codes, timeouts, paths |
+| 8 | Claude boundary | JSON, trust, hashes, provenance |
+| 9 | reliability | ordering, idempotence, optimistic concurrency, reconciliation, measurement |
+| 10 | learning engine | authoritative evidence vs generated content |
+| 11 | persistence | SQL parameters, transactions, commit/rollback, constraints |
+| 12 | API | JSON/network representation, transport-vs-domain validation |
+| 13 | collaborative editing | merge, stale versions, filesystem publication, crash recovery, atomicity-vs-durability |
+| 14 | architecture | measurable quality scenarios, evidence, reversal conditions |
+| 15 | defense | cumulative line→system reasoning |
+
+### Spiral-depth rule
+
+The same concept returns at increasing depth. Example:
+
+```text
+Phase 1: string is a sequence I can inspect
+Phase 7: process output can be bytes or text
+Phase 8: JSON text becomes Python values
+Phase 12: JSON is a network representation
+Phase 13: file bytes are hashed and safely published
+```
+
+First encounter: **what is it?**  
+Later encounter: **what boundary, failure, or design decision does it create?**
+
+---
+
+## Adaptive difficulty and recovery
+
+The curriculum is mastery-paced.
+
+A wrong answer does not mean:
+
+```text
+repeat a different problem at the same difficulty
+```
+
+It means:
+
+```text
+identify the prerequisite that failed
+→ reduce complexity
+→ stabilize it
+→ rebuild complexity
+```
+
+### Complexity ladder
+
+```text
+R0 syntax recognition
+R1 single operation
+R2 sequential state
+R3 single control decision
+R4 single function call
+R5 function + branch
+R6 composition / phase-level task
+```
+
+This ladder is reusable across domains.
+
+For later concepts, "simpler" means removing unrelated layers while preserving the target:
+
+```text
+transaction problem too complex
+→ first trace one commit/rollback decision
+
+concurrency problem too complex
+→ first trace two versions without threads
+
+architecture defense too complex
+→ first identify one requirement and one mechanism
+```
+
+### Scaffolding sequence
+
+CMU's instructional guidance describes a progression from modeling and scaffolding through coaching, fading, self-directed performance, and generalization.
+
+BuildLens follows that structure:
+
+```text
+MODEL only when needed
+→ STRUCTURE the task
+→ COACH one attempt
+→ FADE the support
+→ TRANSFER to a new surface
+```
+
+### Worked examples
+
+When independent problem solving is still too demanding, a solved **neighboring** example may temporarily reduce cognitive load.
+
+The learner's job is not to passively read it.
+
+They must:
+
+```text
+explain each solved step
+→ complete a missing step
+→ solve a fresh micro-example
+```
+
+Then the scaffold is removed.
+
+### Low-stakes interpretation
+
+Frequent wrong answers are compatible with progress.
+
+BuildLens records them because they reveal:
+
+```text
+what looked familiar
+what could actually be retrieved
+which prerequisite was missing
+how much support was needed
+whether support later faded
+```
+
+The number of attempts is not itself a mastery score.
+
+---
+
 # Strand 1 — Execute Code in Your Head
 
 ## Core ideas

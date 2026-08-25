@@ -2,13 +2,16 @@
 
 ## Lifecycle
 
-**Current phase:** Phase 0 — Specification Before Code
+**Current phase:** Phase 1 — Pure Functions and Execution (contract prediction; no code yet)
 
 ## What exists
 
 Planning and learning documents only.
 
 There is intentionally no application implementation yet.
+
+The Phase 0 tracing history is recorded verbatim in
+`learning/LEARNING_LEDGER.md`.
 
 ## What does NOT exist yet
 
@@ -31,6 +34,14 @@ None yet.
 
 The first implementation target will be a tiny deterministic transformation whose complete execution can be traced by hand.
 
+Proposed first path:
+
+```text
+one diff-line string
+→ classify_diff_line
+→ one classification string
+```
+
 ## What I should know cold before Phase 1
 
 - variable assignment vs mutation at a basic level;
@@ -38,6 +49,18 @@ The first implementation target will be a tiny deterministic transformation whos
 - sequential / conditional execution;
 - how to predict output without running Python;
 - how to describe an input/output contract in plain English.
+
+## What I demonstrated
+
+- correctly traced an unseen two-call Python program before running it;
+- bound arguments to per-call parameters and tracked local reassignment;
+- selected branches from exact indexed string values;
+- carried return values into later calls;
+- preserved string case and produced the exact final output;
+- explained the shared principle as following values through the code.
+
+This passes the Phase 0 gate. It does not mark the concept mastered; delayed
+retrieval and additional contexts are still required.
 
 ## First gate
 
@@ -56,15 +79,66 @@ predict by hand
 
 The generated problem should use the same deep skill as the academic examples but not reproduce them.
 
+**Result:** Passed on unseen exercise `BL-P0-TRANSFER-20260825-012` after
+correctly predicting both output and execution path without reported tool use.
+
 ## Reference-project use
 
 Not yet.
 
 Argos, Datum, and Trellis are deliberately deferred until the matching Python/design concepts have been introduced.
 
-## Weak concepts
+## Weak concepts / retrieval targets
 
-None recorded yet.
+- `exact_case_tracking`: initially changed capitalization mentally; corrected in
+  later attempts and applied correctly in the final unseen trace. Delayed
+  retrieval remains due.
+- `local_reassignment_and_return_expression`: initially evaluated a return with
+  an old local value; corrected and applied correctly in the final unseen trace.
+- `trace_transcription_precision`: an earlier submitted explanation did not match
+  the reported paper trace; the final unseen written trace was internally exact.
+- Confidence calibration is not yet available because confidence has not been
+  provided with the Phase 0 predictions.
+- `branch_precedence`: the first Phase 1 prediction classified `+++` and `---`
+  lines as ordinary additions/removals instead of checking the more specific
+  metadata prefixes first.
+- `empty_input_classification`: the empty string was classified as metadata
+  instead of the default/context category.
+- `unified_diff_metadata_meaning`: `+++` and `---` file headers were described
+  as removed source-code lines and written with four prefix characters.
+- `function_contract`: the learner does not yet know how to state the function's
+  accepted input and promised output.
+- `pure_function_side_effects`: the learner does not yet know whether the proposed
+  pure function changes state outside its call.
+- `classification_vs_extraction`: the classifier was described as returning a
+  file path instead of a category label.
+- `pure_function_vs_mutation`: the classifier was described as removing a header
+  even though its contract only returns a value and leaves the input/external
+  state unchanged.
+- `data_vs_external_resource`: path-like characters inside a string were treated
+  as an opened file rather than ordinary input data.
+- `function_call_implies_mutation`: calling a classifier was assumed to remove
+  part of its input despite a return-only contract with no file operation.
+- `return_literal_as_call_value`: the learner is unsure that an executed
+  `return` expression becomes the value of the function-call expression and is
+  then assigned to the caller's variable.
+- `dynamic_return_paths_vs_contract`: Python's runtime return behavior was
+  treated as if one return expression guaranteed the function would always
+  return that type; the distinction between possible branches and an intended
+  stable contract needs reinforcement.
+
+### Active remediation status
+
+- `RETURN_VALUE` is stable at R4 on evidence `EV-P1-RETURN-007`: the learner
+  correctly traced a no-argument function returning a string into a caller
+  assignment and exact printed output.
+- Next: one fresh R4 near-transfer without guiding state prompts. If correct,
+  climb to R5 by adding exactly one branch.
+- Evidence `EV-P1-RETURN-008` correctly completed that fresh R4 near-transfer
+  without guiding state prompts. `RETURN_VALUE` is ready to climb to R5.
+- Next: one function, one branch, one call, and no nested calls or domain
+  vocabulary. If correct, give a fresh R5 near-transfer before returning to the
+  BuildLens classifier contract.
 
 ## Files I should be able to teach
 
@@ -78,9 +152,9 @@ The first reset becomes due after the first week of active implementation.
 
 ## Next implementation milestone
 
-After the Phase 0 gate passes:
-
-Create the smallest pure-function BuildLens behavior from Phase 1.
+After the learner correctly restates and approves the first function contract,
+write one focused failing test, verify that it fails for the expected missing-
+behavior reason, and only then add the smallest implementation needed to pass it.
 
 ## End-game relationship
 

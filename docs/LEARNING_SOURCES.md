@@ -740,3 +740,159 @@ https://www.reddit.com/r/ExperiencedDevs/comments/1tuumx4/how_deep_can_you_go_in
 BuildLens rule:
 - never invent a rationale for a decision you did not make;
 - distinguish original historical rationale from your later decision to keep/change the design.
+
+
+---
+
+## Python implementation-adjacent sources
+
+### PY-CONTROLFLOW-FUNCTIONS
+**Python Tutorial — More Control Flow Tools / Defining Functions**  
+https://docs.python.org/3/tutorial/controlflow.html
+
+Use for `if`, loops, `def`, parameters/arguments, local names, return values, and function annotation syntax.
+
+### PY-STDTYPES
+**Python — Built-in Types**  
+https://docs.python.org/3/library/stdtypes.html
+
+Use for strings/sequences, indexing, and prefix/string operations introduced by diff parsing.
+
+### PY-DATACLASSES
+**Python — dataclasses**  
+https://docs.python.org/3/library/dataclasses.html
+
+Use for named records and the precise meaning/limits of `frozen=True`.
+
+### PY-TYPING
+**Python — typing**  
+https://docs.python.org/3/library/typing.html
+
+Use for contracts/type hints and the crucial fact that Python runtime does not enforce annotations.
+
+### PY-ARGPARSE
+**Python — argparse**  
+https://docs.python.org/3/library/argparse.html
+
+Use for Phase 6 command-line argument parsing.
+
+### PY-SUBPROCESS
+**Python — subprocess**  
+https://docs.python.org/3/library/subprocess.html
+
+Use for Git child processes, arguments, stdout/stderr, return codes, timeout, bytes-vs-text, and process failures.
+
+### PY-PATHLIB
+**Python — pathlib**  
+https://docs.python.org/3/library/pathlib.html
+
+Use for repository/worktree path representation and filesystem path operations.
+
+### PY-JSON
+**Python — json**  
+https://docs.python.org/3/library/json.html
+
+Use for JSON↔Python representations, hook/API serialization, and untrusted-input considerations.
+
+### PY-SQLITE3
+**Python — sqlite3**  
+https://docs.python.org/3/library/sqlite3.html
+
+Use for SQL parameters, transactions, commit/rollback, connection/context-manager behavior, and version-specific transaction semantics.
+
+
+---
+
+## Adaptive remediation / scaffolding sources
+
+### CMU-SCAFFOLDING-MODEL-FADE
+**CMU Eberly Center — Labs / Studios**
+
+https://www.cmu.edu/teaching/designteach/teach/instructionalstrategies/labsstudios.html
+
+BuildLens use:
+- modeling;
+- scaffolding;
+- coaching;
+- fading;
+- increasing learner independence;
+- generalizing from practice to principles.
+
+### CMU-GRADUAL-COMPLEXITY
+**CMU Eberly Center — Critical-thinking instructional scaffolding**
+
+https://www.cmu.edu/teaching/solveproblem/strat-criticalthinking/criticalthinking-07.html
+
+BuildLens use:
+- assignments should gradually increase difficulty/complexity;
+- early tasks may provide explicit structure/prompts;
+- supports should be removed as mastery develops;
+- the purpose of scaffolding is to progress toward complexity, not permanently avoid it.
+
+### CMU-WORKED-EXAMPLES
+**CMU Eberly Center — Concrete Strategies for Active Learning**
+
+https://www.cmu.edu/teaching/online/designteach/strategies/activelearning.html
+
+BuildLens use:
+- a solved worked example can provide a more structured task when open problem solving is too demanding;
+- require learners to explain each step;
+- optionally include incorrect steps for diagnosis;
+- follow the worked example with active retrieval rather than passive rereading.
+
+### CMU-MASTERY-INDIVIDUAL-PACE
+**CMU Eberly Center — Mastery-based course strategy**
+
+https://www.cmu.edu/teaching/solveproblem/strat-backgroundknowledge/backgroundknowledge-08.html
+
+BuildLens use:
+- do not advance to later objectives until the current objective is demonstrated;
+- allow individualized pacing;
+- provide additional scaffolding to learners who need it.
+
+### CMU-RETRIEVAL-LOW-STAKES
+**CMU Eberly Center — Retrieval Practice for Improved Learning**
+
+https://www.cmu.edu/teaching/resources/instructionalstrategies/activelearningstrategies/retrievalpractice/index.html
+
+BuildLens use:
+- frequent, low-stakes retrieval;
+- use assessments as learning opportunities;
+- wrong attempts provide diagnostic information rather than acting as high-stakes failures.
+
+### UCB-CS61A-BASIC-TO-CHALLENGE
+**UC Berkeley CS61A — environment/function study guides and discussions**
+
+https://www-inst.eecs.berkeley.edu/~cs61a/fa22/study-guide/environments-hof/
+https://www-inst.eecs.berkeley.edu/~cs61a/fa25/disc/disc01/
+
+BuildLens use:
+- reason through execution before asking a computer to check;
+- use diagrams/state tracking;
+- move through basic/easy/challenge practice rather than beginning at maximum complexity;
+- check predictions after committing them.
+
+### PYTHON-STRINGS-INDEXING
+**Python Tutorial — An Informal Introduction to Python**
+
+https://docs.python.org/3/tutorial/introduction.html
+
+BuildLens use:
+- string indexing;
+- negative indices;
+- slicing;
+- immutable string behavior;
+- Phase 0/1 `R0` syntax remediation.
+
+### PYTHON-CONTROL-FUNCTIONS
+**Python Tutorial — More Control Flow Tools**
+
+https://docs.python.org/3/tutorial/controlflow.html
+
+BuildLens use:
+- `if` / `elif` / `else`;
+- function definitions;
+- formal parameters;
+- local symbol tables;
+- return behavior;
+- use as documentation after a learner attempt, not as an answer key before prediction.
