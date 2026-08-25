@@ -1877,6 +1877,74 @@ target-restored-for-output; reasoning-transfer-due
 
 ```text
 EVIDENCE ID:
+EV-P1-DIFF-011
+
+DATE / PHASE / GATE:
+2026-08-25 / Phase 1 / diff marker clarification
+
+IMPLEMENTATION TRIGGER:
+The first BuildLens classifier must distinguish source-change markers from the source content they describe.
+
+ADJACENT CONCEPT:
+Unified-diff `+` and `-` source-line markers versus Python source text.
+
+EXERCISE TYPE:
+teach-back
+
+SOURCE / CONTEXT:
+BuildLens
+
+PROBLEM — VERBATIM:
+The line `+value = 1` separates into a leading diff marker `+` and the actual Python source `value = 1`. The marker performs no arithmetic.
+
+MY ANSWER — VERBATIM:
+so it just added to the file that value =1 and the + was used to show it was adding so if it was a - the value =1 would be removed from the file
+
+MY REASONING — VERBATIM:
+the + was used to show it was adding so if it was a - the value =1 would be removed from the file
+
+CONFIDENCE BEFORE CHECK:
+not provided
+
+TOOLS / HELP USED BEFORE COMMITMENT:
+none reported
+
+RESULT:
+correct
+
+MISCONCEPTION / GAP:
+No marker-versus-source misconception remains in this explanation. Precision note: a diff describes the addition/removal; applying the diff changes the file. `+++` and `---` are separate metadata-header cases.
+
+CORRECT MODEL — ADDED AFTER ATTEMPT:
+In a unified diff, `+value = 1` says the source line `value = 1` exists in the new version, while `-value = 1` says that source line existed in the old version and is absent from the new version. The marker is diff notation, not part of the Python line.
+
+WHY THIS MATTERS TO THE REAL IMPLEMENTATION:
+BuildLens must count source additions/removals without counting `+++` and `---` file headers as changed source lines.
+
+TRANSFER / NEXT RETRIEVAL:
+Move to test design and ask which input/expected pair proves this behavior.
+
+PARENT EVIDENCE ID:
+EV-P1-CLASSIFY-010
+
+PRIMARY BLOCKER:
+BOUNDARY_CONCEPT
+
+SCAFFOLD RUNG:
+R1
+
+WHY THIS RUNG:
+Isolated one marker and one source line without function tracing.
+
+SUPPORT PROVIDED BEFORE THIS ATTEMPT:
+one annotated example
+
+RECOVERY STATUS:
+stable-at-rung
+```
+
+```text
+EVIDENCE ID:
 EV-P1-BRANCH-009
 
 DATE / PHASE / GATE:

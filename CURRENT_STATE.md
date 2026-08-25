@@ -149,6 +149,9 @@ Argos, Datum, and Trellis are deliberately deferred until the matching Python/de
 - New question: `diff_marker_vs_source_code` — the learner asked what the leading
   `+` in `+value = 1` is adding. Clarify that it is unified-diff notation marking
   the source content `value = 1` as newly present, not Python arithmetic.
+- Evidence `EV-P1-DIFF-011` correctly explained that `+` marks `value = 1` as
+  added and `-` marks it as removed. The diff-marker-versus-source distinction is
+  stable at R1; `+++`/`---` metadata-header precedence remains a later retrieval.
 - The learner requested a subject change after several similar traces. Next topic:
   design the first failing behavior test rather than issuing another trace.
 
