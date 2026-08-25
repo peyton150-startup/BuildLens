@@ -143,6 +143,14 @@ Argos, Datum, and Trellis are deliberately deferred until the matching Python/de
   not include reasoning. The learner reported that the scaffold was too similar.
 - Next: fade detailed prompts and test the real prefix-classification structure
   with two calls. Require branch-order reasoning before implementation.
+- Evidence `EV-P1-CLASSIFY-010` correctly predicted `added metadata context`
+  and connected `startswith` to return behavior. Detailed branch-order and
+  outside-state explanations remain retrieval targets.
+- New question: `diff_marker_vs_source_code` — the learner asked what the leading
+  `+` in `+value = 1` is adding. Clarify that it is unified-diff notation marking
+  the source content `value = 1` as newly present, not Python arithmetic.
+- The learner requested a subject change after several similar traces. Next topic:
+  design the first failing behavior test rather than issuing another trace.
 
 ## Files I should be able to teach
 

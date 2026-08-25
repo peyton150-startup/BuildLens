@@ -1793,6 +1793,90 @@ climbing
 
 ```text
 EVIDENCE ID:
+EV-P1-CLASSIFY-010
+
+DATE / PHASE / GATE:
+2026-08-25 / Phase 1 / BuildLens prefix-classification trace
+
+IMPLEMENTATION TRIGGER:
+The first BuildLens pure function must distinguish added source lines, file-header metadata, and context lines.
+
+ADJACENT CONCEPT:
+String prefixes, ordered conditions, early returns, and unified-diff marker meaning.
+
+EXERCISE TYPE:
+tracing
+
+SOURCE / CONTEXT:
+BuildLens
+
+PROBLEM — VERBATIM:
+def classify_prefix(line):
+    if line.startswith("+++"):
+        return "metadata"
+
+    if line.startswith("+"):
+        return "added"
+
+    return "context"
+
+
+first = classify_prefix("+value = 1")
+second = classify_prefix("+++ b/app.py")
+third = classify_prefix(" value = 1")
+
+print(first, second, third)
+
+Predict the exact output, evaluated conditions/returns, why check order matters, whether anything changes, and confidence.
+
+MY ANSWER — VERBATIM:
+can we move to another subject, i have traced these similar problems, added metadata context the startswith tells the story of whati si going to retunr and i like that you used this to tell me what each of them are, so now i understand further what metadata added and context are, my one question is what is the +1value = 1 actually adding
+
+MY REASONING — VERBATIM:
+the startswith tells the story of whati si going to retunr and i like that you used this to tell me what each of them are, so now i understand further what metadata added and context are
+
+CONFIDENCE BEFORE CHECK:
+not provided
+
+TOOLS / HELP USED BEFORE COMMITMENT:
+none reported
+
+RESULT:
+partial
+
+MISCONCEPTION / GAP:
+The exact classifications were correct and `startswith` was connected to return behavior. Branch-order reasoning, outside-state behavior, and confidence were not supplied. The learner asked whether `+value = 1` performs addition, exposing a diff-marker-versus-source-code question.
+
+CORRECT MODEL — ADDED AFTER ATTEMPT:
+The exact output is `added metadata context`. In unified-diff text, the first `+` is a change marker meaning the remainder of that line is newly present in the new file. The source content is `value = 1`; the marker is not Python's arithmetic addition operator. The classifier reads strings and returns labels without modifying a file or input string.
+
+WHY THIS MATTERS TO THE REAL IMPLEMENTATION:
+BuildLens must count the diff marker as evidence about a change while treating the remaining characters as source content, and it must not confuse `+++` file headers with added source lines.
+
+TRANSFER / NEXT RETRIEVAL:
+Honor the request to stop repetitive traces. Move to Phase 1 test design, then revisit branch order through a failing test rather than another near-identical snippet.
+
+PARENT EVIDENCE ID:
+EV-P1-BRANCH-009
+
+PRIMARY BLOCKER:
+BOUNDARY_CONCEPT
+
+SCAFFOLD RUNG:
+R6
+
+WHY THIS RUNG:
+Used two ordered prefix checks and three calls in the real BuildLens classification domain.
+
+SUPPORT PROVIDED BEFORE THIS ATTEMPT:
+one-sentence explanation of `startswith`
+
+RECOVERY STATUS:
+target-restored-for-output; reasoning-transfer-due
+```
+
+```text
+EVIDENCE ID:
 EV-P1-BRANCH-009
 
 DATE / PHASE / GATE:
