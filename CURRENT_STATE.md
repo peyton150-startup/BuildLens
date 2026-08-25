@@ -203,6 +203,31 @@ Argos, Datum, and Trellis are deliberately deferred until the matching Python/de
   remains unsure whether indentation/statement position or the Boolean condition
   controls execution. Require a two-rule teach-aloud before the next unseen trace.
   The scheduled five-attempt public evidence sync is due.
+- Evidence `EV-P1-SYNTAX-023` correctly connected the Boolean condition to
+  executing/skipping the `if` body, but described indentation as controlling calls
+  and execution order. Require one corrected restatement: indentation owns blocks;
+  calls invoke functions; execution normally proceeds top to bottom. Current
+  public-sync batch: 1/5.
+- Evidence `EV-P1-SYNTAX-024` correctly identified indentation as block ownership,
+  but invocation, condition evaluation, and normal order remain conflated. Descend
+  to a four-item concept match before another trace. Current public-sync batch:
+  2/5.
+- Evidence `EV-P1-SYNTAX-025` matched all four mechanisms correctly, but the prose
+  still attributed branch execution to indentation and described an `if` as a
+  returned value. Require four one-sentence definitions before another trace.
+  Current public-sync batch: 3/5.
+- Evidence `EV-P1-SYNTAX-026` correctly separated indentation, conditions,
+  execution order, and return, with minor terminology refinements still useful.
+  Climb to one unseen overlapping-prefix `if`/`elif` trace before introducing the
+  BuildLens contract. Current public-sync batch: 4/5.
+- Evidence `EV-P1-BRANCH-027` correctly identified the first overlapping-prefix
+  condition as true and the returned string as `"pair"`, but the learner explicitly
+  does not yet know `elif` and wrote the printed output with quotation marks.
+  Descend to an R0 `if`/`elif` micro-problem, then require one unseen branch-order
+  trace. The scheduled five-attempt public sync is due.
+- Handoff checkpoint: remain in Phase 1 contract prediction with no application
+  code. The immediate blocker is `ELIF_AND_FIRST_MATCH`; do not introduce the
+  BuildLens function contract until that blocker passes an unseen variant.
 
 ## Files I should be able to teach
 

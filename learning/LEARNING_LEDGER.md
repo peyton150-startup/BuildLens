@@ -2304,6 +2304,428 @@ teach-aloud-required
 
 ```text
 EVIDENCE ID:
+EV-P1-SYNTAX-023
+
+DATE / PHASE / GATE:
+2026-08-25 / Phase 1 / block-membership teach-aloud
+
+IMPLEMENTATION TRIGGER:
+The learner must accurately distinguish indentation, function invocation, execution order, and condition-controlled branch execution before tracing BuildLens control flow.
+
+ADJACENT CONCEPT:
+Indentation determines structural block membership; calls invoke functions; normal statement order is top to bottom; conditions decide branch-body execution.
+
+EXERCISE TYPE:
+oral defense
+
+SOURCE / CONTEXT:
+academic
+
+PROBLEM — VERBATIM:
+Before the next trace, explain these two rules in your own words:
+
+What does indentation determine?
+
+What does a True or False condition determine?
+
+Confidence:
+
+MY ANSWER — VERBATIM:
+indentation determins where the function or if statemtn will be called in what order, the true or false condition determines if we say the if is true and retunr the value or if we skip the if altogether as lon as it is in the correct indentation
+
+MY REASONING — VERBATIM:
+indentation determins where the function or if statemtn will be called in what order, the true or false condition determines if we say the if is true and retunr the value or if we skip the if altogether as lon as it is in the correct indentation
+
+CONFIDENCE BEFORE CHECK:
+not provided
+
+TOOLS / HELP USED BEFORE COMMITMENT:
+Codex had explained block membership versus Boolean execution in the preceding assessment; no interpreter or debugger was reported
+
+RESULT:
+partial
+
+MISCONCEPTION / GAP:
+The learner correctly connected a true or false condition with executing or skipping the `if` body. However, indentation was described as deciding when a function or `if` is called and in what order. Indentation determines structural block membership, not invocation or sequence. A call expression invokes a function, and statements normally execute top to bottom. An `if` body may perform any statements; it does not necessarily return a value.
+
+CORRECT MODEL — ADDED AFTER ATTEMPT:
+Indentation tells Python which enclosing block owns a statement: for example, the function body or an `if` body. A function-call expression invokes the function, and execution normally proceeds top to bottom within the active block. Python always evaluates the `if` condition when execution reaches it; `True` executes the indented body, while `False` skips that body and continues afterward.
+
+WHY THIS MATTERS TO THE REAL IMPLEMENTATION:
+Reading the BuildLens classifier requires independently identifying branch structure, the order checks are reached, and whether each input makes a branch body execute.
+
+TRANSFER / NEXT RETRIEVAL:
+Require a concise corrected two-rule restatement, then give one short unseen branch-order trace.
+
+PARENT EVIDENCE ID:
+EV-P1-SYNTAX-022
+
+PRIMARY BLOCKER:
+BLOCK_STRUCTURE_VS_EXECUTION_ORDER
+
+SCAFFOLD RUNG:
+R0
+
+WHY THIS RUNG:
+The false-branch result is predictable, but the vocabulary for structural ownership versus runtime sequence is not yet stable.
+
+SUPPORT PROVIDED BEFORE THIS ATTEMPT:
+worked false-branch trace and direct two-question teach-aloud prompt
+
+RECOVERY STATUS:
+corrected-rule-restatement-required
+```
+
+```text
+EVIDENCE ID:
+EV-P1-SYNTAX-024
+
+DATE / PHASE / GATE:
+2026-08-25 / Phase 1 / corrected control-flow rule restatement
+
+IMPLEMENTATION TRIGGER:
+The learner must independently separate block ownership, function invocation, condition evaluation, and sequential order before reading the real classifier.
+
+ADJACENT CONCEPT:
+Indentation, call expressions, Boolean branch selection, and top-to-bottom execution are separate mechanisms.
+
+EXERCISE TYPE:
+oral defense
+
+SOURCE / CONTEXT:
+academic
+
+PROBLEM — VERBATIM:
+Restate this in your own words:
+
+Indentation determines:
+
+A function begins executing when:
+
+A condition determines:
+
+Normal execution order is:
+
+Confidence:
+
+MY ANSWER — VERBATIM:
+indnetation determins which block a statemnt belogs to, key word is block, it is in the next indentation and position in the code to be executed and it is not false, a conditon determins if we run the statment at all or if we accept it as true without running it, nomral execution order is based on indentaition
+
+MY REASONING — VERBATIM:
+indnetation determins which block a statemnt belogs to, key word is block, it is in the next indentation and position in the code to be executed and it is not false, a conditon determins if we run the statment at all or if we accept it as true without running it, nomral execution order is based on indentaition
+
+CONFIDENCE BEFORE CHECK:
+not provided
+
+TOOLS / HELP USED BEFORE COMMITMENT:
+Codex supplied the four separate rules before this restatement; no interpreter or debugger was reported
+
+RESULT:
+partial
+
+MISCONCEPTION / GAP:
+The indentation/block-membership rule was stated correctly. Function invocation was not clearly identified as occurring when execution reaches a call expression. The condition rule was partly correct about running or skipping a statement, but `True` does not mean accepting a body without running it: Python evaluates the condition and then executes the body when true. Normal order was incorrectly attributed to indentation rather than top-to-bottom sequence within the active block.
+
+CORRECT MODEL — ADDED AFTER ATTEMPT:
+Indentation groups statements into blocks. A function begins executing when execution reaches a call expression. An `if` condition is evaluated to `True` or `False`; true executes its body and false skips its body. Within whichever block is active, statements normally execute from top to bottom.
+
+WHY THIS MATTERS TO THE REAL IMPLEMENTATION:
+The first BuildLens classifier combines all four mechanisms, so conflating them would make branch-order reasoning unreliable even when the final label is guessed correctly.
+
+TRANSFER / NEXT RETRIEVAL:
+Descend to a four-item concept-matching task before asking for another prose explanation or code trace.
+
+PARENT EVIDENCE ID:
+EV-P1-SYNTAX-023
+
+PRIMARY BLOCKER:
+CONTROL_FLOW_MECHANISM_SEPARATION
+
+SCAFFOLD RUNG:
+R0
+
+WHY THIS RUNG:
+One rule is stable, but the remaining three need isolated one-to-one mappings without code syntax.
+
+SUPPORT PROVIDED BEFORE THIS ATTEMPT:
+explicit four-rule correction and labeled restatement fields
+
+RECOVERY STATUS:
+concept-matching-required
+```
+
+```text
+EVIDENCE ID:
+EV-P1-SYNTAX-025
+
+DATE / PHASE / GATE:
+2026-08-25 / Phase 1 / control-flow concept matching
+
+IMPLEMENTATION TRIGGER:
+The learner must correctly map structural and runtime mechanisms before combining them in the first BuildLens classifier.
+
+ADJACENT CONCEPT:
+Indentation groups blocks, calls invoke functions, conditions select branch execution, and active-block statements proceed top to bottom.
+
+EXERCISE TYPE:
+oral defense
+
+SOURCE / CONTEXT:
+academic
+
+PROBLEM — VERBATIM:
+Match each concept to exactly one description:
+
+Concepts
+
+A. Indentation
+B. Function call
+C. if condition
+D. Normal execution order
+
+Descriptions
+
+1. Invokes the function
+2. Executes statements top to bottom inside the active block
+3. Groups statements into blocks
+4. Determines whether the if body executes or is skipped
+
+Answer:
+
+A =
+B =
+C =
+D =
+
+Difference between indentation and execution order:
+Confidence:
+
+MY ANSWER — VERBATIM:
+a= 3
+b= 1
+c= 4
+d= 2
+
+indentation is how we order the blocks and execution order is top to bottom but we might not run certain things if the indentation calls for it like an else if statement where the if is the returned value
+
+MY REASONING — VERBATIM:
+indentation is how we order the blocks and execution order is top to bottom but we might not run certain things if the indentation calls for it like an else if statement where the if is the returned value
+
+CONFIDENCE BEFORE CHECK:
+not provided
+
+TOOLS / HELP USED BEFORE COMMITMENT:
+Codex supplied the four mechanism definitions before this matching task; no interpreter or debugger was reported
+
+RESULT:
+partial
+
+MISCONCEPTION / GAP:
+All four one-to-one matches were correct. In the prose explanation, indentation was still described as causing statements to run or be skipped. Indentation only groups statements into blocks; the evaluated condition determines whether a branch body runs. Python uses `elif` for “else if,” and an `if` is not a returned value; a `return` statement sends a value to the caller. Confidence was omitted.
+
+CORRECT MODEL — ADDED AFTER ATTEMPT:
+Indentation determines which block owns each statement. Within an active block, statements normally execute top to bottom. When execution reaches an `if` or `elif`, its condition determines whether that branch body executes. A `return` statement ends the current function call and supplies the call's value.
+
+WHY THIS MATTERS TO THE REAL IMPLEMENTATION:
+The BuildLens classifier will use ordered `if`/`elif` checks and returned labels; the learner must distinguish branch structure, branch selection, and the returned result.
+
+TRANSFER / NEXT RETRIEVAL:
+Require four one-sentence definitions for indentation, condition, order, and return before an unseen branch-order trace.
+
+PARENT EVIDENCE ID:
+EV-P1-SYNTAX-024
+
+PRIMARY BLOCKER:
+STRUCTURE_SELECTION_RETURN_SEPARATION
+
+SCAFFOLD RUNG:
+R0
+
+WHY THIS RUNG:
+Recognition is correct, but the learner's own explanation still conflates the mechanisms.
+
+SUPPORT PROVIDED BEFORE THIS ATTEMPT:
+four-item matching scaffold with one-to-one descriptions
+
+RECOVERY STATUS:
+four-sentence-teach-aloud-required
+```
+
+```text
+EVIDENCE ID:
+EV-P1-SYNTAX-026
+
+DATE / PHASE / GATE:
+2026-08-25 / Phase 1 / four-rule control-flow teach-aloud
+
+IMPLEMENTATION TRIGGER:
+The learner must state the separate roles of indentation, conditions, execution order, and return before tracing ordered classifier branches.
+
+ADJACENT CONCEPT:
+Block ownership, conditional branch execution, sequential execution, and function-call return values.
+
+EXERCISE TYPE:
+oral defense
+
+SOURCE / CONTEXT:
+academic
+
+PROBLEM — VERBATIM:
+Now state each rule in your own words—one sentence each:
+
+Indentation:
+
+Condition:
+
+Execution order:
+
+Return:
+
+Confidence:
+
+Do not use a code example yet.
+
+MY ANSWER — VERBATIM:
+indentation: creates the blocks that execution will follow
+conditon: decides whether we run an else if statment or skip it&#x20;
+execution order: is top to bottom and runs in that order of the block
+return: returns the valsue that is in the return place
+
+MY REASONING — VERBATIM:
+indentation: creates the blocks that execution will follow
+conditon: decides whether we run an else if statment or skip it&#x20;
+execution order: is top to bottom and runs in that order of the block
+return: returns the valsue that is in the return place
+
+CONFIDENCE BEFORE CHECK:
+not provided
+
+TOOLS / HELP USED BEFORE COMMITMENT:
+Codex supplied concise definitions immediately before this teach-aloud; no interpreter or debugger was reported
+
+RESULT:
+correct
+
+MISCONCEPTION / GAP:
+The four mechanisms were separated correctly. Terminology needs minor refinement: Python calls “else if” `elif`, a condition controls its associated branch body rather than the statement's existence, and `return` both ends the current function call and supplies its value to the caller. Confidence was omitted.
+
+CORRECT MODEL — ADDED AFTER ATTEMPT:
+Indentation defines which block owns each statement. An evaluated condition decides whether its branch body executes. Statements normally run top to bottom within the active block. `return` ends the current function call and sends its expression's value to the caller.
+
+WHY THIS MATTERS TO THE REAL IMPLEMENTATION:
+These distinct rules are required to explain why the first matching BuildLens classifier branch returns a label and prevents later branches from running.
+
+TRANSFER / NEXT RETRIEVAL:
+Climb to one unseen ordered `if`/`elif` trace using overlapping non-BuildLens string prefixes.
+
+PARENT EVIDENCE ID:
+EV-P1-SYNTAX-025
+
+PRIMARY BLOCKER:
+BRANCH_ORDER_TRANSFER
+
+SCAFFOLD RUNG:
+R3
+
+WHY THIS RUNG:
+The prerequisite vocabulary is stable enough to combine block structure, condition selection, and return in one ordered branch trace.
+
+SUPPORT PROVIDED BEFORE THIS ATTEMPT:
+concept matching followed by four isolated sentence prompts
+
+RECOVERY STATUS:
+ready-for-unseen-branch-order-trace
+```
+
+```text
+EVIDENCE ID:
+EV-P1-BRANCH-027
+
+DATE / PHASE / GATE:
+2026-08-25 / Phase 1 / unseen overlapping-prefix branch-order trace
+
+IMPLEMENTATION TRIGGER:
+The learner must understand `if`/`elif` first-match behavior and early `return` before tracing the real BuildLens classifier.
+
+ADJACENT CONCEPT:
+Overlapping string prefixes, ordered branch selection, `elif`, early return, and printed representation.
+
+EXERCISE TYPE:
+tracing
+
+SOURCE / CONTEXT:
+academic
+
+PROBLEM — VERBATIM:
+def prefix_label(text):
+    if text.startswith("ab"):
+        return "pair"
+    elif text.startswith("abc"):
+        return "triple"
+
+    return "other"
+
+
+result = prefix_label("abc")
+print(result)
+
+Predict:
+
+Is the first condition True or False?
+Is the elif condition evaluated? Why?
+Returned value:
+Exact printed output:
+Explain how execution order and return produce this result:
+Confidence:
+
+MY ANSWER — VERBATIM:
+ok can you push all the changes and where w eare i want to pick this up in opus, can you giveme a prompt to continue where we are, the first condiotn is true, i have no idea what an elif is , pair , "pair"
+
+MY REASONING — VERBATIM:
+the first condiotn is true, i have no idea what an elif is
+
+CONFIDENCE BEFORE CHECK:
+not provided
+
+TOOLS / HELP USED BEFORE COMMITMENT:
+none reported
+
+RESULT:
+partial
+
+MISCONCEPTION / GAP:
+The learner correctly identified the first condition as true and the returned string as `"pair"`. The learner does not yet know `elif`, so could not explain that it is skipped when the preceding `if` matches. The exact printed output was written with quotation marks; `print` displays `pair` without quotes. Execution-order reasoning and confidence were omitted.
+
+CORRECT MODEL — ADDED AFTER ATTEMPT:
+`"abc".startswith("ab")` is `True`, so Python enters the first branch. `return "pair"` immediately ends the function call and supplies `"pair"` to `result`. The `elif` condition is not evaluated. `print(result)` produces the exact output `pair` without quotation marks. `elif` means “else if” and is considered only when every preceding condition in that chain was false.
+
+WHY THIS MATTERS TO THE REAL IMPLEMENTATION:
+The real BuildLens classifier has overlapping general and specific prefixes, so branch order and first-match behavior determine whether metadata is distinguished from ordinary added or removed lines.
+
+TRANSFER / NEXT RETRIEVAL:
+Start with an R0 plain-language `if` versus `elif` selection problem with no function or string prefixes, then rebuild to one unseen ordered branch trace before introducing the BuildLens contract.
+
+PARENT EVIDENCE ID:
+EV-P1-SYNTAX-026
+
+PRIMARY BLOCKER:
+ELIF_AND_FIRST_MATCH
+
+SCAFFOLD RUNG:
+R0
+
+WHY THIS RUNG:
+The first condition and returned value were predicted correctly, but the learner explicitly reported no knowledge of `elif`.
+
+SUPPORT PROVIDED BEFORE THIS ATTEMPT:
+control-flow mechanism definitions and one unseen ordered trace
+
+RECOVERY STATUS:
+elif-microproblem-required
+```
+
+```text
+EVIDENCE ID:
 EV-P1-TEST-012
 
 DATE / PHASE / GATE:
