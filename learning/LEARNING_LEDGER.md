@@ -1790,3 +1790,85 @@ none beyond the prior R4 exercise
 RECOVERY STATUS:
 climbing
 ```
+
+```text
+EVIDENCE ID:
+EV-P1-BRANCH-009
+
+DATE / PHASE / GATE:
+2026-08-25 / Phase 1 / first R5 function-and-branch attempt
+
+IMPLEMENTATION TRIGGER:
+The BuildLens classifier requires one function to choose a returned label from an input condition without mutating the input.
+
+ADJACENT CONCEPT:
+One function, one branch, one call, local result, and returned value.
+
+EXERCISE TYPE:
+tracing
+
+SOURCE / CONTEXT:
+academic
+
+PROBLEM — VERBATIM:
+def transform(word, marker):
+    if word[0] == marker:
+        result = word + "!"
+    else:
+        result = marker + word
+
+    return result
+
+
+original = "code"
+answer = transform(original, "c")
+
+print(original, answer)
+
+Predict the comparison, branch, local result, returned value, final caller values, exact output, outside changes, and confidence.
+
+MY ANSWER — VERBATIM:
+code code! can we step it up a little more this is the same problem you laready gave me
+
+MY REASONING — VERBATIM:
+not provided
+
+CONFIDENCE BEFORE CHECK:
+not provided
+
+TOOLS / HELP USED BEFORE COMMITMENT:
+none reported
+
+RESULT:
+partial
+
+MISCONCEPTION / GAP:
+The exact output was correct. Branch selection, local state, return flow, outside-state behavior, and confidence were not explained, so reasoning could not be evaluated. The learner correctly identified that the exercise surface was overly similar to the preceding scaffold.
+
+CORRECT MODEL — ADDED AFTER ATTEMPT:
+`word[0]` is `"c"`, which equals marker `"c"`, so the true branch assigns local `result = "code!"`. The function returns `"code!"`; the caller assigns it to `answer`; `original` remains `"code"`; and the exact output is `code code!`.
+
+WHY THIS MATTERS TO THE REAL IMPLEMENTATION:
+Correct output alone is insufficient; the learner must explain which classifier branch returned the label and why no input or file changed.
+
+TRANSFER / NEXT RETRIEVAL:
+Fade the detailed prompts and climb to the actual BuildLens prefix-classification shape with two calls.
+
+PARENT EVIDENCE ID:
+EV-P1-RETURN-008
+
+PRIMARY BLOCKER:
+BRANCH_SELECTION
+
+SCAFFOLD RUNG:
+R5
+
+WHY THIS RUNG:
+Added exactly one branch to the stable R4 function-call/return structure.
+
+SUPPORT PROVIDED BEFORE THIS ATTEMPT:
+detailed guiding questions
+
+RECOVERY STATUS:
+climbing
+```

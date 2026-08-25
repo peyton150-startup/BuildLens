@@ -139,6 +139,10 @@ Argos, Datum, and Trellis are deliberately deferred until the matching Python/de
 - Next: one function, one branch, one call, and no nested calls or domain
   vocabulary. If correct, give a fresh R5 near-transfer before returning to the
   BuildLens classifier contract.
+- Evidence `EV-P1-BRANCH-009` predicted the exact R5 output correctly but did
+  not include reasoning. The learner reported that the scaffold was too similar.
+- Next: fade detailed prompts and test the real prefix-classification structure
+  with two calls. Require branch-order reasoning before implementation.
 
 ## Files I should be able to teach
 
