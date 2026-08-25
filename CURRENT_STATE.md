@@ -228,6 +228,59 @@ Argos, Datum, and Trellis are deliberately deferred until the matching Python/de
 - Handoff checkpoint: remain in Phase 1 contract prediction with no application
   code. The immediate blocker is `ELIF_AND_FIRST_MATCH`; do not introduce the
   BuildLens function contract until that blocker passes an unseen variant.
+- Evidence `EV-P1-ELIF-028` was answered correctly at R0. The learner identified the
+  false first condition, stated the correct reason the `elif` is evaluated (the
+  preceding condition was false), named the winning branch, and wrote the exact
+  output `medium` without quotation marks. That last point resolves
+  `printed_output_includes_quotes` for one attempt; it is not yet mastered.
+- Evidence `EV-P1-ELIF-029` passed the unseen branch-order transfer. The learner
+  asked to skip ahead first; the gate was compressed to its single transfer question
+  rather than waived, and the learner then correctly stated that the swapped chain
+  matches `score >= 90` and never evaluates the condition below it. The
+  `ELIF_AND_FIRST_MATCH` blocker is cleared for Phase 1 purposes. It is not mastered:
+  mastery still needs a third unseen variant in a second context plus one delayed
+  retrieval.
+- Open terminology refinements from that attempt: `return` was used for what is an
+  assignment plus `print`, and the second branch of a swapped chain was called the
+  `if` rather than the `elif`. Correct these in passing; do not descend a rung for
+  them.
+- Gate cleared, so the `classify_diff_line` contract has been stated in plain English.
+  Evidence `EV-P1-CONTRACT-030` restated the input and the four labels correctly but
+  answered the unchanged-state question with the project's name, which is not program
+  state. The contract is therefore NOT yet approved, and no failing test or
+  implementation may be written.
+- Active blocker: `PURE_FUNCTION_NO_SIDE_EFFECTS`. Evidence `EV-P1-PURE-031` passed at
+  R1: the learner predicted `hello` then `HELLO` exactly, showing that producing a new
+  value leaves the original variable unchanged. Evidence `EV-P1-PURE-032` climbs one
+  feature to R4 by replacing the string method with a `classify_diff_line` call and
+  asking for the same two predicted outputs. A correct answer closes contract part 3.
+- Evidence `EV-P1-PURE-032` answered correctly: `added`, and `line` unchanged. The
+  transcribed line contained one extra space, which is `trace_transcription_precision`
+  rather than a purity error; no rung was descended for it. Contract part 3 is closed
+  and `PURE_FUNCTION_NO_SIDE_EFFECTS` is cleared for Phase 1 purposes, not mastered.
+- All three contract parts are now restated correctly across `EV-P1-CONTRACT-030` and
+  `EV-P1-PURE-032`. The contract awaits only the learner's explicit word of approval
+  and explicit authorization to continue. No test and no implementation may be written
+  before both are given.
+- Two triggers for the public evidence sync are now active at once: five new attempts
+  (`EV-P1-ELIF-028` through `EV-P1-PURE-032`) and the pre-implementation checkpoint.
+  The repository-path blocker is resolved: use a temporary clone of
+  `peyton150-startup/BuildLens` inside the workspace, copy the changed authoritative
+  documents into it, commit and push there, verify public `main`, then remove the
+  temporary clone. Do not commit through the enclosing home-directory repository.
+- Confidence was reported for the first time in Phase 1 on `EV-P1-PURE-031`, as the
+  words `faily confident` rather than a number. Keep requesting a number so
+  calibration can eventually be measured.
+- Format note from the learner: they report difficulty answering list-style recall
+  prompts. Prefer concrete output prediction over enumeration, and infer the concept
+  from the prediction rather than asking for properties to be listed.
+- Confidence remains unreported on every Phase 1 attempt, so calibration still
+  cannot be computed. Continue requiring a confidence number in each response.
+- Public-sync resolution: `C:\Users\nicol\BuildLens_Project` intentionally remains
+  a documentation workspace without its own `.git`. Codex performs verified public
+  syncs through a disposable child clone. Evidence `028`–`032` is included in the
+  pre-implementation sync checkpoint; implementation remains blocked only on the
+  learner's explicit contract approval and authorization to continue.
 
 ## Files I should be able to teach
 

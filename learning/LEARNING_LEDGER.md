@@ -3383,3 +3383,483 @@ plain-language contract and labeled response fields
 RECOVERY STATUS:
 stable-at-rung
 ```
+
+```text
+EVIDENCE ID:
+EV-P1-ELIF-028
+
+DATE / PHASE / GATE:
+2026-08-25 / Phase 1 / R0 elif branch-selection remediation
+
+IMPLEMENTATION TRIGGER:
+The BuildLens classifier depends on an ordered condition chain, so the learner must
+be able to say which branch runs and which conditions are never evaluated.
+
+ADJACENT CONCEPT:
+`elif` as "else if"; first-true-wins; later conditions in the same chain are skipped.
+
+EXERCISE TYPE:
+tracing
+
+SOURCE / CONTEXT:
+academic
+
+PROBLEM — VERBATIM:
+A locker system assigns a size label from a single number. It checks the rules in
+written order and stops at the first rule that fits.
+
+count = 4
+
+if count == 2:
+    print("small")
+elif count == 4:
+    print("medium")
+else:
+    print("large")
+
+1. Is the first condition true or false?
+2. Is the elif condition evaluated at all? Why or why not?
+3. Which branch runs?
+4. What is the exact printed output - write it exactly as it would appear on the screen?
+5. Confidence, 0-100%.
+
+MY ANSWER — VERBATIM:
+1. it si false 
+2. yes, becasue the count does not == 2 it goes to the first elif
+3. count==4 / "medium"
+4. medium
+
+MY REASONING — VERBATIM:
+yes, becasue the count does not == 2 it goes to the first elif
+
+CONFIDENCE BEFORE CHECK:
+not provided
+
+TOOLS / HELP USED BEFORE COMMITMENT:
+none reported
+
+RESULT:
+correct
+
+MISCONCEPTION / GAP:
+No conceptual error. All four predictions were right and the stated reason for
+evaluating the `elif` was the correct mechanism: the preceding `if` condition was
+false. The printed output was written without quotation marks, which corrects the
+`printed_output_includes_quotes` slip from `EV-P1-BRANCH-027`. Confidence was again
+omitted, so calibration data still cannot be computed.
+
+CORRECT MODEL — ADDED AFTER ATTEMPT:
+`count` is `4`, so `count == 2` is `False` and the first branch body is skipped.
+Because that condition was false, Python evaluates the next condition in the same
+chain: `count == 4` is `True`, so `print("medium")` runs. The `else` is skipped
+because a branch already won. `print` writes the string's characters, so the exact
+output is `medium` with no quotation marks.
+
+WHY THIS MATTERS TO THE REAL IMPLEMENTATION:
+The real classifier must test the more specific metadata prefix before the general
+one; that only works if the learner knows a chain stops at its first true condition.
+
+TRANSFER / NEXT RETRIEVAL:
+One unseen if/elif branch-order variant. Do not introduce the classify_diff_line
+contract until that unseen variant is solved and explained.
+
+PARENT EVIDENCE ID:
+EV-P1-BRANCH-027
+
+PRIMARY BLOCKER:
+ELIF_AND_FIRST_MATCH
+
+SCAFFOLD RUNG:
+R0
+
+WHY THIS RUNG:
+No function, no string prefixes, no overlapping conditions, one integer, one chain.
+Only the elif mechanism itself is under test.
+
+SUPPORT PROVIDED BEFORE THIS ATTEMPT:
+plain-language explanation of elif with no worked exercise; labeled response fields
+
+RECOVERY STATUS:
+stable-at-rung
+```
+
+```text
+EVIDENCE ID:
+EV-P1-ELIF-029
+
+DATE / PHASE / GATE:
+2026-08-25 / Phase 1 / unseen branch-order variant
+
+IMPLEMENTATION TRIGGER:
+The BuildLens classifier will contain two conditions that can both be true for the
+same input, so written order alone decides the returned label.
+
+ADJACENT CONCEPT:
+Branch ORDER as meaning: when two conditions in one chain overlap, the earlier one
+wins and the later one is never evaluated.
+
+EXERCISE TYPE:
+transfer
+
+SOURCE / CONTEXT:
+academic
+
+PROBLEM — VERBATIM:
+A grading tool assigns one label from a single score.
+
+score = 90
+
+if score >= 50:
+    label = "pass"
+elif score >= 90:
+    label = "excellent"
+else:
+    label = "fail"
+
+print(label)
+
+1. Is the first condition true or false?
+2. Is the elif condition evaluated? Why or why not?
+3. What value does label hold when print runs?
+4. Exact printed output.
+5. Both conditions would be true for this score. Which one decides the result, and why?
+6. If the two branches were swapped so that score >= 90 were checked first, what
+   would print instead? Explain what that tells you about writing a chain where one
+   condition is more specific than another.
+7. Confidence, 0-100%.
+
+MY ANSWER — VERBATIM:
+it would stop right there and return excellent, it would not get to execute the if statemnt
+
+MY REASONING — VERBATIM:
+it would stop right there and return excellent, it would not get to execute the if statemnt
+
+CONFIDENCE BEFORE CHECK:
+not provided
+
+TOOLS / HELP USED BEFORE COMMITMENT:
+none reported
+
+RESULT:
+correct
+
+MISCONCEPTION / GAP:
+The mechanism is correct: the swapped chain matches `score >= 90` first and never
+evaluates the condition below it. Two terminology refinements remain. Nothing is
+`returned` in this snippet — there is no function, so `label` is assigned and then
+printed. After the swap, `score >= 50` occupies the `elif` position, not the `if`.
+Confidence was again omitted.
+
+The learner asked to skip ahead before answering, stating the concept was already
+understood. The gate was compressed to the single transfer question rather than
+waived, and was then answered correctly.
+
+CORRECT MODEL — ADDED AFTER ATTEMPT:
+As written, `score >= 50` is true for `90`, so `label` becomes `"pass"` and the
+`elif score >= 90` is never evaluated; the output is `pass`. Swapped, `score >= 90`
+is true, `label` becomes `"excellent"`, and the `score >= 50` test below it never
+runs; the output is `excellent`. When two conditions in one chain overlap, the
+earlier one wins, so a broad condition placed above a narrower one makes the
+narrower branch unreachable for every input the broad one already accepts.
+
+WHY THIS MATTERS TO THE REAL IMPLEMENTATION:
+This is the deep structure behind the classifier's metadata problem without naming
+it: a broad condition placed first can swallow every input that a narrower
+condition below it was meant to catch.
+
+TRANSFER / NEXT RETRIEVAL:
+If correct and explained, introduce the classify_diff_line contract in plain
+English and require the learner to restate and approve it before any test or
+implementation is written.
+
+PARENT EVIDENCE ID:
+EV-P1-ELIF-028
+
+PRIMARY BLOCKER:
+ELIF_AND_FIRST_MATCH
+
+SCAFFOLD RUNG:
+R3
+
+WHY THIS RUNG:
+Climbs exactly one feature above EV-P1-ELIF-028: the conditions now overlap, so
+order alone determines the result. Still no function, no return, no string
+prefixes, and no BuildLens vocabulary.
+
+SUPPORT PROVIDED BEFORE THIS ATTEMPT:
+correctness feedback on the R0 attempt only; no worked overlapping example
+
+RECOVERY STATUS:
+transfer-gate-passed
+```
+
+```text
+EVIDENCE ID:
+EV-P1-CONTRACT-030
+
+DATE / PHASE / GATE:
+2026-08-25 / Phase 1 / classify_diff_line contract restatement and approval
+
+IMPLEMENTATION TRIGGER:
+No test or implementation may be written until the learner restates and approves the
+first BuildLens function contract.
+
+ADJACENT CONCEPT:
+A contract has three parts: accepted input, promised output, and state left unchanged.
+
+EXERCISE TYPE:
+design
+
+SOURCE / CONTEXT:
+BuildLens
+
+PROBLEM — VERBATIM:
+Restate the classify_diff_line contract in your own words, covering:
+
+1. what goes in (how much text, in what form),
+2. what comes out (what kind of value, and what the possible values are),
+3. what stays unchanged when it runs.
+
+Then say approved, or say what you would change.
+
+MY ANSWER — VERBATIM:
+1. one line that goes into a classify_diff_line(str)
+2. metadata added removed and context
+3. the name fo the project statys the same, i am nt the best with just listing things off
+
+MY REASONING — VERBATIM:
+not provided
+
+CONFIDENCE BEFORE CHECK:
+not provided
+
+TOOLS / HELP USED BEFORE COMMITMENT:
+none reported
+
+RESULT:
+partial
+
+MISCONCEPTION / GAP:
+Parts 1 and 2 are correct: one line of text as a string, and the four category
+labels. The answer did not state that exactly one of those four labels is returned
+per call. Part 3 is wrong. The learner named the project's name as the thing that
+stays unchanged, which is not program state at all. This continues the existing
+`pure_function_side_effects` cluster: the learner still cannot say which data a
+pure function leaves untouched. The learner also reported difficulty with
+list-style recall, so the remediation switched from enumeration to output
+prediction.
+
+CORRECT MODEL — ADDED AFTER ATTEMPT:
+Input: exactly one line of unified-diff text as a string. Output: exactly one
+string per call, always one of `metadata`, `added`, `removed`, `context`. Unchanged:
+the string that was passed in, every file on disk, and all state outside the call.
+The function reads its argument, produces a new value, and modifies nothing.
+
+WHY THIS MATTERS TO THE REAL IMPLEMENTATION:
+If the learner believes classification mutates something, they will expect the
+wrong behavior from the first test and cannot judge whether the implementation is
+correct.
+
+TRANSFER / NEXT RETRIEVAL:
+Descend to one non-BuildLens output prediction showing that producing a new value
+leaves the original variable unchanged, then return to contract part 3.
+
+PARENT EVIDENCE ID:
+EV-P1-ELIF-029
+
+PRIMARY BLOCKER:
+PURE_FUNCTION_NO_SIDE_EFFECTS
+
+SCAFFOLD RUNG:
+R6
+
+WHY THIS RUNG:
+Stating a full contract is the phase-target task; it exposed a prerequisite gap.
+
+SUPPORT PROVIDED BEFORE THIS ATTEMPT:
+plain-English contract with three labeled restatement fields
+
+RECOVERY STATUS:
+descending
+```
+
+```text
+EVIDENCE ID:
+EV-P1-PURE-031
+
+DATE / PHASE / GATE:
+2026-08-25 / Phase 1 / unchanged-input remediation
+
+IMPLEMENTATION TRIGGER:
+The classifier contract promises the input string is not modified; the learner must
+be able to see that producing a value leaves the original alone.
+
+ADJACENT CONCEPT:
+An operation that produces a new value does not overwrite the variable it read from.
+
+EXERCISE TYPE:
+tracing
+
+SOURCE / CONTEXT:
+academic
+
+PROBLEM — VERBATIM:
+word = "hello"
+shout = word.upper()
+
+print(word)
+print(shout)
+
+word.upper() produces an all-capitals version of the string.
+
+1. Exactly what does the first print display?
+2. Exactly what does the second print display?
+3. Confidence, 0-100%.
+
+MY ANSWER — VERBATIM:
+hello
+HELLO
+faily confident
+
+MY REASONING — VERBATIM:
+not provided
+
+CONFIDENCE BEFORE CHECK:
+faily confident
+
+TOOLS / HELP USED BEFORE COMMITMENT:
+none reported
+
+RESULT:
+correct
+
+MISCONCEPTION / GAP:
+No error. Both outputs are exact, in the right order, and without quotation marks.
+This is the first attempt in Phase 1 on which any confidence was reported, though it
+is qualitative rather than a number, so calibration can be started but not yet
+measured numerically.
+
+CORRECT MODEL — ADDED AFTER ATTEMPT:
+`word.upper()` produces a new string `"HELLO"` and binds it to `shout`. It does not
+write back into `word`, so `word` still holds `"hello"`. The first `print` displays
+`hello` and the second displays `HELLO`. Reading a value to produce another value
+leaves the original untouched.
+
+WHY THIS MATTERS TO THE REAL IMPLEMENTATION:
+This is the smallest form of the classifier's promise that its input is unchanged.
+
+TRANSFER / NEXT RETRIEVAL:
+Return to contract part 3 and ask which data classify_diff_line leaves untouched.
+
+PARENT EVIDENCE ID:
+EV-P1-CONTRACT-030
+
+PRIMARY BLOCKER:
+PURE_FUNCTION_NO_SIDE_EFFECTS
+
+SCAFFOLD RUNG:
+R1
+
+WHY THIS RUNG:
+One value, one operation, no function definition, no branch, no domain vocabulary,
+and no list to enumerate. Only the unchanged-original idea is under test.
+
+SUPPORT PROVIDED BEFORE THIS ATTEMPT:
+correctness feedback on contract parts 1 and 2; format changed from enumeration to
+output prediction at the learner's request
+
+RECOVERY STATUS:
+stable-at-rung
+```
+
+```text
+EVIDENCE ID:
+EV-P1-PURE-032
+
+DATE / PHASE / GATE:
+2026-08-25 / Phase 1 / contract part 3 near-transfer in BuildLens vocabulary
+
+IMPLEMENTATION TRIGGER:
+Contract approval is blocked until the learner can say what classify_diff_line leaves
+unchanged.
+
+ADJACENT CONCEPT:
+A classifier returns a label and does not modify the line it was given.
+
+EXERCISE TYPE:
+transfer
+
+SOURCE / CONTEXT:
+BuildLens
+
+PROBLEM — VERBATIM:
+Assume classify_diff_line exists and behaves exactly as the contract says.
+
+line = "+value = 1"
+label = classify_diff_line(line)
+
+print(label)
+print(line)
+
+1. Exactly what does the first print display?
+2. Exactly what does the second print display?
+3. Confidence.
+
+MY ANSWER — VERBATIM:
+added
++value =  1
+
+MY REASONING — VERBATIM:
+not provided
+
+CONFIDENCE BEFORE CHECK:
+not provided
+
+TOOLS / HELP USED BEFORE COMMITMENT:
+none reported
+
+RESULT:
+correct
+
+MISCONCEPTION / GAP:
+The concept is correct on both lines: the call produces the label `added` and the
+variable `line` still holds the original string. The transcribed second line reads
+`+value =  1` with two spaces where the source has one. This is the existing
+`trace_transcription_precision` weakness, not a misunderstanding of purity, so no
+rung was descended. Confidence was omitted again.
+
+CORRECT MODEL — ADDED AFTER ATTEMPT:
+`classify_diff_line(line)` reads the string and produces a new value, the label
+`"added"`, which is bound to `label`. Nothing writes back into `line`, so the first
+`print` displays `added` and the second displays `+value = 1` exactly as originally
+written. This is contract part 3: the input string, and everything else outside the
+call, is unchanged.
+
+WHY THIS MATTERS TO THE REAL IMPLEMENTATION:
+This is contract part 3 restated as a prediction. A correct answer approves the
+unchanged-input promise and unblocks the first failing test.
+
+TRANSFER / NEXT RETRIEVAL:
+If correct, close the contract and request explicit authorization before writing any
+test or implementation.
+
+PARENT EVIDENCE ID:
+EV-P1-PURE-031
+
+PRIMARY BLOCKER:
+PURE_FUNCTION_NO_SIDE_EFFECTS
+
+SCAFFOLD RUNG:
+R4
+
+WHY THIS RUNG:
+Same structure as the stable R1 attempt, climbed by exactly one feature: the
+producing step is now a function call in BuildLens vocabulary rather than a string
+method. Still no branch and no list to enumerate.
+
+SUPPORT PROVIDED BEFORE THIS ATTEMPT:
+correctness feedback on the R1 attempt; the contract remains visible
+
+RECOVERY STATUS:
+returned-to-target
+```
