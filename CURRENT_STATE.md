@@ -154,6 +154,11 @@ Argos, Datum, and Trellis are deliberately deferred until the matching Python/de
   stable at R1; `+++`/`---` metadata-header precedence remains a later retrieval.
 - The learner requested a subject change after several similar traces. Next topic:
   design the first failing behavior test rather than issuing another trace.
+- Evidence `EV-P1-TEST-012` proposed a valid input but described the expected
+  behavior as applying a file change rather than returning `"added"`.
+- Active test-design blocker: `classification_return_vs_downstream_effect`.
+  Descend to R1 with a generic classifier and one input/expected-return pair;
+  return to the BuildLens test only after that distinction is stable.
 
 ## Files I should be able to teach
 

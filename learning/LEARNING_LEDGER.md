@@ -1709,6 +1709,79 @@ stable-at-rung
 
 ```text
 EVIDENCE ID:
+EV-P1-TEST-012
+
+DATE / PHASE / GATE:
+2026-08-25 / Phase 1 / first classifier test-design attempt
+
+IMPLEMENTATION TRIGGER:
+TDD requires a failing test that asserts the classifier's returned label before implementation exists.
+
+ADJACENT CONCEPT:
+Test input, expected return value, and the incorrect observable behavior the test catches.
+
+EXERCISE TYPE:
+test design
+
+SOURCE / CONTEXT:
+BuildLens
+
+PROBLEM — VERBATIM:
+Choose one classifier behavior—`added`, `removed`, `metadata`, or `context`—and propose:
+
+Input:
+Expected result:
+Bug this test would catch:
+Confidence:
+
+MY ANSWER — VERBATIM:
+input: +value =1, value = 1 is added to the file, if it would not add it to the file
+
+MY REASONING — VERBATIM:
+if it would not add it to the file
+
+CONFIDENCE BEFORE CHECK:
+not provided
+
+TOOLS / HELP USED BEFORE COMMITMENT:
+none reported
+
+RESULT:
+partial
+
+MISCONCEPTION / GAP:
+The input is a valid added-line example, but the expected result and bug were described as file mutation. The classifier's observable behavior is returning the label `"added"`; it never applies a diff or edits a file.
+
+CORRECT MODEL — ADDED AFTER ATTEMPT:
+For input `"+value =1"`, the expected result is the string `"added"`. This test catches an implementation that returns any other classification, such as `"context"` or `"metadata"`. Applying the described source change is outside this function's contract.
+
+WHY THIS MATTERS TO THE REAL IMPLEMENTATION:
+The first failing test must verify the pure function BuildLens is about to implement, not behavior owned by a future component.
+
+TRANSFER / NEXT RETRIEVAL:
+Remove diff/file vocabulary and design one generic input/expected-return test before returning to BuildLens.
+
+PARENT EVIDENCE ID:
+EV-P1-DIFF-011
+
+PRIMARY BLOCKER:
+BOUNDARY_CONCEPT
+
+SCAFFOLD RUNG:
+R1
+
+WHY THIS RUNG:
+Reduce the task to one input and one expected returned value with no function body, branch trace, or file domain.
+
+SUPPORT PROVIDED BEFORE THIS ATTEMPT:
+test-design field labels
+
+RECOVERY STATUS:
+descending
+```
+
+```text
+EVIDENCE ID:
 EV-P1-RETURN-008
 
 DATE / PHASE / GATE:
