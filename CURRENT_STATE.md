@@ -179,6 +179,30 @@ Argos, Datum, and Trellis are deliberately deferred until the matching Python/de
   principle and conflated comparison direction, `else`/`else if`, and input versus
   return types. Provide one fresh plain-language boundary variant. The scheduled
   five-attempt public evidence sync is now due; do not advance the gate.
+- Evidence `EV-P1-TEST-018` correctly solved and explained an unseen inclusive
+  boundary test. The boundary-test transfer gate is passed. Python branch syntax
+  remains an R0 remediation target; do not treat syntax transcription as a failed
+  boundary concept.
+- Evidence is recorded locally after every attempt. Public pushes are batched
+  after five new attempts or immediately before implementation, whichever comes
+  first; individual answers do not require individual pushes. Current batch: 1/5.
+- Evidence `EV-P1-SYNTAX-019` correctly added colons and predicted the boundary
+  behavior, but the submitted Python still lacked visible block indentation.
+  Isolate indentation at R0 before introducing the BuildLens contract. Current
+  public-sync batch: 2/5.
+- Evidence `EV-P1-SYNTAX-020` used comments to describe indentation and placed the
+  fallback return three levels deep. Remediate with explicit leading-space counts:
+  function body = 4 spaces; branch body = 8 spaces; fallback return = 4 spaces.
+  Current public-sync batch: 3/5.
+- Evidence `EV-P1-SYNTAX-021` corrected the fallback indentation and predicted
+  `"no"`, but could not explain that a false condition skips the `if` body and
+  continues at the next function-level statement. Test that execution rule in one
+  unseen local-value variant. Current public-sync batch: 4/5.
+- Evidence `EV-P1-SYNTAX-022` correctly predicted returned `"standard"` and exact
+  output `standard`, and recognized call-time local initialization. The learner
+  remains unsure whether indentation/statement position or the Boolean condition
+  controls execution. Require a two-rule teach-aloud before the next unseen trace.
+  The scheduled five-attempt public evidence sync is due.
 
 ## Files I should be able to teach
 

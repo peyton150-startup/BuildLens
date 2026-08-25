@@ -1855,6 +1855,455 @@ unseen-variant-required
 
 ```text
 EVIDENCE ID:
+EV-P1-TEST-018
+
+DATE / PHASE / GATE:
+2026-08-25 / Phase 1 / unseen boundary-transfer gate
+
+IMPLEMENTATION TRIGGER:
+The learner must correctly reason about an unseen inclusive boundary and explain why the exact boundary is tested before implementation.
+
+ADJACENT CONCEPT:
+Inclusive comparison, Boolean result, expected and competing returns, boundary-test purpose, and Python branch syntax.
+
+EXERCISE TYPE:
+transfer
+
+SOURCE / CONTEXT:
+blind transfer
+
+PROBLEM — VERBATIM:
+A library system returns:
+
+- `"fee"` when a book is overdue by **3 days or more**
+- `"no fee"` when it is overdue by fewer than 3 days
+
+Test input: exactly `3` days.
+
+Is “3 days or more” true or false?
+Expected returned string:
+Incorrect returned string this test catches:
+Why is testing exactly 3 more useful than testing 5?
+What principle does this share with the earlier boundary tests?
+Confidence:
+
+Do not write code or run anything yet.
+
+MY ANSWER — VERBATIM:
+ok but make sure we spread the pushes out ot is ok to commit but we do not nned to push every commit, def is_late(time)
+if time >= 3&#x20;
+reutnr "fee"
+else:
+return "no fee"
+
+original = 3&#x20;
+result = is_late(oringinal)
+print(result)
+
+it is true, expected return is "fee" and incorrect would be "no fee", because 3 is the threshold for fee or no fee, exact vlaue where equality matter is the principle can you also tell me where to add where my sytax is missing
+
+MY REASONING — VERBATIM:
+because 3 is the threshold for fee or no fee, exact vlaue where equality matter is the principle
+
+CONFIDENCE BEFORE CHECK:
+not provided
+
+TOOLS / HELP USED BEFORE COMMITMENT:
+none reported; syntax help was requested after the prediction and principle were committed
+
+RESULT:
+correct
+
+MISCONCEPTION / GAP:
+No boundary-testing misconception remains in this unseen variant. Python syntax and transcription still need correction: missing colons after `def` and `if`, missing indentation, `reutnr` instead of `return`, and `oringinal` instead of `original`. If `&#x20;` is literal pasted text rather than display encoding, it must also be removed.
+
+CORRECT MODEL — ADDED AFTER ATTEMPT:
+At input `3`, the inclusive comparison `3 >= 3` is `True`, so the expected return is `"fee"`; `"no fee"` is the competing wrong return. Testing exactly `3` exercises the equality boundary and catches an off-by-one error that a clearly in-range value such as `5` may not expose.
+
+WHY THIS MATTERS TO THE REAL IMPLEMENTATION:
+The learner can now design and defend an exact-boundary behavior test before implementation, which is required for BuildLens test-first work.
+
+TRANSFER / NEXT RETRIEVAL:
+Mark the boundary-test concept stable. Address Python syntax separately and introduce the next Phase 1 contract concept without implementing BuildLens.
+
+PARENT EVIDENCE ID:
+EV-P1-TEST-017
+
+PRIMARY BLOCKER:
+PYTHON_BRANCH_SYNTAX
+
+SCAFFOLD RUNG:
+R0
+
+WHY THIS RUNG:
+The conceptual test reasoning passed; only concrete Python punctuation, indentation, keyword spelling, and identifier consistency remain weak.
+
+SUPPORT PROVIDED BEFORE THIS ATTEMPT:
+plain-language unseen contract with labeled test fields
+
+RECOVERY STATUS:
+boundary-gate-passed-syntax-remediation-needed
+```
+
+```text
+EVIDENCE ID:
+EV-P1-SYNTAX-019
+
+DATE / PHASE / GATE:
+2026-08-25 / Phase 1 / unseen R0 Python syntax check
+
+IMPLEMENTATION TRIGGER:
+The learner must be able to write valid indentation for a tiny function and branch before authoring a real BuildLens test or function.
+
+ADJACENT CONCEPT:
+Colons begin Python blocks; indentation determines which statements belong to the function and each branch.
+
+EXERCISE TYPE:
+transfer
+
+SOURCE / CONTEXT:
+academic
+
+PROBLEM — VERBATIM:
+def access_label(score)
+if score >= 80
+return "ready"
+else
+return "review"
+
+value = 80
+answer = access_label(value)
+print(answer)
+
+Respond with:
+
+1. The corrected Python
+2. Whether the condition is True or False
+3. The returned value
+4. The exact printed output
+5. A short explanation
+6. Confidence
+
+MY ANSWER — VERBATIM:
+def access_label(score):&#x20;
+if score >= 80:&#x20;
+return "ready"
+else:&#x20;
+return "review"
+
+value = 80
+answer = access_label(value)
+print(answer)
+
+it is true, the returned vvalue is "ready", ready , we are still doing the exact value when equality matters privnciple
+
+MY REASONING — VERBATIM:
+we are still doing the exact value when equality matters privnciple
+
+CONFIDENCE BEFORE CHECK:
+not provided
+
+TOOLS / HELP USED BEFORE COMMITMENT:
+Codex had previously shown one corrected function with indentation; no interpreter or debugger was reported
+
+RESULT:
+partial
+
+MISCONCEPTION / GAP:
+The learner added the required colons and correctly predicted the comparison, return, output, and boundary principle. The submitted function still has no visible indentation, so Python cannot determine the function body or branch bodies. Confidence was omitted. If `&#x20;` is literal pasted text rather than display encoding, it is also not valid Python source.
+
+CORRECT MODEL — ADDED AFTER ATTEMPT:
+The `if` and `else` lines must be indented inside the function. Each corresponding `return` must be indented one additional level inside its branch. With input `80`, `80 >= 80` is `True`, the function returns `"ready"`, and `print` outputs `ready` without quotation marks.
+
+WHY THIS MATTERS TO THE REAL IMPLEMENTATION:
+Python indentation expresses control-flow ownership. A BuildLens classifier cannot be read, tested, or executed correctly unless its function and branch bodies are structurally exact.
+
+TRANSFER / NEXT RETRIEVAL:
+Give an indentation-only unseen function with all punctuation already correct and one return outside the `if` but inside the function.
+
+PARENT EVIDENCE ID:
+EV-P1-TEST-018
+
+PRIMARY BLOCKER:
+PYTHON_INDENTATION
+
+SCAFFOLD RUNG:
+R0
+
+WHY THIS RUNG:
+Logic and boundary reasoning are stable; only block indentation needs isolation.
+
+SUPPORT PROVIDED BEFORE THIS ATTEMPT:
+one prior fully corrected Python branch example
+
+RECOVERY STATUS:
+indentation-unseen-variant-required
+```
+
+```text
+EVIDENCE ID:
+EV-P1-SYNTAX-020
+
+DATE / PHASE / GATE:
+2026-08-25 / Phase 1 / indentation-only unseen attempt
+
+IMPLEMENTATION TRIGGER:
+The learner must distinguish function-body indentation from branch-body indentation before writing the first BuildLens function.
+
+ADJACENT CONCEPT:
+Indentation comments do not create blocks; statements at the same indentation level share the same enclosing block.
+
+EXERCISE TYPE:
+transfer
+
+SOURCE / CONTEXT:
+academic
+
+PROBLEM — VERBATIM:
+Fix only the indentation— all punctuation is already present:
+
+def choose(flag):
+if flag:
+return "yes"
+return "no"
+
+result = choose(False)
+print(result)
+
+Respond with:
+
+Correctly indented code:
+Returned value:
+Exact printed output:
+Why the second return must be inside the function but outside the if:
+Confidence:
+
+MY ANSWER — VERBATIM:
+def choose(flag):
+if flag:   #indent&#x20;
+return "yes" # indent twice &#x20;
+return "no" # indent 3 times &#x20;
+
+result = choose(False)
+print(result)
+
+MY REASONING — VERBATIM:
+if flag:   #indent&#x20;
+return "yes" # indent twice &#x20;
+return "no" # indent 3 times &#x20;
+
+CONFIDENCE BEFORE CHECK:
+not provided
+
+TOOLS / HELP USED BEFORE COMMITMENT:
+Codex specified that only indentation needed correction; no interpreter or debugger was reported
+
+RESULT:
+wrong
+
+MISCONCEPTION / GAP:
+Comments describing indentation do not indent the statements themselves. The learner correctly associated the `if` with one level and the true-branch return with two levels, but placed `return "no"` at a third level. That return must be at the same one-level indentation as the `if` so it remains inside the function but outside the conditional. The return prediction, printed output, explanation, and confidence were omitted.
+
+CORRECT MODEL — ADDED AFTER ATTEMPT:
+`if flag:` has four leading spaces. `return "yes"` has eight leading spaces because it is inside both the function and the `if`. `return "no"` has four leading spaces because it is inside the function but outside the `if`. With `False`, the `if` body is skipped and the function reaches `return "no"`.
+
+WHY THIS MATTERS TO THE REAL IMPLEMENTATION:
+In Python, indentation is control-flow structure. Misindenting a fallback return can make it unreachable, conditional, or outside the function entirely.
+
+TRANSFER / NEXT RETRIEVAL:
+Remove code-entry ambiguity: ask for the exact count of leading spaces on each statement, then ask which return executes for `False`.
+
+PARENT EVIDENCE ID:
+EV-P1-SYNTAX-019
+
+PRIMARY BLOCKER:
+PYTHON_INDENTATION_LEVELS
+
+SCAFFOLD RUNG:
+R0
+
+WHY THIS RUNG:
+The learner needs one concrete mapping from nesting depth to leading-space count before another full syntax rewrite.
+
+SUPPORT PROVIDED BEFORE THIS ATTEMPT:
+corrected prior function and verbal one-level/two-level indentation explanation
+
+RECOVERY STATUS:
+space-count-remediation-required
+```
+
+```text
+EVIDENCE ID:
+EV-P1-SYNTAX-021
+
+DATE / PHASE / GATE:
+2026-08-25 / Phase 1 / indentation execution explanation recovery
+
+IMPLEMENTATION TRIGGER:
+The learner must explain how execution continues after a false `if` before tracing or writing the first BuildLens function.
+
+ADJACENT CONCEPT:
+A false condition skips the indented branch body; execution resumes at the next statement in the enclosing function block.
+
+EXERCISE TYPE:
+tracing
+
+SOURCE / CONTEXT:
+academic
+
+PROBLEM — VERBATIM:
+def choose(flag):
+    if flag:
+        return "yes"
+    return "no"
+
+
+result = choose(False)
+print(result)
+
+Without running it, answer:
+
+Which return executes when flag is False?
+Exact printed output:
+Why does that return execute?
+Confidence:
+
+MY ANSWER — VERBATIM:
+you are right about the indents for no it should be only 1 my mistake, it would retunr "no" and i do not know why
+
+MY REASONING — VERBATIM:
+i do not know why
+
+CONFIDENCE BEFORE CHECK:
+not provided
+
+TOOLS / HELP USED BEFORE COMMITMENT:
+Codex provided the corrected indentation and leading-space counts before this prediction; no interpreter or debugger was reported
+
+RESULT:
+partial
+
+MISCONCEPTION / GAP:
+The learner corrected the fallback return to one indentation level and predicted `"no"` correctly, but could not explain false-branch skipping or how execution resumes at the next statement in the function body. Confidence was omitted.
+
+CORRECT MODEL — ADDED AFTER ATTEMPT:
+The argument `False` binds to `flag`. Because the `if flag` condition is false, Python skips the more deeply indented `return "yes"`. Execution continues at the next statement still inside the function, `return "no"`, so the call evaluates to `"no"` and the exact printed output is `no`.
+
+WHY THIS MATTERS TO THE REAL IMPLEMENTATION:
+BuildLens classification depends on knowing which branch bodies are skipped and which fallback return executes when earlier conditions do not match.
+
+TRANSFER / NEXT RETRIEVAL:
+Give a fresh function where a default local value is assigned, a false branch is skipped, and the function returns the unchanged local value.
+
+PARENT EVIDENCE ID:
+EV-P1-SYNTAX-020
+
+PRIMARY BLOCKER:
+FALSE_BRANCH_CONTINUATION
+
+SCAFFOLD RUNG:
+R3
+
+WHY THIS RUNG:
+Indentation levels are now corrected; the remaining gap is execution through one false branch.
+
+SUPPORT PROVIDED BEFORE THIS ATTEMPT:
+correct indentation, explicit space counts, and a focused execution question
+
+RECOVERY STATUS:
+unseen-false-branch-variant-required
+```
+
+```text
+EVIDENCE ID:
+EV-P1-SYNTAX-022
+
+DATE / PHASE / GATE:
+2026-08-25 / Phase 1 / unseen false-branch local-state variant
+
+IMPLEMENTATION TRIGGER:
+The learner must distinguish indentation-based block membership from condition-based execution before tracing the BuildLens classifier.
+
+ADJACENT CONCEPT:
+Function-call timing, parameter binding, local initialization, false-branch skipping, and fallback return.
+
+EXERCISE TYPE:
+tracing
+
+SOURCE / CONTEXT:
+blind transfer
+
+PROBLEM — VERBATIM:
+def delivery_label(express):
+    label = "standard"
+
+    if express:
+        label = "fast"
+
+    return label
+
+
+result = delivery_label(False)
+print(result)
+
+Answer:
+
+Initial value of label:
+Is the condition True or False?
+Which line is skipped?
+Value of label when return executes:
+Exact printed output:
+Why:
+Confidence:
+
+MY ANSWER — VERBATIM:
+label is not set until we run the delivery_label() i am not sure if it skips the express because ti is not the first statement indented, so it would return "standard", standard
+
+MY REASONING — VERBATIM:
+label is not set until we run the delivery_label() i am not sure if it skips the express because ti is not the first statement indented
+
+CONFIDENCE BEFORE CHECK:
+not provided
+
+TOOLS / HELP USED BEFORE COMMITMENT:
+Codex had explained false-branch skipping on the preceding example; no interpreter or debugger was reported
+
+RESULT:
+partial
+
+MISCONCEPTION / GAP:
+The learner correctly predicted the returned value and exact output and correctly observed that local `label` is initialized only when the function call executes. The learner was unsure whether statement order or being the first indented statement controls skipping. Indentation determines that `label = "fast"` belongs to the `if`; the Boolean value of `express` determines whether that block executes. The explicit condition result, skipped line, and confidence were omitted.
+
+CORRECT MODEL — ADDED AFTER ATTEMPT:
+Calling `delivery_label(False)` binds `express` to `False`, then initializes local `label` to `"standard"`. Because `if express` is false, Python skips the more deeply indented line `label = "fast"`. The function-level `return label` then returns the unchanged string `"standard"`, and the exact printed output is `standard`.
+
+WHY THIS MATTERS TO THE REAL IMPLEMENTATION:
+BuildLens classification requires separating which statements structurally belong to a branch from whether a particular input makes that branch execute.
+
+TRANSFER / NEXT RETRIEVAL:
+Ask the learner to teach aloud the two separate rules—indentation determines block membership; the condition determines execution—then give one short unseen branch-order variant.
+
+PARENT EVIDENCE ID:
+EV-P1-SYNTAX-021
+
+PRIMARY BLOCKER:
+BLOCK_MEMBERSHIP_VS_EXECUTION
+
+SCAFFOLD RUNG:
+R3
+
+WHY THIS RUNG:
+The output trace is correct; the remaining gap is the control-flow reason for skipping one branch body.
+
+SUPPORT PROVIDED BEFORE THIS ATTEMPT:
+one explicit explanation of false-branch skipping and a fresh local-value example
+
+RECOVERY STATUS:
+teach-aloud-required
+```
+
+```text
+EVIDENCE ID:
 EV-P1-TEST-012
 
 DATE / PHASE / GATE:
