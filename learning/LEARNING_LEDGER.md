@@ -3863,3 +3863,2614 @@ correctness feedback on the R1 attempt; the contract remains visible
 RECOVERY STATUS:
 returned-to-target
 ```
+
+```text
+EVIDENCE ID:
+EV-P1-RED-033
+
+DATE / PHASE / GATE:
+2026-08-25 / Phase 1 / predict the first red before running it
+
+IMPLEMENTATION TRIGGER:
+The learner approved the classify_diff_line contract and authorized the first failing
+test. A test must be seen to fail for the expected missing-behavior reason before any
+implementation is written.
+
+ADJACENT CONCEPT:
+A test names expected behavior before the behavior exists; the first failure is
+caused by the missing thing itself, not by a wrong answer.
+
+EXERCISE TYPE:
+tracing
+
+SOURCE / CONTEXT:
+BuildLens
+
+PROBLEM — VERBATIM:
+The entire contents of test_classify.py:
+
+from classify import classify_diff_line
+
+
+def test_single_plus_line_is_added():
+    result = classify_diff_line("+value = 1")
+    assert result == "added"
+
+
+test_single_plus_line_is_added()
+print("test passed")
+
+There is no classify.py in the project. Nothing else has been written.
+
+The command to be run is: python test_classify.py
+
+1. Will this print `test passed`, or will it stop with an error?
+2. Which line does Python stop on, and what is it unable to do there?
+3. Confidence, 0-100.
+
+MY ANSWER — VERBATIM:
+we will do all of that on the docker containers trellis-t19-test for python also can you rename it something python relateed so we knwo it is specifically for python testing, trellis-ai-agent for postgres and can you rename it so we can test for postgres, it looks good to me, what does the assert do for the result , 2. i have no idea
+
+MY REASONING — VERBATIM:
+not provided
+
+CONFIDENCE BEFORE CHECK:
+not provided
+
+TOOLS / HELP USED BEFORE COMMITMENT:
+none reported
+
+RESULT:
+partial
+
+MISCONCEPTION / GAP:
+The learner approved the test as written but did not commit to a prediction. Two
+prerequisites surfaced instead. First, `assert` is unreadable to the learner, so the
+surrounding red-test question could not be answered; per the syntax-only help rule
+the larger problem was suspended. Second, the learner reported no idea which line
+Python stops on, which is the `import` concept rather than the assertion concept.
+These are separate blockers and are being treated separately, `assert` first.
+
+CORRECT MODEL — ADDED AFTER ATTEMPT:
+withheld; the red-test prediction is suspended, not answered, and will be reissued
+after the `assert` and `import` prerequisites are stable.
+
+WHY THIS MATTERS TO THE REAL IMPLEMENTATION:
+A red test only proves something if the learner can say in advance why it is red. A
+test that fails for an unexpected reason is evidence about the test, not about the
+missing behavior.
+
+TRANSFER / NEXT RETRIEVAL:
+Run the test, compare against the prediction, then write the smallest implementation
+that makes exactly this test pass.
+
+PARENT EVIDENCE ID:
+EV-P1-PURE-032
+
+PRIMARY BLOCKER:
+none identified; this is a forward step rather than a remediation
+
+SCAFFOLD RUNG:
+R4
+
+WHY THIS RUNG:
+One import, one call, one assertion. No branch, no loop, and no second category.
+
+SUPPORT PROVIDED BEFORE THIS ATTEMPT:
+the full test file is visible and the absence of classify.py is stated explicitly
+
+RECOVERY STATUS:
+suspended-pending-syntax-prerequisites
+```
+
+```text
+EVIDENCE ID:
+EV-P1-SYNTAX-034
+
+DATE / PHASE / GATE:
+2026-08-25 / Phase 1 / assert syntax-only remediation
+
+IMPLEMENTATION TRIGGER:
+The first BuildLens test states its expectation with `assert`, which the learner
+cannot yet read.
+
+ADJACENT CONCEPT:
+`assert` takes one True/False value. True continues silently; False stops execution
+immediately.
+
+EXERCISE TYPE:
+tracing
+
+SOURCE / CONTEXT:
+academic
+
+PROBLEM — VERBATIM:
+total = 5
+
+assert total == 5
+print("first")
+
+assert total == 9
+print("second")
+
+1. Does `first` print?
+2. Does `second` print?
+3. Confidence, 0-100.
+
+MY ANSWER — VERBATIM:
+ok could you create another container that is only for test postgres and name it testing postgres container or something like that, so assert means the function will hit every line until something fails and ti will stop and will it print fail, i know it wont print test passed, 1. yes 2. no
+
+MY REASONING — VERBATIM:
+so assert means the function will hit every line until something fails and ti will stop
+
+CONFIDENCE BEFORE CHECK:
+not provided
+
+TOOLS / HELP USED BEFORE COMMITMENT:
+none reported
+
+RESULT:
+correct
+
+MISCONCEPTION / GAP:
+Both predictions are right and the stated mechanism is right: execution proceeds line
+by line until an assertion is false, and then stops. One misconception surfaced in
+the learner's own question: a failed assertion does not print the word `fail`. Nothing
+is printed at all. Python raises `AssertionError` and writes a traceback naming the
+file, line number, and failing expression. The learner also volunteered, unprompted
+and correctly, that the suspended red test will not print `test passed`. Confidence
+was omitted for the third consecutive attempt.
+
+CORRECT MODEL — ADDED AFTER ATTEMPT:
+`total` is `5`. `total == 5` is `True`, so the first `assert` does nothing at all and
+execution continues, printing `first`. `total == 9` is `False`, so the second `assert`
+stops the program immediately with an `AssertionError`. The line `print("second")` is
+never reached, so `second` never appears. A satisfied assertion is silent; a violated
+one is fatal.
+
+WHY THIS MATTERS TO THE REAL IMPLEMENTATION:
+Every BuildLens test from here on states its expectation as an assertion. A learner
+who cannot read `assert` cannot tell a passing test from a broken one.
+
+TRANSFER / NEXT RETRIEVAL:
+Then remediate the `import` line separately, then reissue the suspended red-test
+prediction `EV-P1-RED-033`.
+
+PARENT EVIDENCE ID:
+EV-P1-RED-033
+
+PRIMARY BLOCKER:
+SYNTAX_READING
+
+SCAFFOLD RUNG:
+R0
+
+WHY THIS RUNG:
+One integer, two assertions, two prints, no function, no import, and no BuildLens
+vocabulary. Only the assert form is under test.
+
+SUPPORT PROVIDED BEFORE THIS ATTEMPT:
+explanation of the assert form alone, explicitly connected to the already stable
+True/False comparison from the locker exercise
+
+RECOVERY STATUS:
+stable-at-rung
+```
+
+```text
+EVIDENCE ID:
+EV-P1-RED-035
+
+DATE / PHASE / GATE:
+2026-08-25 / Phase 1 / reissued red-test prediction
+
+IMPLEMENTATION TRIGGER:
+`assert` is now stable, so the suspended first-red prediction can be reissued. The
+remaining unknown is the `import` line.
+
+ADJACENT CONCEPT:
+`from <file> import <name>` locates a module and pulls one name out of it, and runs
+before anything else in the file because execution proceeds top to bottom.
+
+EXERCISE TYPE:
+tracing
+
+SOURCE / CONTEXT:
+BuildLens
+
+PROBLEM — VERBATIM:
+The file test_classify.py, unchanged:
+
+from classify import classify_diff_line
+
+
+def test_single_plus_line_is_added():
+    result = classify_diff_line("+value = 1")
+    assert result == "added"
+
+
+test_single_plus_line_is_added()
+print("test passed")
+
+There is still no classify.py. Nothing else has been written.
+
+1. Which line does Python stop on? Give the line itself, or its number.
+2. What is it unable to do there?
+3. Confidence, 0-100.
+
+MY ANSWER — VERBATIM:
+it stops on the first line if there is no classify
+it cannot pull diff_line from classify
+
+MY REASONING — VERBATIM:
+it stops on the first line if there is no classify
+
+CONFIDENCE BEFORE CHECK:
+not provided
+
+TOOLS / HELP USED BEFORE COMMITMENT:
+none reported
+
+RESULT:
+correct
+
+MISCONCEPTION / GAP:
+The prediction matches the observed failure. The learner named the import line and
+the reason: the module does not exist, so the name cannot be pulled out of it. Two
+refinements. The imported name is `classify_diff_line`, not `diff_line`. The
+traceback reports line 8 rather than line 1 because the module docstring occupies the
+first six lines; the learner's phrase `first line` correctly meant the first
+executable line. Confidence was omitted for the fourth consecutive attempt.
+
+CORRECT MODEL — ADDED AFTER ATTEMPT:
+Observed output, run as `python test_classify.py`:
+
+Traceback (most recent call last):
+  File "test_classify.py", line 8, in <module>
+    from classify import classify_diff_line
+ModuleNotFoundError: No module named 'classify'
+
+Exit code 1. Python executes top to bottom, so the import runs before the function is
+defined or called. No classify.py exists, so the module cannot be located, the name
+cannot be bound, and execution never reaches the assertion or the final print. This
+is a red for the correct reason: the behavior is missing, not the test.
+
+WHY THIS MATTERS TO THE REAL IMPLEMENTATION:
+The first red must be understood before it is run. If the learner cannot say which
+line fails and why, a green test later proves nothing to them.
+
+TRANSFER / NEXT RETRIEVAL:
+Run the test, compare with the prediction, then write the smallest classify.py that
+makes exactly this assertion pass.
+
+PARENT EVIDENCE ID:
+EV-P1-SYNTAX-034
+
+PRIMARY BLOCKER:
+SYNTAX_READING on the import statement
+
+SCAFFOLD RUNG:
+R4
+
+WHY THIS RUNG:
+Returns to the suspended target. The assert half is now stable; only the import half
+remains unknown, and the import form was explained without revealing its failure mode.
+
+SUPPORT PROVIDED BEFORE THIS ATTEMPT:
+explanation of the import form and of top-to-bottom execution order, with the
+missing-module consequence deliberately withheld
+
+RECOVERY STATUS:
+target-level-passed
+```
+
+```text
+EVIDENCE ID:
+EV-P1-GREEN-036
+
+DATE / PHASE / GATE:
+2026-08-25 / Phase 1 / select the smallest implementation that passes
+
+IMPLEMENTATION TRIGGER:
+The first red has been observed and understood. The next patch is the smallest
+implementation that makes exactly this assertion pass.
+
+ADJACENT CONCEPT:
+One passing test does not pin down one implementation. A test that a wrong function
+also satisfies is not yet strong enough.
+
+EXERCISE TYPE:
+design
+
+SOURCE / CONTEXT:
+BuildLens
+
+PROBLEM — VERBATIM:
+The test calls classify_diff_line("+value = 1") and asserts the result equals "added".
+
+A
+def classify_diff_line(line):
+    return "added"
+
+B
+def classify_diff_line(line):
+    if line.startswith("+"):
+        return "added"
+
+C
+def classify_diff_line(line):
+    if line.startswith("-"):
+        return "added"
+
+1. Which of these make the test pass? It may be more than one; say so if you think so.
+2. Confidence, 0-100.
+
+MY ANSWER — VERBATIM:
+B
+it is the only one that has the addiotn sign and A just has to have a line exsist and C is removed not added
+
+MY REASONING — VERBATIM:
+it is the only one that has the addiotn sign and A just has to have a line exsist and C is removed not added
+
+CONFIDENCE BEFORE CHECK:
+not provided
+
+TOOLS / HELP USED BEFORE COMMITMENT:
+none reported
+
+RESULT:
+partial
+
+MISCONCEPTION / GAP:
+B is correctly identified as passing, and C is correctly rejected with the correct
+reason: it checks for a minus sign, so a plus line takes no branch and the returned
+value never equals the expected label. A was rejected, but A also passes. The
+learner's own description of A, that it only requires a line to exist, is accurate;
+the missing step is carrying that through to the assertion, which compares the
+returned value with the expected label and finds them equal. New misconception
+recorded as `test_passes_implies_implementation_correct`: the learner assumes a test
+selects exactly one implementation. Confidence was omitted for the fifth consecutive
+attempt.
+
+CORRECT MODEL — ADDED AFTER ATTEMPT:
+withheld until the learner traces candidate A directly.
+
+WHY THIS MATTERS TO THE REAL IMPLEMENTATION:
+Recognizing that candidate A also passes is what motivates the second and third tests,
+and eventually the branch-order question the classifier actually turns on.
+
+TRANSFER / NEXT RETRIEVAL:
+Write the chosen implementation, rerun, then ask what second test would separate the
+surviving candidates.
+
+PARENT EVIDENCE ID:
+EV-P1-RED-035
+
+PRIMARY BLOCKER:
+none identified; this is a selection task, not a remediation
+
+SCAFFOLD RUNG:
+R5
+
+WHY THIS RUNG:
+Selection among three short candidates, one branch each, no tracing of multiple calls
+and no writing of code required.
+
+SUPPORT PROVIDED BEFORE THIS ATTEMPT:
+the observed traceback was read line by line; the test call and assertion were restated
+
+RECOVERY STATUS:
+descending-one-rung
+```
+
+```text
+EVIDENCE ID:
+EV-P1-GREEN-037
+
+DATE / PHASE / GATE:
+2026-08-25 / Phase 1 / trace the unconditional candidate
+
+IMPLEMENTATION TRIGGER:
+Before writing classify.py the learner must see that the current single test does not
+rule out a function that ignores its input entirely.
+
+ADJACENT CONCEPT:
+An assertion compares the value that was actually returned. A function that ignores
+its argument can still return the expected value and satisfy the test.
+
+EXERCISE TYPE:
+tracing
+
+SOURCE / CONTEXT:
+BuildLens
+
+PROBLEM — VERBATIM:
+def classify_diff_line(line):
+    return "added"
+
+
+result = classify_diff_line("+value = 1")
+print(result)
+
+assert result == "added"
+print("test passed")
+
+1. What does print(result) display?
+2. Is result == "added" True or False?
+3. Does the assert stop the program, or does test passed print?
+4. Confidence, 0-100.
+
+MY ANSWER — VERBATIM:
+so A would work too becaue it has to be that the "+value =1" would be true and if it was false it would stop there, i think this will run until a line fails and the assert will stop it, this is another way to do the same thing, and i like to see it, result == "added" is true, 1. "added"
+
+MY REASONING — VERBATIM:
+i think this will run until a line fails and the assert will stop it, this is another way to do the same thing
+
+CONFIDENCE BEFORE CHECK:
+not provided
+
+TOOLS / HELP USED BEFORE COMMITMENT:
+none reported
+
+RESULT:
+correct
+
+MISCONCEPTION / GAP:
+The learner reached the target insight: candidate A also passes the single existing
+test, so one test does not select one implementation. The blocker
+`test_passes_implies_implementation_correct` is cleared for Phase 1 purposes.
+Two refinements. The learner's phrasing suggests candidate A evaluates the input; it
+does not examine `line` at all and returns the same label for every possible argument.
+The printed value was again written with quotation marks, which is the second
+occurrence of `printed_output_includes_quotes` in Phase 1. Confidence was omitted for
+the fifth consecutive attempt.
+
+CORRECT MODEL — ADDED AFTER ATTEMPT:
+Candidate A ignores its parameter entirely and returns `"added"` unconditionally.
+`print(result)` displays `added` without quotation marks, `result == "added"` is
+`True`, the assertion is therefore silent, and `test passed` is printed. The test is
+satisfied by a function that never inspects its input, which is why one assertion is
+not yet enough evidence of correct behavior.
+
+WHY THIS MATTERS TO THE REAL IMPLEMENTATION:
+If one test cannot distinguish a real classifier from a function that always answers
+added, the learner will not understand why further tests are needed, and the eventual
+branch-order test will look arbitrary.
+
+TRANSFER / NEXT RETRIEVAL:
+Then ask which second test would fail for candidate A but pass for candidate B, and
+write classify.py only afterwards.
+
+PARENT EVIDENCE ID:
+EV-P1-GREEN-036
+
+PRIMARY BLOCKER:
+TEST_STRENGTH
+
+SCAFFOLD RUNG:
+R4
+
+WHY THIS RUNG:
+Descends one rung from selection among three candidates to tracing exactly one of
+them, reusing the already stable return-value and assert skills with nothing new.
+
+SUPPORT PROVIDED BEFORE THIS ATTEMPT:
+confirmation that B and C were judged correctly; the candidate is expanded into a
+runnable trace with the call and assertion written out
+
+RECOVERY STATUS:
+stable-at-rung
+```
+
+```text
+EVIDENCE ID:
+EV-P1-GAP-038
+
+DATE / PHASE / GATE:
+2026-08-25 / Phase 1 / find the gap between contract and implementation
+
+IMPLEMENTATION TRIGGER:
+classify.py now exists and passes its only test, but it does not yet satisfy the
+approved contract for every input. The learner chooses which gap to close next.
+
+ADJACENT CONCEPT:
+A contract promises behavior for all valid inputs; a test only demonstrates behavior
+for the inputs it supplies. The difference between the two is where the next test
+comes from.
+
+EXERCISE TYPE:
+design
+
+SOURCE / CONTEXT:
+BuildLens
+
+PROBLEM — VERBATIM:
+The implementation is now exactly:
+
+def classify_diff_line(line):
+    if line.startswith("+"):
+        return "added"
+
+The approved contract promised exactly one of four labels, every time.
+
+1. Give one line of diff text where this function gives a wrong answer, or no answer
+   at all.
+2. What label should it return for that example?
+3. Confidence, 0-100.
+
+MY ANSWER — VERBATIM:
+so A does not check anything it just passes everything, 1. +green_giant 2. added
+
+MY REASONING — VERBATIM:
+so A does not check anything it just passes everything
+
+CONFIDENCE BEFORE CHECK:
+not provided
+
+TOOLS / HELP USED BEFORE COMMITMENT:
+none reported
+
+RESULT:
+partial
+
+MISCONCEPTION / GAP:
+The restatement of candidate A is correct and unprompted: it inspects nothing and
+returns the same label for every input. The gap example is not a gap. The supplied
+line `+green_giant` begins with a plus sign, so the current implementation already
+returns `added`, which is the label the learner said it should return. The learner
+supplied a case the function handles correctly rather than a case it fails. New
+misconception `handled_case_vs_failing_case`: an example is being chosen by whether it
+fits the category rather than by whether the code currently gets it wrong. Confidence
+was omitted for the sixth consecutive attempt.
+
+CORRECT MODEL — ADDED AFTER ATTEMPT:
+withheld; the learner will locate a failing input by tracing the real function rather
+than being told one.
+
+WHY THIS MATTERS TO THE REAL IMPLEMENTATION:
+The learner, not Claude, should choose the next behavior. Any of the three remaining
+categories is a legitimate answer, and a metadata example would surface the branch
+ordering problem earlier than a plain context line.
+
+TRANSFER / NEXT RETRIEVAL:
+Turn the learner's example into the second test, predict the failure, run it, then
+extend the implementation by exactly one branch.
+
+PARENT EVIDENCE ID:
+EV-P1-GREEN-037
+
+PRIMARY BLOCKER:
+none identified; this is a forward design choice
+
+SCAFFOLD RUNG:
+R5
+
+WHY THIS RUNG:
+The learner supplies one input and one expected label against a four-line function,
+with no code to write and no trace to perform.
+
+SUPPORT PROVIDED BEFORE THIS ATTEMPT:
+the implementation and the contract were restated side by side; the first test is green
+
+RECOVERY STATUS:
+descending-one-rung
+```
+
+```text
+EVIDENCE ID:
+EV-P1-GAP-039
+
+DATE / PHASE / GATE:
+2026-08-25 / Phase 1 / locate the failing input by tracing
+
+IMPLEMENTATION TRIGGER:
+The learner must find an input the current implementation fails, rather than being
+handed one, before the second test is written.
+
+ADJACENT CONCEPT:
+When the condition is false the branch body is skipped, the function body ends without
+reaching any return, and the call still produces a value: None.
+
+EXERCISE TYPE:
+tracing
+
+SOURCE / CONTEXT:
+BuildLens
+
+PROBLEM — VERBATIM:
+The real function, as it exists on disk right now:
+
+def classify_diff_line(line):
+    if line.startswith("+"):
+        return "added"
+
+
+print(classify_diff_line("+green_giant"))
+print(classify_diff_line("-green_giant"))
+
+1. What does the first print show?
+2. What does the second print show?
+3. Confidence, 0-100.
+
+MY ANSWER — VERBATIM:
+1. added 2. nothing
+
+MY REASONING — VERBATIM:
+not provided
+
+CONFIDENCE BEFORE CHECK:
+not provided
+
+TOOLS / HELP USED BEFORE COMMITMENT:
+none reported
+
+RESULT:
+correct
+
+MISCONCEPTION / GAP:
+Both predictions are conceptually right and the first is exact, written without
+quotation marks. The second answer, `nothing`, correctly identifies that no branch is
+taken and no return is reached, but the observed output is `None`. The refinement is
+that a function which finishes without reaching a return still produces a value, and
+that value has a name and is displayed. This located the failing input the learner
+could not choose in `EV-P1-GAP-038`, which resolves `handled_case_vs_failing_case` by
+observation. Confidence was omitted for the seventh consecutive attempt.
+
+CORRECT MODEL — ADDED AFTER ATTEMPT:
+Observed output:
+
+added
+None
+
+`"+green_giant".startswith("+")` is True, so the branch runs and returns `added`.
+`"-green_giant".startswith("+")` is False, so the branch body is skipped, the function
+body ends with no return reached, and the call evaluates to `None`. The contract
+promises one of four label strings for every input, so `None` for a minus line is
+concrete evidence the contract is not yet met.
+
+WHY THIS MATTERS TO THE REAL IMPLEMENTATION:
+The contract promises one of four label strings for every input. Discovering that the
+current function silently produces None for a minus line is the concrete evidence that
+the contract is not yet met, and it is the reason the second test exists.
+
+TRANSFER / NEXT RETRIEVAL:
+Turn the discovered failing input into the second test, predict its failure, run it,
+then add exactly one branch.
+
+PARENT EVIDENCE ID:
+EV-P1-GAP-038
+
+PRIMARY BLOCKER:
+FUNCTION_WITH_NO_RETURN_PATH
+
+SCAFFOLD RUNG:
+R4
+
+WHY THIS RUNG:
+Descends from choosing an example to tracing two calls of a four-line function the
+learner has already read, reusing the stable false-condition-skips-the-body rule and
+adding exactly one new idea.
+
+SUPPORT PROVIDED BEFORE THIS ATTEMPT:
+the learner's example was accepted as valid input and shown to be already handled; the
+contrasting minus-sign call was supplied
+
+RECOVERY STATUS:
+stable-at-rung
+```
+
+```text
+EVIDENCE ID:
+EV-P1-RED2-040
+
+DATE / PHASE / GATE:
+2026-08-25 / Phase 1 / predict the second red
+
+IMPLEMENTATION TRIGGER:
+The learner's own failing input has become the second test. Its failure must be
+predicted before it is run and before the implementation grows a branch.
+
+ADJACENT CONCEPT:
+Distinguishing a missing-module failure from a failed expectation. The module now
+exists, so the failure moves from import time to assertion time.
+
+EXERCISE TYPE:
+tracing
+
+SOURCE / CONTEXT:
+BuildLens
+
+PROBLEM — VERBATIM:
+test_classify.py now ends with:
+
+test_single_plus_line_is_added()
+test_single_minus_line_is_removed()
+print("test passed")
+
+where the second test calls classify_diff_line("-green_giant") and asserts the result
+equals "removed". classify.py is unchanged.
+
+1. Which of the two test functions fails, the first or the second?
+2. What kind of error will it be: ModuleNotFoundError like last time, or
+   AssertionError? Why that one?
+3. Does test passed print?
+4. Confidence, 0-100.
+
+MY ANSWER — VERBATIM:
+1. i have no idea 2. it will not be asertionerror becasue there is no assert 3. no, i have no idea why just a hunch
+
+MY REASONING — VERBATIM:
+it will not be asertionerror becasue there is no assert
+
+CONFIDENCE BEFORE CHECK:
+not provided
+
+TOOLS / HELP USED BEFORE COMMITMENT:
+none reported
+
+RESULT:
+partial
+
+MISCONCEPTION / GAP:
+Answer 3 is correct, though the learner reported it as a hunch without a reason.
+Answer 2 exposes the real blocker: the learner concluded there is no assertion because
+none was visible in the excerpt, which shows that an assertion inside a called
+function is not yet recognized as code that will run. Presentation contributed to
+this, since only the final three lines of the file were quoted in the prompt; the full
+file was shown immediately afterward. Recorded as `assert_inside_called_function`.
+Confidence was omitted for the eighth consecutive attempt.
+
+CORRECT MODEL — ADDED AFTER ATTEMPT:
+withheld; the prediction is suspended, not answered, and will be reissued once calling
+a function containing an assertion is stable.
+
+WHY THIS MATTERS TO THE REAL IMPLEMENTATION:
+Reading which kind of failure occurred is how the learner will later tell a broken
+test from missing behavior without asking anyone.
+
+TRANSFER / NEXT RETRIEVAL:
+Run it, compare, then add exactly one branch to classify.py and rerun.
+
+PARENT EVIDENCE ID:
+EV-P1-GAP-039
+
+PRIMARY BLOCKER:
+none identified; this is a forward step
+
+SCAFFOLD RUNG:
+R5
+
+WHY THIS RUNG:
+Two calls and one failing assertion against code the learner has already traced, with
+one new discrimination: which failure type occurs and why.
+
+SUPPORT PROVIDED BEFORE THIS ATTEMPT:
+the None result was observed together; the contract violation was named explicitly
+
+RECOVERY STATUS:
+suspended-pending-prerequisite
+```
+
+```text
+EVIDENCE ID:
+EV-P1-CALL-041
+
+DATE / PHASE / GATE:
+2026-08-25 / Phase 1 / calling a function that contains an assertion
+
+IMPLEMENTATION TRIGGER:
+Every BuildLens test from here on hides its assertion inside a test function that is
+called further down the file.
+
+ADJACENT CONCEPT:
+A call runs the statements in the function body. An assertion inside a called function
+is live code, and a false one stops the whole program, not merely the function.
+
+EXERCISE TYPE:
+tracing
+
+SOURCE / CONTEXT:
+academic
+
+PROBLEM — VERBATIM:
+def check():
+    assert 2 == 3
+
+
+print("before")
+check()
+print("after")
+
+check has no arguments and returns nothing. Its whole body is one assertion, and
+2 == 3 is False.
+
+1. Does before print?
+2. Does after print?
+3. Confidence, 0-100.
+
+MY ANSWER — VERBATIM:
+the function goes till the assert is false then it stops not sure if it gets an assertion error or the function stops and execution keeps going
+
+option 2
+
+MY REASONING — VERBATIM:
+the function goes till the assert is false then it stops not sure if it gets an assertion error or the function stops and execution keeps going
+
+CONFIDENCE BEFORE CHECK:
+not provided
+
+TOOLS / HELP USED BEFORE COMMITMENT:
+none reported
+
+RESULT:
+wrong
+
+MISCONCEPTION / GAP:
+The learner identified the exact open question unprompted, which is strong
+metacognition: does a false assertion inside a function end only that function, or the
+whole program. Offered the binary, the learner committed to option 2, that execution
+continues after the call. The observed behavior is option 1. Recorded as
+`exception_stops_only_the_function`: a raised error is treated as a local exit rather
+than as something that propagates to the caller and terminates the program when
+uncaught. This is a genuine wrong answer on a fair binary, preserved as such.
+Confidence was omitted for the ninth consecutive attempt.
+
+CORRECT MODEL — ADDED AFTER ATTEMPT:
+Observed output:
+
+before
+Traceback (most recent call last):
+  File "check_demo.py", line 6, in <module>
+    check()
+  File "check_demo.py", line 2, in check
+    assert 2 == 3
+AssertionError
+
+Exit code 1. `before` prints. The call runs the function body, the assertion is false,
+and an AssertionError is raised. Being inside a function does not change what assert
+does; it only means the error travels back to the caller. Nothing catches it, so the
+program terminates and `after` never prints. The traceback shows both frames, the
+calling line and the failing line, which is how a call chain is read.
+
+WHY THIS MATTERS TO THE REAL IMPLEMENTATION:
+Without this, the learner cannot tell why a test file stops where it does, and the
+final print in test_classify.py will look unrelated to the assertions above it.
+
+TRANSFER / NEXT RETRIEVAL:
+Reissue the suspended second-red prediction EV-P1-RED2-040, then add one branch to
+classify.py.
+
+PARENT EVIDENCE ID:
+EV-P1-RED2-040
+
+PRIMARY BLOCKER:
+FUNCTION_CALL_FLOW
+
+SCAFFOLD RUNG:
+R1
+
+WHY THIS RUNG:
+One no-argument function, one assertion, two prints, no return value, no parameters,
+no strings, and no BuildLens vocabulary.
+
+SUPPORT PROVIDED BEFORE THIS ATTEMPT:
+the full test file was displayed so the hidden assertions were visible; the earlier
+partial excerpt was acknowledged as the cause of the confusion
+
+RECOVERY STATUS:
+wrong-remaining-at-rung
+```
+
+```text
+EVIDENCE ID:
+EV-P1-CALL-042
+
+DATE / PHASE / GATE:
+2026-08-25 / Phase 1 / near-transfer with a satisfied assertion
+
+IMPLEMENTATION TRIGGER:
+The learner must distinguish a call that fails from a call that succeeds before
+returning to the real second red.
+
+ADJACENT CONCEPT:
+A satisfied assertion inside a called function is silent, the call returns normally,
+and execution continues at the next line.
+
+EXERCISE TYPE:
+transfer
+
+SOURCE / CONTEXT:
+academic
+
+PROBLEM — VERBATIM:
+def verify():
+    assert 4 == 4
+
+
+print("start")
+verify()
+print("done")
+
+Note: 4 == 4.
+
+1. Does start print?
+2. Does done print?
+3. Confidence, 0-100.
+
+MY ANSWER — VERBATIM:
+both will print, failry confident
+
+MY REASONING — VERBATIM:
+not provided
+
+CONFIDENCE BEFORE CHECK:
+failry confident
+
+TOOLS / HELP USED BEFORE COMMITMENT:
+none reported
+
+RESULT:
+correct
+
+MISCONCEPTION / GAP:
+No error, and specifically no overcorrection, which was the risk this problem was
+designed to detect. Having just watched a false assertion terminate a program, the
+learner did not generalize that to all assertions inside functions.
+`exception_stops_only_the_function` is corrected and `FUNCTION_CALL_FLOW` is stable at
+R1. Confidence was reported qualitatively rather than numerically.
+
+CORRECT MODEL — ADDED AFTER ATTEMPT:
+`4 == 4` is True, so the assertion inside `verify` is silent, the call returns
+normally, and execution continues at the next line. Both `start` and `done` print. A
+call runs the statements in the function body; a satisfied assertion changes nothing,
+and a violated one raises an error that propagates to the caller and ends the program.
+
+WHY THIS MATTERS TO THE REAL IMPLEMENTATION:
+test_classify.py calls two test functions in sequence and prints at the end. The
+learner must be able to say why a passing test lets the next line run while a failing
+one does not, or the final print will look arbitrary.
+
+TRANSFER / NEXT RETRIEVAL:
+Reissue the suspended EV-P1-RED2-040 with the full file visible, then add one branch to
+classify.py.
+
+PARENT EVIDENCE ID:
+EV-P1-CALL-041
+
+PRIMARY BLOCKER:
+FUNCTION_CALL_FLOW
+
+SCAFFOLD RUNG:
+R1
+
+WHY THIS RUNG:
+Same rung as the failed attempt, deliberately not descended further, because the
+structure is identical and only the truth value of the assertion changed. This tests
+whether the learner overcorrects to believing any assertion inside a function halts
+the program.
+
+SUPPORT PROVIDED BEFORE THIS ATTEMPT:
+the failing run was executed and its two-frame traceback was read together; error
+propagation to the caller was explained
+
+RECOVERY STATUS:
+recovered-stable-at-rung
+```
+
+```text
+EVIDENCE ID:
+EV-P1-RED2-043
+
+DATE / PHASE / GATE:
+2026-08-26 / Phase 1 / second red prediction, reissued with full files
+
+IMPLEMENTATION TRIGGER:
+FUNCTION_CALL_FLOW is stable, so the suspended second-red prediction can be reissued
+before classify.py grows a branch.
+
+ADJACENT CONCEPT:
+Distinguishing an import-time failure from an assertion failure, and identifying which
+of two sequential calls stops the program.
+
+EXERCISE TYPE:
+tracing
+
+SOURCE / CONTEXT:
+BuildLens
+
+PROBLEM — VERBATIM:
+test_classify.py in full:
+
+from classify import classify_diff_line
+
+
+def test_single_plus_line_is_added():
+    result = classify_diff_line("+value = 1")
+    assert result == "added"
+
+
+def test_single_minus_line_is_removed():
+    result = classify_diff_line("-green_giant")
+    assert result == "removed"
+
+
+test_single_plus_line_is_added()
+test_single_minus_line_is_removed()
+print("test passed")
+
+classify.py in full, unchanged:
+
+def classify_diff_line(line):
+    if line.startswith("+"):
+        return "added"
+
+1. Which of the two test calls fails, the first or the second?
+2. ModuleNotFoundError or AssertionError? Why that one?
+3. Does test passed print?
+4. Confidence, 0-100.
+
+MY ANSWER — VERBATIM:
+the second one, assertionerror, no, this one was too easy please try to add a little more difficulty ewhile aslo keeping the same high level ideas
+
+MY REASONING — VERBATIM:
+not provided
+
+CONFIDENCE BEFORE CHECK:
+not provided; the learner instead reported the problem was too easy
+
+TOOLS / HELP USED BEFORE COMMITMENT:
+none reported
+
+RESULT:
+correct
+
+MISCONCEPTION / GAP:
+All three answers are right: the second call fails, the failure is an AssertionError
+rather than a ModuleNotFoundError, and `test passed` does not print. The reason for the
+error type was not stated, but the discrimination itself was made correctly. The
+learner requested greater difficulty at the same conceptual level, which is the
+assistance-fading signal from LEARNING_RULES section 14.8; scaffolding was removed
+from the next problem accordingly.
+
+CORRECT MODEL — ADDED AFTER ATTEMPT:
+Observed output, exit code 1:
+
+Traceback (most recent call last):
+  File "test_classify.py", line 22, in <module>
+    test_single_minus_line_is_removed()
+  File "test_classify.py", line 18, in test_single_minus_line_is_removed
+    assert result == "removed"
+AssertionError
+
+classify.py now exists, so the import succeeds and the failure moves from import time
+to assertion time. The first call passes silently, because a satisfied assertion
+produces no output. The second call receives None, `None == "removed"` is False, and
+the raised AssertionError propagates to the caller and ends the program before the
+final print.
+
+WHY THIS MATTERS TO THE REAL IMPLEMENTATION:
+Reading which kind of failure occurred, and where, is how the learner will later tell
+a broken test from missing behavior without assistance.
+
+TRANSFER / NEXT RETRIEVAL:
+Run it, compare against the prediction, then add exactly one branch to classify.py and
+rerun to green.
+
+PARENT EVIDENCE ID:
+EV-P1-CALL-042
+
+PRIMARY BLOCKER:
+none identified; the prerequisite is now stable
+
+SCAFFOLD RUNG:
+R5
+
+WHY THIS RUNG:
+Returns to the suspended target. Both files are now shown complete, per the
+presentation rule adopted after EV-P1-RED2-040.
+
+SUPPORT PROVIDED BEFORE THIS ATTEMPT:
+both files shown in full; the learner was reminded that the minus line yields None
+
+RECOVERY STATUS:
+target-level-passed-fading-support
+```
+
+```text
+EVIDENCE ID:
+EV-P1-META-044
+
+DATE / PHASE / GATE:
+2026-08-26 / Phase 1 / branch order against real diff output
+
+IMPLEMENTATION TRIGGER:
+classify.py now has two branches and passes both tests, but a real diff contains
+header lines that begin with the same characters those branches match.
+
+ADJACENT CONCEPT:
+Overlapping prefixes in real input. A broad condition placed first makes a narrower one
+unreachable, so branch arrangement, not just branch presence, determines correctness.
+
+EXERCISE TYPE:
+design
+
+SOURCE / CONTEXT:
+BuildLens
+
+PROBLEM — VERBATIM:
+A real git diff fragment, exactly as Git prints it:
+
+diff --git a/app.py b/app.py
+index 3f8a1c2..9d4e7b1 100644
+--- a/app.py
++++ b/app.py
+@@ -1,3 +1,4 @@
+ import os
+-DEBUG = False
++DEBUG = True
++VERBOSE = True
+
+Work out what the current two-branch implementation returns for each of those eight
+lines, and say which of its answers are wrong. Then explain what would have to change
+about the function, and specifically about the arrangement of what is already there, to
+make it right. Do not write the code; describe the shape and justify the placement.
+
+Confidence, 0-100.
+
+MY ANSWER — VERBATIM:
+wouldn't it be -- a/app.py and on the next line it would be ++b/app.py  , past that i do not know
+
+MY REASONING — VERBATIM:
+wouldn't it be -- a/app.py and on the next line it would be ++b/app.py
+
+CONFIDENCE BEFORE CHECK:
+not provided
+
+TOOLS / HELP USED BEFORE COMMITMENT:
+none reported
+
+RESULT:
+partial
+
+MISCONCEPTION / GAP:
+The learner did not classify any of the eight lines and reported not knowing beyond the
+format question. The format itself was disputed: the learner proposed two-character
+header prefixes rather than three. This is the recorded `unified_diff_metadata_meaning`
+weakness resurfacing in a third form; it was previously written with four characters and
+is now written with two. Rather than assert the correct format, a real repository was
+created and real `git diff` output was produced and displayed, confirming three dashes
+and three plusses. The R6 problem was too large while the input format itself was still
+unreadable, so the exercise is suspended and remediation descends to the single
+`startswith` question the whole problem turns on. Confidence was omitted again.
+
+CORRECT MODEL — ADDED AFTER ATTEMPT:
+withheld; the classification of the eight lines remains unanswered and will be reissued
+once the prefix question is stable.
+
+WHY THIS MATTERS TO THE REAL IMPLEMENTATION:
+This is the Phase 1 target the whole elif sequence was built toward. It is also the
+first time the learner meets real tool output rather than a constructed example, and it
+revisits three earlier weak concepts at once: branch_precedence,
+unified_diff_metadata_meaning, and empty_input_classification.
+
+TRANSFER / NEXT RETRIEVAL:
+Turn the identified wrong answers into tests, predict the reds, then reorder rather than
+merely extend the implementation.
+
+PARENT EVIDENCE ID:
+EV-P1-RED2-043
+
+PRIMARY BLOCKER:
+none identified; this is a deliberate difficulty increase at the learner's request
+
+SCAFFOLD RUNG:
+R6
+
+WHY THIS RUNG:
+Eight inputs against real tool output, multiple wrong answers to find, and a design
+justification required. No options, no sub-questions, and no hint as to which lines are
+the traps.
+
+SUPPORT PROVIDED BEFORE THIS ATTEMPT:
+none beyond the two files, which the learner has already read; scaffolding was
+deliberately removed at the learner's request
+
+RECOVERY STATUS:
+suspended-descending
+```
+
+```text
+EVIDENCE ID:
+EV-P1-FILES-045
+
+DATE / PHASE / GATE:
+2026-08-26 / Phase 1 / which file holds which code
+
+IMPLEMENTATION TRIGGER:
+The learner asked why there is no `elif` in test_classify.py, which shows the two-file
+split and the import bridge are not yet clear.
+
+ADJACENT CONCEPT:
+A test file states expectations and holds no branching; the module holds the behavior;
+the import connects them so a call crosses from one file into the other and returns.
+
+EXERCISE TYPE:
+design
+
+SOURCE / CONTEXT:
+BuildLens
+
+PROBLEM — VERBATIM:
+Suppose classify.py is edited so it returns "ADDED" in capitals instead of "added".
+
+1. Does python test_classify.py still print test passed?
+2. Which file would have to change to make it pass again, and is there more than one
+   right answer?
+3. Confidence, 0-100.
+
+MY ANSWER — VERBATIM:
+not answered; superseded before the learner responded
+
+MY REASONING — VERBATIM:
+not applicable
+
+CONFIDENCE BEFORE CHECK:
+not applicable
+
+TOOLS / HELP USED BEFORE COMMITMENT:
+not applicable
+
+RESULT:
+retired-superseded
+
+MISCONCEPTION / GAP:
+The underlying gap, MODULE_VS_TEST_FILE_OWNERSHIP, was resolved by demonstration before
+this question was answered. The learner asked for the actual result of the one-branch
+module paired with the two-test file. Both combinations were then executed in scratch
+directories: the one-branch module produced an AssertionError at exit 1, and the
+two-branch module produced `test passed` at exit 0, against a byte-identical test file.
+Seeing one unchanged test file return opposite verdicts established the division of
+responsibility more directly than the hypothetical would have.
+
+The learner also corrected a presentation defect: the two-branch output had been shown
+without its source in the same message. That is recorded as a standing rule.
+
+CORRECT MODEL — ADDED AFTER ATTEMPT:
+classify.py holds the behavior and contains the if/elif. test_classify.py holds the
+expectations and contains no branching. The line `from classify import
+classify_diff_line` connects them, so a call in the test file transfers execution into
+the module and returns with a value. Editing the module changes the verdict; the test
+file does not move.
+
+WHY THIS MATTERS TO THE REAL IMPLEMENTATION:
+Every later BuildLens module will be paired with a test file. If the learner cannot say
+which file owns behavior and which owns expectations, they cannot read a failing test as
+evidence about the code, and Phase 4 decomposition will be meaningless.
+
+TRANSFER / NEXT RETRIEVAL:
+Return to the suspended EV-P1-META-044 branch-order problem, which remains open.
+
+PARENT EVIDENCE ID:
+EV-P1-META-044
+
+PRIMARY BLOCKER:
+MODULE_VS_TEST_FILE_OWNERSHIP
+
+SCAFFOLD RUNG:
+R4
+
+WHY THIS RUNG:
+One hypothetical single-character change, two files already read, no tracing of multiple
+inputs and no new syntax. It also touches the older `exact_case_tracking` weakness in a
+new surface form.
+
+SUPPORT PROVIDED BEFORE THIS ATTEMPT:
+both files displayed complete and labelled by filename; the import line explained as the
+bridge between them
+
+RECOVERY STATUS:
+resolved-by-demonstration
+```
+
+```text
+EVIDENCE ID:
+EV-P1-PREFIX-046
+
+DATE / PHASE / GATE:
+2026-08-26 / Phase 1 / the single prefix question the classifier turns on
+
+IMPLEMENTATION TRIGGER:
+The current implementation tests `line.startswith("+")` first, and a real diff contains
+a header line beginning with three plus characters.
+
+ADJACENT CONCEPT:
+`startswith` compares only the beginning of the string, so a longer run of the same
+character still matches a single-character prefix.
+
+EXERCISE TYPE:
+tracing
+
+SOURCE / CONTEXT:
+BuildLens
+
+PROBLEM — VERBATIM:
+print("+++ b/app.py".startswith("+"))
+
+startswith asks: do the characters at the very beginning of this string match the ones
+I gave you?
+
+Is that True or False?
+
+Confidence, 0-100.
+
+MY ANSWER — VERBATIM:
+it misses on the metadata and the context it only looks at the added ir removed
+
+MY REASONING — VERBATIM:
+it misses on the metadata and the context it only looks at the added ir removed
+
+CONFIDENCE BEFORE CHECK:
+not provided
+
+TOOLS / HELP USED BEFORE COMMITMENT:
+none reported
+
+RESULT:
+partial
+
+MISCONCEPTION / GAP:
+The diagnosis of what is missing is correct and was given without prompting: two of the
+four contract labels have no branch, so metadata and context can never be returned. The
+learner did not reach the ordering consequence, which is the actual target. The implied
+fix, adding the two missing branches, is insufficient on its own: a metadata branch
+placed below the single-plus branch is unreachable for every header line, because the
+broader condition matches first. The prefix Boolean in EV-P1-PREFIX-046 was not answered
+directly. Confidence was omitted again.
+
+Rather than reissue the abstract Boolean, the next problem uses the learner's own implied
+fix as its subject, which is a more honest test of the same idea.
+
+CORRECT MODEL — ADDED AFTER ATTEMPT:
+withheld; the ordering consequence remains unanswered.
+
+WHY THIS MATTERS TO THE REAL IMPLEMENTATION:
+If this is True, the first branch of the current function claims every file header as an
+added source line, and the metadata category becomes unreachable no matter how many
+branches are added below. This single fact is the entire reason branch order matters
+here.
+
+TRANSFER / NEXT RETRIEVAL:
+Then classify the eight real diff lines, then reissue the arrangement question from
+EV-P1-META-044.
+
+PARENT EVIDENCE ID:
+EV-P1-META-044
+
+PRIMARY BLOCKER:
+OVERLAPPING_PREFIX_MATCHING
+
+SCAFFOLD RUNG:
+R1
+
+WHY THIS RUNG:
+One string, one call, one Boolean result. No function definition, no branch, no labels,
+and no classification.
+
+SUPPORT PROVIDED BEFORE THIS ATTEMPT:
+real git diff output was generated and displayed to settle the header format by
+observation rather than assertion; header prefixes and content prefixes were contrasted
+side by side
+
+RECOVERY STATUS:
+partial-reframed
+```
+
+```text
+EVIDENCE ID:
+EV-P1-ORDER-047
+
+DATE / PHASE / GATE:
+2026-08-26 / Phase 1 / the learner's own fix, tested for reachability
+
+IMPLEMENTATION TRIGGER:
+The learner correctly identified that metadata and context branches are missing. The
+next question is whether adding them at the bottom is sufficient.
+
+ADJACENT CONCEPT:
+A branch can exist and still be unreachable. In one chain, a broader condition placed
+above a narrower one consumes every input the narrower one was written to catch.
+
+EXERCISE TYPE:
+tracing
+
+SOURCE / CONTEXT:
+BuildLens
+
+PROBLEM — VERBATIM:
+def classify_diff_line(line):
+    if line.startswith("+"):
+        return "added"
+    elif line.startswith("-"):
+        return "removed"
+    elif line.startswith("+++"):
+        return "metadata"
+    else:
+        return "context"
+
+
+print(classify_diff_line("+++ b/app.py"))
+
+1. What does it print?
+2. Confidence, 0-100.
+
+MY ANSWER — VERBATIM:
+metadata
+
+MY REASONING — VERBATIM:
+not provided
+
+CONFIDENCE BEFORE CHECK:
+not provided
+
+TOOLS / HELP USED BEFORE COMMITMENT:
+none reported
+
+RESULT:
+wrong
+
+MISCONCEPTION / GAP:
+The learner predicted `metadata` and the observed output is `added`. The branch whose
+condition names the header prefix exists, but it sits below a broader condition that
+matches first, so it is never evaluated for any input at all. The learner has previously
+stated this rule correctly in the abstract, on the grading transfer in EV-P1-ELIF-029,
+but did not recognize it here in the project's own code with string prefixes rather than
+numeric comparisons. This is precisely the `branch_precedence` weakness recorded from the
+very first Phase 1 prediction, now reproduced against running code. Confidence was
+omitted again.
+
+CORRECT MODEL — ADDED AFTER ATTEMPT:
+Observed output: added
+
+`"+++ b/app.py".startswith("+")` is True, because startswith inspects only the beginning
+of the string and does not require the following characters to differ. A string that
+begins with three plus characters also begins with one. The first condition therefore
+matches, `return "added"` executes, and the chain ends. The metadata branch below it is
+unreachable for every possible input, which makes it dead code rather than a fix. The
+consequence for BuildLens is a silently inflated count: every file header in every diff
+would be recorded as a source line Claude added.
+
+WHY THIS MATTERS TO THE REAL IMPLEMENTATION:
+This is the exact defect BuildLens would ship if the branches were added in the obvious
+order. Every file header would be counted as an added source line, and the change counts
+Claude produced would be silently inflated on every diff.
+
+TRANSFER / NEXT RETRIEVAL:
+Then classify all eight real diff lines, then state the required arrangement and justify
+it, closing EV-P1-META-044.
+
+PARENT EVIDENCE ID:
+EV-P1-PREFIX-046
+
+PRIMARY BLOCKER:
+OVERLAPPING_PREFIX_MATCHING
+
+SCAFFOLD RUNG:
+R5
+
+WHY THIS RUNG:
+One call against a four-branch function the learner effectively proposed, with the
+identical deep structure as the already-passed grading exercise where a score satisfied
+two conditions at once.
+
+SUPPORT PROVIDED BEFORE THIS ATTEMPT:
+the learner's implied fix was written out in full; the structural parallel to the passed
+grading exercise was named explicitly
+
+RECOVERY STATUS:
+wrong-demonstrated-in-real-code
+```
+
+```text
+EVIDENCE ID:
+EV-P1-ORDER-048
+
+DATE / PHASE / GATE:
+2026-08-26 / Phase 1 / state the required branch order and justify it
+
+IMPLEMENTATION TRIGGER:
+The learner has now seen a metadata branch fail to fire in running code. The remaining
+half of EV-P1-META-044 is to state the arrangement that works and say why.
+
+ADJACENT CONCEPT:
+In a single chain of overlapping conditions, the more specific test must be written above
+the more general one, or the specific branch is unreachable.
+
+EXERCISE TYPE:
+design
+
+SOURCE / CONTEXT:
+BuildLens
+
+PROBLEM — VERBATIM:
+You now know the four branches are all necessary, and that this arrangement does not
+work.
+
+Tell me the order the four conditions have to be tested in, and why that order and not
+another. Do not write code; just the order and the reason.
+
+Confidence, 0-100.
+
+MY ANSWER — VERBATIM:
+metadata first and then the added and removed and context at the end if nothing else returns
+
+for the empty line i would make sure the context line checks for something, i am not tottaly sure how to check for the context to make sure it is not empty, -debug = false is the context and it still starts with a "-"
+
+MY REASONING — VERBATIM:
+for the empty line i would make sure the context line checks for something, i am not tottaly sure how to check for the context to make sure it is not empty
+
+CONFIDENCE BEFORE CHECK:
+not provided
+
+TOOLS / HELP USED BEFORE COMMITMENT:
+none reported
+
+RESULT:
+partial
+
+MISCONCEPTION / GAP:
+The ordering answer is correct: metadata first, then added and removed, with context last
+as the fallback when nothing above matched. The learner also correctly described the
+fallback's role. Two gaps remain. First, the justification for placing metadata first was
+not stated, so the arrangement is produced but not yet defended. Second, a new
+misconception surfaced: `removed_line_vs_context_line`. The learner called
+`-DEBUG = False` a context line. It begins with a single dash and is a deleted source
+line; context lines are the unchanged ones, which Git prefixes with a single space, as in
+` import os`. The learner also proposed adding an explicit emptiness check to the context
+branch, which is unnecessary: an empty string satisfies none of the earlier conditions and
+therefore reaches the fallback, which the approved contract already assigns to context.
+Real git diff output was displayed again with each line's first character extracted, so
+the space prefix could be observed directly. Confidence was omitted again.
+
+CORRECT MODEL — ADDED AFTER ATTEMPT:
+withheld in part; the required order is confirmed correct, but the justification and the
+nine-line classification remain to be answered by the learner.
+
+WHY THIS MATTERS TO THE REAL IMPLEMENTATION:
+This is the Phase 1 target. The learner must state the arrangement themselves, because
+the whole point of the phase is that the ordering decision is understood rather than
+copied from a generated implementation.
+
+TRANSFER / NEXT RETRIEVAL:
+Write the failing tests for the header lines first, predict the reds, then restructure
+classify.py to the stated order and rerun.
+
+PARENT EVIDENCE ID:
+EV-P1-ORDER-047
+
+PRIMARY BLOCKER:
+OVERLAPPING_PREFIX_MATCHING
+
+SCAFFOLD RUNG:
+R5
+
+WHY THIS RUNG:
+The mechanism has just been demonstrated in running code and the parallel to the passed
+grading exercise was drawn explicitly. Only the ordering statement and its justification
+remain.
+
+SUPPORT PROVIDED BEFORE THIS ATTEMPT:
+the failing arrangement was executed and its output shown; the structural parallel to
+EV-P1-ELIF-029 was laid out side by side; the practical consequence of the defect for
+BuildLens change counts was named
+
+RECOVERY STATUS:
+order-correct-justification-outstanding
+```
+
+```text
+EVIDENCE ID:
+EV-P1-META-049
+
+DATE / PHASE / GATE:
+2026-08-26 / Phase 1 / classify real diff output and defend the order
+
+IMPLEMENTATION TRIGGER:
+The ordering is correct but undefended, and the diff vocabulary needed correcting before
+the lines could be classified.
+
+ADJACENT CONCEPT:
+Unified diff line prefixes: a space marks an unchanged context line, one dash or plus
+marks changed source, three marks a Git file header. Some diff lines fit no category in
+the current contract.
+
+EXERCISE TYPE:
+design
+
+SOURCE / CONTEXT:
+BuildLens
+
+PROBLEM — VERBATIM:
+Label all nine lines of this real diff with one of the four labels each:
+
+diff --git a/app.py b/app.py
+index 580a0a3..b1c52a7 100644
+--- a/app.py
++++ b/app.py
+@@ -1,2 +1,3 @@
+ import os
+-DEBUG = False
++DEBUG = True
++VERBOSE = True
+
+Two of those do not fit any category cleanly; say so if you spot them, and say what you
+would do about it.
+
+Then, in one sentence: why must metadata be tested before added?
+
+Confidence, 0-100.
+
+MY ANSWER — VERBATIM:
+1st line i do not know
+2nd line is context?
+3rd line is metadata
+4th line is metadata
+5th line is i do not knoiw
+6th line is i do not know context?
+7th line is removed 
+8th is added
+9th is added
+is it safe to assume that if it is not metadata or addded or removed it is context?
+
+i want to widen to catch as metadata so we can be as factually correct as possible
+
+B, 100
+
+MY REASONING — VERBATIM:
+is it safe to assume that if it is not metadata or addded or removed it is context?
+
+i want to widen to catch as metadata so we can be as factually correct as possible
+
+CONFIDENCE BEFORE CHECK:
+100
+
+TOOLS / HELP USED BEFORE COMMITMENT:
+none reported
+
+RESULT:
+correct
+
+MISCONCEPTION / GAP:
+Six of the nine classifications are correct, and the three the learner declined to label
+are exactly the three the approved contract does not cover. The uncertainty was therefore
+well calibrated: it identified an underspecified contract rather than a knowledge gap.
+The learner's own question, whether anything not metadata, added, or removed is context,
+correctly describes the fallback and correctly implies that Git bookkeeping lines would be
+mislabelled as unchanged source.
+
+The learner then amended the contract deliberately, choosing to widen metadata to catch
+`diff --git`, `index`, and `@@`, with the stated reason of remaining as factually correct
+as possible. This is the first design decision the learner has made and defended
+unprompted.
+
+The ordering justification was requested three times in open form without an answer, so
+the format was changed to selection among three candidate sentences. The learner chose the
+correct one and reported a numeric confidence of 100, the first numeric confidence in
+Phase 1. `branch_precedence` is now stated and defended, not merely produced.
+
+Claude's prompt said two lines did not fit the contract; the correct count is three. That
+error was corrected in the same message.
+
+CORRECT MODEL — ADDED AFTER ATTEMPT:
+Under the amended contract: `diff --git`, `index`, `---`, `+++`, and `@@` are metadata;
+a line beginning with one space is context; one dash is removed; one plus is added; the
+empty string reaches the fallback and is context. Metadata must be tested first because a
+header beginning with `+++` also begins with `+`, so testing `added` first would match and
+return, leaving the metadata branch unreachable for every header line.
+
+WHY THIS MATTERS TO THE REAL IMPLEMENTATION:
+The classification determines the tests, and the justification is the Phase 1 mastery
+requirement. The two ill-fitting lines, the `diff --git` and `index` headers and the `@@`
+hunk marker, are the first genuine gap in the approved contract and are the learner's to
+notice.
+
+TRANSFER / NEXT RETRIEVAL:
+Write the header tests, predict the reds, restructure classify.py to the stated order,
+rerun, then teach the file aloud to close the Phase 1 milestone.
+
+PARENT EVIDENCE ID:
+EV-P1-ORDER-048
+
+PRIMARY BLOCKER:
+removed_line_vs_context_line, now corrected by observation
+
+SCAFFOLD RUNG:
+R6
+
+WHY THIS RUNG:
+Nine real inputs, four labels, an unprompted gap to notice in the contract, and a
+justification. Support is faded to vocabulary only.
+
+SUPPORT PROVIDED BEFORE THIS ATTEMPT:
+real git diff output displayed with the first character of every line extracted; the
+prefix vocabulary tabulated; the empty-string case explained as reaching the fallback
+without a special check
+
+RECOVERY STATUS:
+phase-target-passed
+```
+
+```text
+EVIDENCE ID:
+EV-P1-RED3-050
+
+DATE / PHASE / GATE:
+2026-08-26 / Phase 1 / predict the third red
+
+IMPLEMENTATION TRIGGER:
+The amended contract produced four new tests. Their failure must be predicted before
+classify.py is restructured.
+
+ADJACENT CONCEPT:
+A raised AssertionError ends the program, so only the first failure of several is ever
+displayed. A green run proves everything; a red run reports only one thing at a time.
+
+EXERCISE TYPE:
+tracing
+
+SOURCE / CONTEXT:
+BuildLens
+
+PROBLEM — VERBATIM:
+test_classify.py now defines six tests and calls them in order: added, removed, file
+header metadata, hunk marker metadata, unchanged context, empty context. classify.py is
+unchanged with two branches, plus and minus only.
+
+Four of those six tests are now broken.
+
+1. Which call produces the traceback?
+2. How many failures will you actually see in the output?
+3. Confidence, 0-100.
+
+MY ANSWER — VERBATIM:
+the first metadata gives an assertion error, i thin you will only see that one error because it will stop execution alltogther
+
+MY REASONING — VERBATIM:
+i thin you will only see that one error because it will stop execution alltogther
+
+CONFIDENCE BEFORE CHECK:
+not provided
+
+TOOLS / HELP USED BEFORE COMMITMENT:
+none reported
+
+RESULT:
+correct
+
+MISCONCEPTION / GAP:
+Both answers are correct and the reason is correct. The learner identified the file
+header test as the first failing call and understood that the raised AssertionError ends
+the program, so three further broken tests never run and only one traceback appears.
+
+CORRECT MODEL — ADDED AFTER ATTEMPT:
+Observed output, exit code 1: the traceback names line 43, the call to
+test_file_header_is_metadata, and line 23, its assertion. Four tests were broken but only
+the first failure is reported, because the error terminates execution. This is the first
+concrete argument for a test runner, which would report all four at once; the decision to
+add one is deferred until running tests by hand is the actual friction.
+
+WHY THIS MATTERS TO THE REAL IMPLEMENTATION:
+Understanding that a hand-rolled test file reports one failure at a time is the concrete
+argument for a test runner later, and it prevents the learner from believing a single
+traceback means a single broken behavior.
+
+TRANSFER / NEXT RETRIEVAL:
+Run it, restructure classify.py to the learner's stated order, rerun to green, then teach
+the file aloud to close the Phase 1 milestone.
+
+PARENT EVIDENCE ID:
+EV-P1-META-049
+
+PRIMARY BLOCKER:
+none identified; forward step
+
+SCAFFOLD RUNG:
+R6
+
+WHY THIS RUNG:
+Six sequential calls against a known implementation, requiring both the identification of
+the first failure and the consequence of early termination.
+
+SUPPORT PROVIDED BEFORE THIS ATTEMPT:
+both files shown complete in the same message, per the standing presentation rule
+
+RECOVERY STATUS:
+target-level-passed
+```
+
+```text
+EVIDENCE ID:
+EV-P1-TEACH-051
+
+DATE / PHASE / GATE:
+2026-08-26 / Phase 1 / milestone teach-aloud of classify.py
+
+IMPLEMENTATION TRIGGER:
+All six tests are green and the implementation is restructured to the learner's stated
+order. The milestone requires the learner to teach the file.
+
+ADJACENT CONCEPT:
+Explaining a file at the level of contract, control flow, operator semantics, and known
+limitations rather than narrating its lines.
+
+EXERCISE TYPE:
+teach-aloud
+
+SOURCE / CONTEXT:
+BuildLens
+
+PROBLEM — VERBATIM:
+Teach me classify.py. Cover:
+
+- what it does, in one sentence;
+- what goes in, what comes out, what it leaves unchanged;
+- why the branches are in that order;
+- what or is doing in the first condition;
+- one input you think it still gets wrong.
+
+Confidence, 0-100.
+
+MY ANSWER — VERBATIM:
+it startes with an if statement that has a switch on it so it will check for all of those thinfs and then will return metadata if it is if it is not one of those things then it will go down to elif and check for added or removed because it is the "+" is the shorter verson of "+++" so it has to go last then context, this works because it include all of the missing parts that were not in the classify beforehand
+
+MY REASONING — VERBATIM:
+because it is the "+" is the shorter verson of "+++" so it has to go last
+
+CONFIDENCE BEFORE CHECK:
+not provided
+
+TOOLS / HELP USED BEFORE COMMITMENT:
+none reported
+
+RESULT:
+partial
+
+MISCONCEPTION / GAP:
+Two of the five requested points were covered, including the hardest one. The control
+flow is described correctly: the metadata prefixes are tested first, a match returns
+metadata, otherwise the chain falls through to added and removed, and context is last.
+The ordering rationale is correct and stated in the learner's own words.
+
+Three points were not answered: the input, output, and unchanged state; what the operator
+in the first condition does; and one input the function still gets wrong. The learner
+instead asserted that the function works because it now includes the previously missing
+categories, which does not address the question about remaining defects.
+
+Terminology: the learner called the compound condition a switch. Python has no switch
+statement here; the condition is a chain of comparisons joined by a Boolean operator. The
+operator itself was introduced by Claude in this patch and has not yet been explained or
+predicted by the learner, which is a deviation from the implementation-adjacent teaching
+loop and is recorded as such.
+
+CORRECT MODEL — ADDED AFTER ATTEMPT:
+withheld in part; the three unanswered points were reissued without hints at the
+learner's explicit request.
+
+WHY THIS MATTERS TO THE REAL IMPLEMENTATION:
+The milestone requires that the learner can defend the file, including its limits. A file
+described only by what it now handles cannot be defended against the question of what it
+still misses.
+
+TRANSFER / NEXT RETRIEVAL:
+Answer the three outstanding points, then close the Phase 1 milestone and sync evidence
+publicly before any further implementation.
+
+PARENT EVIDENCE ID:
+EV-P1-RED3-050
+
+PRIMARY BLOCKER:
+KNOWN_LIMITATIONS_OF_OWN_CODE
+
+SCAFFOLD RUNG:
+R6
+
+WHY THIS RUNG:
+Phase target. Support is fully faded at the learner's explicit request: no hints, no
+leading commentary, question only.
+
+SUPPORT PROVIDED BEFORE THIS ATTEMPT:
+none; the learner asked for the question with no hints
+
+RECOVERY STATUS:
+partial-outstanding-points-reissued
+```
+
+```text
+EVIDENCE ID:
+EV-P1-BUG-052
+
+DATE / PHASE / GATE:
+2026-08-26 / Phase 1 / the three outstanding teach-aloud points and the located defect
+
+IMPLEMENTATION TRIGGER:
+The milestone teach-aloud left three points unanswered, the most important being whether
+the learner can name a remaining defect in their own code.
+
+ADJACENT CONCEPT:
+A leading prefix alone cannot distinguish a Git file header from deleted content that
+begins with the same characters. Correct classification needs more of the line than its
+first characters.
+
+EXERCISE TYPE:
+design
+
+SOURCE / CONTEXT:
+BuildLens
+
+PROBLEM — VERBATIM:
+1. What goes in, what comes out, what it leaves unchanged.
+2. What or is doing in the first condition.
+3. One input it still gets wrong.
+
+Then, after the learner reported not being sure of 3:
+
+A Markdown file contains a line that reads exactly:
+
+---
+
+Someone deletes that line. Git prints one line in the diff for that deletion.
+
+1. What exactly is that diff line, written out character for character.
+2. What does classify_diff_line return for it?
+3. What should it return?
+
+Then, after the learner could not construct the line:
+
+Git marks a deleted line by putting one - in front of its contents.
+
+deleted line contained:  hello        Git prints:  -hello
+deleted line contained:  import os    Git prints:  -import os
+deleted line contained:  ---          Git prints:  ?
+
+Write out the ? line, character for character.
+
+MY ANSWER — VERBATIM:
+the or goes down the list and checks one by one to see if it is in the or, what goes in is  a line of metadata added removed or context and what goes out is a string returning added removed context metadata, not sure what it gets wrong still
+
+it would return metadata i am not sure about the rest, classify diff line would return metadata
+
+it should return removed and git prints: --
+
+MY REASONING — VERBATIM:
+the or goes down the list and checks one by one to see if it is in the or
+
+CONFIDENCE BEFORE CHECK:
+not provided
+
+TOOLS / HELP USED BEFORE COMMITMENT:
+none reported
+
+RESULT:
+partial
+
+MISCONCEPTION / GAP:
+The description of `or` is correct in effect: the conditions are evaluated left to right
+and the whole condition is true if any one of them is true. The refinement is that
+evaluation stops at the first true condition. Input and output were stated correctly. The
+unchanged half of the contract was omitted for the third consecutive time, though the
+learner answered it correctly when asked directly at EV-P1-PURE-032, so it is treated as a
+reporting omission rather than a lost concept and remains a retrieval target.
+
+The learner could not name a remaining defect unaided and said so plainly. Given a
+concrete scenario they correctly predicted that the function returns metadata and
+correctly stated that it should return removed, which is the substance of the defect.
+They could not construct the diff line itself, writing two dashes where Git emits four.
+This is the same run-length counting error that produced the earlier two-character and
+four-character header guesses, and it is now recorded as its own concept,
+`diff_prefix_character_count`, rather than being folded into
+`unified_diff_metadata_meaning`.
+
+Both facts were then settled by execution rather than assertion: real git diff output
+showed the deleted line as four characters, and the classifier was run against it,
+returning metadata where removed was required.
+
+CORRECT MODEL — ADDED AFTER ATTEMPT:
+Deleting a Markdown line containing three dashes produces a diff line of four dashes: one
+deletion marker plus the three characters of content. `"----".startswith("---")` is True,
+so the metadata branch claims it and returns metadata, but it is a deleted source line and
+should be removed. The ordering fix was necessary but is not sufficient, because a leading
+prefix alone cannot distinguish a Git file header from deleted content that happens to
+begin with the same characters. A correct rule must use more of the line than its first
+characters.
+
+WHY THIS MATTERS TO THE REAL IMPLEMENTATION:
+This is the next behavior to drive with a test, and it is the first defect in BuildLens
+code found from real tool output rather than from a constructed example.
+
+TRANSFER / NEXT RETRIEVAL:
+Milestone pause. Do not fix the defect automatically. The learner decides whether to
+tighten the metadata rule now or record it as a known limitation, and a public evidence
+sync is due before further implementation.
+
+PARENT EVIDENCE ID:
+EV-P1-TEACH-051
+
+PRIMARY BLOCKER:
+diff_prefix_character_count
+
+SCAFFOLD RUNG:
+R6 descending to R1
+
+WHY THIS RUNG:
+The target question was answered only after descending to a two-example pattern completion
+for the diff line itself, which is worked-example rescue under LEARNING_RULES 14.6.
+
+SUPPORT PROVIDED BEFORE THIS ATTEMPT:
+none initially, at the learner's request; after the learner committed to not knowing, one
+concrete scenario and then two solved neighboring examples were supplied
+
+RECOVERY STATUS:
+defect-located-with-scaffolding
+```
+
+```text
+EVIDENCE ID:
+EV-P1-RULE-053
+
+DATE / PHASE / GATE:
+2026-08-26 / Phase 1 / tighten the metadata rule
+
+IMPLEMENTATION TRIGGER:
+The learner chose to fix the `----` defect rather than accept it as a limitation.
+
+ADJACENT CONCEPT:
+When a prefix is ambiguous, the distinguishing evidence may be the character that follows
+it. A Git file header carries a space after its three markers; deleted content does not.
+
+EXERCISE TYPE:
+design
+
+SOURCE / CONTEXT:
+BuildLens
+
+PROBLEM — VERBATIM:
+These four strings, exactly as Git emits them:
+
+must be metadata     --- a/notes.md
+must be metadata     +++ b/notes.md
+must be removed      ----
+must be added        ++++
+
+startswith("---") cannot tell those apart. Something else about those strings can. What is
+the rule? Describe it, do not write code.
+
+MY ANSWER — VERBATIM:
+a space after the 3 pluses
+
+MY REASONING — VERBATIM:
+a space after the 3 pluses
+
+CONFIDENCE BEFORE CHECK:
+not provided
+
+TOOLS / HELP USED BEFORE COMMITMENT:
+none reported
+
+RESULT:
+correct
+
+MISCONCEPTION / GAP:
+The rule is correct and was produced unaided from four contrasting strings, with support
+fully faded and no hints given. The learner named the space following the three marker
+characters as the distinguishing evidence. This is the first time in Phase 1 that the
+learner has derived a classification rule rather than predicted the behavior of one.
+Confidence was omitted.
+
+CORRECT MODEL — ADDED AFTER ATTEMPT:
+Git writes its file headers as three markers, a space, then a path: `--- a/notes.md`.
+A deleted line whose content began with dashes produces consecutive markers with no space
+at that position: `----`. Requiring `"--- "` and `"+++ "` with the trailing space therefore
+separates headers from content. Both tests and the new `----` case pass, seven green.
+
+WHY THIS MATTERS TO THE REAL IMPLEMENTATION:
+This is the fix that shipped, and the learner chose the decision, derived the rule, and
+can defend it.
+
+TRANSFER / NEXT RETRIEVAL:
+One transfer variant in a non-BuildLens domain, then the milestone closes.
+
+PARENT EVIDENCE ID:
+EV-P1-BUG-052
+
+PRIMARY BLOCKER:
+none identified
+
+SCAFFOLD RUNG:
+R6
+
+WHY THIS RUNG:
+Rule derivation from contrasting examples, with no hints and no options, at the learner's
+explicit request.
+
+SUPPORT PROVIDED BEFORE THIS ATTEMPT:
+four contrasting strings with their required labels; nothing else
+
+RECOVERY STATUS:
+phase-target-passed
+```
+
+```text
+EVIDENCE ID:
+EV-P1-LIMIT-054
+
+DATE / PHASE / GATE:
+2026-08-26 / Phase 1 / accepted limitation of the single-line contract
+
+IMPLEMENTATION TRIGGER:
+Verification of the tightened rule against real Git output revealed a case the rule cannot
+resolve.
+
+ADJACENT CONCEPT:
+Some inputs are ambiguous in isolation. Resolving them requires context the contract does
+not supply, which makes this a limit of the contract rather than of the implementation.
+
+EXERCISE TYPE:
+observation
+
+SOURCE / CONTEXT:
+BuildLens
+
+PROBLEM — VERBATIM:
+not a learner exercise; recorded as an accepted limitation
+
+MY ANSWER — VERBATIM:
+not applicable
+
+MY REASONING — VERBATIM:
+not applicable
+
+CONFIDENCE BEFORE CHECK:
+not applicable
+
+TOOLS / HELP USED BEFORE COMMITMENT:
+not applicable
+
+RESULT:
+accepted-limitation
+
+MISCONCEPTION / GAP:
+none; this is a design limit, not an error
+
+CORRECT MODEL — ADDED AFTER ATTEMPT:
+Deleting a line whose content is `-- notes` produces the diff line `--- notes`, which is
+character-for-character indistinguishable from a real file header. The classifier labels
+it metadata; it is a deleted source line. No rule examining only that line can resolve it.
+Disambiguation requires positional context: headers appear before the first hunk marker
+and occur as a `---` and `+++` pair, while deleted content does not. The approved contract
+gives the function exactly one line and no context, so the limitation is inherent to the
+contract.
+
+WHY THIS MATTERS TO THE REAL IMPLEMENTATION:
+This is the first time BuildLens has met a requirement that a pure single-value
+transformation cannot satisfy, and it is the concrete motivation for the representation
+work in Phase 2 and the state work in Phase 3.
+
+TRANSFER / NEXT RETRIEVAL:
+Revisit when parsing a whole diff rather than one line; the learner should be asked to
+identify what additional information would resolve it before any implementation.
+
+PARENT EVIDENCE ID:
+EV-P1-RULE-053
+
+PRIMARY BLOCKER:
+not applicable
+
+SCAFFOLD RUNG:
+not applicable
+
+WHY THIS RUNG:
+not applicable
+
+SUPPORT PROVIDED BEFORE THIS ATTEMPT:
+not applicable
+
+RECOVERY STATUS:
+recorded-as-known-limitation
+```
+
+```text
+EVIDENCE ID:
+EV-P1-TRANSFER-055
+
+DATE / PHASE / GATE:
+2026-08-26 / Phase 1 / milestone transfer variant
+
+IMPLEMENTATION TRIGGER:
+The milestone requires one transfer variant in a different domain before Phase 1 closes.
+
+ADJACENT CONCEPT:
+Ordered matching of overlapping prefixes, and the existence of inputs that ordering alone
+cannot rescue.
+
+EXERCISE TYPE:
+transfer
+
+SOURCE / CONTEXT:
+blind transfer
+
+PROBLEM — VERBATIM:
+A chat client labels each message a user types, by how it starts:
+
+starts with "//"    a comment
+starts with "/"     a command
+anything else       plain text
+
+A user types //help.
+
+1. If the "/" rule is tested before the "//" rule, what label does //help get?
+2. What order do the rules need to be in?
+3. Give an input this scheme labels wrongly no matter what order the rules are in, and say
+   why order cannot save it.
+4. Confidence, 0-100.
+
+MY ANSWER — VERBATIM:
+a command,  // first the n/ then anything else, /// could still not make sense
+low confidence
+
+MY REASONING — VERBATIM:
+/// could still not make sense
+
+CONFIDENCE BEFORE CHECK:
+low confidence
+
+TOOLS / HELP USED BEFORE COMMITMENT:
+none reported
+
+RESULT:
+partial
+
+MISCONCEPTION / GAP:
+Parts 1 and 2 are correct and were answered without hints in an unfamiliar domain, which
+demonstrates that branch precedence has transferred away from diffs. Testing the single
+slash first labels a double-slash message as a command, and the required order is the
+double slash, then the single slash, then the fallback.
+
+Part 3 is not established. The learner nominated `///` but did not say what it gets wrong
+or why ordering cannot help, and in this scheme `///help` is in fact handled correctly:
+it begins with a double slash and is labelled a comment. The generalization of the
+accepted limitation has therefore not yet been demonstrated.
+
+Calibration is now genuinely informative. The learner reported 100 on the branch-order
+selection, which was correct, and low confidence here, on an answer that was indeed weak
+on the part they were unsure about. Two honest calibration points now exist.
+
+CORRECT MODEL — ADDED AFTER ATTEMPT:
+withheld; part 3 was reframed rather than answered, and the learner has not yet committed
+to a case that ordering cannot rescue.
+
+WHY THIS MATTERS TO THE REAL IMPLEMENTATION:
+Parts 1 and 2 test whether branch precedence transfers away from diffs. Part 3 tests
+whether the learner has generalized the accepted limitation rather than memorizing the
+dash case.
+
+TRANSFER / NEXT RETRIEVAL:
+On success, close the Phase 1 milestone and run the public evidence sync before Phase 2.
+
+PARENT EVIDENCE ID:
+EV-P1-RULE-053
+
+PRIMARY BLOCKER:
+none identified
+
+SCAFFOLD RUNG:
+R6
+
+WHY THIS RUNG:
+Different domain, no diff vocabulary, no code shown, and one part requiring the learner to
+generalize a limitation rather than apply a rule.
+
+SUPPORT PROVIDED BEFORE THIS ATTEMPT:
+none; support remains fully faded
+
+RECOVERY STATUS:
+transfer-partial-part-three-reframed
+```
+
+```text
+EVIDENCE ID:
+EV-P1-TRANSFER-056
+
+DATE / PHASE / GATE:
+2026-08-26 / Phase 1 / part three, answered with assistance, then reissued
+
+IMPLEMENTATION TRIGGER:
+The milestone transfer variant requires the learner to generalize the accepted limitation
+of the single-line contract.
+
+ADJACENT CONCEPT:
+Some required labels depend on information absent from the input. Ordering rules cannot
+recover information the input never carried.
+
+EXERCISE TYPE:
+transfer
+
+SOURCE / CONTEXT:
+blind transfer
+
+PROBLEM — VERBATIM:
+The scheme decides what you meant from the characters you typed. Think about a message
+someone genuinely wants to send as ordinary text, nothing to do with comments or commands.
+
+What might they want to type that this scheme will not let them send as plain text? And
+why is that not an ordering problem?
+
+MY ANSWER — VERBATIM:
+a message that starts with a slash like /usr/bin, can you turn off the previews that answer was given to me
+
+MY REASONING — VERBATIM:
+not provided
+
+CONFIDENCE BEFORE CHECK:
+not provided
+
+TOOLS / HELP USED BEFORE COMMITMENT:
+ASSISTED. The learner disclosed, unprompted, that the answer was surfaced to them by a
+client-side preview or suggestion feature before they committed to it. This attempt is
+therefore not unaided evidence and must not be counted toward the transfer gate.
+
+RESULT:
+assisted-not-counted
+
+MISCONCEPTION / GAP:
+The named case is correct: a plain-text message beginning with a slash, such as a file
+path, cannot be sent as plain text under this scheme. The learner did not supply the
+reason, and the answer was not independently produced.
+
+Two process notes. First, the learner's disclosure is itself strong evidence of the
+intellectual honesty the project depends on, and it is recorded as a credit rather than a
+failure. Second, Claude's reframing of part three narrowed toward a single phrase, which
+made the answer easy for any predictive feature to complete. Future questions must not
+funnel toward one specific wording.
+
+Claude cannot disable client-side preview or suggestion features from within the session
+and said so plainly rather than implying otherwise.
+
+CORRECT MODEL — ADDED AFTER ATTEMPT:
+withheld; a fresh surface form was issued instead, since revealing the reasoning here
+would compromise the reissued gate as well.
+
+WHY THIS MATTERS TO THE REAL IMPLEMENTATION:
+The BuildLens classifier has exactly this shape: `--- notes` cannot be labelled correctly
+because the contract supplies one line and the correct label depends on context the line
+does not carry.
+
+TRANSFER / NEXT RETRIEVAL:
+A fresh unseen variant in a third domain, phrased without funnelling toward one wording.
+
+PARENT EVIDENCE ID:
+EV-P1-TRANSFER-055
+
+PRIMARY BLOCKER:
+INFORMATION_NOT_PRESENT_IN_THE_INPUT
+
+SCAFFOLD RUNG:
+R6
+
+WHY THIS RUNG:
+Unchanged rung; the attempt was invalidated by assistance rather than by difficulty.
+
+SUPPORT PROVIDED BEFORE THIS ATTEMPT:
+a reframing of part three, which in hindsight narrowed too far toward one answer
+
+RECOVERY STATUS:
+invalidated-reissued
+```
+
+```text
+EVIDENCE ID:
+EV-P1-TRANSFER-057
+
+DATE / PHASE / GATE:
+2026-08-26 / Phase 1 / fresh surface form of the limitation transfer
+
+IMPLEMENTATION TRIGGER:
+The previous attempt was assisted, so the gate requires a new surface form.
+
+ADJACENT CONCEPT:
+A classification scheme that infers intent from content cannot express content that looks
+like a marker. Reordering cannot recover absent information.
+
+EXERCISE TYPE:
+transfer
+
+SOURCE / CONTEXT:
+blind transfer
+
+PROBLEM — VERBATIM:
+A spreadsheet decides what a cell means from what you type into it:
+
+starts with "="     a formula, evaluated
+anything else       text, shown as typed
+
+Name something a user genuinely wants in a cell that this cannot give them, and say why no
+reordering of those rules fixes it.
+
+Confidence, 0-100.
+
+MY ANSWER — VERBATIM:
+if it starts with a variable like a= mx+b, low confidence, could also be if they want it ot hold a variable that has a value like weight and it is given the value somewhere esle
+
+MY REASONING — VERBATIM:
+could also be if they want it ot hold a variable that has a value like weight and it is given the value somewhere esle
+
+CONFIDENCE BEFORE CHECK:
+low confidence
+
+TOOLS / HELP USED BEFORE COMMITMENT:
+none reported
+
+RESULT:
+wrong
+
+MISCONCEPTION / GAP:
+Neither proposal is a case the scheme mishandles. The string `a= mx+b` begins with a
+letter, not an equals sign, so it is already treated as text and the rule gets it right.
+The second proposal concerns named values and cell references, which are spreadsheet
+features rather than consequences of this classification rule.
+
+The learner is not yet seeing the shape of the target: content that is legitimately text
+but happens to look like a marker. The blocker remains
+`INFORMATION_NOT_PRESENT_IN_THE_INPUT`.
+
+Calibration continues to be accurate. Low confidence was reported and the answer was
+indeed wrong; this is the third consecutive honest calibration point.
+
+CORRECT MODEL — ADDED AFTER ATTEMPT:
+withheld; remediation descends to a concrete scenario rather than revealing the reasoning,
+mirroring how the `----` defect was located earlier in this phase.
+
+WHY THIS MATTERS TO THE REAL IMPLEMENTATION:
+Same deep structure as the accepted BuildLens limitation, in a third domain, with only two
+rules so that ordering is visibly not the issue.
+
+TRANSFER / NEXT RETRIEVAL:
+On success, close the Phase 1 milestone and sync evidence publicly before Phase 2.
+
+PARENT EVIDENCE ID:
+EV-P1-TRANSFER-056
+
+PRIMARY BLOCKER:
+INFORMATION_NOT_PRESENT_IN_THE_INPUT
+
+SCAFFOLD RUNG:
+R6
+
+WHY THIS RUNG:
+Two rules only, no ordering puzzle to solve, and an open question phrased without
+funnelling toward a single wording.
+
+SUPPORT PROVIDED BEFORE THIS ATTEMPT:
+none
+
+RECOVERY STATUS:
+wrong-descending
+```
+
+```text
+EVIDENCE ID:
+EV-P1-TRANSFER-058
+
+DATE / PHASE / GATE:
+2026-08-26 / Phase 1 / concrete scenario for the limitation transfer
+
+IMPLEMENTATION TRIGGER:
+The open-form transfer question was answered incorrectly twice, so remediation descends to
+one concrete case the learner reasons about, as was done successfully with the `----`
+defect.
+
+ADJACENT CONCEPT:
+Content that is legitimately text but looks like a marker cannot be expressed, and the
+label the user wants depends on intent the characters do not carry.
+
+EXERCISE TYPE:
+tracing
+
+SOURCE / CONTEXT:
+blind transfer
+
+PROBLEM — VERBATIM:
+A teacher is building a worksheet. In one cell she wants students to see the text:
+
+=SUM(B1:B9)
+
+She wants it displayed exactly like that, as a label explaining what a formula looks like.
+She types it in.
+
+1. What does the spreadsheet do with that cell?
+2. What did she want?
+3. There are only two rules. Would swapping their order help her? Why or why not?
+4. Confidence, 0-100.
+
+MY ANSWER — VERBATIM:
+it adds whatever is in B1 with B2 B3 B4 B5 B6B 7 B8 B9, the sum of all of those cells, the "=" has to be the first rule if the other rule is first it will not run the function
+
+it will not give her the actual sum if she has the anything else rule first, they do not match but in excel or sheets if you click on the value it shows you what the formula is, i am not sure what is missing
+
+1. i have no idea
+2. it needs to add in the formula and then put the answer next ot that
+
+so yuou would need to add the leading apostrophe to the formula and it would be added as a rule for the anything else catagory, so if it does start with an "=" but you dont want it to run the number then it will not run it
+
+MY REASONING — VERBATIM:
+so if it does start with an "=" but you dont want it to run the number then it will not run it
+
+CONFIDENCE BEFORE CHECK:
+not provided on the final step; low confidence reported on the preceding attempts
+
+TOOLS / HELP USED BEFORE COMMITMENT:
+worked-example rescue under LEARNING_RULES 14.6. The learner did not know the leading
+apostrophe convention and said so, so it was supplied as a tool fact. The reasoning about
+what the apostrophe contributes was then produced by the learner.
+
+RESULT:
+correct-with-scaffolding
+
+MISCONCEPTION / GAP:
+The sum computation was described correctly. The learner initially kept reasoning about how
+to make the formula run rather than about the teacher's intent to display text, and skipped
+the stated goal in the problem. After the mismatch was acknowledged, the learner observed
+unprompted that Excel and Sheets show the formula when a cell is selected, which is a
+genuine and relevant observation: the interpretation lives somewhere outside the cell's
+displayed value.
+
+The final answer reaches the target in the learner's own words: an escape marker is needed
+for the case where a value starts with the marker character but the user does not want it
+interpreted. The phrase `you dont want it to run` is the concept, since wanting is exactly
+the information the characters cannot carry.
+
+This is recorded as correct WITH SCAFFOLDING. Under LEARNING_RULES 14.6 a worked example
+must be followed by a fresh example solved unaided before the concept counts as
+transferred, so a delayed unaided variant remains due.
+
+CORRECT MODEL — ADDED AFTER ATTEMPT:
+Typing `'=SUM(B1:B9)` displays `=SUM(B1:B9)`. The apostrophe is never shown; it is not
+content. It exists solely to carry the user's intent that the following characters be taken
+literally. The characters `=SUM(B1:B9)` state what was typed but cannot state what was
+meant, so no ordering of the two rules and no more precise prefix test can recover the
+wanted label. The information was never present in the input.
+
+The BuildLens case is identical in structure. `--- notes` may be a Git file header or a
+deleted line whose content was `-- notes`. The characters are the same and the meanings
+differ. Git supplies no escape marker; it relies on position, since headers precede the
+first hunk marker and occur in pairs. The approved contract hands the classifier one line
+with no position, so the distinguishing fact is discarded before the function is called.
+This is a limit of the contract, and it is the concrete motivation for Phase 2
+representation work.
+
+WHY THIS MATTERS TO THE REAL IMPLEMENTATION:
+Question 3 is the whole gate. If the learner can say that swapping two rules cannot help
+because the wanted label is not determined by the characters, they have generalized the
+BuildLens limitation rather than memorized the dash case.
+
+TRANSFER / NEXT RETRIEVAL:
+On success, close the Phase 1 milestone and sync evidence publicly before Phase 2.
+
+PARENT EVIDENCE ID:
+EV-P1-TRANSFER-057
+
+PRIMARY BLOCKER:
+INFORMATION_NOT_PRESENT_IN_THE_INPUT
+
+SCAFFOLD RUNG:
+R1
+
+WHY THIS RUNG:
+One concrete cell, two rules, and a direct question about whether reordering helps. No
+open-ended search for an example is required.
+
+SUPPORT PROVIDED BEFORE THIS ATTEMPT:
+both prior proposals were explained as already handled correctly by the rule; one concrete
+scenario was supplied
+
+RECOVERY STATUS:
+transfer-reached-with-scaffolding-fresh-variant-due
+```
