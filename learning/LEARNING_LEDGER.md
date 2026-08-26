@@ -7003,3 +7003,448 @@ non-diff input was demonstrated when the learner raised the error question
 RECOVERY STATUS:
 gate-passed
 ```
+
+```text
+EVIDENCE ID:
+EV-P2-POSITION-064
+
+DATE / PHASE / GATE:
+2026-08-26 / Phase 2 / delayed-retrieval attempt, INFORMATION_NOT_PRESENT_IN_THE_INPUT
+
+IMPLEMENTATION TRIGGER:
+Part 3 of EV-P2-MODEL-060 was left unanswered at the session boundary. It is a second
+natural instance of the Phase 1 concept and was carried forward as the delayed retrieval
+still owed after the worked-example rescue in EV-P1-TRANSFER-058.
+
+ADJACENT CONCEPT:
+A per-line label is computed from one line. Information that lives elsewhere in the stream
+cannot appear in it.
+
+EXERCISE TYPE:
+design
+
+SOURCE / CONTEXT:
+BuildLens, against real `git diff` output generated for this attempt
+
+PROBLEM — VERBATIM:
+1. Take the line `+RETRIES = 5`. Your `classify_diff_line` is handed exactly that string and
+nothing else, and returns exactly one label. Which file does that line belong to, and can the
+returned label say so?
+
+2. Same question for `+DEBUG = True`.
+
+3. If your answer to 1 and 2 is that the label cannot say, then where in the output above does
+the file identity actually live?
+
+MY ANSWER — VERBATIM:
+it belongs to b/config.py, it is b/app.py, the file identities live in the file header/ diff --git
+
+MY REASONING — VERBATIM:
+not supplied
+
+CONFIDENCE BEFORE CHECK:
+not provided — sixth consecutive omission; calibration still cannot be computed
+
+TOOLS / HELP USED BEFORE COMMITMENT:
+none reported
+
+RESULT:
+partial
+
+MISCONCEPTION / GAP:
+Both file attributions are correct, and part 3 is correct: identity lives in the `diff --git`
+and `---`/`+++` header lines, not in the content lines. What was NOT answered is the half the
+retrieval actually turns on — whether the returned LABEL can carry that identity. The learner
+answered which file each line belongs to by reading the whole diff, which is a different
+capability from what one label can express.
+
+Open probe, not yet corrected: the answers name `b/config.py` and `b/app.py`. Under the
+already-corrected `diff_a_b_prefixes_are_two_files` this may be precise (the added line exists
+in the after version) or may be residue of reading `a/` and `b/` as distinct files. Untested.
+
+CORRECT MODEL — ADDED AFTER ATTEMPT:
+withheld; the attempt is still open
+
+WHY THIS MATTERS TO THE REAL IMPLEMENTATION:
+It prices any future per-file breakdown of the summary, and it is the same shape as the
+accepted `EV-P1-LIMIT-054` limitation.
+
+TRANSFER / NEXT RETRIEVAL:
+pending resolution of the unanswered half
+
+PARENT EVIDENCE ID:
+EV-P2-MODEL-060
+
+PRIMARY BLOCKER:
+none identified yet; the question may simply have been read as two parts instead of three
+
+SCAFFOLD RUNG:
+R6
+
+WHY THIS RUNG:
+Real unmodified git output, three open questions, no options offered.
+
+SUPPORT PROVIDED BEFORE THIS ATTEMPT:
+none
+
+RECOVERY STATUS:
+open
+```
+
+```text
+EVIDENCE ID:
+EV-P2-SYNTAX-065
+
+DATE / PHASE / GATE:
+2026-08-26 / Phase 2 / R0 remediation, string-literal quotes
+
+IMPLEMENTATION TRIGGER:
+While answering EV-P2-POSITION-064 the learner wrote `would it not be able to return anything
+because of the ""`, flagging that the quote marks themselves were unreadable. Under
+LEARNING_RULES 14.3 the surrounding diff problem was stopped and the syntax isolated.
+
+ADJACENT CONCEPT:
+Quotes delimit a string literal. They are punctuation for the parser and are not characters of
+the value.
+
+EXERCISE TYPE:
+tracing
+
+SOURCE / CONTEXT:
+academic micro-example, no BuildLens domain vocabulary
+
+PROBLEM — VERBATIM:
+label = "added"
+print(label)
+print(len(label))
+
+1. What does the first `print` display?
+2. What number does the second `print` display?
+
+then: counting the quote marks there are 7 characters between the `=` and the end of the line.
+`len` said 5. Why 5?
+
+MY ANSWER — VERBATIM:
+it prints added and the second prints 5
+
+because the quotes are not apart of the string they say that the vlaue is a string
+
+MY REASONING — VERBATIM:
+because the quotes are not apart of the string they say that the vlaue is a string
+
+CONFIDENCE BEFORE CHECK:
+not provided
+
+TOOLS / HELP USED BEFORE COMMITMENT:
+none; the code was run only after both predictions were committed
+
+RESULT:
+correct
+
+MISCONCEPTION / GAP:
+None remaining on this form. The prior confusion was that the quotes might prevent a value
+from being returned at all.
+
+CORRECT MODEL — ADDED AFTER ATTEMPT:
+`label = "added"` stores the five characters a-d-d-e-d. The quotes mark where the text begins
+and ends and are consumed by the parser.
+
+WHY THIS MATTERS TO THE REAL IMPLEMENTATION:
+Every label `classify_diff_line` returns is a string literal, and every test compares against
+one. The learner could not read the return values or the assertions without this.
+
+TRANSFER / NEXT RETRIEVAL:
+near-transfer EV-P2-SYNTAX-066 below
+
+PARENT EVIDENCE ID:
+EV-P2-POSITION-064
+
+PRIMARY BLOCKER:
+SYNTAX_READING
+
+SCAFFOLD RUNG:
+R0
+
+WHY THIS RUNG:
+One literal, one variable, no branch, no function, no diff vocabulary.
+
+SUPPORT PROVIDED BEFORE THIS ATTEMPT:
+one sentence stating that quotes mark where text starts and stops; no answer given
+
+RECOVERY STATUS:
+stable-at-rung
+```
+
+```text
+EVIDENCE ID:
+EV-P2-SYNTAX-066
+
+DATE / PHASE / GATE:
+2026-08-26 / Phase 2 / R0 near-transfer, new surface form
+
+IMPLEMENTATION TRIGGER:
+LEARNING_RULES 14.7 requires a fresh near-transfer at the same rung before climbing.
+
+ADJACENT CONCEPT:
+Single and double quotes produce the same value; the choice decides which quote character can
+appear inside the literal.
+
+EXERCISE TYPE:
+tracing
+
+SOURCE / CONTEXT:
+academic micro-example using a BuildLens string as data only
+
+PROBLEM — VERBATIM:
+marker = 'diff --git'
+print(len(marker))
+
+1. What number prints?
+2. Does swapping `"` for `'` change the value stored in `marker`?
+
+MY ANSWER — VERBATIM:
+10 confidence, 8
+
+for 2 idk
+
+is this more sytax like if i have a double qutes already i can use the single quote as the same value
+
+MY REASONING — VERBATIM:
+is this more sytax like if i have a double qutes already i can use the single quote as the same value
+
+CONFIDENCE BEFORE CHECK:
+8 out of 100 — FIRST CONFIDENCE NUMBER RECORDED IN THE PROJECT. The scale was confirmed by the
+learner afterwards as out of 100. The answer was CORRECT, so this is a large underconfidence
+error and the first calibration data point in the project.
+
+TOOLS / HELP USED BEFORE COMMITMENT:
+none
+
+RESULT:
+partial, then correct
+
+MISCONCEPTION / GAP:
+Part 1 correct. Part 2 was answered `idk`. Rather than asserting, `marker == "diff --git"` was
+run and printed `True`; the learner was then asked what the choice of quote character actually
+decides and answered correctly, reaching the nesting rule unaided from the evidence.
+
+CORRECT MODEL — ADDED AFTER ATTEMPT:
+`'diff --git'` and `"diff --git"` are the same 10-character value. The outer pair is never in
+the value, so the only thing the choice decides is which quote character may appear inside
+without terminating the literal early. Demonstrated with `"he said 'hi'"` and `'he said "hi"'`,
+both 12 characters.
+
+WHY THIS MATTERS TO THE REAL IMPLEMENTATION:
+`classify.py` and `test_classify.py` both use double quotes throughout; the learner now knows
+that is a style choice, not a semantic one.
+
+TRANSFER / NEXT RETRIEVAL:
+Climb back to the unresolved half of EV-P2-POSITION-064.
+
+PARENT EVIDENCE ID:
+EV-P2-SYNTAX-065
+
+PRIMARY BLOCKER:
+none remaining
+
+SCAFFOLD RUNG:
+R0
+
+WHY THIS RUNG:
+Same rung as EV-P2-SYNTAX-065, different quote style and different string.
+
+SUPPORT PROVIDED BEFORE THIS ATTEMPT:
+none before commitment; an `==` comparison was generated afterwards to settle part 2 by real
+output rather than assertion
+
+RECOVERY STATUS:
+climbed
+```
+
+```text
+EVIDENCE ID:
+EV-P2-POSITION-064-CLOSE
+
+DATE / PHASE / GATE:
+2026-08-26 / Phase 2 / DELAYED RETRIEVAL SATISFIED
+
+IMPLEMENTATION TRIGGER:
+Closing the half of EV-P2-POSITION-064 left open when the string-literal syntax blocked it.
+
+ADJACENT CONCEPT:
+INFORMATION_NOT_PRESENT_IN_THE_INPUT — a value computed from one line cannot carry information
+that lives in a different line.
+
+EXERCISE TYPE:
+design
+
+SOURCE / CONTEXT:
+BuildLens, real `git diff` output
+
+PROBLEM — VERBATIM:
+`classify_diff_line("+RETRIES = 5")` returns `"added"`. Can that returned value tell you the
+line came from `config.py`?
+
+MY ANSWER — VERBATIM:
+no, you would have to look at the dif --git above it to make that destinction
+
+MY REASONING — VERBATIM:
+you would have to look at the dif --git above it to make that destinction
+
+CONFIDENCE BEFORE CHECK:
+80 out of 100
+
+TOOLS / HELP USED BEFORE COMMITMENT:
+none. The intervening remediation EV-P2-SYNTAX-065 and EV-P2-SYNTAX-066 concerned string
+literal syntax only and did not touch the concept under test.
+
+RESULT:
+correct, unaided
+
+MISCONCEPTION / GAP:
+None. The learner both denied that the label can carry the identity and named the mechanism
+that would be required — reading the `diff --git` line ABOVE the content line, which is
+positional context the single-line contract does not supply.
+
+CORRECT MODEL — ADDED AFTER ATTEMPT:
+`classify_diff_line` receives one string and returns one label. File identity is stated once
+per file in the `diff --git` header and is absent from every content line beneath it.
+Recovering it requires remembering the most recent header while walking the lines in order,
+which is state the current contract has no place to keep.
+
+WHY THIS MATTERS TO THE REAL IMPLEMENTATION:
+This is the price of any future per-file breakdown of `DiffSummary`, and it is the same shape
+as the accepted limitation EV-P1-LIMIT-054, where `--- notes` cannot be told from a file
+header one line at a time. It also explains why `files_changed` must come from counting
+`file_header` labels rather than from anything an `added` line knows.
+
+TRANSFER / NEXT RETRIEVAL:
+Concept now has the third variant across a fourth domain plus one delayed retrieval. Under
+LEARNING_RULES 5 it moves from RETRIEVAL-DUE toward MASTERED once the learner also defends it
+in the oral-defence format.
+
+PARENT EVIDENCE ID:
+EV-P2-POSITION-064
+
+PRIMARY BLOCKER:
+none
+
+SCAFFOLD RUNG:
+R6
+
+WHY THIS RUNG:
+Real unmodified git output, open question, no options offered, no hint given.
+
+SUPPORT PROVIDED BEFORE THIS ATTEMPT:
+none on the concept
+
+RECOVERY STATUS:
+retrieval-satisfied
+```
+
+```text
+EVIDENCE ID:
+EV-P2-TDD-067
+
+DATE / PHASE / GATE:
+2026-08-26 / Phase 2 / test-first gate, predict the failure before observing it
+
+IMPLEMENTATION TRIGGER:
+Step 1 of Phase 2 adds the `file_header` label. Test-first requires the learner to state the
+expected value and predict the current actual value before any code changes.
+
+ADJACENT CONCEPT:
+`expected` is the behaviour the design demands. `actual` is what the code does today. A first
+test is written precisely because they differ.
+
+EXERCISE TYPE:
+design
+
+SOURCE / CONTEXT:
+BuildLens, `classify.py` as it stands
+
+PROBLEM — VERBATIM:
+Walk the `if` from the top with `diff --git a/config.py b/config.py` as `line`. What does
+`classify_diff_line` return for it, as the code stands right now?
+
+then:
+input     ?
+expected  ?
+actual    ?
+
+MY ANSWER — VERBATIM:
+it is the file header, but it would return metadata, it would return on the first if statement
+and stop there
+
+input is the diff -git, expected is metadata and actual is metadata
+
+both would be metadata, i just called it file header becasue we called it that earlier
+
+it made it so that when i wanted to know what file we were under i did not have to sort through
+metadata it was its own value
+
+fileheader and then metadata
+
+MY REASONING — VERBATIM:
+it would return on the first if statement and stop there
+
+i just called it file header becasue we called it that earlier
+
+CONFIDENCE BEFORE CHECK:
+70 out of 100, tagged DESIGN by the learner, on the final slot answer
+
+TOOLS / HELP USED BEFORE COMMITMENT:
+none. The current return value was confirmed by running the real function only AFTER the
+learner had predicted it.
+
+RESULT:
+correct, then wrong, then correct
+
+MISCONCEPTION / GAP:
+The first answer was fully correct including the mechanism — first branch matches, returns,
+stops. The learner then collapsed `expected` into `actual`, giving `metadata` for both, and
+dismissed `file_header` as a name used in conversation rather than a decision. New
+misconception recorded as `expected_mirrors_current_behavior`: a test was treated as a
+description of what the code does rather than a demand for what it should do. A test written
+that way passes on its first run and proves nothing.
+
+The recovery did not involve restating the design. The learner was asked to recall their own
+Option A decision from EV-P2-COUNT-061 and did so correctly and in their own terms — the file
+marker gets its own value so you do not have to sort through metadata to find it. With the
+decision back in view, the two slots were filled correctly and unaided.
+
+CORRECT MODEL — ADDED AFTER ATTEMPT:
+input     "diff --git a/config.py b/config.py"
+expected  "file_header"   the behaviour Option A demands
+actual    "metadata"      what the unchanged classifier returns, confirmed by running it
+
+Because the two differ, the test fails, and the failure is the reason to change the code.
+
+WHY THIS MATTERS TO THE REAL IMPLEMENTATION:
+This is the first test in the project written against behaviour that does not exist yet. Every
+previous test in `test_classify.py` was written against behaviour already present.
+
+TRANSFER / NEXT RETRIEVAL:
+Predict the exact output of the failing run before it is executed.
+
+PARENT EVIDENCE ID:
+EV-P2-CASES-063
+
+PRIMARY BLOCKER:
+expected_mirrors_current_behavior
+
+SCAFFOLD RUNG:
+R6, descended to a two-way selection, then returned
+
+WHY THIS RUNG:
+The open three-part form produced `im not sure how to answer this`. Per the standing rule that
+a repeatedly failing open question becomes a selection among plausible candidates, the slots
+were reduced to a choice between two labels the learner had already named.
+
+SUPPORT PROVIDED BEFORE THIS ATTEMPT:
+the learner's own earlier sentence was quoted back; the Option A/B decision was named but its
+content was not restated
+
+RECOVERY STATUS:
+recovered-at-target
+```

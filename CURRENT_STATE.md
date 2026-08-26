@@ -877,3 +877,74 @@ NEXT, and not yet started: `classify_diff_line` gains the `file_header` label, t
 iteration are introduced through the implementation-adjacent loop, since the learner has met
 neither. Only then is the summary function built, test-first, from the four cases above.
 
+RISK RAISED BY THE LEARNER, and it changed the analysis. The learner challenged the invalid
+input case, arguing that Claude Code would never hand BuildLens nonsense. That is correct: a
+shopping list never arrives. Real git output of an unexpected SHAPE does. Three cases were
+generated and run through the current classifier:
+
+```text
+binary file changed   files=1 added=0 removed=0   honest
+file renamed          files=1 added=0 removed=0   defensible, rename is invisible
+git command failed    files=0 added=0 removed=0   DANGEROUS
+```
+
+The third is the hazard. When BuildLens runs git as a subprocess in Phase 7 and the command
+fails, stderr text such as `fatal: not a git repository` is classified entirely as context and
+summarizes to zeros. BuildLens would then report `Claude changed nothing` when the truth is
+`we failed to look`. Those are opposite statements and the reader cannot distinguish them.
+
+This does not require solving in Phase 2. It MUST be resolved before or during Phase 7, when
+the Git boundary is built, and the likely mechanism is the subprocess exit status rather than
+anything in the text. Record the resolution as an explicit decision rather than letting the
+zeros stand by default.
+
+Also noted: renames and binary changes are currently invisible in the summary. Neither is a
+defect against the agreed specification; both are consequences of a model built from line
+counts, and the learner should be able to say so when defending it.
+
+
+## Phase 2 — session of 2026-08-26, second sitting
+
+DELAYED RETRIEVAL SATISFIED, evidence `EV-P2-POSITION-064-CLOSE`. The unaided variant of
+`INFORMATION_NOT_PRESENT_IN_THE_INPUT` owed since `EV-P1-TRANSFER-058` is now banked in a
+fourth domain. Asked whether the label `"added"` returned for `+RETRIES = 5` can say the line
+came from `config.py`, the learner answered no and named the mechanism unaided: you would have
+to look at the `diff --git` above it. That is positional context the single-line contract does
+not supply. The concept now has its third variant across two contexts plus one delayed
+retrieval; it moves toward MASTERED once the learner defends it in the oral-defence format.
+
+CALIBRATION IS NOW LIVE. The first two confidence numbers in the project were recorded this
+sitting, after roughly eight consecutive omissions. The scale was confirmed as out of 100.
+
+```text
+EV-P2-SYNTAX-066        8/100   correct    large underconfidence
+EV-P2-POSITION-064-CLOSE 80/100  correct    well calibrated
+```
+
+Watch whether low numbers cluster on syntax questions specifically. Keep asking every time;
+the learner still does not volunteer them.
+
+New remediation chain closed, `EV-P2-SYNTAX-065` and `EV-P2-SYNTAX-066`. Blocker
+`SYNTAX_READING` on string-literal quotes, surfaced when the learner wrote `would it not be
+able to return anything because of the ""`. The diff problem was stopped and the syntax
+isolated at R0 per LEARNING_RULES 14.3. The learner predicted `added` and `5` correctly and
+explained that the quotes are not part of the value. A near-transfer with single quotes was
+also correct, and the learner reached the nesting rule unaided after `marker == "diff --git"`
+was run and printed `True`. `'` and `"` are now known to be a style choice, not a semantic one.
+
+Process note that worked and should continue: part 2 of the near-transfer was answered `idk`
+and was settled by generating real output rather than by asserting the answer.
+
+NEXT, unchanged and not yet started: `classify_diff_line` gains the `file_header` label,
+test-first. Then lists and iteration through the implementation-adjacent loop. Then the
+summary function from the four cases in `EV-P2-CASES-063`.
+
+LEARNER HYPOTHESIS, offered unprompted on 2026-08-26 and to be tested rather than assumed:
+
+> "syntax is more of a struggle for me than logic"
+
+The first two calibration points are consistent with it — 8/100 on a quote-syntax question,
+80/100 on a design question, both answers correct. Two points establish nothing. Tag each
+future confidence number as SYNTAX or DESIGN so the claim can be checked against evidence
+rather than impression. If it holds, the consequence is concrete: syntax gets isolated at R0
+on sight, while design questions should be issued at full difficulty without scaffolding.
