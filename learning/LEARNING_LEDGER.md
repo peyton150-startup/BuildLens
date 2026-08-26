@@ -8910,3 +8910,143 @@ the open question was made concrete as a line count after the learner asked what
 RECOVERY STATUS:
 stable-at-rung
 ```
+
+```text
+EVIDENCE ID:
+EV-P2-RECORD-081
+
+DATE / PHASE / GATE:
+2026-08-26 / Phase 2 / DESIGN DECISION with oral defence, tuple versus record
+
+IMPLEMENTATION TRIGGER:
+summarize_diff must return three values. Every function the learner has written returns one.
+
+ADJACENT CONCEPT:
+class, dataclass, instance, attribute, tuple, unpacking. Positional access versus named access.
+
+EXERCISE TYPE:
+design
+
+SOURCE / CONTEXT:
+BuildLens
+
+PROBLEM — VERBATIM:
+Option A returns the three numbers directly; the caller must remember the order.
+Option B returns the record you named; the names travel with the values, at the cost of a class
+definition and one import.
+Which one, and why?
+
+then: What would have to be true for Option A to be the better choice here?
+
+MY ANSWER — VERBATIM:
+I like B but i ma not totaly sure why?
+
+a is cooked and B is not cooked
+
+would it print the files changed number
+the module error is thrown
+
+it organizes all the prints inot a place where you have to specifically call a vairable from it,
+what is that place called give me vocab words
+
+the attriute is held inside the class that can be unpakced by a user or function by position or
+by calling the exact name, so you do not need to remember where anything is because it can be
+unpacked from any position
+
+no, i might have been wrong on that
+
+yes, you have to have a class that holdseverything instead of just holding it, but that does not
+make it that much slower
+
+if the order was obvious but once the tuple turns into 4 or 5 then you need a class to hold the
+values
+
+MY REASONING — VERBATIM:
+so you do not need to remember where anything is
+
+if the order was obvious but once the tuple turns into 4 or 5 then you need a class to hold the
+values
+
+CONFIDENCE BEFORE CHECK:
+80 on the earlier question about storing the classifier result once; not provided on the
+decision itself
+
+TOOLS / HELP USED BEFORE COMMITMENT:
+none. Vocabulary was requested by the learner AFTER they had described the mechanism correctly
+in their own words, and was supplied then.
+
+RESULT:
+correct, with one claim falsified by the learner's own test
+
+MISCONCEPTION / GAP:
+The decision was made before the reasoning existed — `I like B but i ma not totaly sure why`.
+Rather than accept the choice, the two failure cases were made concrete and run.
+
+Option A with a misremembered order printed 2 under the name `added` and exited 0. Option B with
+a misspelled field raised AttributeError, named the mistake, suggested the correct field, and
+exited 1. The learner predicted both outcomes correctly, calling A `cooked` and B `not cooked`,
+and identified that A prints the files_changed number.
+
+Error name corrected: the learner said `the module error is thrown`. It is AttributeError — the
+object exists, the field on it does not. Taxonomy now has five members.
+
+One claim in the learner's explanation was FALSE and they caught it themselves when asked to
+predict: they said a dataclass instance can be unpacked by position as well as by name. Run:
+`files, added, removed = summary` raises TypeError, cannot unpack non-iterable DiffSummary
+object. The learner had already answered `no, i might have been wrong on that` before it ran.
+
+That falsification improved the argument rather than damaging it. Option B does not ADD named
+access alongside positional; it REMOVES position as a way in. That removal is the entire point,
+and it is why the misspelling failed loudly instead of silently returning the wrong number.
+
+New misconception recorded and immediately resolved: `dataclass_is_unpackable`.
+
+ORAL DEFENCE, assessed against docs/DESIGN_REVIEW_RUBRIC.md. The learner produced every required
+element without the labels being named:
+
+requirement    three counts must reach a caller without being confused for one another
+alternative    a plain tuple
+mechanism      the value is reached by name, so position cannot be gotten wrong
+downside       an extra class definition, judged negligible in speed at three integers
+reversal       a tuple is better when the order is obvious and the count is small, and the
+               learner offered the threshold themselves — four or five values needs names
+
+The reversal condition was answered without hesitation and is the element the rubric says is
+most often missing.
+
+CORRECT MODEL — ADDED AFTER ATTEMPT:
+positional access   you get the value by knowing WHERE it is    tuple
+named access        you get the value by knowing WHAT it is     attribute on an instance
+
+A silent wrong number is worse than a loud failure. This is the same shape as the learner's own
+git-failure hazard, where zeros are reported confidently when the truth is that nothing was
+read.
+
+WHY THIS MATTERS TO THE REAL IMPLEMENTATION:
+DiffSummary is the first named type in BuildLens and the first decision the learner defended
+under challenge rather than merely made.
+
+TRANSFER / NEXT RETRIEVAL:
+Build summarize_diff test-first. Then delete the three single-count functions in a separate
+patch.
+
+PARENT EVIDENCE ID:
+EV-P2-DRY-080
+
+PRIMARY BLOCKER:
+none
+
+SCAFFOLD RUNG:
+R6
+
+WHY THIS RUNG:
+Open design choice on real project code, with adversarial follow-up and a demanded reversal
+condition.
+
+SUPPORT PROVIDED BEFORE THIS ATTEMPT:
+the two options were presented with their costs; vocabulary was supplied on request after the
+mechanism had been described correctly; both failure cases were generated rather than asserted
+
+RECOVERY STATUS:
+defended
+```

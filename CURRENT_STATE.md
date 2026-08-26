@@ -1374,3 +1374,107 @@ splitlines boundary                   unaided retrieval owed, then string -> lis
 exit status retrieval                 owed, unannounced, not a Python test run
 branch_precedence retrieval           owed, needs a longer gap
 ```
+
+## Phase 2 — DiffSummary chosen and defended
+
+Evidence `EV-P2-RECORD-081`. The learner chose Option B, a `DiffSummary` record, over a plain
+tuple, and defended it under challenge.
+
+```text
+positional access   you get the value by knowing WHERE it is    tuple
+named access        you get the value by knowing WHAT it is     attribute on an instance
+```
+
+The decision arrived before the reasoning — `I like B but i ma not totaly sure why`. Both
+failure cases were then generated rather than argued:
+
+```text
+Option A, wrong order        printed 2 under the name "added", exit 0, nobody finds out
+Option B, misspelled field   AttributeError, named the mistake, suggested the fix, exit 1
+```
+
+A is dangerous BECAUSE it succeeded. Same shape as the learner's own git-failure hazard.
+
+One claim in the learner's explanation was false and they caught it themselves before it ran:
+they said a dataclass can be unpacked by position as well as by name. It cannot —
+`files, added, removed = summary` raises TypeError. Recorded as `dataclass_is_unpackable`,
+resolved immediately. The falsification strengthened the argument: Option B does not add named
+access alongside positional, it REMOVES position as a way in, which is exactly why the
+misspelling failed loudly.
+
+Vocabulary was requested by the learner AFTER describing the mechanism correctly in their own
+words: class, dataclass, instance, attribute, tuple, unpacking. Supplying it then rather than
+earlier was the right order and should be repeated.
+
+Error taxonomy now has five members, all exiting non-zero:
+
+```text
+ModuleNotFoundError   the file is not there
+ImportError           the file is there, the name is not, caught at the import line
+NameError             the name is not there, caught where it is used
+AttributeError        the object exists, the field on it does not
+AssertionError        everything exists, the value is wrong
+```
+
+ORAL DEFENCE PASSED against `docs/DESIGN_REVIEW_RUBRIC.md`, with no labels prompted:
+
+```text
+requirement    three counts must reach a caller without being confused for one another
+alternative    a plain tuple
+mechanism      the value is reached by name, so position cannot be gotten wrong
+downside       an extra class definition, judged negligible at three integers
+reversal       a tuple is better when order is obvious and the count is small — the learner
+               offered the threshold unprompted, four or five values needs names
+```
+
+The reversal condition is the element the rubric flags as most often missing, and it was
+answered without hesitation.
+
+## Phase 2 — PAUSED RED, deliberately
+
+`test_summarize.py` now contains a failing test and this is the intended state:
+
+```python
+def test_summarize_diff_reports_all_three_counts():
+    result = summarize_diff(TWO_FILE_DIFF)
+    assert result.files_changed == 2
+    assert result.lines_added == 3
+    assert result.lines_removed == 2
+```
+
+`summarize.py` has no `summarize_diff` and no `DiffSummary`. The import at the top of the test
+file asks for `summarize_diff`, so the suite fails at the import line.
+
+RESUME HERE. The learner was asked which of the five errors this produces and at which line,
+and had not answered when the session paused. That question is the first thing to ask tomorrow.
+Do not answer it for them and do not run the suite before they commit.
+
+Agreed sequencing for the next patch, one idea at a time:
+
+```text
+1. predict the failure, then build DiffSummary and summarize_diff, test-first
+2. delete count_added_lines, count_removed_lines, count_changed_files once nothing calls them
+3. splitlines boundary, string -> list, after its unaided retrieval
+```
+
+Still owed and unannounced: the exit-status retrieval, in a form that is not a Python test run.
+Still owed after a longer gap: the `branch_precedence` retrieval.
+
+### Resume question SPOILED — Claude's error, tenth prompt defect
+
+The paused-red state above was intended as tomorrow's opening question: which of the five errors
+does the failing import produce, and at which line. Claude then ran the suite in the same
+message in order to verify the red state, printing `ImportError` before the learner had
+committed to a prediction.
+
+This is the tenth recorded prompt defect and the first that destroyed a planned assessment
+rather than merely confusing one. The instruction not to run the suite before the learner
+commits had been written into HANDOFF.md by Claude in the same turn.
+
+RULE: verify a red state BEFORE writing the test into the conversation, or not at all. Never run
+a suite in the same message that asks the learner to predict its output.
+
+Salvage, and it is arguably the better question: ask the learner to EXPLAIN why the failure is
+`ImportError` at the import line rather than `NameError` at the call site, given that in both
+cases a name is missing from a file that exists. Then issue one fresh unspoiled prediction
+before any code is written.
