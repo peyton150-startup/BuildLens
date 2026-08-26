@@ -8,9 +8,10 @@ Contract:
 
 
 def classify_diff_line(line):
-    if (
-        line.startswith("diff --git")
-        or line.startswith("index ")
+    if line.startswith("diff --git"):
+        return "file_header"
+    elif (
+        line.startswith("index ")
         or line.startswith("--- ")
         or line.startswith("+++ ")
         or line.startswith("@@")

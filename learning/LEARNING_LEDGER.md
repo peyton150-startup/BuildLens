@@ -7448,3 +7448,423 @@ content was not restated
 RECOVERY STATUS:
 recovered-at-target
 ```
+
+```text
+EVIDENCE ID:
+EV-P2-BRANCH-068
+
+DATE / PHASE / GATE:
+2026-08-26 / Phase 2 / implementation, branch order and its justification
+
+IMPLEMENTATION TRIGGER:
+Making the failing `file_header` test green required deciding where the new branch goes.
+
+ADJACENT CONCEPT:
+Branch order matters only when one condition's matches are contained in another's. Where
+conditions cannot both match, order is a readability choice, not a correctness requirement.
+
+EXERCISE TYPE:
+design
+
+SOURCE / CONTEXT:
+BuildLens, `classify.py`
+
+PROBLEM — VERBATIM:
+To make it return "file_header" instead, does it stay where it is, or does it need to be
+somewhere else? If it moves, does it go above the existing `if` or below it? Your reason
+matters more than the position.
+
+MY ANSWER — VERBATIM:
+yes make it fileheader and add it before all the others since it appears first on the git diff
+
+no but if it classifies as file header than we know that every call after that is under this
+file until we have another file header
+
+no nothing matches, so i guess the order could be below, but not sure why
+
+yeah the order matters here becuase there is a part of it that is included in the other but for
+this it does not have that nuance
+
+MY REASONING — VERBATIM:
+since it appears first on the git diff
+
+there is a part of it that is included in the other but for this it does not have that nuance
+
+CONFIDENCE BEFORE CHECK:
+70 out of 100, tagged DESIGN
+
+TOOLS / HELP USED BEFORE COMMITMENT:
+none
+
+RESULT:
+right placement, wrong reason, then correct principle unaided
+
+MISCONCEPTION / GAP:
+New misconception `branch_order_mirrors_input_order`: the learner justified putting the branch
+first because `diff --git` appears first in the diff FILE. Branch order concerns which
+conditions can both match one string; the function never sees more than one line and has no
+knowledge of file order. This directly contradicted the learner's own conclusion in
+EV-P2-POSITION-064-CLOSE, and quoting that back was enough to dislodge it.
+
+The learner then checked all six remaining conditions against the string, found none matched,
+and correctly concluded the position was free — while stating honestly that they did not know
+why. A contrast case (`"+++ b/app.py"`, which matches both `"+++ "` and `"+"`) produced the
+general rule in the learner's own words.
+
+UNPROMPTED CONTRIBUTION, recorded because it is ahead of the plan: asked whether the function
+knows the line came first, the learner answered no and then volunteered that once a line is
+classified `file_header`, every later call belongs to that file until the next `file_header`.
+That is the caller-held-state solution to the positional gap and is the design for a future
+per-file breakdown. Not built; out of scope for this patch.
+
+CORRECT MODEL — ADDED AFTER ATTEMPT:
+Order matters when one condition's match set is a subset of another's — `"+++ "` inside `"+"`.
+`"diff --git"` overlaps nothing in the chain, so it is correct anywhere. It was placed first
+for readability, which is now a defensible statement rather than a wrong one.
+
+WHY THIS MATTERS TO THE REAL IMPLEMENTATION:
+This retires `branch_precedence`, open since Phase 1, at the level of a stated rule rather than
+a memorised instance.
+
+TRANSFER / NEXT RETRIEVAL:
+Predict the whole-suite result after the change.
+
+PARENT EVIDENCE ID:
+EV-P2-TDD-067
+
+PRIMARY BLOCKER:
+branch_order_mirrors_input_order
+
+SCAFFOLD RUNG:
+R6
+
+WHY THIS RUNG:
+Real project code, open question, no options offered.
+
+SUPPORT PROVIDED BEFORE THIS ATTEMPT:
+the learner's own prior conclusion was quoted back; a contrast string was supplied
+
+RECOVERY STATUS:
+recovered-at-target
+```
+
+```text
+EVIDENCE ID:
+EV-P2-GREEN-069
+
+DATE / PHASE / GATE:
+2026-08-26 / Phase 2 / predict the suite result, step 1 complete
+
+IMPLEMENTATION TRIGGER:
+Confirming the patch turns the suite green without breaking the seven existing tests.
+
+ADJACENT CONCEPT:
+A failed `assert` raises and stops execution, so the final `print` and the exit code are one
+fact, not two.
+
+EXERCISE TYPE:
+tracing
+
+SOURCE / CONTEXT:
+BuildLens, both whole files
+
+PROBLEM — VERBATIM:
+Does `test passed` print, and what exit code? Does `test_file_header_is_metadata` still pass?
+
+MY ANSWER — VERBATIM:
+it prints and exit code 1, yes
+
+no assertion error will not run
+
+it prints then assertion error and stops execution
+
+im not sure
+
+yes
+
+fileheader
+
+passes
+
+the elif and returns metadata
+
+it prints, exit code 0, 20
+
+MY REASONING — VERBATIM:
+no assertion error will not run
+
+CONFIDENCE BEFORE CHECK:
+30 out of 100 mid-sequence, then 20 out of 100 on the final correct prediction
+
+TOOLS / HELP USED BEFORE COMMITMENT:
+none; the suite was run only after the final prediction
+
+RESULT:
+wrong twice, then correct after decomposition
+
+MISCONCEPTION / GAP:
+Twice the learner paired a printed success with exit code 1, which cannot happen: the print is
+the last statement and an AssertionError stops execution before it. Recorded as
+`output_and_exit_status_are_independent`. The learner articulated the correct rule when asked
+directly, then reverted to the inconsistent pairing on the next prediction, so the rule was
+available but not yet driving the trace.
+
+Two prompt defects, mine, both of which made it worse and are recorded as process evidence:
+a prediction was requested against a previous run the learner had to hold in memory rather
+than see, violating the standing show-whole-files rule; and a four-blank two-row table was
+issued after a `30` confidence, which produced `im not sure`. Decomposing to one branch test
+per question — does the string start with these characters, what is returned, does the assert
+match — recovered it in four exchanges with no further error.
+
+CORRECT MODEL — ADDED AFTER ATTEMPT:
+Eight calls run in order; all eight pass; `print("test passed")` executes; the process exits 0.
+Confirmed by running: `test passed`, exit code 0.
+
+CALIBRATION, tagged per the learner's own hypothesis:
+
+8/100   SYNTAX    correct
+80/100  DESIGN    correct
+70/100  DESIGN    correct
+50/100  mixed     correct
+20/100  TRACING   correct
+
+Five for five correct with confidence trending DOWN. The learner's syntax-versus-logic
+hypothesis is not what the data shows. The two lowest numbers, 20 and 30, both follow an
+admission of being unsure and precede sequences the learner then completed without error. The
+working revision: the learner rates how supported the path felt, not whether the reasoning was
+sound. The cost is concrete — at 20 they would have accepted a wrong correction from Claude
+while being right.
+
+WHY THIS MATTERS TO THE REAL IMPLEMENTATION:
+Step 1 of Phase 2 is complete. `files_changed` can now be derived from counting one label, and
+the knowledge that `diff --git` marks a file lives only in the classifier, which was the point
+of the learner's Option A decision.
+
+TRANSFER / NEXT RETRIEVAL:
+Lists and iteration, which the learner has never used.
+
+PARENT EVIDENCE ID:
+EV-P2-BRANCH-068
+
+PRIMARY BLOCKER:
+output_and_exit_status_are_independent
+
+SCAFFOLD RUNG:
+R6, descended to R1, climbed back
+
+WHY THIS RUNG:
+Two whole files and an eight-call suite, reduced to single branch tests, then rebuilt.
+
+SUPPORT PROVIDED BEFORE THIS ATTEMPT:
+both whole files were shown after the learner asked for the code; the candidate set was
+narrowed to two tests, then to one branch at a time
+
+RECOVERY STATUS:
+recovered-at-target
+```
+
+```text
+EVIDENCE ID:
+EV-P2-TEACH-070
+
+DATE / PHASE / GATE:
+2026-08-26 / Phase 2 / MILESTONE — teach one file aloud
+
+IMPLEMENTATION TRIGGER:
+CLAUDE.md requires a learner explanation before a behaviour-adding patch closes.
+
+ADJACENT CONCEPT:
+Explaining a file means stating its contract and its limits, not narrating its lines.
+
+EXERCISE TYPE:
+design
+
+SOURCE / CONTEXT:
+BuildLens, `classify.py`
+
+PROBLEM — VERBATIM:
+Teach it to me as if I've never seen it and don't know what a diff is. I'll push on anything
+you assert without a reason, and I'll ask what the file can't do before we're finished.
+
+MY ANSWER — VERBATIM:
+the def classify diff line is a function that looks at each line in the git diff and classifies
+the line as either fileheader metadata added removed or context, it does this by using if
+statments and the line.startwith function to look at the first part of each line to catagorize
+what it is going to return. a diff is the summary of the changes that have jsut been made to
+the file, the diff names what file, the relateed metadata  as well as the actual lines that
+were added, so you cna see what was added or removed, the file cnat yet differentiate if you
+are given a shopping list, it will jsut return context
+
+ok, so it calls one line but we would run it until we got to the end of the diff so we can
+create the summary of the diff
+
+if the git fails it will still be contect
+
+because we have the file header and we can count how many their are
+
+MY REASONING — VERBATIM:
+because we have the file header and we can count how many their are
+
+CONFIDENCE BEFORE CHECK:
+90 on the one-line-per-call correction, 60 on the limitation selection, 90 on why file counting
+is no longer a limitation. All correct.
+
+TOOLS / HELP USED BEFORE COMMITMENT:
+none
+
+RESULT:
+correct after one challenge
+
+MISCONCEPTION / GAP:
+The opening sentence said the function "looks at each line in the git diff". It sees exactly
+one line and knows nothing of the diff; the caller does the repeating. Challenged with a single
+question and corrected immediately at 90 confidence, with the learner volunteering the
+iteration that has not been built yet.
+
+Unchallenged minor point, left for later: `line.startswith` was called a function. It is a
+method called on the string. Not corrected now because it would have interrupted the
+explanation for no current benefit.
+
+Asked for a limitation on SUCCESSFUL git output the learner answered `i am not sure`. Per the
+standing rule the open question became a four-way selection containing three real limitations
+and one distractor that today's patch had just eliminated. The learner picked A, B and C
+correctly and rejected D, then explained D correctly: `diff --git` now has its own label and
+can simply be counted.
+
+CORRECT MODEL — ADDED AFTER ATTEMPT:
+One call, one line, one label, nothing outside the call changed. Real limitations: a prose line
+reading `--- notes` is indistinguishable from a header; no line can say which file it belongs
+to; a rename with no content edit is invisible. Not a limitation: counting files, which is what
+the `file_header` label bought.
+
+WHY THIS MATTERS TO THE REAL IMPLEMENTATION:
+The learner can now state what the file promises and what it costs, which is the standard the
+design review will hold them to.
+
+TRANSFER / NEXT RETRIEVAL:
+EV-P2-TRANSFER-071
+
+PARENT EVIDENCE ID:
+EV-P2-GREEN-069
+
+PRIMARY BLOCKER:
+none
+
+SCAFFOLD RUNG:
+R6
+
+WHY THIS RUNG:
+Open-ended teaching of real project code with adversarial follow-up.
+
+SUPPORT PROVIDED BEFORE THIS ATTEMPT:
+none; one open question was converted to a selection after `i am not sure`
+
+RECOVERY STATUS:
+milestone-item-satisfied
+```
+
+```text
+EVIDENCE ID:
+EV-P2-TRANSFER-071
+
+DATE / PHASE / GATE:
+2026-08-26 / Phase 2 / MILESTONE — transfer variant, unseen domain
+
+IMPLEMENTATION TRIGGER:
+CLAUDE.md requires one transfer variant before the milestone closes.
+
+ADJACENT CONCEPT:
+A shorter prefix tested before a longer one makes the longer branch unreachable.
+
+EXERCISE TYPE:
+tracing plus design critique
+
+SOURCE / CONTEXT:
+academic micro-example, no diff and no git vocabulary
+
+PROBLEM — VERBATIM:
+def classify_code(code):
+    if code.startswith("A"):
+        return "alpha"
+    elif code.startswith("AB"):
+        return "beta"
+    else:
+        return "other"
+
+1. What does `classify_code("ABC")` return?
+2. Is anything wrong here? If so, what and why.
+
+MY ANSWER — VERBATIM:
+Alpha, not sure whats wrong but it will go with A because that is the first statemet that is
+checked
+
+your are right it will never retuen beta
+
+we need to switch the AB to call that first which is the same with the --- and the - for diff
+line
+
+if you check for one startswith of a string but you have a longer verson checked right after
+the second string will never get checked because the first will always call, the first is still
+apart of the second so it never gets to the second
+
+MY REASONING — VERBATIM:
+if you check for one startswith of a string but you have a longer verson checked right after
+the second string will never get checked because the first will always call, the first is still
+apart of the second so it never gets to the second
+
+CONFIDENCE BEFORE CHECK:
+90 out of 100 on the fix and the analogy
+
+TOOLS / HELP USED BEFORE COMMITMENT:
+none
+
+RESULT:
+correct
+
+MISCONCEPTION / GAP:
+Part 1 was correct with the right mechanism. Part 2 was not seen unaided; one closed question —
+can any input ever return "beta" — produced it. The learner then supplied the fix, the analogy
+to `"--- "` inside `"-"`, and, when asked to drop all four literals, the general rule.
+
+Attribution note, third occurrence this session: the learner wrote `your are right` in response
+to a question that asserted nothing. They are crediting Claude for conclusions they reached
+themselves. This is the same pattern as the underconfidence and is now tracked as
+`credits_examiner_for_own_conclusion`.
+
+CORRECT MODEL — ADDED AFTER ATTEMPT:
+Verified by running both versions over A9, ABC, AB, ZZ:
+
+input  broken  fixed
+A9     alpha   alpha
+ABC    alpha   beta
+AB     alpha   beta
+ZZ     other   other
+
+`beta` is unreachable in the broken version.
+
+WHY THIS MATTERS TO THE REAL IMPLEMENTATION:
+This is the third variant of `branch_precedence` across a second context, in a domain with no
+diff vocabulary, with the rule stated generally. Under LEARNING_RULES 5 the concept now has
+three unseen correct variants across two contexts plus a correct explanation.
+
+TRANSFER / NEXT RETRIEVAL:
+One delayed retrieval remains before `branch_precedence` can be marked MASTERED.
+
+PARENT EVIDENCE ID:
+EV-P2-TEACH-070
+
+PRIMARY BLOCKER:
+none
+
+SCAFFOLD RUNG:
+R5
+
+WHY THIS RUNG:
+One function, one branch chain, unseen domain, no hints given.
+
+SUPPORT PROVIDED BEFORE THIS ATTEMPT:
+none; one closed question was used after part 2 stalled
+
+RECOVERY STATUS:
+transfer-satisfied
+```

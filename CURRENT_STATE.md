@@ -948,3 +948,132 @@ The first two calibration points are consistent with it — 8/100 on a quote-syn
 future confidence number as SYNTAX or DESIGN so the claim can be checked against evidence
 rather than impression. If it holds, the consequence is concrete: syntax gets isolated at R0
 on sight, while design questions should be issued at full difficulty without scaffolding.
+
+## Phase 2 — step 1 complete
+
+`classify_diff_line` now has five labels. `diff --git` returns `file_header` from its own
+leading branch; the other four metadata prefixes moved into an `elif` and keep `metadata`.
+Eight tests green, `python test_classify.py` prints `test passed`, exit code 0.
+
+The branch was placed first for READABILITY, not correctness. The learner verified that none
+of the six remaining conditions match a `diff --git` line, so its position is free. The rule,
+in the learner's words: order matters when "there is a part of it that is included in the
+other". This retires `branch_precedence`, open since Phase 1, as a stated rule rather than a
+memorised instance.
+
+New misconceptions this sitting:
+
+- `branch_order_mirrors_input_order` — branch order justified by where the line appears in the
+  diff file. Dislodged by quoting the learner's own EV-P2-POSITION-064-CLOSE conclusion back.
+- `output_and_exit_status_are_independent` — a printed success paired with exit code 1, twice.
+  The learner stated the correct rule when asked directly, then reverted on the next
+  prediction, so the rule is available but not yet driving the trace. Expect this one again.
+
+CALIBRATION, five points, all on CORRECT answers:
+
+```text
+8/100   SYNTAX    correct
+80/100  DESIGN    correct
+70/100  DESIGN    correct
+50/100  mixed     correct
+20/100  TRACING   correct
+```
+
+The learner's syntax-versus-logic hypothesis does NOT fit this data. Revised working
+hypothesis, to be tested rather than assumed: the learner rates how supported the path felt
+rather than whether the reasoning held. Both 20 and 30 followed an admission of being unsure
+and preceded error-free sequences.
+
+TWO PROMPT DEFECTS, mine, fourth and fifth in the project:
+
+- a prediction was requested against a previous run the learner had to recall rather than see,
+  violating the standing show-whole-files rule. The learner asked for the code, correctly.
+- a four-blank two-row table was issued immediately after a 30 confidence and produced
+  `im not sure`. After a low confidence, reduce the number of blanks rather than increasing
+  structure. One branch test per question recovered it in four exchanges.
+
+UNPROMPTED LEARNER CONTRIBUTION, not built and out of scope: once a line is classified
+`file_header`, every later line belongs to that file until the next `file_header`. That is the
+caller-held-state answer to the positional gap and is the design for a per-file breakdown when
+one is wanted.
+
+MILESTONE PAUSE IS ACTIVE per CLAUDE.md. Automated tests and learner trace are satisfied.
+Still owed before Phase 2 continues: the learner teaching `classify.py` aloud, and one transfer
+variant. Do not begin lists and iteration until both are done.
+
+### Standing retrieval commitment — do not drop
+
+`output_and_exit_status_are_independent` is NOT settled and is scheduled for re-testing.
+
+Evidence: in `EV-P2-GREEN-069` the learner twice predicted that `test passed` would print AND
+the exit code would be 1. Asked directly whether both could happen, they answered correctly —
+"no assertion error will not run" — and then produced the same inconsistent pairing on the very
+next prediction. A rule that can be stated on demand but does not govern the next trace is not
+yet knowledge.
+
+Re-test in a DIFFERENT surface form, not another run of `test_classify.py`. Candidates:
+
+- a script that prints, then raises, with the print BEFORE the failure rather than after;
+- a script that prints and exits 0 while reporting a logical failure in its text;
+- a command that writes to stderr and still exits 0.
+
+The third is the one that matters most, because it is the Phase 7 git hazard in miniature: text
+and exit status are separate channels, and the whole `fatal: not a git repository` problem
+exists because BuildLens would read the text and ignore the status. Settling this concept is a
+prerequisite for the learner making that Phase 7 decision on their own evidence.
+
+Do not announce the re-test in advance.
+
+## Phase 2 — step 1 MILESTONE CLOSED
+
+All four requirements met, evidence `EV-P2-GREEN-069`, `EV-P2-TEACH-070`, `EV-P2-TRANSFER-071`.
+
+```text
+automated tests      eight green, exit 0
+learner trace        predicted the run before it ran
+learner explanation  taught classify.py, defended three limitations
+transfer variant     unseen domain, found the dead branch, stated the rule generally
+```
+
+`branch_precedence` now has three unseen correct variants across two contexts plus a correct
+general explanation. One DELAYED RETRIEVAL remains before it can be marked MASTERED — schedule
+it after a gap, in a domain that is neither diffs nor letter codes.
+
+Corrected during the explanation: the learner opened by saying the function "looks at each line
+in the git diff". One question fixed it at 90 confidence, and they volunteered the caller-side
+iteration unprompted. Left uncorrected on purpose: `startswith` was called a function rather
+than a method. Not worth interrupting the explanation for; raise it when methods matter.
+
+Confirmed limitations the learner can now name and defend: `--- notes` as prose is
+indistinguishable from a header; no line can say which file it belongs to; a rename with no
+content edit is invisible. Correctly rejected as NOT a limitation: counting files, which is
+exactly what this patch bought.
+
+CALIBRATION, nine points, every underlying answer correct:
+
+```text
+8/100   SYNTAX    correct
+80/100  DESIGN    correct
+70/100  DESIGN    correct
+50/100  mixed     correct
+20/100  TRACING   correct
+90/100  DESIGN    correct
+60/100  DESIGN    correct
+90/100  DESIGN    correct
+90/100  TRANSFER  correct
+```
+
+Nine for nine. The syntax-versus-logic hypothesis does not fit. The revised hypothesis does:
+the low numbers cluster where the learner had been walked through the path, the high numbers
+where they moved unaided. The learner is measuring how much help arrived, not whether the
+reasoning was sound.
+
+New tracked pattern `credits_examiner_for_own_conclusion`, three occurrences this sitting. The
+learner wrote "your are right" in response to a question that asserted nothing. Combined with
+the underconfidence, the practical cost is that a wrong correction from Claude would likely be
+accepted. Worth testing directly at some point with a confidently stated wrong claim.
+
+NEXT: lists and iteration, which the learner has never used. The learner has already described
+what iteration must do — call the classifier once per line until the diff ends, and hold the
+last `file_header` seen — so the concept is motivated and does not need justifying. Do not
+write a loop in front of them before they have predicted what one does.
