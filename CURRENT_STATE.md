@@ -1128,3 +1128,42 @@ undetected — no test exists that would turn red.
 Note for the next sitting: the learner is now asking their own questions about the code rather
 than only answering. Two of the three best moments this session came from their questions, not
 from issued exercises. Leave room for that.
+
+## Phase 2 — lists and iteration, GATE PASSED
+
+Evidence `EV-P2-LIST-074`. The learner predicted an unseen `for` loop's output — three lines,
+`added removed context` — before it was run. That is the Phase 2 requirement and the standing
+rule that no loop is written in front of them unpredicted was honoured.
+
+Now known, none of it previously met:
+
+```text
+a list holds many values in order under one name
+len counts items in a list, characters in a string
+labels[1] selects one item by position
+for NAME in LIST: creates NAME and binds each item in turn
+the loop variable's name is chosen by the author
+indexing selects one; iteration visits all
+```
+
+UNPROMPTED: asked to print three labels using only what they already knew, the learner invented
+indexing without having seen it. They also worked out the arbitrary loop-variable name from a
+single `for banana in labels` example and raised it as a question before being told.
+
+Three misconceptions surfaced and resolved, all by generated output rather than assertion:
+
+- `nested_call_evaluation` — `print(len(labels[0]))` was expected to print words. Resolved by
+  evaluating inside-out; confirmed as 5, 7, 7.
+- `print_list_vs_iterate` — `print(labels)` was expected to show the first slot. It shows the
+  container, brackets and all, on one line.
+- `loop_vs_index` — a loop was defined as the tool for reaching a numbered slot. Resolved by
+  asking the learner to make the loop print only `"removed"`; they correctly answered that it
+  cannot.
+
+Calibration continues to be sound. 90 on a correct list-length answer, 40 on the one wrong
+answer of the sequence. The earlier underconfidence pattern did not repeat here.
+
+NEXT, and deliberately not started: accumulation. Counting labels across a loop requires a
+running total that survives between passes, which is a genuinely new idea and must not be
+folded into the same sitting as the loop itself. After that, the summary function can be built
+test-first from the four cases in `EV-P2-CASES-063`.

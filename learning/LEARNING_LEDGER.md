@@ -8085,3 +8085,142 @@ none; the learner was told only that the example contained no tests or asserts
 RECOVERY STATUS:
 stable-at-rung
 ```
+
+```text
+EVIDENCE ID:
+EV-P2-LIST-074
+
+DATE / PHASE / GATE:
+2026-08-26 / Phase 2 / PHASE GATE — predict a loop's output before seeing one run
+
+IMPLEMENTATION TRIGGER:
+The summary function must visit every line of a diff. The learner had never used a list or any
+form of iteration, and the standing rule forbids writing a loop in front of them before they
+have predicted what one does.
+
+ADJACENT CONCEPT:
+A list holds many values in order under one name. Indexing selects one by position. A `for`
+loop creates a name and binds it to each item in turn, running its block once per item.
+
+EXERCISE TYPE:
+tracing
+
+SOURCE / CONTEXT:
+academic micro-examples, no diff vocabulary
+
+PROBLEM — VERBATIM:
+labels = ["added", "removed", "context"]
+print(len(labels))
+
+then, without new syntax: Write the code that prints all three labels, one per line.
+
+then: for label in labels: print(label) — How many lines does that print, and what are they?
+
+MY ANSWER — VERBATIM:
+no idea, it could be added or it could be the sum of the 3 i do not know
+
+3, 90
+
+for labels it is counting the number of slots in the array and for word it is counting the
+number of characters i nthe word
+
+print(len(labels[0]))
+print(len(labels[1]))
+print(len(labels[2]))
+
+added
+ removed
+context
+
+"added" so it would be 5?
+
+500
+
+3 lines it is a for loop
+
+added, removed, context
+
+it prints the list, are you trying to get at that i can make a variable any name in the for loop
+and it will make that the variable that holds the value of the tring?
+
+no, would it print the first slot on the list and then the loop prints all of them?
+
+the loop is when you want to be able to look at the specific numbered slots so i would call the
+second one, but in the print it just gives you all of them, 40
+
+no
+
+ok labels[1] then for all just run the loop
+
+MY REASONING — VERBATIM:
+for labels it is counting the number of slots in the array and for word it is counting the
+number of characters i nthe word
+
+CONFIDENCE BEFORE CHECK:
+90 on the list length after conversion to a selection; 40 on the loop-versus-index question,
+which was the one wrong answer. Both well calibrated — the first correct, the second not.
+
+TOOLS / HELP USED BEFORE COMMITMENT:
+none
+
+RESULT:
+gate passed
+
+MISCONCEPTION / GAP:
+GATE: the learner predicted `3 lines: added, removed, context` for an unseen `for` loop before
+it was run, which is the Phase 2 requirement.
+
+Notable, and unprompted: asked to print all three labels using only what they already knew, the
+learner INVENTED indexing — `labels[0]`, `labels[1]`, `labels[2]` — which had never been shown.
+
+Three misconceptions surfaced and were resolved:
+
+1. `nested_call_evaluation` — the invented code was `print(len(labels[0]))` and the learner
+   predicted it would print the words. Resolved by evaluating from the inside out: `labels[0]`
+   is `"added"`, so `len` of it is 5. Confirmed by running: 5, 7, 7.
+2. `print_list_vs_iterate` — `print(labels)` was expected to print the first slot. It prints
+   the container itself, `['added', 'removed', 'context']`, on one line.
+3. `loop_vs_index` — the learner defined a loop as the tool for reaching a specific numbered
+   slot. Resolved by asking them to make the loop print only `"removed"`. They answered `no`,
+   which is correct and settles the division: indexing selects one, iteration visits all.
+
+The loop variable was understood without being told. Shown `for banana in labels`, the learner
+asked whether the name is arbitrary and holds each value in turn. That is exactly right and was
+volunteered as a question rather than answered as a prompt.
+
+CORRECT MODEL — ADDED AFTER ATTEMPT:
+`len` counts items in a list and characters in a string — 3 and 5 for the same data. Indexing
+picks one item by position. `for NAME in LIST:` creates NAME, binds it to each item in order,
+and runs the indented block once per binding. The name is chosen by the author. A loop is the
+right tool when the same operation applies to every item; the alternative is one written line
+per item, which the learner priced correctly at 500 lines for 500 labels.
+
+WHY THIS MATTERS TO THE REAL IMPLEMENTATION:
+The summary function cannot be written without this. It also explains the eight repetitive call
+lines at the bottom of `test_classify.py`, which the learner had independently complained were
+hard to read.
+
+TRANSFER / NEXT RETRIEVAL:
+Apply the loop to real diff lines and the existing classifier. Then accumulation, which is a
+genuinely new concept and should not be folded into this one.
+
+PARENT EVIDENCE ID:
+EV-P2-EXEC-073
+
+PRIMARY BLOCKER:
+loop_vs_index, resolved
+
+SCAFFOLD RUNG:
+R0 for the list literal, climbing to R2 for the loop
+
+WHY THIS RUNG:
+No diff vocabulary, no branches, no functions, three short words in one list.
+
+SUPPORT PROVIDED BEFORE THIS ATTEMPT:
+the opening `len` question was converted to a three-way selection after `no idea`; the `for`
+syntax form was explained once, minimally, after the learner answered `what?` to a question
+about where the loop variable comes from
+
+RECOVERY STATUS:
+gate-passed
+```
