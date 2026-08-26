@@ -18,7 +18,7 @@ def test_single_minus_line_is_removed():
     assert result == "removed"
 
 
-def test_file_header_is_metadata():
+def test_plus_file_marker_is_metadata():
     result = classify_diff_line("+++ b/app.py")
     assert result == "metadata"
 
@@ -51,7 +51,7 @@ def test_diff_git_line_is_file_header():
 test_single_plus_line_is_added()
 test_single_minus_line_is_removed()
 test_deleted_dashes_line_is_removed()
-test_file_header_is_metadata()
+test_plus_file_marker_is_metadata()
 test_hunk_marker_is_metadata()
 test_unchanged_line_is_context()
 test_empty_line_is_context()

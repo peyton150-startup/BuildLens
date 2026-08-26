@@ -1077,3 +1077,54 @@ NEXT: lists and iteration, which the learner has never used. The learner has alr
 what iteration must do — call the classifier once per line until the diff ends, and hold the
 last `file_header` seen — so the concept is motivated and does not need justifying. Do not
 write a loop in front of them before they have predicted what one does.
+
+## Phase 2 — rename done
+
+`test_file_header_is_metadata` is now `test_plus_file_marker_is_metadata`, renamed at both its
+definition and its call. Suite output unchanged: `test passed`, exit code 0. `file_header` now
+means exactly one thing across the codebase. Name chosen by the learner after rejecting `line`
+as insufficiently distinguishing.
+
+New misconception `missing_name_vs_failed_assertion`, evidence `EV-P2-RENAME-072`: a
+half-finished rename was predicted to raise an AssertionError. It raises `NameError` at the
+call site and the assert never runs — nothing is tested at all. Demonstrated by executing a
+half-renamed copy rather than describing it.
+
+This is adjacent to the standing `output_and_exit_status_are_independent` commitment and was
+raised without announcing it as the re-test. Both failures exit 1, so the exit code alone
+cannot separate "checked and disagreed" from "never checked". The scheduled re-test is still
+owed, still unannounced.
+
+Deferred with reasons, not forgotten:
+
+- Phase 7 git-failure decision — Phase 2 does not run git; deciding it now means deciding it
+  without the subprocess present.
+- `.gitignore` — near-worthless while syncing copies three named files into a fresh clone;
+  `__pycache__` has no path into the repo. Becomes real only if the workspace gains its own
+  `.git`.
+- `branch_precedence` delayed retrieval — requires a gap to mean anything.
+
+NEXT: lists and iteration. Still never used by the learner.
+
+## Phase 2 — learner-initiated: execution order
+
+Evidence `EV-P2-EXEC-073`. The learner asked unprompted how `test_classify.py` runs, reporting
+that `classify.py` reads easily but the test file does not. They predicted `A C B D` correctly
+first time on a six-line example and applied it to the real file unaided: a `def` binds a name
+without running the body, and nothing is tested until the calls at the bottom execute.
+
+The reported difficulty was VOLUME, not concept. Eight definitions of near-identical shape read
+as a wall. The learner found the structure when asked: three lines each, identical shape, two
+varying parts. Record this as a reading strategy, not a Python gap.
+
+Second learner-initiated question and the better one: where the tested line comes from. Answer
+given correctly — typed by hand. This retires the neighbourhood of the Phase 1 misconception
+`data_vs_external_resource`.
+
+Stated unaided, and it is the honest reading of a green suite: eight passing tests prove only
+the cases someone chose to write. This is exactly why `--- notes` and the failed-git case go
+undetected — no test exists that would turn red.
+
+Note for the next sitting: the learner is now asking their own questions about the code rather
+than only answering. Two of the three best moments this session came from their questions, not
+from issued exercises. Leave room for that.

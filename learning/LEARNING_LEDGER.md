@@ -7868,3 +7868,220 @@ none; one closed question was used after part 2 stalled
 RECOVERY STATUS:
 transfer-satisfied
 ```
+
+```text
+EVIDENCE ID:
+EV-P2-RENAME-072
+
+DATE / PHASE / GATE:
+2026-08-26 / Phase 2 / refactor — rename with no behaviour change
+
+IMPLEMENTATION TRIGGER:
+`test_file_header_is_metadata` tested `"+++ b/app.py"`, but `file_header` had just become the
+label for `diff --git` lines. The name pointed at the wrong concept.
+
+ADJACENT CONCEPT:
+A test name must distinguish this case from its neighbours. A rename must change names only —
+identical output and identical exit code — or it is not a refactor. A name is referenced in
+more than one place and all references must move together.
+
+EXERCISE TYPE:
+design plus tracing
+
+SOURCE / CONTEXT:
+BuildLens, `test_classify.py`
+
+PROBLEM — VERBATIM:
+Its name contains `file_header`. But `"file_header"` is now the label returned for `diff --git`
+lines — a different thing entirely. I'm asking you for the replacement name.
+
+then: If I rename the `def` but forget the call at the bottom, what happens? If I rename both,
+what changes in the output?
+
+MY ANSWER — VERBATIM:
+wouldnt it just be "line"
+
+"plusfilemarker"
+
+test_plus_file_maker_is_metadata
+
+it would test to see if the line is metadata and if not it throws an assetrion error, what is 2
+asking
+
+no, we changed it early so we dont have a mass renaming on our hands
+
+yes it would fail and stop execution
+
+MY REASONING — VERBATIM:
+we changed it early so we dont have a mass renaming on our hands
+
+CONFIDENCE BEFORE CHECK:
+not provided
+
+TOOLS / HELP USED BEFORE COMMITMENT:
+none
+
+RESULT:
+partial
+
+MISCONCEPTION / GAP:
+The first proposal, `line`, does not distinguish the test from its neighbours — every test
+passes a line and two of them expect `metadata`. Asked whether that name would identify the
+broken input six months later, the learner produced `plusfilemarker`, which does distinguish
+it, then applied lower_snake_case correctly when reminded of their own convention.
+
+The learner also volunteered the reason renaming now is cheap: doing it early avoids a mass
+rename later. That was unprompted and is the standard argument.
+
+New misconception `missing_name_vs_failed_assertion`: asked what happens when the `def` is
+renamed and the call is not, the learner predicted an AssertionError. They correctly said the
+function no longer exists, then still expected the assert to run. Settled by generating the
+real failure rather than asserting:
+
+NameError: name 'test_file_header_is_metadata' is not defined
+exit code: 1
+
+The assert never executed. Nothing was tested. Both failures exit 1, so the exit status alone
+cannot distinguish "checked and disagreed" from "never checked" — only the text can. This is
+the same two-channel problem as `fatal: not a git repository`, pointing the opposite way, and
+it was raised here without announcing it as the scheduled re-test.
+
+CORRECT MODEL — ADDED AFTER ATTEMPT:
+Renamed at both line 21 and line 54. Suite prints `test passed`, exit code 0 — byte-identical
+to before the rename, which is what makes it a refactor.
+
+WHY THIS MATTERS TO THE REAL IMPLEMENTATION:
+`file_header` now means exactly one thing across the codebase.
+
+TRANSFER / NEXT RETRIEVAL:
+`output_and_exit_status_are_independent` remains open. This attempt strengthened the
+neighbouring idea that one exit code can cover several different failures.
+
+PARENT EVIDENCE ID:
+EV-P2-TRANSFER-071
+
+PRIMARY BLOCKER:
+missing_name_vs_failed_assertion
+
+SCAFFOLD RUNG:
+R5
+
+WHY THIS RUNG:
+One rename across two references, no new control flow.
+
+SUPPORT PROVIDED BEFORE THIS ATTEMPT:
+the existing naming convention was quoted; the half-renamed file was executed to show the real
+error rather than describing it
+
+RECOVERY STATUS:
+recovered-at-target
+```
+
+```text
+EVIDENCE ID:
+EV-P2-EXEC-073
+
+DATE / PHASE / GATE:
+2026-08-26 / Phase 2 / learner-initiated question, execution order in a test file
+
+IMPLEMENTATION TRIGGER:
+The learner asked, unprompted, how `test_classify.py` actually runs — whether it starts at the
+top or the bottom, and whether the first function called is supposed to fail. They reported
+that `classify.py` reads easily but the test file does not.
+
+ADJACENT CONCEPT:
+A `def` binds a name; it does not execute the body. Reading order is not execution order once
+a file separates definitions from calls.
+
+EXERCISE TYPE:
+tracing
+
+SOURCE / CONTEXT:
+academic micro-example, then transferred to the real test file
+
+PROBLEM — VERBATIM:
+print("A")
+
+def f():
+    print("B")
+
+print("C")
+f()
+print("D")
+
+Write down the output in order, top to bottom.
+
+MY ANSWER — VERBATIM:
+A C B D
+
+my issue is when it is all those longer functions and there are a lot fo them, nothing gets
+tested at that moment, no the failure gives us what we need to fix
+
+3 lines each they test different things, where do they get the result =
+classify_diff_line("+value = 1") or the line they are testing
+
+it's typed in by hand
+
+they prove the cases we have created in the test classify
+
+MY REASONING — VERBATIM:
+my issue is when it is all those longer functions and there are a lot fo them
+
+CONFIDENCE BEFORE CHECK:
+not provided
+
+TOOLS / HELP USED BEFORE COMMITMENT:
+none
+
+RESULT:
+correct
+
+MISCONCEPTION / GAP:
+None on the principle. `A C B D` was predicted correctly first time and confirmed by running
+it, and the learner then applied it to the real file without help: nothing is tested when the
+`def` line is read, and no test in the file is currently expected to fail.
+
+The reported difficulty was VOLUME, not concept — eight definitions of similar shape. Addressed
+by having the learner observe that each test is three lines with an identical shape and only
+two varying parts, the input string and the expected label. This is a code-reading strategy
+rather than a Python fact and belongs with docs/CODE_READING_DEBUGGING_PLAYBOOK.md.
+
+Second learner-initiated question, and the better one: where the tested line comes from. The
+learner correctly answered that it is typed by hand, which retires the neighbourhood of the
+Phase 1 misconception `data_vs_external_resource`, where path-like characters in a string were
+read as an opened file.
+
+CORRECT MODEL — ADDED AFTER ATTEMPT:
+Python executes top to bottom. Each `def` creates a name and skips the body. The eight calls at
+the bottom then run in written order, and only then does anything get tested. Confirmed by
+running the micro-example: A, C, B, D.
+
+The consequence, stated by the learner unaided: eight passing tests prove only the cases
+someone chose to write. A green suite is not evidence of correctness on inputs nobody thought
+of, which is precisely why `--- notes` and the failed-git case go undetected.
+
+WHY THIS MATTERS TO THE REAL IMPLEMENTATION:
+Execution order is the prerequisite for iteration, which is the next topic. The learner needs
+to see that a loop moves the repetition from eight hand-written call lines into one construct.
+
+TRANSFER / NEXT RETRIEVAL:
+Lists and iteration.
+
+PARENT EVIDENCE ID:
+EV-P2-RENAME-072
+
+PRIMARY BLOCKER:
+none; reported difficulty was volume rather than concept
+
+SCAFFOLD RUNG:
+R2
+
+WHY THIS RUNG:
+Six lines, one definition, one call, no branches, no arguments, no return values.
+
+SUPPORT PROVIDED BEFORE THIS ATTEMPT:
+none; the learner was told only that the example contained no tests or asserts
+
+RECOVERY STATUS:
+stable-at-rung
+```
