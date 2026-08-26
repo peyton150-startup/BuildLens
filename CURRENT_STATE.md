@@ -1205,3 +1205,172 @@ Prompt-reading note, and it was Claude's risk rather than the learner's error: t
 `afterwards it goes back to zero for the next interation` had two opposite readings. It was
 disambiguated by asking rather than assumed. Keep doing that; three of this project's recorded
 defects came from not doing it.
+
+## Phase 2 — delayed retrievals, split result
+
+Evidence `EV-P2-RETR-076`, taken after a genuine session gap.
+
+```text
+accumulator reset placement   RETRIEVED, unaided, 90 confidence, correct
+splitlines                    NOT RETRIEVED, learner asked what it does
+```
+
+The accumulator retrieval counts. It used a summing form, `total + p` rather than `total + 1`,
+which is a real variation rather than the same problem renumbered, and the reset-inside case was
+answered correctly again.
+
+`splitlines` failed and is recorded as re-learned, not banked. One more unaided attempt after a
+gap is owed. The scheduling decision was vindicated: building on it yesterday would have
+surfaced this gap inside the summary function rather than in a two-line example.
+
+`nested_call_evaluation` recurred, second occurrence. Asked for the output of two lines that
+both wrap a result in `len`, the learner reported the innermost value instead of evaluating
+outward. It did not recur once the lines were described in terms of what each counts. Watch it.
+
+REVISED PLAN, and it keeps the patch to one new idea: the summary function can be built against
+a LIST OF LINES first, with the string boundary and `splitlines` added afterwards as a separate
+step. That way the unretained concept is not load-bearing while the first Phase 2 code is
+written, and `splitlines` gets its unaided retrieval when it is actually needed.
+
+## Phase 2 — first working summary code
+
+`summarize.py` exists. One function, every line of it specified by the learner:
+
+```python
+def count_added_lines(all_lines):
+    count = 0
+    for line in all_lines:
+        if classify_diff_line(line) == "added":
+            count = count + 1
+    return count
+```
+
+`test_summarize.py` holds the seventeen-line two-file diff as a constant and asserts 3.
+Both suites green, exit 0. Evidence `EV-P2-COUNT-077`.
+
+The learner proposed the whole design unprompted — classify the line, compare the label, bump a
+counter — and needed three corrections, all reached by question rather than statement:
+
+- `loop_outside_vs_inside` — the loop was drafted OUTSIDE, calling the function once per line.
+  Fixed by pointing at the test, which calls it once with all seventeen.
+- `code_after_return` — `count = 0` placed after `return count`. Dislodged by quoting the
+  learner's own sentence from `EV-P2-TDD-067`.
+- `locals_persist_between_calls` — the reset was wanted because `count` was thought to survive.
+  Settled by calling a function twice: 2 and 2, not 2 and 4.
+
+FIRST MODULE-BOUNDARY DECISION, and it is the learner's. Asked whether the function belonged in
+`classify.py`, they said `how do i even think about that?`. Given one heuristic — write a single
+sentence covering both functions and watch for an "and" — they wrote `classify a single line of
+diff text while counting the added lines`, saw the bolt-on, and chose a new file. `summarize.py`,
+job: count what a whole diff changed. That sentence still holds for the two counters to come.
+
+Error taxonomy now has three members, all exiting non-zero:
+
+```text
+ModuleNotFoundError   the file is not there
+NameError             the file is there, the name inside it is not
+AssertionError        both are there, the value is wrong
+```
+
+## Phase 2 — exit status, root cause found
+
+Evidence `EV-P2-EXIT-078`. The scheduled unannounced re-test arrived naturally and the learner
+predicted `it passes and exit 1` for a third time.
+
+Descending twice found the actual cause, and it was not carelessness. Asked what an exit code
+IS, the learner answered `i have no idea`. The number had never had a referent, so pairing it
+with a pass was never a contradiction. Every prior correct statement of the rule was recall
+without meaning.
+
+METHOD NOTE FOR CLAUDE, and it is the most useful thing in this sitting: when a learner can
+state a rule and then immediately contradict it, suspect a missing referent before suspecting
+carelessness. Two earlier re-tests of this rule failed to ask whether the term was understood.
+Ask what a term means before re-testing a rule built on it.
+
+Resolved by running two scripts that both print `hello`, one exiting 0 and one raising after the
+print and exiting 1. Text cannot distinguish them; the number can. The learner then predicted a
+fresh case correctly at 80 and stated the rule in their own words.
+
+DIRECT CONSEQUENCE for Phase 7, and the learner now has the concept to decide it themselves:
+when git fails it prints `fatal: not a git repository` and exits non-zero. The classifier labels
+that text as context and summarises to zeros; the exit status reports the failure independently.
+That is precisely the information the learner said the text does not carry.
+
+One delayed unaided retrieval on exit status is now DUE, in a form that is not a Python test
+run — ideally a real command writing to stderr. Do not announce it.
+
+## Phase 2 — what remains
+
+```text
+count_removed_lines    same shape as count_added_lines, should be quick
+count_changed_files    same shape, counts "file_header"
+three values at once   GENUINELY NEW, must be its own patch
+splitlines boundary    unaided retrieval still owed, then wire string -> list
+```
+
+Still open from earlier: `.gitignore` (low value), the `branch_precedence` delayed retrieval
+(needs a longer gap), and the Phase 7 decision itself, which is now much closer to decidable.
+
+PROMPT DEFECTS, seventh and eighth, both the same shape and both recorded because the learner
+had to ask: predictions were requested against code the learner could not see — once an input
+they were asked to invent from nothing, once a file created through a tool call and never shown.
+The standing rule is whole files, every time, including files Claude has just written.
+
+## Phase 2 — all three counts exist
+
+`summarize.py` now has `count_added_lines`, `count_removed_lines`, and `count_changed_files`.
+Every value from the Phase 2 gate specification `EV-P2-CASES-063` now computes from the real
+seventeen-line diff: 3 added, 2 removed, 2 files. Ten tests green across both files, exit 0.
+
+Evidence `EV-P2-REPEAT-079`. Support was faded deliberately — the learner supplied both expected
+values and both function bodies in one pass, no step-by-step. Parts 3 and 4 were correct first
+time: only the function name and the compared label change.
+
+Two things worth keeping:
+
+- The learner again filled a test slot with a description rather than a value, second occurrence
+  after `EV-P2-TDD-067`. Asked directly for numbers, they gave 2 and 2 correctly. When asking for
+  an expected value, ask for the NUMBER, not what the function returns.
+- Caught before it bit: the label was written `"file header"` with a space. The real label is
+  `"file_header"`. Comparison is exact, so that would have produced a silent zero with every
+  other test still green. The learner was shown the branch and typed the string themselves.
+
+Error taxonomy now has four members, all exiting non-zero:
+
+```text
+ModuleNotFoundError   the file is not there
+ImportError           the file is there, the name is not, caught at the import line
+NameError             the name is not there, caught where it is used
+AssertionError        everything exists, the value is wrong
+```
+
+`ImportError` was met for the first time here. The learner predicted `NameError`, which is the
+correct inference from the three-member taxonomy they had; the distinction is where the failure
+is caught, not what is missing.
+
+## Phase 2 — the learner proposed the consolidation
+
+Evidence `EV-P2-DRY-080`. Shown the three stacked functions and asked how many of the eighteen
+lines actually differ, the learner proposed the target design unprompted:
+
+> one function, called once, that loops the diff, looks for all three findings with three
+> separate counters, and returns the three counts
+
+This is the second time they have identified repetition without being led to it — the first was
+their own complaint about the eight near-identical tests in `test_classify.py`.
+
+They named the requirement, returning three counts, without knowing the mechanism. Returning
+more than one value is the ONLY genuinely new idea left in Phase 2 and gets its own patch.
+
+Ninth prompt defect, same family as the seventh and eighth: `what do you notice` produced `what
+am i looking for?`. Open noticing questions do not work here; a concrete count of what differs
+worked immediately. Ask for something countable.
+
+## Phase 2 — what remains
+
+```text
+one function returning three values   NEW IDEA, next patch, design already the learner's
+splitlines boundary                   unaided retrieval owed, then string -> list
+exit status retrieval                 owed, unannounced, not a Python test run
+branch_precedence retrieval           owed, needs a longer gap
+```

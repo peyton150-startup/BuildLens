@@ -8362,3 +8362,551 @@ still required before any output was generated
 RECOVERY STATUS:
 stable-at-rung
 ```
+
+```text
+EVIDENCE ID:
+EV-P2-RETR-076
+
+DATE / PHASE / GATE:
+2026-08-26 / Phase 2 / DELAYED RETRIEVAL, both prerequisites, after a session gap
+
+IMPLEMENTATION TRIGGER:
+`EV-P2-ACC-075` required two delayed retrievals before the summary function could be written:
+accumulator reset placement, and `splitlines` versus looping a raw string, both in surface
+forms that are not label counting.
+
+ADJACENT CONCEPT:
+Where an accumulator is initialised decides whether it accumulates or resets. `splitlines()`
+converts one string into a list of its lines.
+
+EXERCISE TYPE:
+tracing
+
+SOURCE / CONTEXT:
+academic micro-examples, deliberately not diffs and not labels
+
+PROBLEM — VERBATIM:
+prices = [4, 4, 4]
+total = 0
+for p in prices:
+    total = total + p
+print(total)
+
+prices = [4, 4, 4]
+for p in prices:
+    total = 0
+    total = total + p
+print(total)
+
+then:
+message = "one\ntwo\nthree"
+print(len(message))
+print(len(message.splitlines()))
+
+MY ANSWER — VERBATIM:
+12 and 4
+
+90
+
+one
+two
+three
+what does splitlines do?
+
+13 and 3, 90
+
+MY REASONING — VERBATIM:
+not supplied
+
+CONFIDENCE BEFORE CHECK:
+90 on the accumulator pair, correct. 90 on the splitlines pair, correct but only after the
+definition was restated.
+
+TOOLS / HELP USED BEFORE COMMITMENT:
+none on the accumulator. On splitlines the learner asked what the method does and was told
+before committing to an answer.
+
+RESULT:
+accumulator RETRIEVED; splitlines NOT retrieved
+
+MISCONCEPTION / GAP:
+The accumulator retrieval is clean and counts. Both values correct, unaided, after a real gap,
+in a summing surface form — `total + p` rather than `total + 1` — which is a genuine variation
+rather than the same problem with new numbers. The reset-inside-the-loop case was answered
+correctly again, so the placement distinction is holding.
+
+`splitlines` FAILED as a retrieval. The learner asked outright what it does. This is recorded
+as re-learned rather than banked, and another unaided attempt after a gap is owed before the
+concept can be called retained. The scheduling was justified: had this been built on yesterday,
+the gap would have been discovered inside the summary function instead of in a two-line example.
+
+`nested_call_evaluation` recurred: asked for the output of two lines that both wrap results in
+`len`, the learner answered with the three words rather than two numbers. This is the second
+occurrence, after `print(len(labels[0]))` in `EV-P2-LIST-074`. The pattern is reading the
+innermost expression and reporting that, rather than evaluating outward. Watch for it; it did
+not recur once the two lines were described as counting characters and counting items.
+
+CORRECT MODEL — ADDED AFTER ATTEMPT:
+Initialise before the loop to accumulate, inside to reset — 12 and 4. `"one\ntwo\nthree"` is 13
+characters including two `\n`, and `splitlines()` gives `['one', 'two', 'three']`, 3 items.
+
+WHY THIS MATTERS TO THE REAL IMPLEMENTATION:
+One of the two gates on writing the summary function is now passed. The other is not.
+
+TRANSFER / NEXT RETRIEVAL:
+`splitlines` owes one more unaided attempt after a gap. It does NOT block starting the summary
+function, because the function can be built against a list of lines first and given the string
+boundary afterwards — which also keeps the patch to one new idea.
+
+PARENT EVIDENCE ID:
+EV-P2-ACC-075
+
+PRIMARY BLOCKER:
+none for the accumulator; retention for splitlines
+
+SCAFFOLD RUNG:
+R2
+
+WHY THIS RUNG:
+Two short programs, small numbers, no functions, no branches, no project vocabulary.
+
+SUPPORT PROVIDED BEFORE THIS ATTEMPT:
+none on the accumulator; the definition of `splitlines` was restated on request before the
+second attempt
+
+RECOVERY STATUS:
+accumulator retrieval-satisfied; splitlines re-learned, retrieval still due
+```
+
+```text
+EVIDENCE ID:
+EV-P2-COUNT-077
+
+DATE / PHASE / GATE:
+2026-08-26 / Phase 2 / first working summary code, built test-first
+
+IMPLEMENTATION TRIGGER:
+The summary needs three counts. The smallest first patch is one count from a list of lines.
+
+ADJACENT CONCEPT:
+One function calling another inside a loop. Module boundaries. Locals are created fresh per
+call. ModuleNotFoundError versus NameError versus AssertionError.
+
+EXERCISE TYPE:
+design and implementation
+
+SOURCE / CONTEXT:
+BuildLens
+
+PROBLEM — VERBATIM:
+What's the smallest first patch here? What would you build first?
+Give me the body in words, line by line — I'll write the Python.
+
+MY ANSWER — VERBATIM:
+what if i ran classify diff line and then counted what it retunres in an if statmetn so if
+result == "added" count_for_added = countforadded + 1
+
+def count_added_lines(line):
+tab*
+tab* if classify_diff_line(line) == "added"
+tab* count = count +1
+tab* return count
+
+i know there needs to be a loop in here to read all of the diff but i am not sure how to write
+it, i know the loop will call count_added_lines until the entire git diff is read and then we
+will have the added count, do the same with removed and files changed
+
+count = 0
+
+ok so the loop goes inside the count_added_lines and it will just call the next line after that
+in two_File_Diff, 80
+
+all_lines or all_diff_lines , under the function so maybe instead of that put it after the count
+is returned so when the loop is complete we reset the count for the next time the function is
+called
+
+because everytime you call the loop you start at a clean slate then you change the value of
+count
+
+so new file then, classify a single line of diff text while counting the added lines.
+
+summarize.py, count what a whole diff changed added removed
+
+MY REASONING — VERBATIM:
+i know the loop will call count_added_lines until the entire git diff is read
+
+because everytime you call the loop you start at a clean slate then you change the value of
+count
+
+CONFIDENCE BEFORE CHECK:
+70 on the name and error prediction, 60 on the same reissued, 80 on the loop placement
+correction
+
+TOOLS / HELP USED BEFORE COMMITMENT:
+none
+
+RESULT:
+correct after two corrections
+
+MISCONCEPTION / GAP:
+The learner proposed the entire design unprompted and correctly: run the classifier, compare
+the label, bump a counter. Three things needed correcting, all found by questions rather than
+statements.
+
+1. loop_outside_vs_inside — the draft had the loop OUTSIDE, calling count_added_lines once per
+   line. Resolved by pointing at the test, which calls it once with all seventeen lines. The
+   learner corrected it immediately at 80 confidence.
+2. code_after_return — count = 0 was placed after return count, intended as a reset for the
+   next call. Dislodged by quoting the learner's own sentence from EV-P2-TDD-067, that a return
+   stops the function.
+3. locals_persist_between_calls — the reset was wanted because the learner believed count might
+   survive between calls. Settled by running a function twice: 2 and 2, not 2 and 4. The learner
+   then stated the rule themselves, that every call starts at a clean slate.
+
+MODULE BOUNDARY, and this is the learner's first such decision. Asked whether the new function
+belonged in classify.py, the learner said "how do i even think about that?". Given one heuristic
+— write a single sentence covering both functions and see whether it needs an "and" — they wrote
+"classify a single line of diff text while counting the added lines", recognised the bolt-on,
+and chose a new file. They named it summarize.py with the job "count what a whole diff changed",
+a sentence that will still hold when the other two counters arrive.
+
+ERROR TAXONOMY extended, predicted correctly in part. The learner predicted NameError for
+calling a function that does not exist, and predicted line 8 as the failure point. Line 8 was
+right. The error is ModuleNotFoundError, because the FILE was missing rather than the name:
+
+ModuleNotFoundError   the file is not there
+NameError             the file is there, the name inside it is not
+AssertionError        both are there, the value is wrong
+
+CORRECT MODEL — ADDED AFTER ATTEMPT:
+summarize.py, every line specified by the learner:
+
+def count_added_lines(all_lines):
+    count = 0
+    for line in all_lines:
+        if classify_diff_line(line) == "added":
+            count = count + 1
+    return count
+
+python test_summarize.py prints "test passed", exit code 0. test_classify.py unaffected.
+
+WHY THIS MATTERS TO THE REAL IMPLEMENTATION:
+First BuildLens code that does real work across a whole diff, and the first composition of two
+functions. One of the three summary values now exists.
+
+TRANSFER / NEXT RETRIEVAL:
+lines_removed and files_changed are the same shape and should be fast. Returning three values at
+once is a genuinely new idea and must be its own patch.
+
+PARENT EVIDENCE ID:
+EV-P2-RETR-076
+
+PRIMARY BLOCKER:
+loop_outside_vs_inside, resolved
+
+SCAFFOLD RUNG:
+R6
+
+WHY THIS RUNG:
+Real project code, two composed functions, a loop, an accumulator, and a branch.
+
+SUPPORT PROVIDED BEFORE THIS ATTEMPT:
+the module-boundary heuristic was supplied as a method, not as an answer; the input list was
+shown concretely after the learner asked what they were looking at
+
+RECOVERY STATUS:
+recovered-at-target
+```
+
+```text
+EVIDENCE ID:
+EV-P2-EXIT-078
+
+DATE / PHASE / GATE:
+2026-08-26 / Phase 2 / SCHEDULED RE-TEST, output_and_exit_status_are_independent
+
+IMPLEMENTATION TRIGGER:
+The re-test was recorded as owed and deliberately unannounced. It arrived naturally when the
+learner predicted the result of the now-passing summarize test.
+
+ADJACENT CONCEPT:
+A finishing program hands back one number, separate from anything it printed. 0 means it
+finished normally; anything else means it did not.
+
+EXERCISE TYPE:
+tracing
+
+SOURCE / CONTEXT:
+academic micro-examples
+
+PROBLEM — VERBATIM:
+Does it print "test passed", and what exit code?
+
+then: print("hello") — What exit code does that finish with?
+then: What do you understand an exit code to be?
+
+MY ANSWER — VERBATIM:
+it passes and exit 1
+
+hello
+
+i have no idea
+
+all done exit 0, so zero is all good and 1 is there is an error? 80
+
+test passed exit 0
+
+MY REASONING — VERBATIM:
+so zero is all good and 1 is there is an error?
+
+CONFIDENCE BEFORE CHECK:
+80 on the corrected rule, correct
+
+TOOLS / HELP USED BEFORE COMMITMENT:
+none
+
+RESULT:
+wrong, root cause found, then correct
+
+MISCONCEPTION / GAP:
+THIRD occurrence of pairing a printed success with exit 1. Descending twice found the root, and
+it was not a reasoning error: asked what an exit code is, the learner answered "i have no idea".
+The number had never meant anything, so pairing it with a pass was never a contradiction to
+them. Every previous correct statement of the rule was verbal recall without a referent.
+
+This is the important lesson of the sitting for Claude, not for the learner: a rule the learner
+can state and then immediately contradict may indicate a missing referent rather than
+carelessness. Two earlier attempts re-tested the rule and neither asked whether the term itself
+was understood. Ask what a term means before re-testing a rule that uses it.
+
+Demonstrated with two scripts that BOTH print "hello", one exiting 0 and one raising after the
+print and exiting 1. The text alone cannot distinguish them; the number can. The learner then
+predicted a fresh case correctly at 80 and stated the rule in their own words.
+
+CORRECT MODEL — ADDED AFTER ATTEMPT:
+print("hello") prints hello and exits 0. The same file with a raise after it prints hello and
+exits 1. $? in the shell reads that number. Non-zero rather than specifically 1 is the general
+rule, and other programs use different numbers for different failures, git among them.
+
+WHY THIS MATTERS TO THE REAL IMPLEMENTATION:
+This is the foundation of the Phase 7 decision the learner raised themselves. When git fails it
+prints "fatal: not a git repository" and exits non-zero. The classifier labels that text as
+context and summarises to zeros, but the exit status reports the failure independently. The
+learner now has the concept needed to make that decision on their own evidence rather than being
+told the mechanism.
+
+TRANSFER / NEXT RETRIEVAL:
+One delayed unaided retrieval on exit status, in a form that is not a Python test run, ideally a
+real command that writes to stderr. Do not announce it.
+
+PARENT EVIDENCE ID:
+EV-P2-GREEN-069
+
+PRIMARY BLOCKER:
+term_without_referent
+
+SCAFFOLD RUNG:
+R0
+
+WHY THIS RUNG:
+One line of code, no tests, no asserts, no functions.
+
+SUPPORT PROVIDED BEFORE THIS ATTEMPT:
+none until the learner said they had no idea what an exit code is, at which point the concept
+was stated in two lines and demonstrated
+
+RECOVERY STATUS:
+root-cause-found, retrieval-due
+```
+
+```text
+EVIDENCE ID:
+EV-P2-REPEAT-079
+
+DATE / PHASE / GATE:
+2026-08-26 / Phase 2 / faded repetition of a known shape
+
+IMPLEMENTATION TRIGGER:
+count_removed_lines and count_changed_files are the same shape as count_added_lines. Support was
+deliberately reduced: the learner supplied expected values and both function bodies at once
+rather than being walked through them.
+
+ADJACENT CONCEPT:
+ImportError as distinct from NameError. Exact string comparison in a branch.
+
+EXERCISE TYPE:
+design and implementation
+
+SOURCE / CONTEXT:
+BuildLens
+
+PROBLEM — VERBATIM:
+1. count_removed_lines(TWO_FILE_DIFF) should return what?
+2. count_changed_files(TWO_FILE_DIFF) should return what?
+3. What differs in count_removed_lines from the function above?
+4. What differs in count_changed_files?
+
+MY ANSWER — VERBATIM:
+1. shoudl return a count of all removed lines
+2. should return all file headers count
+3. the function is called count_removed_lines and it is == "removed"
+4. the function name and the "added" turns into "file header"
+90
+
+for removed it is 2 and for files changed it is also 2 , 90
+
+"file_header"
+
+nameerror, not sure
+
+test passed exit 0, 90
+
+MY REASONING — VERBATIM:
+the function name and the "added" turns into "file header"
+
+CONFIDENCE BEFORE CHECK:
+90 on the initial answer, 90 on the corrected numbers, 90 on the final green prediction. All
+correct where a value was actually given.
+
+TOOLS / HELP USED BEFORE COMMITMENT:
+none
+
+RESULT:
+correct
+
+MISCONCEPTION / GAP:
+Parts 3 and 4 were correct first time and unaided — the learner identified that only the
+function name and the compared label change.
+
+Parts 1 and 2 described what the functions return rather than giving a number. This is the
+second appearance of the pattern first recorded in EV-P2-TDD-067: a test slot is filled with a
+description instead of a value. Asked directly for the two numbers, the learner gave 2 and 2
+correctly, matching their own EV-P2-CASES-063 specification.
+
+Caught before it could bite: the learner wrote the label as "file header" with a space. The real
+label is "file_header". Comparison is exact, so the space would have produced a silent zero
+count with all tests otherwise passing. The learner was shown the branch in classify.py and
+typed the exact string themselves rather than being corrected.
+
+ImportError met for the first time. Asked to predict the failure from their own three-part
+taxonomy, the learner answered NameError, which is the correct inference from that taxonomy —
+the file exists and the name does not. The actual error is ImportError because the failure
+occurs during the import rather than at a call site. Taxonomy now refined to four:
+
+ModuleNotFoundError   the file is not there
+ImportError           the file is there, the name is not, caught at the import line
+NameError             the name is not there, caught where it is used
+AssertionError        everything exists, the value is wrong
+
+CORRECT MODEL — ADDED AFTER ATTEMPT:
+Three functions in summarize.py, identical but for the compared label. All three
+EV-P2-CASES-063 values now compute from the real seventeen-line diff: 3 added, 2 removed,
+2 files. Ten tests green across both files, exit 0.
+
+WHY THIS MATTERS TO THE REAL IMPLEMENTATION:
+The full specification the learner wrote at the Phase 2 gate is now satisfied by running code.
+
+TRANSFER / NEXT RETRIEVAL:
+The duplication observation below leads directly into the single-function version.
+
+PARENT EVIDENCE ID:
+EV-P2-COUNT-077
+
+PRIMARY BLOCKER:
+none
+
+SCAFFOLD RUNG:
+R6 with support faded — four questions answered in one pass, no step-by-step
+
+SUPPORT PROVIDED BEFORE THIS ATTEMPT:
+none beyond showing the current file whole
+
+RECOVERY STATUS:
+stable-at-rung
+```
+
+```text
+EVIDENCE ID:
+EV-P2-DRY-080
+
+DATE / PHASE / GATE:
+2026-08-26 / Phase 2 / learner identifies duplication and proposes the consolidation
+
+IMPLEMENTATION TRIGGER:
+Three near-identical six-line functions now sit in summarize.py.
+
+ADJACENT CONCEPT:
+Repetition that differs in one token is a signal to consolidate. Three passes over one list can
+become one pass with three counters.
+
+EXERCISE TYPE:
+design
+
+SOURCE / CONTEXT:
+BuildLens
+
+PROBLEM — VERBATIM:
+What do you notice, and does it bother you?
+then: the three functions are six lines each, eighteen lines total. How many of those eighteen
+lines are actually different from each other?
+
+MY ANSWER — VERBATIM:
+what am i looking for?
+
+ok so they are mostly the same thing, could we turn this into a single function that is called
+once that has an if statment thatwould run the diff in a loop and look for all of the 3 findings
+with 3 seperate counts and return the 3 counts
+
+MY REASONING — VERBATIM:
+they are mostly the same thing
+
+CONFIDENCE BEFORE CHECK:
+not provided
+
+TOOLS / HELP USED BEFORE COMMITMENT:
+none
+
+RESULT:
+correct
+
+MISCONCEPTION / GAP:
+None. The open question "what do you notice" produced "what am i looking for?" — the ninth
+recorded prompt defect of this kind. Made concrete as a count of how many of eighteen lines
+actually differ, the learner immediately identified the duplication and proposed the exact
+target design unprompted: one function, one loop over the diff, three separate counters, three
+counts returned.
+
+This is the second time the learner has spotted repetition without being led to it. The first
+was the eight near-identical tests in test_classify.py, raised as their own complaint.
+
+The learner named the requirement — return three counts — without knowing the mechanism for it.
+Returning more than one value is the only genuinely new idea remaining and must be its own patch.
+
+CORRECT MODEL — ADDED AFTER ATTEMPT:
+The learner's design stands as stated and will be built next.
+
+WHY THIS MATTERS TO THE REAL IMPLEMENTATION:
+The consolidation is the learner's decision, made from evidence in front of them, not a
+refactor imposed by Claude.
+
+TRANSFER / NEXT RETRIEVAL:
+Returning three values from one function.
+
+PARENT EVIDENCE ID:
+EV-P2-REPEAT-079
+
+PRIMARY BLOCKER:
+none
+
+SCAFFOLD RUNG:
+R6
+
+WHY THIS RUNG:
+Open design observation on real project code.
+
+SUPPORT PROVIDED BEFORE THIS ATTEMPT:
+the open question was made concrete as a line count after the learner asked what to look for
+
+RECOVERY STATUS:
+stable-at-rung
+```
