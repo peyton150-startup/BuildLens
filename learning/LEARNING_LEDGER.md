@@ -6474,3 +6474,532 @@ scenario was supplied
 RECOVERY STATUS:
 transfer-reached-with-scaffolding-fresh-variant-due
 ```
+
+```text
+EVIDENCE ID:
+EV-P2-MODEL-059
+
+DATE / PHASE / GATE:
+2026-08-26 / Phase 2 / specify the data model
+
+IMPLEMENTATION TRIGGER:
+Phase 1 produced a function answering one question about one line. BuildLens must report
+what changed across a whole diff, which requires a representation the learner has not yet
+chosen.
+
+ADJACENT CONCEPT:
+The representation ladder: raw text, then primitive values, then a collection, then a named
+domain record. This attempt establishes which primitive values are wanted before any
+collection or record is introduced.
+
+EXERCISE TYPE:
+design
+
+SOURCE / CONTEXT:
+BuildLens
+
+PROBLEM — VERBATIM:
+Someone glances at BuildLens and wants to know what Claude just did to their code. They are
+not going to read nine lines of diff.
+
+diff --git a/app.py b/app.py
+index 580a0a3..b1c52a7 100644
+--- a/app.py
++++ b/app.py
+@@ -1,2 +1,3 @@
+ import os
+-DEBUG = False
++DEBUG = True
++VERBOSE = True
+
+1. What should BuildLens tell them about this diff? Give the actual values, not just field
+   names.
+2. What would you call each thing you just listed?
+3. Is there anything you would want to report that classify_diff_line cannot give you, no
+   matter how many lines you feed it?
+4. Confidence, 0-100.
+
+MY ANSWER — VERBATIM:
+files changed = classify.py, test_classify.py , how many lines +2601 -3 +35 -2  , not sure what else, 2. a git diff summary, 3. maybe i would want the CI to see if it runs, i am not sure
+
+MY REASONING — VERBATIM:
+not provided
+
+CONFIDENCE BEFORE CHECK:
+not provided
+
+TOOLS / HELP USED BEFORE COMMITMENT:
+none reported
+
+RESULT:
+partial
+
+MISCONCEPTION / GAP:
+The SHAPE of the specification is correct and was produced unprompted: files changed, lines
+added, lines removed. That is the model, and it matches the fields sketched for this phase
+in the implementation plan without the learner having seen them.
+
+Two problems. First, the learner summarized the wrong diff, reporting figures from the
+sync commit pushed minutes earlier rather than from the nine-line app.py diff in the
+prompt. This is a reading-target error rather than a modelling error, and the shape of the
+answer is unaffected by it. Second, `a git diff summary` names the whole record rather than
+the individual values, so the three fields are still unnamed.
+
+Part 3 named continuous integration, which is not derivable from diff text at all. The
+question asked what the learner would want from the diff that per-line labels cannot
+produce; the intended territory is information requiring position, such as which file a
+given changed line belongs to.
+
+CORRECT MODEL — ADDED AFTER ATTEMPT:
+withheld; parts 1 and 2 have no single correct answer and the learner's specification will
+be built as given. Part 3 was reframed with a concrete two-file scenario.
+
+WHY THIS MATTERS TO THE REAL IMPLEMENTATION:
+Phase 2 is specified at MEDIUM assistance: Claude asks what the data model should contain
+rather than defining it. The fields the learner names here become the fields of the eventual
+record, and the learner must be able to say where each one originates and why it exists.
+
+TRANSFER / NEXT RETRIEVAL:
+Design normal, boundary, empty, and invalid cases for the chosen representation before any
+test is shown, per the Phase 2 knowledge gate.
+
+PARENT EVIDENCE ID:
+EV-P1-TRANSFER-058
+
+PRIMARY BLOCKER:
+none identified; opening design task
+
+SCAFFOLD RUNG:
+R6
+
+WHY THIS RUNG:
+Open specification against real tool output, with no options offered and no fields
+suggested. Support remains faded to questions only.
+
+SUPPORT PROVIDED BEFORE THIS ATTEMPT:
+the complete diff, and the reminder that the audience will not read it line by line
+
+RECOVERY STATUS:
+shape-correct-reissued-for-values
+```
+
+```text
+EVIDENCE ID:
+EV-P2-MODEL-060
+
+DATE / PHASE / GATE:
+2026-08-26 / Phase 2 / the three values, their names, and the positional gap
+
+IMPLEMENTATION TRIGGER:
+The learner named the right three fields but computed them from the wrong diff and did not
+name the individual values.
+
+ADJACENT CONCEPT:
+A per-line label carries no position, so it cannot attribute a changed line to a file. That
+attribution is the same missing-information problem as the accepted Phase 1 limitation.
+
+EXERCISE TYPE:
+design
+
+SOURCE / CONTEXT:
+BuildLens
+
+PROBLEM — VERBATIM:
+1. For the app.py diff: files changed, lines added, lines removed. Three numbers.
+2. Names for those three values. Yours, not mine.
+3. Now suppose a diff touches two files, app.py and config.py. You feed every line to
+   classify_diff_line and get back a label for each. Can you tell which file any given added
+   line belongs to? Why or why not?
+4. Confidence, 0-100.
+
+MY ANSWER — VERBATIM:
+maybe add in the numbers of the lines that were changed, like "-789 ->791" , i have no idea what 2 is asking me
+
+2 files, 1 line added and 1 line removed, i know i am wrong, please explain what is going on
+
+1 file changed, 2 added and 1 removed, i have no idea how to think about the labels
+
+MY REASONING — VERBATIM:
+maybe add in the numbers of the lines that were changed, like "-789 ->791"
+
+CONFIDENCE BEFORE CHECK:
+not provided
+
+TOOLS / HELP USED BEFORE COMMITMENT:
+EXPLANATION REQUESTED AND GIVEN. After committing to `2 files, 1 added, 1 removed` the
+learner asked what was going on. The diff was then labelled line by line using the
+learner's own classifier, and the a/ and b/ convention was explained. The corrected counts
+that followed were produced after that explanation.
+
+RESULT:
+partial
+
+MISCONCEPTION / GAP:
+The learner proposed adding changed line numbers to the model, which is a legitimate
+candidate field spotted in the data rather than invented: the information lives in the `@@`
+hunk marker. It carries a real cost, since extracting it requires reading numbers out of the
+middle of a string rather than testing how a line starts. Recorded as a candidate field, not
+yet accepted.
+
+New misconception `diff_a_b_prefixes_are_two_files`: the learner read `a/app.py` and
+`b/app.py` as two separate files. They are one file shown before and after; Git uses a/ and b/
+as side labels. This is the most common misreading of unified diff output and it is now
+corrected, with the five metadata lines shown to be Git describing one file rather than
+changing anything.
+
+The learner also reported that question 2, asking for names for the three values, was
+unintelligible. That was a wording failure: the request for field names was not distinguished
+from the request for values. It was reissued with a non-diff example contrasting the values
+`4` and `2500` with the names `doors` and `weight_lbs`.
+
+After the explanation the learner produced the correct counts unaided: one file changed, two
+lines added, one line removed. They then reported having no idea how to reason about which
+labels feed which number, which is the next step and is the seed of a genuine asymmetry in
+the model.
+
+CORRECT MODEL — ADDED AFTER ATTEMPT:
+`a/app.py` and `b/app.py` are the same file before and after. Five of the nine lines are
+metadata describing that one file. `DEBUG = False` becoming `DEBUG = True` is recorded by Git
+as one removal plus one addition, because Git has no concept of a changed line. `VERBOSE = True`
+is a second, independent addition. The counts are therefore one file changed, two lines added,
+one line removed.
+
+WHY THIS MATTERS TO THE REAL IMPLEMENTATION:
+Part 3 is a second, independent instance of `INFORMATION_NOT_PRESENT_IN_THE_INPUT`, arising
+naturally from the project rather than from a constructed analogy. If the learner reaches it
+unaided here, it counts toward the delayed retrieval carried over from Phase 1.
+
+TRANSFER / NEXT RETRIEVAL:
+Design normal, boundary, empty, and invalid cases for the chosen representation before any
+test is shown.
+
+PARENT EVIDENCE ID:
+EV-P2-MODEL-059
+
+PRIMARY BLOCKER:
+none identified; reading-target error rather than a modelling error
+
+SCAFFOLD RUNG:
+R6
+
+WHY THIS RUNG:
+The diff is restated so the counting target is unambiguous, but no field names are offered
+and part 3 remains an open question.
+
+SUPPORT PROVIDED BEFORE THIS ATTEMPT:
+the correct diff was restated; the distinction between naming the record and naming its
+values was pointed out; part 3 was narrowed to a concrete two-file scenario
+
+RECOVERY STATUS:
+counts-correct-after-explanation
+```
+
+```text
+EVIDENCE ID:
+EV-P2-COUNT-061
+
+DATE / PHASE / GATE:
+2026-08-26 / Phase 2 / which labels produce which number
+
+IMPLEMENTATION TRIGGER:
+The learner has the three correct counts but cannot yet say how each is derived from the
+per-line labels, which is what the eventual implementation must do.
+
+ADJACENT CONCEPT:
+Two of the three values are direct counts of a label. The third is not, and noticing that
+asymmetry is the point.
+
+EXERCISE TYPE:
+design
+
+SOURCE / CONTEXT:
+BuildLens
+
+PROBLEM — VERBATIM:
+Label tally for the app.py diff:
+
+metadata   5
+context    1
+removed    1
+added      2
+
+The learner's three numbers were: 1 file changed, 2 lines added, 1 line removed.
+
+1. Match each of your three numbers to a number in that tally. Which number came from which
+   label?
+2. Does every one of your three numbers have a match? If one does not, say which.
+3. Confidence, 0-100.
+
+MY ANSWER — VERBATIM:
+added is 2 removed is 1, so i need a file change label and maybe how much context and metadata
+
+the diff --git the metadata for each file adn the @@ -1,2@@ for each file
+
+can you show me 2 and i guess you dont need them if the metadata is just telling you the before and after of a file, you already know it changred and for context i guess that is unneeded information
+
+i like A but how will i know if 2 files are changed
+
+i like this a lot more, you can see the files changed, then if we keep the lines added and reomved we can see the numbers
+
+MY REASONING — VERBATIM:
+i guess you dont need them if the metadata is just telling you the before and after of a file, you already know it changred and for context i guess that is unneeded information
+
+CONFIDENCE BEFORE CHECK:
+not provided
+
+TOOLS / HELP USED BEFORE COMMITMENT:
+none reported; two design options were displayed on request at the learner's explicit ask,
+and two real diffs were generated to settle factual questions
+
+RESULT:
+correct
+
+MISCONCEPTION / GAP:
+The learner found the asymmetry unaided: `added` and `removed` match tally entries directly
+and `files_changed` has no label to count. Their proposed remedy, a label marking a file
+change, is the design that was adopted.
+
+One factual error, corrected by observation rather than assertion: the learner claimed `@@`
+appears once per file. A one-file, two-hunk diff was generated showing one `diff --git` line
+and two `@@` lines. `@@` marks a hunk, a contiguous neighbourhood of change, and a file may
+contain many. `diff --git` is the line that appears exactly once per file. New concept
+recorded: `hunk_vs_file`. This also priced the learner's earlier line-number proposal, since
+the numbers live in `@@` and there may be several per file, making changed line numbers a
+list rather than a single value.
+
+Part 3 was answered well and independently. The learner concluded that metadata and context
+counts do not earn a place in the summary, reasoning that metadata only identifies the file
+before and after, which the file count already conveys, and that context lines are unchanged
+code. Cutting a field for want of a reader is the design-review standard, and the learner
+applied it without being told it existed.
+
+Part 2 was answered after both options were displayed on request. The learner chose Option A,
+a fifth `file_header` label, so that all three values derive from the same tally and the
+knowledge that `diff --git` marks a file lives only in the classifier.
+
+The learner has not yet supplied the counts for the two-file diff; that was reissued.
+
+CORRECT MODEL — ADDED AFTER ATTEMPT:
+`diff --git` appears exactly once per file and is therefore the countable file marker. `@@`
+appears once per hunk and cannot be used for a file count. Under the adopted Option A the
+classifier gains a fifth label, `file_header`, and all three summary values become counts of
+labels: `file_header`, `added`, and `removed`. Metadata and context counts are deliberately
+excluded for want of a reader.
+
+WHY THIS MATTERS TO THE REAL IMPLEMENTATION:
+`lines_added` and `lines_removed` fall straight out of counting labels. `files_changed` does
+not, because one file produces five metadata lines. Discovering that a label count cannot
+supply the file count is what forces a richer representation, and it is the same shape as the
+positional gap in part 3 of EV-P2-MODEL-060.
+
+TRANSFER / NEXT RETRIEVAL:
+Then name the three values, then design normal, boundary, empty, and invalid cases before any
+test is shown.
+
+PARENT EVIDENCE ID:
+EV-P2-MODEL-060
+
+PRIMARY BLOCKER:
+DERIVING_AGGREGATES_FROM_LABELS
+
+SCAFFOLD RUNG:
+R1
+
+WHY THIS RUNG:
+A four-row tally and three known numbers. Pure matching, with no counting, no code, and no
+new vocabulary.
+
+SUPPORT PROVIDED BEFORE THIS ATTEMPT:
+the diff was labelled line by line using the learner's own classifier; the tally was supplied
+so that no counting was required
+
+RECOVERY STATUS:
+design-decided-counts-outstanding
+```
+
+```text
+EVIDENCE ID:
+EV-P2-HUNK-062
+
+DATE / PHASE / GATE:
+2026-08-26 / Phase 2 / reading the hunk header
+
+IMPLEMENTATION TRIGGER:
+The learner proposed reporting changed line numbers and could not read the notation that
+carries them.
+
+ADJACENT CONCEPT:
+`@@ -start,count +start,count @@` gives coordinates, not changes. Minus is the old file and
+plus is the new file, the same convention as the file headers.
+
+EXERCISE TYPE:
+tracing
+
+SOURCE / CONTEXT:
+BuildLens
+
+PROBLEM — VERBATIM:
+@@ -40,7 +40,9 @@
+
+Four numbers: 40, 7, 40, 9.
+
+1. What does the first 40 tell you?
+2. What does the 7 tell you?
+
+MY ANSWER — VERBATIM:
+so it added a line in +1 and the old line is -1?
+
+the first 40 is where to look in the old file and the plus 40 is where to look in the new file, 7 tells me that it was 7 lines and now 9 tells me that i added 2 lines to that hunk
+
+MY REASONING — VERBATIM:
+7 tells me that it was 7 lines and now 9 tells me that i added 2 lines to that hunk
+
+CONFIDENCE BEFORE CHECK:
+not provided
+
+TOOLS / HELP USED BEFORE COMMITMENT:
+none reported; the notation was explained after a first incorrect reading
+
+RESULT:
+correct
+
+MISCONCEPTION / GAP:
+The first attempt read the numbers as identifying added and removed lines, recorded as
+`hunk_numbers_are_changes_not_coordinates`. After the notation was explained the learner read
+an unseen header correctly and went further unprompted, inferring the net length change.
+
+One precision point supplied afterwards: a length change of 7 to 9 gives the NET difference,
+not the number of added lines. Two added, or five added and three removed, both produce net
+two. This is why `lines_added` and `lines_removed` must come from counting content lines
+rather than from hunk arithmetic, and the learner should be able to defend that choice.
+
+CORRECT MODEL — ADDED AFTER ATTEMPT:
+In `@@ -40,7 +40,9 @@` the first pair says the hunk begins at line 40 of the old file and
+covers 7 lines; the second says it begins at line 40 of the new file and covers 9. Both start
+numbers are positions, not changes. When a count is 1 Git omits it, as in `@@ -1 +1 @@`. Any
+trailing text after the closing marker is orienting context, not part of the numbers.
+
+WHY THIS MATTERS TO THE REAL IMPLEMENTATION:
+It settles why the summary counts content lines rather than reading hunk headers, and it
+prices the deferred changed-line-numbers field.
+
+TRANSFER / NEXT RETRIEVAL:
+Design the input and output cases for the summary before any test is shown.
+
+PARENT EVIDENCE ID:
+EV-P2-COUNT-061
+
+PRIMARY BLOCKER:
+hunk_numbers_are_changes_not_coordinates
+
+SCAFFOLD RUNG:
+R1
+
+WHY THIS RUNG:
+One unseen header, two questions, no code and no counting.
+
+SUPPORT PROVIDED BEFORE THIS ATTEMPT:
+the notation was diagrammed and checked against the real before and after contents of app.py
+
+RECOVERY STATUS:
+stable-at-rung
+```
+
+```text
+EVIDENCE ID:
+EV-P2-CASES-063
+
+DATE / PHASE / GATE:
+2026-08-26 / Phase 2 / knowledge gate, learner designs the cases before seeing tests
+
+IMPLEMENTATION TRIGGER:
+The Phase 2 gate requires the learner to specify normal, empty, boundary, and invalid cases
+before any test is shown.
+
+ADJACENT CONCEPT:
+A specification is a set of input and output pairs, including the cases nobody wants to think
+about.
+
+EXERCISE TYPE:
+design
+
+SOURCE / CONTEXT:
+BuildLens
+
+PROBLEM — VERBATIM:
+For each input, what should come out?
+
+1. the two-file diff you counted
+2. empty input, no lines at all
+3. a diff for a brand-new file, nothing removed
+4. a shopping list, not a diff at all
+
+and, for the shopping list: is it a problem that it and an empty input give the same answer?
+If you want an error instead, what would it check to know the input is not a diff?
+
+MY ANSWER — VERBATIM:
+i think for empty is should have 3 zeros, a brand new file is also the zero on removed and 2 for added dont see a problem there, the shopping list might be something where we throw an error
+
+ok no issue with the shopping list or the empyt input , for files changed it would just be one file
+
+MY REASONING — VERBATIM:
+ok no issue with the shopping list or the empyt input
+
+CONFIDENCE BEFORE CHECK:
+not provided
+
+TOOLS / HELP USED BEFORE COMMITMENT:
+none reported; the natural behaviour of the existing classifier on a shopping list was shown
+before the learner settled the question
+
+RESULT:
+correct
+
+MISCONCEPTION / GAP:
+The specification is complete and internally consistent. The learner initially proposed
+raising an error for non-diff input, then withdrew it once the cost was visible: detecting a
+non-diff requires first writing down what a valid diff is, and the classifier already labels
+every shopping-list line as context, yielding zeros without any new machinery.
+
+The accepted consequence, which the learner should be able to defend later, is that nothing
+and nonsense are indistinguishable in the output. Both produce zeros. That is a deliberate
+trade against validation cost and is the natural subject of Phase 5.
+
+The file count for a newly created file was initially omitted and then given correctly as one.
+
+CORRECT MODEL — ADDED AFTER ATTEMPT:
+The agreed specification:
+
+two-file diff   files_changed 2, lines_added 3, lines_removed 2
+empty input     0, 0, 0
+new file        files_changed 1, lines_added 2, lines_removed 0
+shopping list   0, 0, 0, with no error raised
+
+WHY THIS MATTERS TO THE REAL IMPLEMENTATION:
+These four pairs are the tests. They were specified by the learner before any test was shown,
+which is the Phase 2 knowledge gate.
+
+TRANSFER / NEXT RETRIEVAL:
+Introduce lists and iteration through the implementation-adjacent loop, since the learner has
+never met either, then build the summary test-first.
+
+PARENT EVIDENCE ID:
+EV-P2-HUNK-062
+
+PRIMARY BLOCKER:
+none identified
+
+SCAFFOLD RUNG:
+R6
+
+WHY THIS RUNG:
+Four cases including an empty input, a boundary, and an invalid input, specified with no
+tests shown and no options offered.
+
+SUPPORT PROVIDED BEFORE THIS ATTEMPT:
+the first case was filled in as a format example; the classifier's natural behaviour on
+non-diff input was demonstrated when the learner raised the error question
+
+RECOVERY STATUS:
+gate-passed
+```

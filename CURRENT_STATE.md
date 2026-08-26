@@ -2,8 +2,8 @@
 
 ## Lifecycle
 
-**Current phase:** Phase 1 — Pure Functions and Execution (classifier complete against the
-amended contract, four branches, six green tests; milestone teach-aloud in progress)
+**Current phase:** Phase 2 — Data Representation and Test Design (started; no Phase 2 code
+yet, data model being specified by the learner)
 
 ## What exists
 
@@ -744,3 +744,136 @@ If the learner says a line of Python is unreadable, stop the larger trace and re
 Every attempt remains verbatim in `learning/LEARNING_LEDGER.md` and is linked into a remediation chain.
 
 This does not advance the project phase.
+
+## Phase 2 — opening state
+
+Phase 1 closed with `classify.py` and `test_classify.py` synced to public `main` at commit
+`e419b0c`, seven tests green.
+
+Phase 2 begins at MEDIUM assistance per the implementation plan: Claude asks what the data
+model should contain rather than defining it. No Phase 2 code exists.
+
+Carried into Phase 2:
+
+- DELAYED RETRIEVAL DUE: one unaided variant of `INFORMATION_NOT_PRESENT_IN_THE_INPUT` in a
+  fourth domain, after a gap. `EV-P1-TRANSFER-058` reached the concept only with a
+  worked-example rescue, so it does not yet count as transferred.
+- The accepted limitation `EV-P1-LIMIT-054` is the concrete motivation for this phase: a
+  single line cannot carry positional meaning, so a representation richer than one string
+  is now justified rather than assumed.
+- Prerequisites the learner has NOT yet met: lists, iteration, and any form of loop. These
+  are required to summarize a whole diff and must be introduced through the
+  implementation-adjacent loop, not assumed.
+- Process rules now standing: show whole files, never a fragment; never print output without
+  the code that produced it; settle tool-behavior questions by generating real output rather
+  than asserting; do not funnel questions toward a single wording; support stays faded to
+  questions only unless an answer shows it was withdrawn too early.
+
+Evidence `EV-P2-MODEL-059` is issued: the learner specifies what BuildLens should report
+about a real nine-line diff, names each value, and identifies anything the per-line
+classifier cannot supply. Do not define the data model for the learner and do not write
+code until the specification is committed.
+
+Evidence `EV-P2-MODEL-059` is partial, and the important half is correct. The learner named
+the model's shape unprompted — files changed, lines added, lines removed — which matches the
+fields sketched in the implementation plan without having seen them. Two corrections: the
+figures were computed from the sync commit rather than from the `app.py` diff in the prompt,
+a reading-target error that does not affect the shape; and `a git diff summary` names the
+record rather than its three values, which remain unnamed.
+
+Part 3 named continuous integration, which is not derivable from diff text. Evidence
+`EV-P2-MODEL-060` reframes it concretely: given a diff touching two files, can a per-line
+label say which file an added line belongs to. This is a second, independent instance of
+`INFORMATION_NOT_PRESENT_IN_THE_INPUT` arising from the project itself rather than from a
+constructed analogy. If the learner reaches it unaided, it counts toward the delayed
+retrieval carried over from Phase 1.
+
+Evidence `EV-P2-MODEL-060` is partial. New misconception `diff_a_b_prefixes_are_two_files`:
+the learner read `a/app.py` and `b/app.py` as two separate files. They are one file shown
+before and after, and this is the most common misreading of unified diff output. It was
+corrected by labelling the diff line by line with the learner's own classifier, which also
+showed that five of the nine lines are Git describing one file rather than changing it. The
+learner then produced the correct counts unaided: one file changed, two lines added, one
+removed.
+
+Also corrected: Git records `DEBUG = False` becoming `DEBUG = True` as one removal plus one
+addition, because it has no concept of a changed line.
+
+Candidate field noted, not accepted: the learner proposed reporting the changed line numbers,
+having spotted that the information lives in the `@@` hunk marker. That is a real observation
+about the data rather than an invention. It carries a cost, since extracting it means reading
+numbers from the middle of a string rather than testing how a line starts, so it stays a
+deliberate decision rather than a free addition.
+
+Prompt defect, the third this project: the request for field NAMES was not distinguished from
+the request for VALUES, and the learner reported the question unintelligible. It was reissued
+with a non-diff contrast between the values `4` and `2500` and the names `doors` and
+`weight_lbs`. When asking for a name, show an example of a name in a domain that cannot leak
+the answer.
+
+Evidence `EV-P2-COUNT-061` descends to R1: given a four-row label tally and the three known
+numbers, match each number to its label. `lines_added` and `lines_removed` are direct label
+counts; `files_changed` is not, because one file produces five metadata lines. That asymmetry
+is what will force a richer representation, and it is the same shape as the positional gap in
+part 3 of `EV-P2-MODEL-060`, which remains unanswered.
+
+DESIGN DECISION by the learner, evidence `EV-P2-COUNT-061`: Option A. `classify_diff_line`
+gains a fifth label, `file_header`, returned for lines beginning `diff --git`. The remaining
+four metadata prefixes keep the `metadata` label. All three summary values then derive from
+one tally of labels — `file_header`, `added`, `removed` — so the knowledge that `diff --git`
+marks a file lives only in the classifier and is not duplicated in the counting code. The
+rejected Option B left the classifier untouched and gave the counting code its own prefix
+test.
+
+Fields deliberately EXCLUDED, and the reasoning is the learner's: counts of metadata and
+context lines do not earn a place, because metadata only identifies the file before and after,
+which the file count already conveys, and context lines are unchanged code. Cutting a field
+for want of a named reader is the design-review standard and the learner applied it unprompted.
+
+New concept `hunk_vs_file`, corrected by observation: the learner believed `@@` appears once
+per file. A one-file two-hunk diff was generated showing one `diff --git` line and two `@@`
+lines. `@@` marks a hunk, a contiguous neighbourhood of change, and one file may contain many.
+`diff --git` is the only line guaranteed to appear exactly once per file. This also prices the
+learner's earlier changed-line-number proposal: those numbers live in `@@`, so they form a
+list per file rather than a single value.
+
+The learner found the label asymmetry unaided — `added` and `removed` match tally entries
+while `files_changed` has none — and proposed the label that became the adopted design.
+
+Outstanding: the learner has not yet given `files_changed`, `lines_added`, and `lines_removed`
+for the two-file diff. Those counts are the specification the first Phase 2 tests will be
+written from and must come from the learner. No Phase 2 code exists.
+
+PHASE 2 KNOWLEDGE GATE PASSED, evidence `EV-P2-CASES-063`. The learner specified all four
+cases before any test was shown, which is what the gate requires:
+
+```text
+two-file diff   files_changed 2, lines_added 3, lines_removed 2
+empty input     0, 0, 0
+new file        files_changed 1, lines_added 2, lines_removed 0
+shopping list   0, 0, 0, no error raised
+```
+
+NAME SETTLED by the learner after considering three candidates: `DiffSummary`, holding
+`files_changed`, `lines_added`, `lines_removed`. `QuickGitDiff` was rejected because the record
+contains no diff text, and `Git` was dropped as redundant in a project where everything is a
+git diff. Python casing was introduced here: CapWords for a type, lower_snake_case for values
+and functions.
+
+ACCEPTED TRADE, and the learner should be able to defend it: non-diff input produces zeros
+rather than an error, so nothing and nonsense are indistinguishable in the output. The learner
+proposed an error, then withdrew it once the cost was visible — detecting a non-diff means
+first writing down what a valid diff is, while the existing classifier already labels every
+shopping-list line as context. Validation is the natural subject of Phase 5.
+
+New concept `hunk_numbers_are_changes_not_coordinates`, corrected: the learner first read the
+`@@` numbers as identifying added and removed lines. They are `start,count` per side, minus for
+the old file and plus for the new. The learner then read an unseen header correctly and
+inferred the net length change unprompted. Precision point supplied: a length change gives the
+NET difference, not the added count, which is why the summary counts content lines rather than
+doing hunk arithmetic.
+
+NEXT, and not yet started: `classify_diff_line` gains the `file_header` label, then lists and
+iteration are introduced through the implementation-adjacent loop, since the learner has met
+neither. Only then is the summary function built, test-first, from the four cases above.
+
