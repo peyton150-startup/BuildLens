@@ -1167,3 +1167,41 @@ NEXT, and deliberately not started: accumulation. Counting labels across a loop 
 running total that survives between passes, which is a genuinely new idea and must not be
 folded into the same sitting as the loop itself. After that, the summary function can be built
 test-first from the four cases in `EV-P2-CASES-063`.
+
+## Phase 2 — accumulation and the string-to-lines boundary
+
+Evidence `EV-P2-ACC-075`. Four accumulator predictions correct at 100 confidence, including the
+reset-inside-the-loop variant that yields 1 instead of 3. The learner identified unaided that a
+counter initialised inside the loop is wiped every pass.
+
+Also established: looping a string yields characters, not lines — the learner inferred this
+unaided and was off only by not counting the space. `\n` is one character; `len("alpha\nbeta")`
+predicted correctly as 10. `splitlines()` converts one string into a list of lines.
+
+The complete pipeline, stated by the learner in their own words before it was written down:
+
+```text
+one diff string
+  -> splitlines()
+  -> for line in lines
+  -> classify_diff_line
+  -> compare the label
+  -> bump one of three counters
+  -> three numbers
+```
+
+STOP POINT, and this is a deliberate judgement rather than fatigue. Seven new syntax forms
+landed in one sitting: list literal, indexing, `for`, the loop variable, the accumulator update,
+`\n`, and `splitlines`. Building the summary function immediately would rest the first real
+Phase 2 code on concepts hours old with no retrieval behind them.
+
+REQUIRED BEFORE THE SUMMARY FUNCTION IS WRITTEN:
+
+- one delayed retrieval on the accumulator, especially the reset-placement distinction;
+- one delayed retrieval on `splitlines` versus looping a raw string;
+- both in surface forms that are not label counting.
+
+Prompt-reading note, and it was Claude's risk rather than the learner's error: the phrase
+`afterwards it goes back to zero for the next interation` had two opposite readings. It was
+disambiguated by asking rather than assumed. Keep doing that; three of this project's recorded
+defects came from not doing it.

@@ -8224,3 +8224,141 @@ about where the loop variable comes from
 RECOVERY STATUS:
 gate-passed
 ```
+
+```text
+EVIDENCE ID:
+EV-P2-ACC-075
+
+DATE / PHASE / GATE:
+2026-08-26 / Phase 2 / accumulation and the string-to-lines boundary
+
+IMPLEMENTATION TRIGGER:
+The summary function needs a running count that survives between loop passes, and a diff
+arrives as one string rather than as a list.
+
+ADJACENT CONCEPT:
+A variable can be defined in terms of its own previous value. Where it is initialised decides
+whether it accumulates or resets. Looping a string yields characters; `splitlines()` converts
+one string into a list of lines.
+
+EXERCISE TYPE:
+tracing
+
+SOURCE / CONTEXT:
+academic micro-examples, then connected to BuildLens
+
+PROBLEM — VERBATIM:
+total = 0
+total = total + 1
+total = total + 1
+print(total)
+
+then the same inside a loop, then with `total = 0` moved INSIDE the loop, then counting only
+"added", then: for x in "hi you": print(x), then: text = "alpha\nbeta"; print(len(text));
+print(text.splitlines())
+
+MY ANSWER — VERBATIM:
+2, 100
+
+3,100
+
+1,100
+
+2,100
+
+just have it set outside the function to zero and then have it changed inside the function so
+when it prints it will be changed and afterwards it goes back to zer o for the next interation
+
+after the whole diff is finished
+
+one counter per variable checking each time it passes the criteria for a file change etc
+
+it will be handed the git diff and we run classify line to get what it is and count each time
+we do it
+
+it prints 5 lines, 40
+
+so it will print the space with all characters perline, we have to get the length of the string
+so we know where everything is in the string
+
+make a list of the lines
+
+so we would make a list ofthe lines and then run classify line to get the added or removed or
+header files and count from there, 10
+
+MY REASONING — VERBATIM:
+one counter per variable checking each time it passes the criteria for a file change etc
+
+CONFIDENCE BEFORE CHECK:
+100 on all four accumulator predictions, all correct. 40 on the string-iteration count, which
+was off by one. Calibration remains sound in both directions.
+
+TOOLS / HELP USED BEFORE COMMITMENT:
+none
+
+RESULT:
+correct
+
+MISCONCEPTION / GAP:
+Four accumulator predictions correct at 100, including the reset-inside-the-loop variant that
+yields 1 rather than 3. The learner identified without help that a counter placed inside the
+loop is wiped each pass.
+
+One ambiguity resolved rather than assumed. The phrase `afterwards it goes back to zero for the
+next interation` has two opposite readings. Asked which they meant — after each label, or after
+the whole diff — the learner answered `after the whole diff is finished`, which is correct.
+Recorded as a prompt-reading success, not a misconception; the wrong reading was Claude's risk,
+not the learner's error.
+
+`for x in "hi you"` was predicted as 5 lines. The CONCEPT was right and unaided — one character
+per pass, inferred rather than told — and the count omitted the space. Six characters, `len`
+agreeing at 6.
+
+One wrong turn: asked what must happen to the string before looping, the learner reached for
+`len` and character positions. Redirected without revealing, by contrasting the two loops
+already seen — a list of labels gives one label per pass, a string gives one character per pass
+— and asking what the loop must be handed to get one LINE per pass. The learner answered `make
+a list of the lines`, which is exactly `splitlines()`.
+
+`\n` was introduced as a single character. The learner predicted `len("alpha\nbeta")` as 10,
+correctly, which confirms it. Their prediction of the `splitlines()` result was a vertical
+character listing, which is what looping the raw string produces rather than what `splitlines`
+returns. Both were generated side by side rather than asserted.
+
+CORRECT MODEL — ADDED AFTER ATTEMPT:
+Initialise before the loop, update inside it, read after it. Initialising inside resets every
+pass. `"alpha\nbeta"` is 10 characters and 2 lines; `splitlines()` returns `['alpha', 'beta']`.
+
+The assembled pipeline, which the learner stated in their own words before seeing it written:
+
+one diff string -> splitlines() -> for line in lines -> classify_diff_line -> compare the label
+-> bump one of three counters -> three numbers
+
+WHY THIS MATTERS TO THE REAL IMPLEMENTATION:
+Every prerequisite for the summary function is now met. Nothing in it is unfamiliar.
+
+TRANSFER / NEXT RETRIEVAL:
+Do NOT build the summary function in the same sitting. Seven new syntax forms were introduced
+today — list literal, indexing, `for`, the loop variable, the accumulator update, `\n`, and
+`splitlines`. Require a delayed retrieval on the accumulator and on `splitlines` before writing
+code that depends on both.
+
+PARENT EVIDENCE ID:
+EV-P2-LIST-074
+
+PRIMARY BLOCKER:
+none
+
+SCAFFOLD RUNG:
+R2 for the bare accumulator, climbing to R5 for the conditional count inside a loop
+
+WHY THIS RUNG:
+Small numbers, one counter, no functions, no diff vocabulary until the final connection.
+
+SUPPORT PROVIDED BEFORE THIS ATTEMPT:
+`\n` and `splitlines` were named as facts, since neither is derivable; every prediction was
+still required before any output was generated
+
+RECOVERY STATUS:
+stable-at-rung
+```
