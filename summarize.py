@@ -2,7 +2,7 @@
 
 Contract:
     in        one string of unified-diff text, as git prints it
-    out       one DiffSummary holding three counts
+    out       one DiffSummary with files_changed, lines_added, lines_removed
     unchanged the string passed in, and everything outside this call
 """
 

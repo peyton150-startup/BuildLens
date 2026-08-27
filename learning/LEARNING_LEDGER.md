@@ -9694,3 +9694,258 @@ none beyond showing the diff text
 RECOVERY STATUS:
 validated
 ```
+
+```text
+EVIDENCE ID:
+EV-P2-TEACH-088
+
+DATE / PHASE / GATE:
+2026-08-27 / Phase 2 / MILESTONE — teach summarize.py aloud
+
+IMPLEMENTATION TRIGGER:
+CLAUDE.md requires a learner explanation before a behaviour-adding phase closes.
+
+ADJACENT CONCEPT:
+A contract states what a caller can rely on, not how the value was built.
+
+EXERCISE TYPE:
+design
+
+SOURCE / CONTEXT:
+BuildLens, summarize.py
+
+PROBLEM — VERBATIM:
+Teach it to someone who has never seen it and doesn't know what a diff is.
+then: Does a caller need to know it's a dataclass, or only that it's a DiffSummary?
+then: Name something summarize_diff gets wrong, or can't report.
+then: Which one is dangerous, and what makes it worse than the other two?
+
+MY ANSWER — VERBATIM:
+the function takes a report of the code changes called a git diff, in string format and breaks
+down each line seperated by a \n into a list of each line, the function then looks at each line
+using classifydefline function and creates a count of each criteria, files changed lines added
+and lines removed. it then puts those values into a dataclass instace that holds the values to be
+printed out by the caller. the function itself starts with the file header and then checks for
+addded and then checks for removed. can we change the out for the contract to be more specific
+the out should make sure to name diffsummary as a dataclass instance so everyone knows
+
+why does it only need to have diffsummary i do not understand
+
+could we say it is a class then?
+
+none change
+
+one DiffSummary with files_changed, lines_added, lines_removed
+
+the caller does not technically need to preint it out, they could be used in another way to be
+added or subtrac4ted from a larger nubmer, i simply meant it would be used by the caller
+
+i do not know, 0
+
+for A i would say it cannot but is that worth adding in now, it would just count everything using
+a different counter and reset every file header, for b wouldnt it just return 2 zeros for added
+and removed, for c it would just return it as context becasue of classifydiffline, d would crash
+because we have stated it has to be a string attributeerror, 50
+
+the git failing because it returns as if it was just an unchanged file, that is worse because we
+think everything is fine while the git completely failed and we are not informed about it
+
+MY REASONING — VERBATIM:
+that is worse because we think everything is fine while the git completely failed and we are not
+informed about it
+
+CONFIDENCE BEFORE CHECK:
+0 on the open limitations question, correctly. 50 on the four-way selection, which was fully
+correct — underconfident.
+
+TOOLS / HELP USED BEFORE COMMITMENT:
+none
+
+RESULT:
+correct
+
+MISCONCEPTION / GAP:
+The explanation was accurate on first pass, including branch order and the string boundary.
+
+LEARNER-INITIATED CONTRACT CHANGE, and the reasoning is the valuable part. The learner asked to
+name DiffSummary as a dataclass instance in the contract "so everyone knows". Challenged with
+whether a caller needs to know that, they did not understand the objection, so it was made
+concrete: if @dataclass were replaced by a hand-written class with identical fields, how many of
+the four calling lines change? The learner answered none, unaided.
+
+They then proposed "class" as a middle ground, which has the same defect more mildly. Told that
+their instinct toward specificity was right but aimed at the wrong detail, they produced the
+better line themselves: "one DiffSummary with files_changed, lines_added, lines_removed". Applied
+verbatim. The rule extracted: state what the caller can rely on, not how you built it.
+
+One assertion challenged as promised — the learner said the values are "to be printed out by the
+caller". They corrected it unprompted to a general use, offering arithmetic as an alternative,
+and their own test is a caller that never prints.
+
+The open limitations question produced "i do not know, 0" and was converted to a four-way
+selection per the standing rule. All four answered correctly, including the odd one out: passing
+a list is NOT a limitation because it raises AttributeError, so the caller finds out. On item A
+the learner also named the fix — a per-file counter keyed off each file_header — and then argued
+it should not be built yet, which is the correct instinct.
+
+Danger ranking correct and unaided: git failing is worse than binary files or missing per-file
+attribution, because the output is indistinguishable from success.
+
+CORRECT MODEL — ADDED AFTER ATTEMPT:
+Contract now reads: out one DiffSummary with files_changed, lines_added, lines_removed.
+
+WHY THIS MATTERS TO THE REAL IMPLEMENTATION:
+The learner can state what summarize.py promises, what it costs, and which of its blind spots is
+dangerous.
+
+TRANSFER / NEXT RETRIEVAL:
+EV-P2-TRANSFER-089
+
+PARENT EVIDENCE ID:
+EV-P2-REAL-087
+
+PRIMARY BLOCKER:
+none
+
+SCAFFOLD RUNG:
+R6
+
+WHY THIS RUNG:
+Open-ended teaching of real project code with adversarial follow-up.
+
+SUPPORT PROVIDED BEFORE THIS ATTEMPT:
+none; one open question was converted to a selection after "i do not know"
+
+RECOVERY STATUS:
+milestone-item-satisfied
+```
+
+```text
+EVIDENCE ID:
+EV-P2-TRANSFER-089
+
+DATE / PHASE / GATE:
+2026-08-27 / Phase 2 / MILESTONE — transfer variant, silent failure in an unseen domain
+
+IMPLEMENTATION TRIGGER:
+CLAUDE.md requires one transfer variant before the milestone closes.
+
+ADJACENT CONCEPT:
+A function call becomes its returned value. Looping a string yields characters. A silent wrong
+answer is worse than a crash.
+
+EXERCISE TYPE:
+tracing and design critique
+
+SOURCE / CONTEXT:
+academic micro-example, log processing, no git and no diffs
+
+PROBLEM — VERBATIM:
+def summarize_log(log_text):
+    errors = 0
+    warnings = 0
+    for line in log_text:
+        if line.startswith("ERROR"):
+            errors = errors + 1
+        elif line.startswith("WARN"):
+            warnings = warnings + 1
+    return LogSummary(errors, warnings)
+
+log = "ERROR disk full\nWARN low memory\nERROR timeout"
+print(summarize_log(log))
+
+What does it actually print? Does it crash?
+
+MY ANSWER — VERBATIM:
+it dores not print anything becasue ti returns the values and you need to call logsummary
+
+i do not know
+
+both print 2
+
+2 erros and 1 warning
+
+2 erros and 1 wanring or 2
+1, 60, no crash
+
+one character
+
+false, so would the loop go through every single character in the string and that is why it
+would print 0
+
+for the logsummary it would be to run splitlines() once before the loop, or could you put it in
+the loop after "in" , because this is a silent failure and we would just be getting ZeroS without
+an error
+
+a silent error that never crashes means you can never fix it unless you notice the output
+
+MY REASONING — VERBATIM:
+so would the loop go through every single character in the string and that is why it would print 0
+
+a silent error that never crashes means you can never fix it unless you notice the output
+
+CONFIDENCE BEFORE CHECK:
+60 on the initial wrong counts
+
+TOOLS / HELP USED BEFORE COMMITMENT:
+none
+
+RESULT:
+wrong, remediated, then correct
+
+MISCONCEPTION / GAP:
+`return_value_is_the_call_expression` RESURFACED, first seen as a Phase 0 weak concept. The
+learner said print would show nothing because the function returns rather than prints. Pointing
+at a run from an hour earlier did not recover it, and they answered "i do not know", so the ladder
+was descended to R1: a function returning 2, printed both via a variable and directly. Both
+correct. Climbed one rung to a function returning a dataclass instance, also correct in meaning.
+Exact printed form supplied — LogSummary(errors=2, warnings=1) — since the repr is generated
+rather than derivable.
+
+"No crash" was correct first time. The counts were not. Asked what `line` holds on the first pass
+of a loop over a string, the learner answered "one character" and then completed the whole chain
+unaided: "E".startswith("ERROR") is false, every character fails, the result is zeros.
+
+Confirmed by running both versions:
+
+theirs: LogSummary(errors=0, warnings=0)
+fixed : LogSummary(errors=2, warnings=1)
+exit code: 0
+
+A log containing two errors reports a clean run, and the process exits 0.
+
+CORRECT MODEL — ADDED AFTER ATTEMPT:
+The fix is splitlines, and the learner offered both valid placements including the inline form
+their own summarize_diff uses.
+
+The general rule, stated by the learner with no domain terms after being asked twice:
+
+"a silent error that never crashes means you can never fix it unless you notice the output"
+
+WHY THIS MATTERS TO THE REAL IMPLEMENTATION:
+This is the third distinct place the learner has made the loud-versus-silent argument today —
+for DiffSummary over a tuple, for the git-failure hazard, and here in a domain with no git in it.
+The principle is now stated generally rather than recognised in context.
+
+TRANSFER / NEXT RETRIEVAL:
+`return_value_is_the_call_expression` needs a delayed retrieval; it resurfaced after appearing
+stable in Phase 1 at EV-P1-RETURN-007 and EV-P1-RETURN-008.
+
+PARENT EVIDENCE ID:
+EV-P2-TEACH-088
+
+PRIMARY BLOCKER:
+return_value_is_the_call_expression
+
+SCAFFOLD RUNG:
+R5, descended to R1, climbed back
+
+WHY THIS RUNG:
+Unseen domain, one function, one loop, one branch chain, a deliberately planted bug.
+
+SUPPORT PROVIDED BEFORE THIS ATTEMPT:
+none on the bug; the two loop headers were shown side by side after the first wrong count
+
+RECOVERY STATUS:
+transfer-satisfied
+```

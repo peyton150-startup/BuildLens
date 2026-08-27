@@ -1680,3 +1680,60 @@ The exit code printed beside the text in the validation run is the whole of the 
 It was pointed out once and deliberately not pressed, since the retrieval must not be announced.
 
 Phase 3 should not begin until the milestone is closed.
+
+## Phase 2 — MILESTONE CLOSED
+
+Evidence `EV-P2-TEACH-088` and `EV-P2-TRANSFER-089`. All four requirements met:
+
+```text
+automated tests      both suites green, validated against real git output
+learner trace        every run predicted before it ran
+learner explanation  contract, mechanism, three limitations, ranked by danger
+transfer variant     unseen domain, found a silent bug, stated the rule generally
+```
+
+CONTRACT IMPROVED BY THE LEARNER, and the reasoning matters more than the wording. They asked to
+name `DiffSummary` as a dataclass instance in the contract. Challenged, they did not understand
+the objection, so it was made concrete: if `@dataclass` were replaced by a hand-written class
+with identical fields, how many of the four calling lines change? They answered none, unaided,
+then produced the better line themselves:
+
+```text
+out       one DiffSummary with files_changed, lines_added, lines_removed
+```
+
+Rule extracted: a contract states what the caller can rely on, not how you built it.
+
+Limitations: the open question produced `i do not know, 0` and was converted to a four-way
+selection. All four correct, including the odd one out — passing a list is NOT a limitation
+because it raises `AttributeError`, so the caller finds out. On the per-file question the learner
+named the fix and then argued it should not be built yet, which is the correct instinct.
+
+Danger ranking correct and unaided: git failing beats binary files and missing per-file
+attribution, because its output is indistinguishable from success.
+
+REGRESSION, and it needs scheduling: `return_value_is_the_call_expression` resurfaced. The learner
+said `print(summarize_log(log))` would print nothing because the function returns rather than
+prints. This was stable in Phase 1 at `EV-P1-RETURN-007` and `EV-P1-RETURN-008`. Remediated by
+descending to R1 — a function returning 2, printed both ways — then climbing to a function
+returning a dataclass instance. A DELAYED RETRIEVAL IS NOW DUE on this concept.
+
+The transfer itself: a log summarizer missing `splitlines`, so it loops characters. It returns
+`LogSummary(errors=0, warnings=0)` for a log containing two errors, and exits 0. The learner
+worked the whole chain unaided once asked what `line` holds on the first pass, then gave the fix
+and the general rule with no domain terms:
+
+> a silent error that never crashes means you can never fix it unless you notice the output
+
+That is the third distinct place today the learner has made the loud-versus-silent argument — for
+`DiffSummary` over a tuple, for the git-failure hazard, and here in a domain with no git in it.
+
+## Retrievals owed entering Phase 3
+
+```text
+exit status                        unaided, unannounced, NOT a Python test run
+branch_precedence                  unaided, after a longer gap, then MASTERED
+return_value_is_the_call_expression NEW, after a gap, following today's regression
+```
+
+Phase 2 is complete. Phase 3 may begin.
