@@ -9050,3 +9050,341 @@ mechanism had been described correctly; both failure cases were generated rather
 RECOVERY STATUS:
 defended
 ```
+
+```text
+EVIDENCE ID:
+EV-P2-SPLIT-082
+
+DATE / PHASE / GATE:
+2026-08-27 / Phase 2 / second delayed retrieval attempt on splitlines, learner-initiated
+
+IMPLEMENTATION TRIGGER:
+The learner opened the session asking to go over splitlines again. It was one of three owed
+retrievals, so a recall attempt was taken before any teaching.
+
+ADJACENT CONCEPT:
+splitlines converts one string into a list of its lines. It has nothing to do with printing.
+Real subprocess output arrives as one string.
+
+EXERCISE TYPE:
+recall, then tracing
+
+SOURCE / CONTEXT:
+BuildLens, settled against real git output
+
+PROBLEM — VERBATIM:
+What does splitlines() do, and what do you get back from it?
+
+then: report = "ok\nfail\nok\nfail" — What does report.splitlines() give back, and what is len()
+of that?
+
+MY ANSWER — VERBATIM:
+it makes it so that if you have a list with multiple instances splitlines will make them print
+on the line below, 10
+
+so splitlines takes a string with /n and makes it into a list, isn't that a little redundeant
+why not just make a list
+
+\n ok, git writes it but i am not sure if git writes it as one string with \n or will it have
+sepereate lines
+
+it gives you a list of all the lines seperated by \n in the 143 character string and the len of
+that is how many lies theere are, for report it is 4 , 90
+
+MY REASONING — VERBATIM:
+isn't that a little redundeant why not just make a list
+
+CONFIDENCE BEFORE CHECK:
+10 on the failed recall, correctly low. 90 on the corrected answer, correct.
+
+TOOLS / HELP USED BEFORE COMMITMENT:
+none on the recall attempt
+
+RESULT:
+retrieval FAILED again, then correct after teaching
+
+MISCONCEPTION / GAP:
+Second failed retrieval on this concept. The wrong answer was diagnostic rather than blank and
+contained two specific errors:
+
+1. `splitlines_input_is_a_list` — the input was thought to be a list. It is a string.
+2. `splitlines_is_a_printing_operation` — the output was described as making things print on
+   the line below. It returns a list and prints nothing.
+
+The second error is CLAUDE'S FAULT and is recorded as such. Every prior demonstration of
+splitlines was immediately followed by a loop that printed each line, so the two fused. The
+correction showed splitlines with no printing of parts at all, using type() on both sides, and
+pointed out that the original string ALREADY prints on three lines because of the \n — so
+line-by-line appearance was never splitlines' doing.
+
+LEARNER QUESTION, and it is the right one: "isn't that a little redundeant why not just make a
+list". Answered by asking who authors the text. TWO_FILE_DIFF in the test file is hand-written,
+so a list was possible there. Real diff text is written by git.
+
+The learner then said they did not know whether git returns one string or separate lines. Under
+the standing rule this was settled by generating real output rather than asserting. git diff was
+run through subprocess with capture_output and text, giving:
+
+type      : <class 'str'>
+len       : 143
+exit code : 0
+repr      : 'diff --git a/app.py b/app.py\nindex 078ac13..d8cb1a4 100644\n--- a/app.py\n+++ ...'
+
+One string, 143 characters, \n between lines. repr was used deliberately because print would
+have acted on the \n and hidden the answer.
+
+CORRECT MODEL — ADDED AFTER ATTEMPT:
+git gives you        one string
+your loop needs      one line per pass
+splitlines bridges   str -> list of str
+
+"ok\nfail\nok\nfail".splitlines() is ['ok', 'fail', 'ok', 'fail'], len 4.
+
+SCORING, and it matters: this was taught and tested in the same sitting, so it does NOT count as
+the delayed retrieval. Recorded as re-learned for the second time. One unaided attempt after a
+gap is still owed, and the surface must not be a string of short words.
+
+WHY THIS MATTERS TO THE REAL IMPLEMENTATION:
+The learner now knows why the string boundary exists rather than just what the method is called.
+They also saw the Phase 7 subprocess call and its exit code side by side with the text, without
+any Phase 7 code being written.
+
+TRANSFER / NEXT RETRIEVAL:
+Unaided splitlines attempt after a gap, third try. Do not precede it with any demonstration.
+
+PARENT EVIDENCE ID:
+EV-P2-RETR-076
+
+PRIMARY BLOCKER:
+splitlines_is_a_printing_operation, induced by Claude's own examples
+
+SCAFFOLD RUNG:
+R1
+
+WHY THIS RUNG:
+One string, one method call, one length, no loop and no project vocabulary.
+
+SUPPORT PROVIDED BEFORE THIS ATTEMPT:
+none before the recall attempt; after it failed, a no-printing demonstration with type() on both
+sides, then real git output to settle the shape question the learner raised
+
+RECOVERY STATUS:
+re-learned, retrieval still due
+```
+
+```text
+EVIDENCE ID:
+EV-P2-IMPORT-083
+
+DATE / PHASE / GATE:
+2026-08-27 / Phase 2 / salvaged question after Claude spoiled the original prediction
+
+IMPLEMENTATION TRIGGER:
+The paused-red state was meant to be a prediction. Claude ran the suite in the same message and
+revealed the answer, so the question was reframed as an explanation.
+
+ADJACENT CONCEPT:
+ImportError and NameError both mean the name was not found. The difference is where Python was
+looking when it failed.
+
+EXERCISE TYPE:
+tracing
+
+SOURCE / CONTEXT:
+BuildLens
+
+PROBLEM — VERBATIM:
+In both ImportError and NameError, a name is missing. Why does this one get caught at line 8
+rather than waiting until the function is actually called?
+
+then: If that import block were moved to the bottom of the file, would it still fail before any
+test ran?
+
+MY ANSWER — VERBATIM:
+becasue python checks the imports first before running anytthing, execution order is top to
+bottom
+
+yes, because then the import would not have been read into the file yet, 60
+
+the problem with countaddedlines is it is not defined in summarize.py yet, and so import erorer,
+and name error because it is not read in 2 different errors
+
+yes, but i thought we made it clear we were combing them into one function called summarize_diff
+or something similar, so there should be no count added lines
+
+when it runs line 8
+
+the import calls will break, everytime it is called it will break, and it will be on the imports
+and then stop so the fucntons will never be called because the immports will fail first
+
+MY REASONING — VERBATIM:
+execution order is top to bottom
+
+because then the import would not have been read into the file yet
+
+CONFIDENCE BEFORE CHECK:
+60 on the bottom-import question, correct in outcome
+
+TOOLS / HELP USED BEFORE COMMITMENT:
+none
+
+RESULT:
+correct
+
+MISCONCEPTION / GAP:
+The execution-order answer was correct and links back to EV-P2-EXEC-073. The phrasing "python
+checks the imports first" was probed, because it could mean a special pre-pass rather than an
+ordinary statement running first. Moving the import to the bottom was run in a scratch copy: the
+suite fails with NameError at the call site, on a function that DOES exist in summarize.py. Only
+position changed.
+
+One misreading: the learner said count_added_lines was not defined in summarize.py. It was, and
+they had been told so in the same message. Corrected by showing the file whole and asking a yes
+or no question.
+
+FAIR CHALLENGE FROM THE LEARNER, and it was right: they objected that the plan was to combine
+the three counters into summarize_diff, so count_added_lines should not exist. The endpoint they
+remembered was correct; the two-patch sequencing had been proposed the previous day and they had
+paused before responding to it. Restated and explicitly agreed: build first with the suite green
+throughout, delete second, so a failure after step two can only be the deletion.
+
+CORRECT MODEL — ADDED AFTER ATTEMPT:
+looking during an import statement    ImportError
+looking at a name being used          NameError
+
+An import does not note a name for later. It fetches it, at that line, before anything below
+runs.
+
+Applied unaided minutes later: asked what breaks if the three functions are deleted without
+touching the test file, the learner answered that the imports fail first and the functions are
+therefore never called.
+
+WHY THIS MATTERS TO THE REAL IMPLEMENTATION:
+It made the two-patch deletion safe to reason about in advance.
+
+TRANSFER / NEXT RETRIEVAL:
+none scheduled; the concept was applied correctly in the same sitting on a different case.
+
+PARENT EVIDENCE ID:
+EV-P2-RECORD-081
+
+PRIMARY BLOCKER:
+none
+
+SCAFFOLD RUNG:
+R5
+
+WHY THIS RUNG:
+Real project code, one moved import, one scratch experiment.
+
+SUPPORT PROVIDED BEFORE THIS ATTEMPT:
+the learner's own earlier description of importing was quoted back; the bottom-import case was
+generated rather than described
+
+RECOVERY STATUS:
+stable-at-rung
+```
+
+```text
+EVIDENCE ID:
+EV-P2-SUMMARY-084
+
+DATE / PHASE / GATE:
+2026-08-27 / Phase 2 / DiffSummary and summarize_diff built, then the counters deleted
+
+IMPLEMENTATION TRIGGER:
+The learner's design from EV-P2-DRY-080 and the record decision from EV-P2-RECORD-081.
+
+ADJACENT CONCEPT:
+dataclass, decorator, type annotation. A refactor must leave observable behaviour identical.
+
+EXERCISE TYPE:
+implementation
+
+SOURCE / CONTEXT:
+BuildLens
+
+PROBLEM — VERBATIM:
+Predict: does test_summarize.py print "test passed", and what exit code? And does
+test_classify.py still pass?
+
+then: If I delete the three functions from summarize.py and change nothing else, what breaks and
+where?
+
+then: Are you losing any coverage?
+
+MY ANSWER — VERBATIM:
+everything lookks good to me, i cannot find any issues, 90, test passed and exit code 0, i
+cannot find a reason why testclassify would not still pass, so they all pass
+
+the import calls will break, everytime it is called it will break, and it will be on the imports
+and then stop so the fucntons will never be called because the immports will fail first
+
+no, they all have the same output variable we are just saving time by calling 1 function instead
+of 3 and holding each instance in a dataclass
+
+ok so it is a dataclass instance holding 3 values, correct? be brief
+
+test passed exit code 0, can we change the docscript right now, 100
+
+one DiffSummary with 3 values
+
+MY REASONING — VERBATIM:
+we are just saving time by calling 1 function instead of 3
+
+CONFIDENCE BEFORE CHECK:
+90 on the build prediction, 100 on the deletion prediction. Both correct.
+
+TOOLS / HELP USED BEFORE COMMITMENT:
+none. Claude did NOT run either suite in the same message as the prediction request, correcting
+the defect recorded the previous day.
+
+RESULT:
+correct
+
+MISCONCEPTION / GAP:
+None. Both predictions were correct, and the coverage question was answered correctly: the three
+deleted tests asserted the same three numbers against the same input that the surviving test
+asserts by name.
+
+One wording correction: the learner said the values are held with "each instance in a dataclass".
+It is ONE instance holding three values. They restated it correctly when asked.
+
+The learner asked for the stale docstring to be fixed immediately and supplied the replacement
+wording themselves — "one DiffSummary with 3 values". Applied as "one DiffSummary holding three
+counts". The suite was re-run afterwards and was unchanged, which is the point of a
+comment-only edit.
+
+CORRECT MODEL — ADDED AFTER ATTEMPT:
+summarize.py is now 34 lines: a DiffSummary dataclass and one summarize_diff that walks the
+lines once, keeps three counters, and returns one record. The three single-count functions and
+their three tests are gone. Both suites green, exit 0, at every step.
+
+New notation introduced and named rather than left to guess: the dataclasses import, the
+@dataclass decorator, and int type annotations that Python does not enforce.
+
+WHY THIS MATTERS TO THE REAL IMPLEMENTATION:
+The Phase 2 data model now exists end to end. Every value the learner specified at the gate is
+produced by one call against a real diff.
+
+TRANSFER / NEXT RETRIEVAL:
+The splitlines boundary — summarize_diff currently takes a list, and git returns a string.
+
+PARENT EVIDENCE ID:
+EV-P2-IMPORT-083
+
+PRIMARY BLOCKER:
+none
+
+SCAFFOLD RUNG:
+R6
+
+WHY THIS RUNG:
+Real project code, a new type, a deletion across two files, and two unaided predictions.
+
+SUPPORT PROVIDED BEFORE THIS ATTEMPT:
+whole files shown before each prediction; new notation named explicitly
+
+RECOVERY STATUS:
+stable-at-rung
+```

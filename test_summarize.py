@@ -5,12 +5,7 @@ Run it with:
     python test_summarize.py
 """
 
-from summarize import (
-    count_added_lines,
-    count_changed_files,
-    count_removed_lines,
-    summarize_diff,
-)
+from summarize import summarize_diff
 
 
 TWO_FILE_DIFF = [
@@ -34,21 +29,6 @@ TWO_FILE_DIFF = [
 ]
 
 
-def test_two_file_diff_has_three_added_lines():
-    result = count_added_lines(TWO_FILE_DIFF)
-    assert result == 3
-
-
-def test_two_file_diff_has_two_removed_lines():
-    result = count_removed_lines(TWO_FILE_DIFF)
-    assert result == 2
-
-
-def test_two_file_diff_has_two_changed_files():
-    result = count_changed_files(TWO_FILE_DIFF)
-    assert result == 2
-
-
 def test_summarize_diff_reports_all_three_counts():
     result = summarize_diff(TWO_FILE_DIFF)
     assert result.files_changed == 2
@@ -56,8 +36,5 @@ def test_summarize_diff_reports_all_three_counts():
     assert result.lines_removed == 2
 
 
-test_two_file_diff_has_three_added_lines()
-test_two_file_diff_has_two_removed_lines()
-test_two_file_diff_has_two_changed_files()
 test_summarize_diff_reports_all_three_counts()
 print("test passed")

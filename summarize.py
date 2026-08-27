@@ -2,32 +2,34 @@
 
 Contract:
     in        a list of unified-diff lines, each a string
-    out       one count
+    out       one DiffSummary holding three counts
     unchanged the list passed in, and everything outside this call
 """
+
+from dataclasses import dataclass
 
 from classify import classify_diff_line
 
 
-def count_added_lines(all_lines):
-    count = 0
+@dataclass
+class DiffSummary:
+    files_changed: int
+    lines_added: int
+    lines_removed: int
+
+
+def summarize_diff(all_lines):
+    files_changed = 0
+    lines_added = 0
+    lines_removed = 0
+
     for line in all_lines:
-        if classify_diff_line(line) == "added":
-            count = count + 1
-    return count
+        label = classify_diff_line(line)
+        if label == "file_header":
+            files_changed = files_changed + 1
+        elif label == "added":
+            lines_added = lines_added + 1
+        elif label == "removed":
+            lines_removed = lines_removed + 1
 
-
-def count_removed_lines(all_lines):
-    count = 0
-    for line in all_lines:
-        if classify_diff_line(line) == "removed":
-            count = count + 1
-    return count
-
-
-def count_changed_files(all_lines):
-    count = 0
-    for line in all_lines:
-        if classify_diff_line(line) == "file_header":
-            count = count + 1
-    return count
+    return DiffSummary(files_changed, lines_added, lines_removed)

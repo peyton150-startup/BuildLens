@@ -1478,3 +1478,109 @@ Salvage, and it is arguably the better question: ask the learner to EXPLAIN why 
 `ImportError` at the import line rather than `NameError` at the call site, given that in both
 cases a name is missing from a file that exists. Then issue one fresh unspoiled prediction
 before any code is written.
+
+## Phase 2 — splitlines, second failed retrieval, re-learned
+
+Evidence `EV-P2-SPLIT-082`. Learner-initiated: they opened the session asking to go over
+`splitlines`. A recall attempt was taken before any teaching, since it was an owed retrieval.
+
+The recall failed for the second time, at 10 confidence, correctly low. The wrong answer was
+diagnostic rather than blank:
+
+```text
+said input is a LIST        it is a STRING
+said output is PRINTING     it is a LIST, and nothing prints
+```
+
+The printing error is CLAUDE'S FAULT. Every prior demonstration followed `splitlines` with a
+loop that printed each line, so the two fused. The fix showed `splitlines` with no printing of
+parts, `type()` on both sides, and pointed out that the original string already prints on three
+lines because of the `\n` — so line-by-line appearance was never `splitlines`' doing.
+
+LEARNER QUESTION, and it was the right one: *isn't that a little redundeant why not just make a
+list*. Answered by asking who authors the text. `TWO_FILE_DIFF` is hand-written, so a list was
+possible there; real diff text is written by git.
+
+The learner then said they did not know whether git returns one string or separate lines. Settled
+by generating real output per the standing rule — `git diff` through `subprocess.run` with
+`capture_output=True, text=True`:
+
+```text
+type      : <class 'str'>
+len       : 143
+exit code : 0
+repr      : 'diff --git a/app.py b/app.py\nindex 078ac13..d8cb1a4 100644\n--- a/app.py\n...'
+```
+
+One string, `\n` between lines. `repr` was used deliberately because `print` would have acted on
+the `\n` and hidden the answer. The learner also saw the Phase 7 subprocess call and its exit
+code sitting beside the text, with no Phase 7 code written.
+
+SCORING: taught and tested in the same sitting, so this does NOT count as the delayed retrieval.
+Re-learned for the second time. One unaided attempt after a gap is still owed, and the surface
+must not be a string of short words.
+
+METHOD NOTE, second of its kind after the exit-code one: when a learner's wrong answer names a
+neighbouring operation, check whether Claude's own examples always paired the two. Twice now the
+misconception has been induced by demonstration habits rather than by the learner.
+
+## Phase 2 — DATA MODEL COMPLETE
+
+`summarize.py` is now 34 lines: a `DiffSummary` dataclass and one `summarize_diff` that walks the
+lines once, keeps three counters, and returns one record. The three single-count functions and
+their three tests are deleted. Both suites green, exit 0, at every step.
+
+Evidence `EV-P2-IMPORT-083` and `EV-P2-SUMMARY-084`.
+
+Delivered in two patches on purpose, and the learner agreed the sequencing after fairly
+challenging it:
+
+```text
+patch 1   add DiffSummary and summarize_diff      suite green throughout
+patch 2   delete the three counters               green means the deletion was safe
+patch 3   fix the stale docstring                 comment only, behaviour unchanged
+```
+
+Both predictions unaided and correct — 90 on the build, 100 on the deletion. The coverage
+question was answered correctly: the deleted tests asserted the same three numbers against the
+same input that the surviving test asserts by name.
+
+Claude did NOT run either suite in the same message as a prediction request. That corrects the
+tenth prompt defect recorded yesterday.
+
+`ImportError` versus `NameError` settled, evidence `EV-P2-IMPORT-083`:
+
+```text
+looking during an import statement    ImportError
+looking at a name being used          NameError
+```
+
+Demonstrated by moving the import block to the bottom of a scratch copy: the suite then fails
+with `NameError` on a function that DOES exist in `summarize.py`. Only position changed. The
+learner applied this unaided minutes later, predicting that deleting the three counters would
+fail at the import and never reach the calls.
+
+Learner-supplied wording for the corrected contract line: `out one DiffSummary holding three
+counts`.
+
+New notation named rather than left to guess: the `dataclasses` import, the `@dataclass`
+decorator, and `int` type annotations that Python does not enforce.
+
+## Phase 2 — what remains
+
+```text
+splitlines boundary   summarize_diff takes a list; git returns one string
+                      this is the last piece of Phase 2
+```
+
+Retrievals still owed:
+
+```text
+splitlines            THIRD unaided attempt after a gap, no demonstration first,
+                      and not a string of short words
+exit status           unaided, unannounced, not a Python test run
+branch_precedence     unaided, after a longer gap, then MASTERED
+```
+
+`HANDOFF.md` is now partly stale: its START HERE section points at the ImportError question,
+which is answered. Refresh it before moving sessions.
