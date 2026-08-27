@@ -10747,3 +10747,125 @@ guessing; the copying syntax was supplied on request
 RECOVERY STATUS:
 resolved
 ```
+
+```text
+EVIDENCE ID:
+EV-P3-MOVIE-096
+
+DATE / PHASE / GATE:
+2026-08-27 / Phase 3 / KNOWLEDGE GATE, second half — the session state movie
+
+IMPLEMENTATION TRIGGER:
+The plan requires tracing real BuildLens session state through several operations, and asks who
+owns the list and who can mutate it.
+
+ADJACENT CONCEPT:
+A returned copy is a snapshot. It is true at the moment it is taken and never updates.
+
+EXERCISE TYPE:
+tracing
+
+SOURCE / CONTEXT:
+BuildLens, the real Session class
+
+PROBLEM — VERBATIM:
+session = Session(); record("diff A"); record("diff B"); h = session.history();
+h.append("diff C"); session.record("diff D")
+
+Track session.changes and h at each of six states.
+then: Who owns the list? Who can mutate it?
+
+MY ANSWER — VERBATIM:
+["diff A" , "diff B"]  does not exist yet
+["diff A" , "diff B"]  ["diff A" , "diff B"]
+
+["diff A", "diff B"]     ["diff A", "diff B","diff C"]
+["diff A", "diff B","diff D"]     ["diff A", "diff B","diff C"]
+state 4 = 100
+state 5 = 30
+what is the behavior for diff D being added to history
+
+the classes own the lsits and the functions are the only ones who can utate it, 40
+
+the session instance owns the list, also we pasue after this gate, so the session instance is the
+only one who can mutate it
+
+nothing stops it, but who is writing that is my question
+
+MY REASONING — VERBATIM:
+the session instance owns the list
+
+CONFIDENCE BEFORE CHECK:
+100 on state 4, 30 on state 5, both correct. 40 on the ownership question, correctly low.
+
+TOOLS / HELP USED BEFORE COMMITMENT:
+none; the movie was run only after all six states were committed
+
+RESULT:
+gate passed
+
+MISCONCEPTION / GAP:
+All six states predicted correctly, including STATE 5 at 30 confidence — underconfidence again on
+a correct answer.
+
+The learner asked the right question unprompted: what is the behaviour for diff D being added to
+history. They had already answered it correctly in the table. Named for them: h is a SNAPSHOT.
+True when taken, never updating. That cuts both ways — the session is protected from h, and h is
+stale the instant anything is recorded.
+
+Ownership answered in two passes. First attempt said the CLASS owns the list, which contradicts
+their own class-attribute discovery from EV-P3-SESSION-093. Asked to reconcile, they corrected to
+the instance without further help.
+
+Mutation answered as "the session instance is the only one who can mutate it". That is the
+INTENT, not the fact. session.changes is a plain public attribute, so
+session.changes.append("sneaky") works and history() then reports it as real history. Demonstrated
+rather than asserted.
+
+The learner then asked the better question: "who is writing that". Answered honestly — they are,
+in six months, or from the CLI in Phase 6, or the API in Phase 12. Not a saboteur; someone who
+forgot record existed and saw a list sitting there. That is precisely what the rejected underscore
+convention was for.
+
+CORRECT MODEL — ADDED AFTER ATTEMPT:
+STATE 0 []
+STATE 1 ['diff A']
+STATE 2 ['diff A', 'diff B']
+STATE 3 ['diff A', 'diff B']            ['diff A', 'diff B']
+STATE 4 ['diff A', 'diff B']            ['diff A', 'diff B', 'diff C']
+STATE 5 ['diff A', 'diff B', 'diff D']  ['diff A', 'diff B', 'diff C']
+
+who owns it     each Session instance owns its own list
+who can mutate  record() is the intended path
+                anything holding session.changes is unprotected
+                the copy returned by history() cannot reach back
+
+The design stops the accidental case and not the deliberate one. The learner can state this as a
+known limitation rather than discovering it later.
+
+WHY THIS MATTERS TO THE REAL IMPLEMENTATION:
+This is the second half of the Phase 3 gate and the plan's stated stopping condition. Both halves
+now pass.
+
+TRANSFER / NEXT RETRIEVAL:
+Phase 3 milestone: teach session.py, then one transfer variant.
+
+PARENT EVIDENCE ID:
+EV-P3-LEAK-095-CLOSE
+
+PRIMARY BLOCKER:
+none
+
+SCAFFOLD RUNG:
+R6
+
+WHY THIS RUNG:
+Six states, two tracked values, a second name entering partway through, real project code.
+
+SUPPORT PROVIDED BEFORE THIS ATTEMPT:
+states 0 and 1 filled in as a format example; the table split in two halves rather than issued as
+twelve blanks at once
+
+RECOVERY STATUS:
+gate-passed
+```

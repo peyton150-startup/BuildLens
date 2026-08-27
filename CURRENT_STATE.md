@@ -2023,3 +2023,71 @@ exit status                          unaided, unannounced, NOT a Python test run
 branch_precedence                    unaided, after a longer gap, then MASTERED
 return_value_is_the_call_expression  after a gap; note the missing_return slip above
 ```
+
+## Phase 3 — KNOWLEDGE GATE PASSED, both halves
+
+Evidence `EV-P3-ALIAS-091` (alias/copy trace) and `EV-P3-MOVIE-096` (session state movie). The
+plan's stopping condition is cleared.
+
+The movie, all six states predicted correctly before it was run:
+
+```text
+                        session.changes                 h
+STATE 0                 []                              does not exist yet
+STATE 1                 ['diff A']                      does not exist yet
+STATE 2                 ['diff A', 'diff B']            does not exist yet
+STATE 3                 ['diff A', 'diff B']            ['diff A', 'diff B']
+STATE 4                 ['diff A', 'diff B']            ['diff A', 'diff B', 'diff C']
+STATE 5                 ['diff A', 'diff B', 'diff D']  ['diff A', 'diff B', 'diff C']
+```
+
+The two lists diverge at STATE 3 and never speak again. `h` is a SNAPSHOT — true when taken, never
+updating. That cuts both ways: the session is protected from `h`, and `h` is stale the instant
+anything is recorded. The learner asked about the diff D behaviour unprompted, having already
+answered it correctly in the table.
+
+GATE ANSWERS, reached in two passes:
+
+```text
+who owns it     each Session instance owns its own list
+
+who can mutate  record()                            the intended path
+                anything holding session.changes    UNPROTECTED
+                the copy returned by history()      cannot reach back
+```
+
+The first ownership answer said the CLASS owns the list, contradicting the learner's own
+class-attribute discovery. Asked to reconcile it, they corrected to the instance unaided.
+
+The mutation answer was initially the INTENT rather than the fact. `session.changes` is a plain
+public attribute, so `session.changes.append("sneaky")` works and `history()` then reports it as
+real history. Demonstrated rather than asserted.
+
+KNOWN LIMITATION the learner can now state: the design stops the ACCIDENTAL case — someone takes
+the history and edits it — and does not stop the deliberate one. The learner asked the sharper
+question, *who is writing that*, and the honest answer is themselves: in six months, or from the
+CLI in Phase 6, or the API in Phase 12. Not a saboteur, someone who forgot `record` existed and
+saw a list sitting there. That is exactly what the rejected underscore convention was for, and
+adding it later is a live option rather than a defect.
+
+Calibration note: 30 confidence on a correct STATE 5, 40 on a correctly-hedged ownership answer.
+Underconfidence continues on correct answers; the single overconfident miss remains the alias
+trace at 100.
+
+## Phase 3 — what remains
+
+```text
+automated tests      DONE, five green
+learner trace        DONE, every run predicted first
+knowledge gate       DONE, both halves
+learner explanation  OWED — teach session.py
+transfer variant     OWED
+```
+
+Retrievals still owed:
+
+```text
+exit status                          unaided, unannounced, NOT a Python test run
+branch_precedence                    unaided, after a longer gap, then MASTERED
+return_value_is_the_call_expression  after a gap
+```
