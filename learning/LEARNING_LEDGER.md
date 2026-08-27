@@ -10632,3 +10632,118 @@ both tests shown whole; the leak drawn as a pointer diagram
 RECOVERY STATUS:
 open
 ```
+
+```text
+EVIDENCE ID:
+EV-P3-LEAK-095-CLOSE
+
+DATE / PHASE / GATE:
+2026-08-27 / Phase 3 / banked prediction resolved, history implemented, ladder complete
+
+IMPLEMENTATION TRIGGER:
+The prediction left unrun at the previous pause, then rungs 4 and 5.
+
+ADJACENT CONCEPT:
+Check what exists before reasoning about what it does. A copy must be returned, not just built.
+
+EXERCISE TYPE:
+tracing and implementation
+
+SOURCE / CONTEXT:
+BuildLens
+
+PROBLEM — VERBATIM:
+Which of the five calls fails first? At that moment, does Session have a history method?
+then: finish def history(self)
+then: all five, pass or fail, and what exit code?
+
+MY ANSWER — VERBATIM:
+great call i missed it session does nto have a history method so it fails on the first one
+
+4, attributeerror, but can you tell me why i am gussing here
+
+def history(self)
+ history = self.changes
+i would make a copy list that does not point to the same place as session so if we append session
+is not affected, how would we do that?
+
+def history(self)
+ history_list = list(self.changes)
+
+reutrn history_list
+
+pass exit code 0 , 80
+
+MY REASONING — VERBATIM:
+i would make a copy list that does not point to the same place as session so if we append session
+is not affected
+
+CONFIDENCE BEFORE CHECK:
+80 on the final green prediction, correct
+
+TOOLS / HELP USED BEFORE COMMITMENT:
+none
+
+RESULT:
+correct
+
+MISCONCEPTION / GAP:
+The banked prediction from the previous session was AssertionError, reasoning correctly about
+rung 5 leak logic while assuming history() existed. On resume the learner identified the gap
+themselves, saying "great call i missed it", and named call 4 and AttributeError.
+
+They then asked a good meta-question: "can you tell me why i am gussing here". They were not
+guessing; they were reasoning without trusting it. The method was made explicit: walk each call,
+list what it touches, check each against the file, then locate the missing thing to pick the
+error. Both steps are derivable with no recall.
+
+aliasing_instead_of_copying in the implementation: the first draft was history = self.changes,
+which aliases. The learner spotted this themselves in the same breath and asked for the copying
+mechanism, which was supplied as list(), .copy(), and slice syntax, since they had used list()
+earlier but not retained the syntax.
+
+missing_return: the second draft built the copy and did not return it. Shown the inside/outside
+picture and reminded that append returns None, the learner supplied "reutrn history_list" without
+being told.
+
+Missing colon after def history(self), second occurrence. Corrected in passing.
+
+CORRECT MODEL — ADDED AFTER ATTEMPT:
+    def history(self):
+        history_list = list(self.changes)
+        return history_list
+
+All five session tests green, all three suites green, exit 0.
+
+The copy was then PROVEN load-bearing rather than asserted: a scratch copy with
+history_list = self.changes was run against the same tests. Rungs 1 to 4 still pass; rung 5 fails
+with AssertionError. One word decides it, and only the leak test defends it.
+
+WHY THIS MATTERS TO THE REAL IMPLEMENTATION:
+Session is complete. It records changes in order and hands out history that callers cannot use to
+corrupt it. The test the learner proposed first, before they had the vocabulary for it, is the one
+that keeps the design honest.
+
+TRANSFER / NEXT RETRIEVAL:
+Phase 3 milestone: explanation and transfer. Then the second half of the Phase 3 gate, tracing
+real session state through several operations.
+
+PARENT EVIDENCE ID:
+EV-P3-LEAK-095
+
+PRIMARY BLOCKER:
+none
+
+SCAFFOLD RUNG:
+R5
+
+WHY THIS RUNG:
+One class, three methods, five tests.
+
+SUPPORT PROVIDED BEFORE THIS ATTEMPT:
+the failure-locating method was made explicit after the learner asked why they felt they were
+guessing; the copying syntax was supplied on request
+
+RECOVERY STATUS:
+resolved
+```

@@ -1959,3 +1959,67 @@ That follows the rule added after the tenth prompt defect.
 After that: implement `history()` returning `list(self.changes)`, get both rungs green, then the
 Phase 3 milestone — explanation plus transfer — and the second half of the Phase 3 gate, tracing
 real session state through several operations.
+
+## Phase 3 — Session COMPLETE, ladder green
+
+```python
+class Session:
+    def __init__(self):
+        self.changes = []
+
+    def record(self, diff_text):
+        self.changes.append(diff_text)
+
+    def history(self):
+        history_list = list(self.changes)
+        return history_list
+```
+
+All five rungs green, all three suites green, exit 0. Evidence `EV-P3-LEAK-095-CLOSE`.
+
+THE COPY WAS PROVEN LOAD-BEARING, not asserted. A scratch copy with `history_list = self.changes`
+was run against the same tests: rungs 1 to 4 still pass, rung 5 fails with `AssertionError`. One
+word decides it, and only the leak test defends it. That is the difference between a test that
+means something and one that happens to pass.
+
+The banked prediction resolved. The learner had predicted `AssertionError`, reasoning correctly
+about rung 5 logic while assuming `history()` existed. On resume they spotted the gap themselves,
+saying *great call i missed it*, and named call 4 and `AttributeError`.
+
+METHOD MADE EXPLICIT after the learner asked *can you tell me why i am gussing here*. They were
+not guessing, they were reasoning without trusting it. The procedure, now written down for reuse:
+
+```text
+walk each call in order
+  -> list what each line touches
+  -> check each against the file
+  -> the first missing thing is where it stops
+  -> then locate WHAT is missing to pick the error name
+```
+
+Two implementation misconceptions, both self-caught:
+
+- `aliasing_instead_of_copying` — the first draft was `history = self.changes`. The learner spotted
+  it in the same breath and asked for the copying mechanism.
+- `missing_return` — the second draft built the copy and discarded it. Shown the inside/outside
+  picture and reminded that `append` returns `None`, they supplied the return unprompted.
+
+Missing colon after `def`, second occurrence. Corrected in passing.
+
+## Phase 3 — what remains
+
+```text
+automated tests      DONE, five green
+learner trace        DONE, every run predicted first
+learner explanation  OWED — teach session.py
+transfer variant     OWED
+second half of gate  OWED — trace real session state through several operations
+```
+
+Retrievals still owed:
+
+```text
+exit status                          unaided, unannounced, NOT a Python test run
+branch_precedence                    unaided, after a longer gap, then MASTERED
+return_value_is_the_call_expression  after a gap; note the missing_return slip above
+```

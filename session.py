@@ -13,3 +13,7 @@ class Session:
 
     def record(self, diff_text):
         self.changes.append(diff_text)
+
+    def history(self):
+        history_list = list(self.changes)
+        return history_list
