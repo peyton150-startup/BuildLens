@@ -10205,3 +10205,230 @@ prediction was committed
 RECOVERY STATUS:
 gate-passed
 ```
+
+```text
+EVIDENCE ID:
+EV-P3-COPY-092
+
+DATE / PHASE / GATE:
+2026-08-27 / Phase 3 / handing out mutable state, and the limit of a shallow copy
+
+IMPLEMENTATION TRIGGER:
+Session owns a list and will expose it. The question left open at the previous pause was what
+could go wrong when session.changes hands out the real list.
+
+ADJACENT CONCEPT:
+Shallow copy. Encapsulation by copy versus by convention. `is` versus `==`.
+
+EXERCISE TYPE:
+tracing and design
+
+SOURCE / CONTEXT:
+BuildLens, then academic micro-examples
+
+PROBLEM — VERBATIM:
+history = session.changes; history.append("diff C"); print(len(session.changes)) — what does that
+print, and is it a problem?
+then: Option A hand out a copy, Option B mark it private and trust callers. Which, and why?
+then: if changes held lists instead of strings, would list(self.changes) still protect the
+session?
+
+MY ANSWER — VERBATIM:
+it prints diff a diff b diff c, thisis the conecpt we just looked at, you pointed history at the
+same list as session then appended the diff c to the end so caller and function point at the same
+modified list
+
+so we need to make sure they don't so we can record everytime they do, how do we do that?
+
+i like A it is the most relaible and will not take up too mcuh space, when it is no loinger in
+use it is not taking up memory, 60, check me o nthat liast sentnece
+
+false / true
+
+a b / a z b c / 70
+
+because the copy[0] went intside the list and appedned the current pointed at list it changed
+both lists, but only because of the position and appedend, check me on this
+
+[[a],[b,q]] / [[replaced],[[b,q]]  not totaly sure but seems closer to the last idea
+
+MY REASONING — VERBATIM:
+you pointed history at the same list as session then appended the diff c to the end
+
+CONFIDENCE BEFORE CHECK:
+60 on the design choice, 70 on the first nested trace which was half wrong, none on the second
+which was fully correct
+
+TOOLS / HELP USED BEFORE COMMITMENT:
+none
+
+RESULT:
+correct on the design, one wrong nested prediction, then correct
+
+MISCONCEPTION / GAP:
+The aliasing leak was identified immediately and correctly, unprompted, as the same concept from
+the gate. The learner then asked how to prevent it rather than being told there was a problem.
+
+DESIGN DECISION, the learner's: Option A, hand out `list(self.changes)`. Reason given —
+most reliable, and the copy is freed once nothing points at it. That garbage-collection statement
+was checked and is correct.
+
+Shallow copy introduced. `original is copy` False, `original[0] is copy[0]` True — both predicted
+correctly.
+
+New misconception `shallow_copy_protects_nested_items`: shown a copy of a list of lists, the
+learner predicted the outer-only result and missed that `copy[0].append("z")` reaches a shared
+inner list. Their explanation then attributed the leak to "position", which was falsified by a
+second trace: `copy[1].append("q")` leaks identically, while `copy[0] = ["replaced"]` does not.
+The learner predicted BOTH lines of that second trace correctly while saying they were unsure —
+underconfident again.
+
+Resolved to the pair they already knew, one level in:
+
+.append()   changes the object       shared -> leaks
+=           moves a name or slot     the copy's own -> contained
+
+CLAUDE ERROR, raised by the learner: "why did you start it as a list of lists... why go that
+deep". The nested example was a hypothetical about the limit of shallow copying, not the
+learner's design, and it was introduced mid-build without being labelled as a detour. Own it and
+label hypotheticals as hypotheticals.
+
+CORRECT MODEL — ADDED AFTER ATTEMPT:
+changes holds strings; strings cannot be mutated; therefore list(...) is sufficient protection.
+Had the items been mutable, a shallow copy would leak and a deep copy would be required.
+
+WHY THIS MATTERS TO THE REAL IMPLEMENTATION:
+It justifies the accessor design and names the condition under which it would stop working.
+
+TRANSFER / NEXT RETRIEVAL:
+Building Session, EV-P3-SESSION-093.
+
+PARENT EVIDENCE ID:
+EV-P3-ALIAS-091
+
+PRIMARY BLOCKER:
+shallow_copy_protects_nested_items, resolved
+
+SCAFFOLD RUNG:
+R5
+
+WHY THIS RUNG:
+Two levels of nesting, two names, one mutation and one assignment.
+
+SUPPORT PROVIDED BEFORE THIS ATTEMPT:
+every structure DRAWN as a pointer diagram; both options shown as code
+
+RECOVERY STATUS:
+recovered-at-target
+```
+
+```text
+EVIDENCE ID:
+EV-P3-SESSION-093
+
+DATE / PHASE / GATE:
+2026-08-27 / Phase 3 / first Session code, test-first, and the class-attribute trap
+
+IMPLEMENTATION TRIGGER:
+Rung 1 of the test ladder: a new Session has no changes.
+
+ADJACENT CONCEPT:
+__init__ runs per instance. A list built in the class body is built once and shared by every
+instance.
+
+EXERCISE TYPE:
+design and tracing
+
+SOURCE / CONTEXT:
+BuildLens
+
+PROBLEM — VERBATIM:
+Which rung is the first test? And what's the number it asserts?
+then: which error, and which line?
+then: a = Session(); b = Session(); a.changes.append("diff A") — two numbers.
+then: without __init__, version 1 has changes = [] in the class body, version 2 has nothing.
+
+MY ANSWER — VERBATIM:
+the first tester is looking for leaks/ mutated lists that were appended without permission, it
+checks the number of strings in the list, question does [[b,q], a]] count as 3 strings or 2
+strings?
+
+i have no idea, the leak only happens when you make a copy and appeand so the copy has to be made
+before a leak is posssible
+
+the first rung and ti asserts the session has zero changes in the list , 80
+
+session is not created yet so imprort error, other than that, how do we check it is a new session,
+not sure
+
+oh so it is a modulenotfounderror
+
+1 / 0 / 100
+
+1 / 0 / they have the same behavior i thought so same outputs
+
+MY REASONING — VERBATIM:
+the leak only happens when you make a copy and appeand so the copy has to be made before a leak
+is posssible
+
+CONFIDENCE BEFORE CHECK:
+80 on the first-rung choice, correct. 100 on the two-Session trace, correct.
+
+TOOLS / HELP USED BEFORE COMMITMENT:
+none
+
+RESULT:
+correct on the ladder and the build; wrong on the class-attribute trap
+
+MISCONCEPTION / GAP:
+The learner first proposed the LEAK test as the first test — the right test for the wrong slot,
+since it is the point of the design. Asked whether it could run before anything existed, they
+reasoned correctly that a copy must exist before it can leak, and with the ladder drawn chose
+rung 1 and the number 0.
+
+ModuleNotFoundError versus ImportError was initially answered as ImportError. Rather than
+correcting it, the directory was listed: no session.py. The learner self-corrected immediately.
+
+LEARNER QUESTION, and it found a real trap: "if we had no init session would still have the
+persisitent memory of the last session?" They predicted 1 and 0 for a class-body `changes = []`,
+expecting identical behaviour. The real result is 1 and 1, with `a.changes is b.changes` True —
+ONE list shared by every instance ever created. Their instinct was right and the sharing is worse
+than they guessed: not just the previous session, but all of them simultaneously.
+
+Recorded as `class_attribute_is_shared`. This is a well-known Python bug and the learner walked
+into the question unprompted.
+
+Version 2, a class with no attribute at all, raises AttributeError.
+
+CORRECT MODEL — ADDED AFTER ATTEMPT:
+self.changes = [] inside __init__   runs per instance   a new list each time
+changes = [] in the class body      runs once at import ONE list, shared forever
+
+session.py now exists with a Session class whose __init__ sets self.changes = []. The first test
+asserts len(session.changes) == 0 and passes, exit 0.
+
+WHY THIS MATTERS TO THE REAL IMPLEMENTATION:
+It is the difference between sessions being independent and every session silently accumulating
+every other session's history.
+
+TRANSFER / NEXT RETRIEVAL:
+Rung 2, record.
+
+PARENT EVIDENCE ID:
+EV-P3-COPY-092
+
+PRIMARY BLOCKER:
+class_attribute_is_shared
+
+SCAFFOLD RUNG:
+R5
+
+WHY THIS RUNG:
+One class, one method, two instances.
+
+SUPPORT PROVIDED BEFORE THIS ATTEMPT:
+the test ladder was DRAWN as five rungs; the directory was listed rather than the error named
+
+RECOVERY STATUS:
+stable-at-rung
+```

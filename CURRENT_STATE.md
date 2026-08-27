@@ -1838,3 +1838,60 @@ exit status                          unaided, unannounced, NOT a Python test run
 branch_precedence                    unaided, after a longer gap, then MASTERED
 return_value_is_the_call_expression  after a gap, following the Phase 2 regression
 ```
+
+## Phase 3 — session.py exists, rung 1 green
+
+```python
+class Session:
+    def __init__(self):
+        self.changes = []
+```
+
+`test_session.py` asserts `len(session.changes) == 0` on a new Session. Green, exit 0. All three
+suites green. Evidence `EV-P3-COPY-092` and `EV-P3-SESSION-093`.
+
+TEST LADDER agreed with the learner, who first proposed the leak test and then reasoned correctly
+that a copy must exist before it can leak:
+
+```text
+1  a new Session has no changes                     len == 0   DONE
+2  record one change, it is there                   len == 1
+3  record two, both there in order                  len == 2
+4  the history you get back holds what was put in
+5  mutating that history does not touch the session  <- the leak test
+```
+
+DESIGN DECISION, the learner's: `history()` returns `list(self.changes)`, a copy, rather than
+marking the attribute private by convention. Reason given — most reliable, and the copy is freed
+once nothing points at it. The garbage-collection claim was checked and is correct.
+
+Shallow copy established, including its limit. `original is copy` False, `original[0] is copy[0]`
+True. New misconception `shallow_copy_protects_nested_items` surfaced and was resolved: the
+learner attributed a nested leak to "position", which was falsified by showing `copy[1]` leaks
+identically while `copy[0] = ...` does not. Reduced to the pair they already knew:
+
+```text
+.append()   changes the object       shared -> leaks
+=           moves a name or slot     the copy's own -> contained
+```
+
+Their items are strings, which cannot be mutated, so `list(...)` is sufficient. Had they been
+mutable, a deep copy would be required. The learner should be able to state that condition.
+
+CLAUDE ERROR, raised by the learner: the nested list-of-lists example was a hypothetical about
+the limit of shallow copying, not their design, and was introduced mid-build without being
+labelled. Label hypotheticals as hypotheticals.
+
+LEARNER QUESTION that found a real trap, unprompted: *if we had no init session would still have
+the persisitent memory of the last session?* They predicted 1 and 0 for a class-body
+`changes = []`. The real answer is 1 and 1, with `a.changes is b.changes` True:
+
+```text
+self.changes = [] in __init__     runs per instance    a new list each time
+changes = [] in the class body    runs once at import  ONE list, shared forever
+```
+
+Recorded as `class_attribute_is_shared`. Their instinct was right and the sharing is worse than
+they guessed — not the previous session, but every session simultaneously.
+
+NEXT: rung 2, `record`, test-first.
