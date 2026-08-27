@@ -9949,3 +9949,259 @@ none on the bug; the two loop headers were shown side by side after the first wr
 RECOVERY STATUS:
 transfer-satisfied
 ```
+
+```text
+EVIDENCE ID:
+EV-P3-STATE-090
+
+DATE / PHASE / GATE:
+2026-08-27 / Phase 3 / what a session must remember, and what one change holds
+
+IMPLEMENTATION TRIGGER:
+Phase 3 opens with Session and changes[]. At MEDIUM assistance the learner specifies the model.
+
+ADJACENT CONCEPT:
+Derived data can go stale. Storage cost must be measured, not asserted.
+
+EXERCISE TYPE:
+design
+
+SOURCE / CONTEXT:
+BuildLens
+
+PROBLEM — VERBATIM:
+What should BuildLens remember across a working session of Claude-made changes, and why?
+then: Which one, and what does it cost you? (three drawn options)
+then: If diff_text and summary ever disagree, which one is wrong?
+
+MY ANSWER — VERBATIM:
+it should remember all the changes to the code in that working session, so it knows what to
+display both for the actual code displayed and the summarize for the diffsummary
+
+it would hodl the diffsummary
+
+i meant that the code that i would need to edit in the ui would need to be displayed, are we not
+there yet?
+
+i was thinking if we make a list of the changes by the line number of the change could be from
+metadata not tottaly sure if that is possible, I have no idea, 10, can it be noted that i am a
+visual learner so code snippits or pictures would make this a lot smoother
+
+the option that would give us the most information is option 3, it would not cost that much, it
+woudl be returning the string above the summary
+
+well i want to push back on not that much, 5 mb is a lot of data if the code is 1000+ lines, what
+is big text, is there a default text size that is smaller in data size, the summary os wrong, im
+not sure about how they could disagree but i guess it would using this logic make more sense to
+hold just the diff text and maybe let the user call summarize later to see what it holds
+
+MY REASONING — VERBATIM:
+i guess it would using this logic make more sense to hold just the diff text and maybe let the
+user call summarize later to see what it holds
+
+CONFIDENCE BEFORE CHECK:
+10 on the open question about what a change should hold, correctly low
+
+TOOLS / HELP USED BEFORE COMMITMENT:
+none
+
+RESULT:
+correct, after the learner corrected Claude
+
+MISCONCEPTION / GAP:
+The learner named the session model unprompted — remember all changes in the working session —
+matching the plan's Session/changes[] sketch.
+
+LEARNER REQUEST, now a standing rule: they identified themselves as a visual learner and asked
+for code snippets or pictures. Recorded in CURRENT_STATE. This is consistent with all ten
+recorded prompt defects, every one of which was an abstract question producing "what am I
+looking at?".
+
+CLAUDE ERROR, corrected by the learner. Storage cost was illustrated with an invented 50,000
+character figure placed beside two measured numbers, which made it look measured. The learner
+pushed back — "i want to push back on not that much" — and asked what the big figure represented.
+Real diffs were then generated:
+
+one small edit in a 1,500-line file      272 chars,    17 diff lines
+rewriting all 500 functions in it     41,667 chars, 2,505 diff lines
+
+So the invented figure was near a real worst case, but that case is a whole-file rewrite. The
+everyday change is ~272 characters and a hundred of them is ~50 KB, not 5 MB. The learner was
+right to demand the measurement.
+
+The learner also correctly identified the summary as the wrong one when the two disagree, since
+it is derived. They could not say how they might disagree; supplied from their own history — when
+they added the file_header label in Phase 2, every previously computed summary would have been
+stale, reporting files_changed = 0.
+
+DESIGN DECISION, the learner's: store only diff_text per change and recompute the summary on
+demand. Recompute cost measured at 0.328 ms for 100 typical changes, about 2 percent of one
+screen frame.
+
+CORRECT MODEL — ADDED AFTER ATTEMPT:
+Session
+└── changes[]
+     └── one diff_text string per change
+
+Reversal condition available to the learner: if summarizing became expensive, or the list very
+large, storing the summary would start to win.
+
+Also clarified: the editable code the learner asked about lives on disk and is Phase 13. The
+session remembers events; the editor reads files. Different jobs.
+
+WHY THIS MATTERS TO THE REAL IMPLEMENTATION:
+It settles what Session holds before any code is written, and it was settled by measurement
+rather than by assertion in both directions.
+
+TRANSFER / NEXT RETRIEVAL:
+Aliasing, EV-P3-ALIAS-091.
+
+PARENT EVIDENCE ID:
+EV-P2-TRANSFER-089
+
+PRIMARY BLOCKER:
+none
+
+SCAFFOLD RUNG:
+R6
+
+WHY THIS RUNG:
+Open design question on the real system, with cost demanded and measured.
+
+SUPPORT PROVIDED BEFORE THIS ATTEMPT:
+the state movie and the three options were DRAWN rather than described, following the new
+standing rule
+
+RECOVERY STATUS:
+stable-at-rung
+```
+
+```text
+EVIDENCE ID:
+EV-P3-ALIAS-091
+
+DATE / PHASE / GATE:
+2026-08-27 / Phase 3 / KNOWLEDGE GATE — alias/copy trace
+
+IMPLEMENTATION TRIGGER:
+Session owns a mutable list and will hand it to other code. The plan states: if you cannot
+explain which object owns the list and who can mutate it, stop here.
+
+ADJACENT CONCEPT:
+Mutation versus rebinding. A name is not the object. Strings are immutable; lists are not.
+
+EXERCISE TYPE:
+tracing
+
+SOURCE / CONTEXT:
+academic micro-examples
+
+PROBLEM — VERBATIM:
+a = ["one"]; b = a; c = ["one"]; b.append("two"); print a, b, c
+then: p = [1, 2]; q = p; p = [9]; print p, q
+then: m = ["a"]; n = m; m.append("b"); m = ["z"]; print m, n
+then: def add_one(items): items.append("new") — what prints?
+
+MY ANSWER — VERBATIM:
+ADDED [x]
+
+so upper throws the old string out and creates an uppercase verson of the string we just threw
+put, so this would be ADDED [x] i have no idea what result would print, 80
+
+added removed / added
+
+100, one / one two / one
+
+9 / 9
+
+z / a b
+
+first new
+
+so what does def replace(items): items = ["gone"] ... my thinking is gone. can you confirm
+
+ok so if we run another function on the list to append or another function (i cant name one) then
+the caller sees it but if it is = to then it becomes a new list and the caller no longer points at
+it
+
+the caller still points at it but the fuction points at another list so from there if you ran
+appedn on the function pointed list it would not affect the caller because it is a new list,
+other did not change what it was pointing at the entire time
+
+MY REASONING — VERBATIM:
+other did not change what it was pointing at the entire time
+
+CONFIDENCE BEFORE CHECK:
+90 on append, 80 on the first mutation contrast, 100 on the three-name alias trace which was
+WRONG, then unstated on the rest
+
+TOOLS / HELP USED BEFORE COMMITMENT:
+none; every prediction preceded its run
+
+RESULT:
+gate passed after three wrong predictions
+
+MISCONCEPTION / GAP:
+Four distinct errors, each productive:
+
+1. `string_methods_mutate` — predicted word.upper() would change word. It returns a new string
+   and the result was discarded, so word printed unchanged.
+2. `aliasing_is_one_directional` — the three-name trace was predicted at 100 CONFIDENCE and was
+   wrong. The learner had just said "i understand now" and asked to move on. The plan's explicit
+   instruction to stop here was quoted and the phase held. This was the single most useful moment
+   of the sitting: the concept looked solid and was not.
+3. `assignment_mutates_aliases` — after learning aliasing, the learner overcorrected and
+   predicted that p = [9] would change q too. Rebinding moves one name only.
+4. `rebinding_unpoints_the_caller` — the learner's summary said that after items = ["gone"] the
+   caller no longer points at the list. The caller never moves; the function's own name does.
+   Corrected by asking what `other` points at, and the learner then stated it fully, adding
+   unprompted that appending through the moved name cannot reach the caller.
+
+The learner asked their own good question mid-trace: if a = "github" then a = "github2", isn't
+that modifying a string? Answered with their own earlier sentence — "when you put the = sign in
+then it does point to it". Nothing was modified; the name moved.
+
+TypeError met for the first time, a sixth taxonomy member: word[0] = "z" raises
+'str' object does not support item assignment, while labels[0] = "z" works.
+
+CORRECT MODEL — ADDED AFTER ATTEMPT:
+p.append(9)     changes the object      every name pointing at it sees it
+p = [9]         moves the name          other names stay where they were
+
+Passing a list to a function creates a second name for the same list. Mutation through the
+parameter reaches the caller; rebinding the parameter does not, and the new list dies with the
+call.
+
+immutable   str, int    methods return a new value, original untouched
+mutable     list        methods change the value in place, return None
+
+GATE PASSED on the final sequence: aliasing, rebinding, both in one trace, mutation through a
+parameter, and rebinding a parameter — all predicted correctly, with the mechanism explained in
+the learner's own words.
+
+WHY THIS MATTERS TO THE REAL IMPLEMENTATION:
+Session will own a list and expose it. Whether callers can mutate it is now a question the
+learner can reason about rather than one they would answer by accident.
+
+TRANSFER / NEXT RETRIEVAL:
+What could go wrong when session.changes hands out the real list. Not yet answered.
+
+PARENT EVIDENCE ID:
+EV-P3-STATE-090
+
+PRIMARY BLOCKER:
+aliasing_is_one_directional, resolved
+
+SCAFFOLD RUNG:
+R1 climbing to R5
+
+WHY THIS RUNG:
+Two or three names, one list, no domain vocabulary, one function at the end.
+
+SUPPORT PROVIDED BEFORE THIS ATTEMPT:
+every step DRAWN as a pointer diagram per the standing visual rule; no answer given before a
+prediction was committed
+
+RECOVERY STATUS:
+gate-passed
+```

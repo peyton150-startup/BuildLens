@@ -1737,3 +1737,104 @@ return_value_is_the_call_expression NEW, after a gap, following today's regressi
 ```
 
 Phase 2 is complete. Phase 3 may begin.
+
+### STANDING RULE — learner is a visual learner
+
+Requested directly on 2026-08-27, at the start of Phase 3:
+
+> can it be noted that i am a visual learner so code snippits or pictures would make this a lot
+> smoother
+
+Apply this from now on. Concretely, for this project:
+
+- prefer a drawn diagram or a concrete code snippet over an abstract question;
+- when asking the learner to choose, SHOW the options as code or as a picture rather than
+  describing them in prose;
+- when asking what something should contain, draw an example of the container first;
+- reserve pure prose questions for defence and explanation, where the point is their words.
+
+This is consistent with what has already been observed independently. Every recorded prompt
+defect in this project has the same shape — an abstract or open question producing "what am I
+looking at?" — and every recovery has come from making the question concrete or countable.
+There are now ten such defects on record. Treat this rule as the fix for that whole class.
+
+## Phase 3 — STARTED. Model specified, alias/copy gate PASSED. No code yet.
+
+Evidence `EV-P3-STATE-090` and `EV-P3-ALIAS-091`. No Phase 3 code exists; this was specification
+and the knowledge gate.
+
+DESIGN DECISION, the learner's:
+
+```text
+Session
+└── changes[]
+     └── one diff_text string per change
+```
+
+The summary is NOT stored. It is recomputed by calling `summarize_diff` when needed, because
+derived data goes stale. The learner reached this by asking which of the two would be wrong if
+they disagreed, answering correctly that the summary is derived, then concluding on their own to
+store only the text.
+
+Both costs were MEASURED rather than asserted, and the learner forced that:
+
+```text
+one small edit in a 1,500-line file     272 chars
+rewriting all 500 functions in it    41,667 chars
+100 typical changes, recompute        0.328 ms   ~2% of one screen frame
+```
+
+CLAUDE ERROR, caught by the learner. A 50,000-character figure was invented and placed beside two
+measured numbers, making it look measured. The learner pushed back and asked what it represented.
+Real diffs were then generated. The invented figure turned out near a genuine worst case, but
+that case is a whole-file rewrite, not a typical change. Do not put invented numbers beside
+measured ones.
+
+Reversal condition the learner can state: if summarizing became expensive, or the list very
+large, storing the summary would start to win.
+
+Also clarified: the editable code lives on disk and is Phase 13. The session remembers events;
+the editor reads files.
+
+ALIAS/COPY GATE PASSED, `EV-P3-ALIAS-091`, after three wrong predictions that were all
+productive:
+
+```text
+p.append(9)     changes the object      every name pointing at it sees it
+p = [9]         moves the name          other names stay where they were
+
+immutable   str, int    methods return a new value, original untouched
+mutable     list        methods change in place, return None
+```
+
+The learner traced aliasing, rebinding, both in one sequence, mutation through a function
+parameter, and rebinding of a parameter — the last correctly and with the mechanism in their own
+words: *other did not change what it was pointing at the entire time*.
+
+THE IMPORTANT MOMENT: the three-name trace was answered WRONG at 100 CONFIDENCE, immediately
+after the learner said they understood and asked to move on. The plan's instruction — *if you
+cannot explain which object owns the list and who can mutate it, stop here* — was quoted and the
+phase held. Overconfidence, not underconfidence, was the risk this time; it is the first such
+instance recorded.
+
+Sixth taxonomy member met: `TypeError` on `word[0] = "z"`, since strings are immutable.
+
+## Phase 3 — NEXT, unanswered
+
+The question on the table when the session paused:
+
+> `session.changes` hands out the actual list, not a copy. What could go wrong with that?
+
+The learner now has every tool needed to answer it and has not yet been asked to. Do not answer
+it for them.
+
+Then: build `Session` test-first, and trace the real session state through several operations,
+which is the second half of the Phase 3 gate.
+
+Retrievals owed:
+
+```text
+exit status                          unaided, unannounced, NOT a Python test run
+branch_precedence                    unaided, after a longer gap, then MASTERED
+return_value_is_the_call_expression  after a gap, following the Phase 2 regression
+```
