@@ -2091,3 +2091,48 @@ exit status                          unaided, unannounced, NOT a Python test run
 branch_precedence                    unaided, after a longer gap, then MASTERED
 return_value_is_the_call_expression  after a gap
 ```
+
+### Carried forward — the mutable-state question returns three times
+
+The learner asked a fair design question at the close of Phase 3:
+
+> but if i know i can call history why append and if i know everything is recorded why append
+
+Answered honestly: at one caller who wrote the class yesterday, the copy is cheap insurance
+rather than a necessity. The case it actually defends is not a deliberate `append("sneaky")`,
+which nobody writes, but the operation that does not look like a mutation:
+
+```text
+.sort()      wanted a sorted view, mutated the real one
+.reverse()   wanted newest-first, reversed history permanently
+.clear()     wanted to clear the display, cleared the record
+.pop()       wanted to peek at the last one, removed it
+```
+
+Demonstrated: three changes recorded in order C, A, B. `sorted(session.changes)` left the real
+order alone; `session.changes.sort()` silently rewrote it to A, B, C. The control tower would then
+report an order Claude never worked in, with no traceback and nothing to notice.
+
+Filed alongside `word.upper()` versus `word = word.upper()` — same shape, one returns a new thing,
+one changes yours.
+
+WHERE THIS RETURNS, confirmed by reading IMPLEMENTATION_PLAN.md rather than asserted:
+
+```text
+Phase 5   Explicit Interfaces / Contracts
+          "what crosses the boundary matters more than the filenames"
+          The underscore decision and what a caller may touch belong here,
+          revisited with the vocabulary for it.
+
+Phase 9   Event-Driven State and Reliability
+          A formal event model - ChangeObserved, TurnCompleted, GatePassed.
+          Once history is an event stream rather than a list of strings,
+          protecting it stops being style and becomes the point.
+
+Phase 13  Safe Collaborative Editing
+          The no-silent-overwrite invariant, two writers, real consequences.
+          CLAUDE.md forbids weakening it without an ADR.
+```
+
+A list quietly reordered by `.sort()` is the toy version of what Phase 13 spends its entire length
+preventing. Raise this thread again at Phase 5 and confirm the learner still holds it.
