@@ -9388,3 +9388,309 @@ whole files shown before each prediction; new notation named explicitly
 RECOVERY STATUS:
 stable-at-rung
 ```
+
+```text
+EVIDENCE ID:
+EV-P2-SPLIT-085
+
+DATE / PHASE / GATE:
+2026-08-27 / Phase 2 / DELAYED RETRIEVAL SATISFIED, splitlines, third attempt
+
+IMPLEMENTATION TRIGGER:
+splitlines had failed two delayed retrievals. A real gap occurred over lunch, so the third
+attempt was issued immediately on return, before any other work and with no demonstration in
+front of it.
+
+ADJACENT CONCEPT:
+splitlines converts one string into a list of its lines, splitting only at \n.
+
+EXERCISE TYPE:
+recall and tracing
+
+SOURCE / CONTEXT:
+academic micro-example, a surface not previously used
+
+PROBLEM — VERBATIM:
+log = "starting build\nrunning tests\nall green"
+
+1. What does log.splitlines() return? Write out the actual value.
+2. What is len(log.splitlines())?
+3. What kind of thing goes in, and what kind comes out?
+
+MY ANSWER — VERBATIM:
+it returns a list of each line, starting running and all green, the len is 3, a string goes in
+and a list comes out,90
+
+yes, i meant the whole line i know that \n spolits them we went over this, i did have the
+misconsecetion that they might print out like this, but you have killed that i know for sure now:
+starting
+running
+green
+
+MY REASONING — VERBATIM:
+a string goes in and a list comes out
+
+CONFIDENCE BEFORE CHECK:
+90 out of 100, tagged by the learner as covered previously. Correct.
+
+TOOLS / HELP USED BEFORE COMMITMENT:
+none. No demonstration preceded the question, deliberately, since the two previous failures both
+followed one.
+
+RESULT:
+correct, unaided
+
+MISCONCEPTION / GAP:
+All three parts correct. The direction is stable — string in, list out — and it was stated
+without prompting.
+
+The written answer abbreviated the values as "starting running and all green", which was
+ambiguous between whole lines and space-split words. Rather than assume the generous reading, the
+learner was asked directly which they meant and told that a straight answer was more useful than
+a tidy one. They confirmed whole lines AND volunteered that they had previously held the
+space-splitting misconception, now closed.
+
+That volunteered disclosure is the more valuable half of the attempt. Recorded as
+`splitlines_splits_on_spaces`, resolved.
+
+Fourth or fifth occurrence of `credits_examiner_for_own_conclusion` — "you have killed that".
+Here it is arguably fair, since real output did the work.
+
+CORRECT MODEL — ADDED AFTER ATTEMPT:
+"starting build\nrunning tests\nall green".splitlines() is
+['starting build', 'running tests', 'all green'], len 3. Each item keeps its whole line. The
+split happens only at \n, never at spaces.
+
+WHY THIS MATTERS TO THE REAL IMPLEMENTATION:
+The last prerequisite for the Phase 2 string boundary is now banked rather than borrowed.
+
+TRANSFER / NEXT RETRIEVAL:
+None owed for splitlines. Under LEARNING_RULES 5 it has now been correct across three surfaces
+with one genuine delayed retrieval, and the direction was explained rather than recited.
+
+Still owed: the exit-status retrieval, unannounced and not a Python test run, and the
+branch_precedence retrieval after a longer gap.
+
+PARENT EVIDENCE ID:
+EV-P2-SPLIT-082
+
+PRIMARY BLOCKER:
+none
+
+SCAFFOLD RUNG:
+R1
+
+WHY THIS RUNG:
+One string, one method, one length, no loop and no project vocabulary.
+
+SUPPORT PROVIDED BEFORE THIS ATTEMPT:
+none whatsoever, which is what made this one count
+
+RECOVERY STATUS:
+retrieval-satisfied
+```
+
+```text
+EVIDENCE ID:
+EV-P2-BOUNDARY-086
+
+DATE / PHASE / GATE:
+2026-08-27 / Phase 2 / where the string-to-list conversion belongs
+
+IMPLEMENTATION TRIGGER:
+summarize_diff took a list. git produces one string. The conversion had to be placed somewhere.
+
+ADJACENT CONCEPT:
+A function's input shape is a design decision. A method belongs to a type; calling a string
+method on a list fails loudly. Adjacent string literals are joined into one string.
+
+EXERCISE TYPE:
+design
+
+SOURCE / CONTEXT:
+BuildLens
+
+PROBLEM — VERBATIM:
+A inside summarize_diff, B in whatever calls it, C accept either and convert only if needed.
+Which one, and why?
+
+then: If the function starts taking a string, what happens to that test?
+then: Does it crash, or does it quietly produce a wrong number?
+
+MY ANSWER — VERBATIM:
+i think we should go with c, most likely it will be handee the string and we will have to run it
+inside summarize_diff but i want to also check incase someon is feeling nice about it and wants
+to save us the compute/time
+
+i see what you are saying, i will change my answer and say we call it in summarize withoiut
+checking it will come from claude code or github as a string no matter what
+
+it breaks, so we need to turn it into one long string, this is becasue the line will then turn
+into a bunch of different lists instead of one
+
+20, i assume it crashes but i do not know
+
+i am strating to think it would run but it would print 1 list per line, since strings have
+splitlines() so it would not crash there, it would produce a list of lines split with \n but
+there are no \n on our two diff lines, so it would not crash it would just not print out what we
+are prepared to read in
+
+never mind you are correct, i was missing that part of it, yes, it would be an attribute error
+because the list that is being called for splitlines(), the field does nto exsist for lists only
+for strings
+
+it will run exit code 0 , 90
+
+MY REASONING — VERBATIM:
+i want to also check incase someon is feeling nice about it and wants to save us the compute/time
+
+CONFIDENCE BEFORE CHECK:
+20 on the crash question, correctly low. 90 on the final green prediction, correct.
+
+TOOLS / HELP USED BEFORE COMMITMENT:
+none
+
+RESULT:
+initially C, changed to A under challenge, then correct
+
+MISCONCEPTION / GAP:
+The learner first chose C, accepting either shape, on the grounds that a caller might save work
+by passing a list. Challenged with a single question — that caller has a string from git, so who
+called splitlines and when — the learner immediately saw that C saves nothing and only relocates
+the work, and switched to A. The switch was theirs; no argument against C was stated.
+
+Recurring error, second occurrence: the learner said the string comes "from claude code or
+github". It comes from `git`, the local program. Re-pinned, and noted in CURRENT_STATE, because
+the distinction matters for the Phase 7 failure mode.
+
+New misconception `method_distributes_over_elements`: asked whether passing a list to a function
+that calls .splitlines() crashes, the learner reasoned that it would run, because "strings have
+splitlines()" — imagining the call applying to each string inside the list. Resolved by asking
+what `all_lines` IS at the moment of the call: the list itself, not an element. The learner then
+named AttributeError and the reason unaided.
+
+Confirmed by generating both cases: a string returns 3, a list raises
+`AttributeError: 'list' object has no attribute 'splitlines'`, exit 1.
+
+CORRECT MODEL — ADDED AFTER ATTEMPT:
+summarize_diff(diff_text) calls diff_text.splitlines() and loops the result. The test constant
+became one string built from adjacent literals joined by the parser, each line ending in \n.
+
+The loud failure is a feature. A stale caller passing a list finds out immediately rather than
+receiving a confidently wrong zero.
+
+WHY THIS MATTERS TO THE REAL IMPLEMENTATION:
+The function now takes exactly the shape git produces, so Phase 7 needs no adapter between them.
+
+TRANSFER / NEXT RETRIEVAL:
+Validated against real output, EV-P2-REAL-087 below.
+
+PARENT EVIDENCE ID:
+EV-P2-SUMMARY-084
+
+PRIMARY BLOCKER:
+method_distributes_over_elements, resolved
+
+SCAFFOLD RUNG:
+R6
+
+WHY THIS RUNG:
+Open three-way design choice on real project code, with the cost and failure mode demanded.
+
+SUPPORT PROVIDED BEFORE THIS ATTEMPT:
+the three options were named with no recommendation; the learner's own error taxonomy was quoted
+back rather than the answer given
+
+RECOVERY STATUS:
+recovered-at-target
+```
+
+```text
+EVIDENCE ID:
+EV-P2-REAL-087
+
+DATE / PHASE / GATE:
+2026-08-27 / Phase 2 / validation against real git output, learner-approved
+
+IMPLEMENTATION TRIGGER:
+The test constant is hand-typed. Claude wrote its \n characters. Real git output is what the
+code must actually survive, and the learner was offered the check with a stated case for
+declining it as out of phase.
+
+ADJACENT CONCEPT:
+A test written against hand-made data proves less than a run against real data.
+
+EXERCISE TYPE:
+tracing against unseen real data
+
+SOURCE / CONTEXT:
+BuildLens against genuine `git diff` output
+
+PROBLEM — VERBATIM:
+files_changed, lines_added, lines_removed — three numbers. There are two lines in there you
+haven't seen before.
+
+MY ANSWER — VERBATIM:
+3 files, 5 added, 1 removed
+
+MY REASONING — VERBATIM:
+not supplied
+
+CONFIDENCE BEFORE CHECK:
+not provided
+
+TOOLS / HELP USED BEFORE COMMITMENT:
+none. The learner counted 452 characters of real diff by hand before any code was run.
+
+RESULT:
+correct
+
+MISCONCEPTION / GAP:
+None. The diff had a shape the tests do not cover — three files including a brand-new one — and
+contained two line forms the learner had never seen:
+
+new file mode 100644   no prefix matches, falls through to "context", uncounted
+--- /dev/null          starts with "--- ", classified "metadata", uncounted
+
+The learner counted correctly without asking about either. The `--- ` branch they defended in
+Phase 1 handled /dev/null with no knowledge of what /dev/null means.
+
+CORRECT MODEL — ADDED AFTER ATTEMPT:
+Real output, captured through subprocess with capture_output and text:
+
+exit code : 0
+type      : <class 'str'>
+length    : 452
+
+DiffSummary(files_changed=3, lines_added=5, lines_removed=1)
+
+Matching the learner's hand count exactly.
+
+WHY THIS MATTERS TO THE REAL IMPLEMENTATION:
+Phase 2 is functionally complete and validated against the real input shape rather than only
+against hand-written fixtures. No subprocess code entered the repository; the harness lived in
+the scratchpad.
+
+TRANSFER / NEXT RETRIEVAL:
+The exit code printed beside the text in that run is the whole of the Phase 7 decision. It was
+pointed out and deliberately not pressed on, since the exit-status retrieval is still owed and
+must not be announced.
+
+PARENT EVIDENCE ID:
+EV-P2-BOUNDARY-086
+
+PRIMARY BLOCKER:
+none
+
+SCAFFOLD RUNG:
+R6
+
+WHY THIS RUNG:
+Unseen real data, unfamiliar line forms, no scaffolding, hand count before execution.
+
+SUPPORT PROVIDED BEFORE THIS ATTEMPT:
+none beyond showing the diff text
+
+RECOVERY STATUS:
+validated
+```

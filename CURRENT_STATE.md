@@ -1584,3 +1584,99 @@ branch_precedence     unaided, after a longer gap, then MASTERED
 
 `HANDOFF.md` is now partly stale: its START HERE section points at the ImportError question,
 which is answered. Refresh it before moving sessions.
+
+## Phase 2 — splitlines RETRIEVAL SATISFIED
+
+Evidence `EV-P2-SPLIT-085`. Third attempt, issued immediately on return from a real gap, with no
+demonstration in front of it — the two previous failures had both followed one. All three parts
+correct at 90 confidence: the list of whole lines, `len` of 3, and the direction stated
+unprompted as string in, list out.
+
+The learner volunteered that they had previously held a space-splitting misconception, now
+closed. Recorded as `splitlines_splits_on_spaces`, resolved. That disclosure is worth more than
+the correct answer, and it came from asking which of two readings they meant rather than taking
+the generous one.
+
+`splitlines` is now banked, not borrowed. Three surfaces, one genuine delayed retrieval, and the
+direction explained rather than recited.
+
+Retrievals still owed:
+
+```text
+exit status         unaided, unannounced, not a Python test run
+branch_precedence   unaided, after a longer gap, then MASTERED
+```
+
+### Recurring correction: git is not GitHub
+
+The learner has now said twice that the diff text arrives "from github". It arrives from `git`,
+the local command-line program, run as a subprocess. BuildLens never contacts GitHub. The only
+GitHub involvement in this project is the sync push, which is unrelated to the diff pipeline.
+
+Worth re-pinning whenever the Phase 7 boundary comes up, because the distinction matters for the
+failure mode: a local program failing produces stderr and a non-zero exit code, which is a
+different situation from a network call failing.
+
+## Phase 2 — PIPELINE COMPLETE AND VALIDATED
+
+`summarize_diff` now takes ONE STRING of diff text, exactly the shape git produces, and returns a
+`DiffSummary`. Evidence `EV-P2-BOUNDARY-086` and `EV-P2-REAL-087`.
+
+```text
+one diff string
+  -> splitlines()
+  -> classify_diff_line, once per line
+  -> three counters
+  -> one DiffSummary
+```
+
+That is the design the learner described in their own words at `EV-P2-ACC-075`, before they had
+met a loop.
+
+The boundary decision was the learner's. Offered three placements, they first chose C — accept
+either shape — reasoning that a caller might save work by passing a list. One question dislodged
+it: that caller has a string from git, so who called `splitlines` and when. They saw that C saves
+nothing and only relocates the work, and switched to A unaided. No argument against C was stated
+by Claude.
+
+The loud failure is a feature and the learner should be able to say so: passing a list now raises
+`AttributeError: 'list' object has no attribute 'splitlines'` rather than silently producing
+zeros.
+
+New misconception `method_distributes_over_elements`, resolved: the learner reasoned that calling
+`.splitlines()` on a list would work because the strings inside have that method. Resolved by
+asking what `all_lines` IS at the moment of the call.
+
+VALIDATED AGAINST REAL GIT OUTPUT, and the learner approved the check after being given the case
+for declining it as out of phase. A three-file diff including a brand-new file, 452 characters,
+a shape the tests do not cover:
+
+```text
+exit code : 0
+type      : <class 'str'>
+length    : 452
+
+DiffSummary(files_changed=3, lines_added=5, lines_removed=1)
+```
+
+The learner hand-counted 3, 5, 1 before anything ran, including two line forms they had never
+seen — `new file mode 100644`, which matches no prefix and falls through to context, and
+`--- /dev/null`, caught by the `"--- "` branch they defended back in Phase 1 without needing to
+know what /dev/null means.
+
+No subprocess code entered the repository. The harness lived in the scratchpad.
+
+## Phase 2 — what is left
+
+Functionally, nothing. What remains is closing discipline:
+
+```text
+milestone requirements   learner explanation of summarize.py, plus one transfer variant
+exit status retrieval    owed, unannounced, NOT a Python test run
+branch_precedence        owed, after a longer gap, then MASTERED
+```
+
+The exit code printed beside the text in the validation run is the whole of the Phase 7 decision.
+It was pointed out once and deliberately not pressed, since the retrieval must not be announced.
+
+Phase 3 should not begin until the milestone is closed.

@@ -8,25 +8,25 @@ Run it with:
 from summarize import summarize_diff
 
 
-TWO_FILE_DIFF = [
-    "diff --git a/app.py b/app.py",
-    "index 078ac13..3e779b8 100644",
-    "--- a/app.py",
-    "+++ b/app.py",
-    "@@ -1,2 +1,3 @@",
-    "-DEBUG = False",
-    "+import os",
-    "+DEBUG = True",
-    " PORT = 8000",
-    "diff --git a/config.py b/config.py",
-    "index 7f9f1df..a5501d6 100644",
-    "--- a/config.py",
-    "+++ b/config.py",
-    "@@ -1,2 +1,2 @@",
-    ' NAME = "buildlens"',
-    "-RETRIES = 3",
-    "+RETRIES = 5",
-]
+TWO_FILE_DIFF = (
+    "diff --git a/app.py b/app.py\n"
+    "index 078ac13..3e779b8 100644\n"
+    "--- a/app.py\n"
+    "+++ b/app.py\n"
+    "@@ -1,2 +1,3 @@\n"
+    "-DEBUG = False\n"
+    "+import os\n"
+    "+DEBUG = True\n"
+    " PORT = 8000\n"
+    "diff --git a/config.py b/config.py\n"
+    "index 7f9f1df..a5501d6 100644\n"
+    "--- a/config.py\n"
+    "+++ b/config.py\n"
+    "@@ -1,2 +1,2 @@\n"
+    ' NAME = "buildlens"\n'
+    "-RETRIES = 3\n"
+    "+RETRIES = 5\n"
+)
 
 
 def test_summarize_diff_reports_all_three_counts():

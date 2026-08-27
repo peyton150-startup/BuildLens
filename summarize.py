@@ -1,9 +1,9 @@
 """Count what a whole diff changed.
 
 Contract:
-    in        a list of unified-diff lines, each a string
+    in        one string of unified-diff text, as git prints it
     out       one DiffSummary holding three counts
-    unchanged the list passed in, and everything outside this call
+    unchanged the string passed in, and everything outside this call
 """
 
 from dataclasses import dataclass
@@ -18,12 +18,12 @@ class DiffSummary:
     lines_removed: int
 
 
-def summarize_diff(all_lines):
+def summarize_diff(diff_text):
     files_changed = 0
     lines_added = 0
     lines_removed = 0
 
-    for line in all_lines:
+    for line in diff_text.splitlines():
         label = classify_diff_line(line)
         if label == "file_header":
             files_changed = files_changed + 1
