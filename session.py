@@ -10,3 +10,6 @@ Contract:
 class Session:
     def __init__(self):
         self.changes = []
+
+    def record(self, diff_text):
+        self.changes.append(diff_text)

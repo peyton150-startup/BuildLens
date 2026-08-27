@@ -10432,3 +10432,203 @@ the test ladder was DRAWN as five rungs; the directory was listed rather than th
 RECOVERY STATUS:
 stable-at-rung
 ```
+
+```text
+EVIDENCE ID:
+EV-P3-RECORD-094
+
+DATE / PHASE / GATE:
+2026-08-27 / Phase 3 / rungs 2 and 3, record and ordering
+
+IMPLEMENTATION TRIGGER:
+The test ladder agreed at EV-P3-SESSION-093.
+
+ADJACENT CONCEPT:
+`self` binds a method to the instance it was called on. `=` assigns, `==` asks. `==` on lists
+compares contents in order. A test builds a world it controls.
+
+EXERCISE TYPE:
+design and implementation
+
+SOURCE / CONTEXT:
+BuildLens
+
+PROBLEM — VERBATIM:
+What should the test do, and what does it assert?
+then: what is the second assert for ordering?
+then: does the len assert still earn its place?
+
+MY ANSWER — VERBATIM:
+before that are we assuming one change = one diff string?
+
+it should have a counter for howm nay times record has been run and compare that to the number of
+changes in self.changes, 80
+
+ok so no counter, we run len to get the number of changes my blank spot is that whaat weould be
+do to compare it to the len, for the first run we can make it assert 1 but after that at 652 how
+can we assert that while knowing how many changes there are
+
+so for the test i would only test the first time i add something and assert 1, because 652 is not
+for a test it is the real run
+
+record does not exsist so attrubute error, my question is does record already exsit in pythons
+library
+
+so it would take in the diff string and appead it to the list you call it for so for
+session.record("diff A") it adds diff a to the session list
+
+pass and exit 0, 100
+
+session.changes = ["diff A" , "diff B]
+
+you are right that was a syntax issue it would be == because i want to make sure that session
+changes is equal to ["diff A", "diff B"]
+
+no, because the == checks the length inadvertently as well as the contents
+
+MY REASONING — VERBATIM:
+652 is not for a test it is the real run
+
+no, because the == checks the length inadvertently as well as the contents
+
+CONFIDENCE BEFORE CHECK:
+80 on the counter proposal which was rejected on their own principle, 100 on the green prediction
+which was correct
+
+TOOLS / HELP USED BEFORE COMMITMENT:
+none
+
+RESULT:
+correct after two corrections
+
+MISCONCEPTION / GAP:
+The learner checked an assumption before building on it — are we assuming one change equals one
+diff string — which is exactly right and it was their own decision from EV-P3-STATE-090.
+
+`derived_state_duplicated` — they proposed a counter attribute tracking how many times record ran,
+to compare against len(changes). Dislodged by placing it beside their own rejected stored-summary
+decision: both are derived data that must be kept in step by hand. They dropped it immediately.
+
+`test_must_discover_the_number` — a genuine and useful confusion. The learner asked how a test
+could assert a count once 652 changes exist. Resolved by drawing the difference between a test,
+which builds a world it controls, and the real run, where nobody asserts anything. They restated
+it correctly: *652 is not for a test it is the real run*.
+
+`assignment_in_place_of_comparison` — the ordering assert was first written with a single `=`,
+which would have replaced the session's list with a hand-written one and made the test pass
+regardless of what record did. The learner self-corrected when shown their own earlier asserts.
+
+The learner then observed unprompted that the `len == 2` assert was redundant once the whole list
+is compared, and it was removed.
+
+Answered for them, since it is not derivable: `record` is not a Python name, and there is no
+reserved list to collide with. `self` was explained as the mechanism by which a method knows which
+instance it was called on.
+
+CORRECT MODEL — ADDED AFTER ATTEMPT:
+    def record(self, diff_text):
+        self.changes.append(diff_text)
+
+Three tests green, exit 0. Rung 3 passed on its first run, which was flagged rather than glossed:
+a test that drives new behaviour must be red first, but a test that locks in existing behaviour is
+a regression guard and may legitimately be green first. The one to distrust passes immediately and
+defends nothing.
+
+WHY THIS MATTERS TO THE REAL IMPLEMENTATION:
+Session can now record changes in order, which is the state the whole phase is named for.
+
+TRANSFER / NEXT RETRIEVAL:
+Rungs 4 and 5, history and the leak test.
+
+PARENT EVIDENCE ID:
+EV-P3-SESSION-093
+
+PRIMARY BLOCKER:
+test_must_discover_the_number, resolved
+
+SCAFFOLD RUNG:
+R5
+
+WHY THIS RUNG:
+One class, two methods, three tests.
+
+SUPPORT PROVIDED BEFORE THIS ATTEMPT:
+the test-versus-real-run distinction was DRAWN as two columns; the counter proposal was met with
+the learner's own prior decision rather than an argument
+
+RECOVERY STATUS:
+stable-at-rung
+```
+
+```text
+EVIDENCE ID:
+EV-P3-LEAK-095
+
+DATE / PHASE / GATE:
+2026-08-27 / Phase 3 / rungs 4 and 5 written, PREDICTION BANKED UNRUN
+
+IMPLEMENTATION TRIGGER:
+The final two rungs of the ladder, including the leak test the learner proposed first.
+
+ADJACENT CONCEPT:
+Reaching through the object versus asking through its method.
+
+EXERCISE TYPE:
+tracing
+
+SOURCE / CONTEXT:
+BuildLens
+
+PROBLEM — VERBATIM:
+Which error, which line, and which of the two new tests hits it first?
+
+MY ANSWER — VERBATIM:
+assertion error the append will add the second diff and then it will be diff a and b
+
+MY REASONING — VERBATIM:
+the append will add the second diff and then it will be diff a and b
+
+CONFIDENCE BEFORE CHECK:
+not provided; the session paused immediately after
+
+TOOLS / HELP USED BEFORE COMMITMENT:
+none
+
+RESULT:
+NOT YET RESOLVED — deliberately not run
+
+MISCONCEPTION / GAP:
+To be assessed on resume. The prediction reasons about rung 5's logic on the assumption that
+`history()` exists. It does not; `session.py` has only `__init__` and `record`.
+
+The suite was deliberately NOT run, so the learner can work this through live rather than reading
+the answer while leaving. This follows the rule added after the tenth prompt defect, where running
+a suite in the same message as a prediction destroyed a planned assessment.
+
+CORRECT MODEL — ADDED AFTER ATTEMPT:
+withheld; the attempt is open
+
+WHY THIS MATTERS TO THE REAL IMPLEMENTATION:
+Rung 5 is the test that justifies the whole copy-returning design.
+
+TRANSFER / NEXT RETRIEVAL:
+pending
+
+PARENT EVIDENCE ID:
+EV-P3-RECORD-094
+
+PRIMARY BLOCKER:
+to be determined
+
+SCAFFOLD RUNG:
+R5
+
+WHY THIS RUNG:
+Two tests, one class, no new syntax.
+
+SUPPORT PROVIDED BEFORE THIS ATTEMPT:
+both tests shown whole; the leak drawn as a pointer diagram
+
+RECOVERY STATUS:
+open
+```

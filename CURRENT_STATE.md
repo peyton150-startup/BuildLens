@@ -1895,3 +1895,67 @@ Recorded as `class_attribute_is_shared`. Their instinct was right and the sharin
 they guessed — not the previous session, but every session simultaneously.
 
 NEXT: rung 2, `record`, test-first.
+
+## Phase 3 — rungs 2 and 3 green, rungs 4 and 5 written, PAUSED WITH A PREDICTION OPEN
+
+```python
+class Session:
+    def __init__(self):
+        self.changes = []
+
+    def record(self, diff_text):
+        self.changes.append(diff_text)
+```
+
+Three tests green, exit 0. Evidence `EV-P3-RECORD-094`.
+
+```text
+1  a new Session has no changes                     DONE, green
+2  record one change, it is there                   DONE, red first, then green
+3  record two, both there in order                  DONE, green on first run
+4  history returns what was recorded                WRITTEN, not yet run
+5  mutating history does not touch the session      WRITTEN, not yet run
+```
+
+RUNG 3 PASSED IMMEDIATELY and this was flagged rather than glossed. A test that DRIVES new
+behaviour must be red first; a test that LOCKS IN existing behaviour is a regression guard and may
+legitimately be green first. The one to distrust passes immediately and defends nothing.
+
+Three misconceptions this stretch, all resolved:
+
+- `derived_state_duplicated` — the learner proposed a counter attribute tracking how many times
+  `record` ran. Dislodged by placing it beside their own rejected stored-summary decision. Both
+  are derived data that must be kept in step by hand.
+- `test_must_discover_the_number` — a genuine and useful confusion: how can a test assert a count
+  once 652 changes exist? Resolved by drawing the difference between a test, which builds a world
+  it controls, and the real run, where nobody asserts anything. The learner restated it: *652 is
+  not for a test it is the real run*.
+- `assignment_in_place_of_comparison` — the ordering assert was first written with a single `=`,
+  which would have replaced the list and made the test pass regardless. Self-corrected when shown
+  their own earlier asserts.
+
+The learner then observed unprompted that `len == 2` was redundant once the whole list is
+compared, and it was removed.
+
+Supplied because not derivable: `record` is not a Python name and there is no reserved list to
+collide with; `self` is how a method knows which instance it was called on.
+
+## RESUME HERE — an open prediction, deliberately not run
+
+`test_session.py` now contains rungs 4 and 5, and `session.py` has NO `history()` method. The
+suite has NOT been run. Evidence `EV-P3-LEAK-095`.
+
+The learner's committed prediction, verbatim:
+
+> assertion error the append will add the second diff and then it will be diff a and b
+
+Do NOT reveal the result. Ask them to walk it: which test runs first, and whether `history()`
+exists at the moment it is called. Their reasoning is about rung 5's logic and assumes the method
+is already there.
+
+The suite was left unrun on purpose so this is worked through live rather than read while leaving.
+That follows the rule added after the tenth prompt defect.
+
+After that: implement `history()` returning `list(self.changes)`, get both rungs green, then the
+Phase 3 milestone — explanation plus transfer — and the second half of the Phase 3 gate, tracing
+real session state through several operations.
