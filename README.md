@@ -23,11 +23,11 @@ The project itself is intentionally built in the same order those ideas should b
 
 ## Current status
 
-**Phase 0 — Specification Before Code.**
+**Phase 3 — State and the State Movie (implementation and knowledge gate complete; transition milestones pending).**
 
-No application code should exist yet.
+Phase 2 is closed and Phase 4 has not started. The remaining Phase 3 transition work is the `session.py` teach-aloud plus a different-domain aliasing/copying transfer; `CURRENT_STATE.md` is authoritative for the exact completed code, retrieval commitments, and next step.
 
-The first task is to pass the Phase 0 tracing gate and then implement one tiny pure Python transformation.
+The curriculum uses selected CMU and MIT material as an academic backbone while BuildLens implementation continues to determine when each concept is introduced.
 
 ## Core rule
 

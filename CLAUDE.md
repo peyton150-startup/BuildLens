@@ -58,6 +58,23 @@ For source-grounded exercises:
 
 When the learner fails, record the misconception in `CURRENT_STATE.md` and generate a new surface form later.
 
+For every teaching interaction, Claude- and Codex-style sessions must follow this operational sequence:
+
+```text
+1. identify the current BuildLens phase
+2. identify the current implementation task
+3. identify one appropriate academic-source objective
+4. identify the smallest prerequisite concept
+5. ask the learner to predict/trace/reason first
+6. adapt down if the answer is wrong
+7. apply the concept to BuildLens
+8. transfer it to a different surface
+9. record the Evidence Record
+10. check whether a cumulative review became due
+```
+
+Use `docs/LEARNING_SOURCES.md` for stable source IDs and public source locations. University material supplies the deep skill, difficulty, reasoning style, and invariants; it is not a question bank. Never copy university homework or exam questions verbatim, and never require a full course when one small objective is sufficient for the current BuildLens task.
+
 ---
 
 ## Mandatory behavior after an incorrect learner answer
@@ -161,6 +178,21 @@ automated tests
 ```
 
 The developer has explicitly chosen a slower learning-first workflow.
+
+Before significant work in a new phase, check both cumulative-review counters in `learning/LEARNING_RULES.md`.
+
+If either counter is due:
+
+```text
+STOP implementation
+→ run the cumulative retrieval review
+→ remediate important misses until independently recovered
+→ record evidence
+→ reset only the counter that triggered
+→ resume implementation
+```
+
+If both counters are due at approximately the same time, run one combined review rather than two back-to-back quizzes. Phase 15 always includes a cumulative final defense.
 
 ---
 

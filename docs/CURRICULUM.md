@@ -120,6 +120,204 @@ The curriculum travels with the implementation instead of running as a separate 
 | 14 | architecture | measurable quality scenarios, evidence, reversal conditions |
 | 15 | defense | cumulative line→system reasoning |
 
+## Academic phase backbone
+
+University sources provide objectives and reasoning depth. The current BuildLens implementation remains the trigger for when a concept appears. Stable source IDs and public locations live in `docs/LEARNING_SOURCES.md`.
+
+### Phases 0–1 — early computation
+
+**Anchors:** `CMU-15112-2026`, `MIT-60001-OCW`, `MIT-6100L-OCW`.
+
+Focus on assignment, expressions, branches, strings, function calls, return values, tracing, and basic decomposition. Do not add AI concepts.
+
+### Phase 2 — representation, contracts, and tests
+
+**Anchors:** `CMU-15122-2026`, `MIT-6102-2026`; begin `CMU-15210-2026` / `MIT-6006-OCW` lightly.
+
+Require explicit representation, specifications, input partitions, normal/boundary/empty/invalid cases, simple preconditions/postconditions/invariants, and defensible representation choice. Keep formal reasoning concrete rather than demanding mathematical proofs.
+
+Example shape:
+
+```text
+classify_diff_line
+
+INPUT: one string
+PROMISE: returns exactly one allowed classification
+INVARIANT: the input string is not modified
+```
+
+### Phase 3 — identity and ownership
+
+**Anchors:** `MIT-60001-OCW`, `MIT-6100L-OCW`, `MIT-6102-2026`.
+
+Strengthen aliasing, mutation, cloning/copying, identity, ownership, and state invariants through the actual Session model.
+
+### Phases 4–5 — construction boundaries
+
+**Anchors:** `MIT-6102-2026`, `CMU-15122-2026`.
+
+Strengthen responsibilities, modules, specifications, interfaces, conceptual ADTs, abstraction, representation independence, dependency direction, client assumptions, and hidden implementation details.
+
+### Phases 2–6 — recurring algorithm strand
+
+**Anchors:** `CMU-15210-2026`, `MIT-6006-OCW`.
+
+Attach these questions to real BuildLens or transfer work:
+
+```text
+What is the problem?
+What algorithm solves it?
+Which operations dominate?
+Why this data structure?
+What is the rough time/space growth?
+What changes at 10× input?
+Is the observed problem algorithmic or in another layer?
+```
+
+Do not add detached LeetCode-style work to every phase.
+
+### Phase 7 — subprocess/system boundary
+
+**Anchors:** `CMU-15213-SYSTEMS`, `MIT-61800-2026`.
+
+Use Git as the trigger for:
+
+```text
+Python process
+→ child Git process
+→ stdout/stderr
+→ return code
+→ Python interpretation
+```
+
+Include executable failure, timeout, bytes/text, and path/I/O boundaries.
+
+### Phase 8 — LLM foundation and authority
+
+**Anchor:** `CMU-11667-LLM`.
+
+Introduce:
+
+```text
+text → tokens → model/context → generation → model output
+```
+
+The central invariant is:
+
+```text
+MODEL OUTPUT ≠ AUTHORITATIVE APPLICATION STATE
+```
+
+Teach probabilistic output, deterministic validation/control of effects, tool proposal versus tool execution, prompt/context as model input, and validation before authority.
+
+### Phase 9 — agent/search foundation and distributed failure
+
+**Anchors:** `CMU-15440-2026`, `CMU-15281-2026`, `MIT-6034-OCW`.
+
+Connect event/state work to:
+
+```text
+state → possible actions → choose action → perform action/tool
+→ observe result → new state → repeat or stop
+```
+
+Distinguish an ordinary deterministic state machine from an LLM-assisted agent loop. Connect retries, duplicate events, partial failure, stale state, idempotence, and ordering. Do not introduce agent frameworks.
+
+### Phase 10 — AI evaluation
+
+**Anchor:** `CMU-11667-LLM`.
+
+Teach:
+
+```text
+model produced an answer ≠ system succeeded
+```
+
+Introduce success criteria, task-level and deterministic checks, limitations of model-based evaluation, automatic evaluation, human evaluation, representative evaluation sets, and repeated evidence.
+
+### Phase 11 — persistence and embedding representation
+
+**Anchors:** `CMU-15445-2025`, `MIT-65830-2026`, `CMU-11667-LLM`.
+
+Strengthen schema, transactions, commit/rollback, indexes, and recovery. Introduce only the representation concept:
+
+```text
+text → embedding vector
+```
+
+No embedding-model implementation is required.
+
+### Phases 11–12 — RAG mental model
+
+**Anchors:** `CMU-11667-LLM`, `CMU-11442-SEARCH-2026`.
+
+```text
+DOCUMENT → embedding/vector
+QUERY → embedding/vector
+similarity search → relevant documents
+documents + question → model context
+model → answer
+```
+
+The learner must distinguish retrieval, memory, model context, and persistent authoritative application state.
+
+### Phase 12 — API/system contract
+
+**Anchors:** `MIT-6102-2026`, `MIT-61800-2026`.
+
+Strengthen API contracts, process/network boundaries, JSON serialization, validation, domain invariants, and client/server reasoning.
+
+### Phase 13 — collaborative distributed state
+
+**Anchors:** `CMU-15440-2026`, `MIT-61800-2026`, `MIT-6102-2026`.
+
+Strengthen multiple actors, concurrency, stale versions, lost updates, conflict, partial failure, recovery, atomicity versus durability, and trust/security. Preserve the no-silent-overwrite architecture in `docs/COLLABORATIVE_EDITING.md`.
+
+### Phases 14–15 — architecture and readiness defense
+
+**Anchors:** `MIT-61800-2026`, existing CMU SEI sources, `CMU-EXEC-AGENTIC-AI`.
+
+Move fluidly through:
+
+```text
+LINE → FUNCTION → DATA STRUCTURE → MODULE → PROCESS
+→ NETWORK/DATABASE → AI/AGENT BOUNDARY → FAILURE
+→ ARCHITECTURE → TRADEOFF
+```
+
+Architecture answers use:
+
+```text
+constraint → alternative → choice → mechanism
+→ downside → evidence → reversal condition
+```
+
+Phase 15 includes the Agentic-AI readiness model:
+
+```text
+USER
+↓
+API
+↓
+AGENT LOOP
+├── MODEL
+├── MEMORY
+├── RETRIEVAL / RAG
+└── TOOLS
+↓
+DETERMINISTIC APPLICATION
+↓
+TRANSACTION / EXTERNAL SYSTEM
+↓
+OBSERVATION
+↓
+AGENT CONTINUES OR STOPS
+
+alongside EVALUATION, GUARDRAILS, and LOGGING / OBSERVABILITY
+```
+
+The learner must defend when an agent is justified; what an LLM may and may not control; where authoritative state lives; memory versus retrieval versus RAG; retries and duplicate mutation; retrieved-context trust; evaluation; one versus multiple agents; multi-agent failure modes; evidence; and reversal conditions. Framework memorization is not required.
+
 ### Spiral-depth rule
 
 The same concept returns at increasing depth. Example:
@@ -1073,6 +1271,19 @@ cumulative knowledge gate
 one reference-project transfer
 one "what changed in my mental model?" reflection
 ```
+
+## Mandatory cumulative retrieval cadence
+
+Maintain two counters:
+
+- **Smaller/foundation (baseline Phases 0–6):** review after every three completed phases. Completing Phase 2 triggers the first Phase 0–2 cumulative review before substantial Phase 3 implementation.
+- **Major/deep (baseline Phases 7–15):** review after every two completed phases.
+
+Classify by actual conceptual depth, not numbering tricks. If both counters are due together, run one combined review. Reset only the counter(s) satisfied; never erase history. Phase 15 always includes a cumulative final defense.
+
+Normal reviews contain approximately 4–7 questions; deep reviews contain approximately 6–10. Prioritize later prerequisites, architecture, prior misconceptions/remediation, neglected retrieval targets, authority boundaries, testing/debugging, algorithm/data-structure choices, and—after Phase 8—AI/system concepts.
+
+Use only taught question types: trace, explain, apply, test/contract, debug, architecture, and defend. Use delayed retrieval with new surface forms. All existing adaptive-remediation and verbatim-evidence rules remain active, and every question records an Evidence Record with type `CUMULATIVE_RETRIEVAL`.
 
 ---
 

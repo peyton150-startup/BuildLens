@@ -545,3 +545,108 @@ solve the isolated prerequisite
 ```
 
 The original failed answer remains in the ledger forever as evidence of progression.
+
+---
+
+# 15. University source ladder
+
+Academic exercises should preferentially follow:
+
+```text
+current BuildLens phase
+→ current implementation trigger
+→ one appropriate CMU/MIT source objective
+→ new micro-problem
+→ BuildLens application
+→ different-looking transfer context
+```
+
+For each exercise, record:
+
+```text
+BUILD PHASE
+IMPLEMENTATION TRIGGER
+ACADEMIC SOURCE
+DEEP SKILL
+BUILDLENS EXERCISE
+TRANSFER
+```
+
+Use the smallest number of authoritative sources necessary. The source defines the deep skill, difficulty, reasoning style, and important invariants. It is not a fixed question bank.
+
+Never copy university homework or exam questions verbatim. Do not require the learner to complete an entire university course. Extract only the smallest relevant material that the current BuildLens implementation can make concrete. If material is login-restricted, do not fabricate it; use public objectives or an appropriate public archive/OCW source and record the limitation in `docs/LEARNING_SOURCES.md`.
+
+# 16. Cumulative retrieval counters
+
+Maintain two independent completion counters.
+
+## 16.1 Smaller/foundation phases
+
+Baseline: Phases 0–6. After every three completed smaller/foundation phases, stop before significant work in the next phase and run one cumulative retrieval review.
+
+Phase 2 completion triggers the first review of important Phase 0–2 material before substantial Phase 3 implementation. The current repository may already be beyond that transition; preserve its history rather than rewriting it.
+
+## 16.2 Major/deep phases
+
+Baseline: Phases 7–15. After every two completed major/deep phases, stop before significant work in the next phase and run one cumulative retrieval review.
+
+Classify by actual conceptual weight, not phase number alone. Record why when a nominally small phase becomes architecturally deep. Splitting a major phase into administrative subphases does not inflate the counter.
+
+## 16.3 Review construction
+
+Prioritize:
+
+1. concepts required by later phases;
+2. deep architectural concepts;
+3. prior misconceptions and remediation targets;
+4. concepts not retrieved recently;
+5. state/authority boundaries;
+6. testing/debugging reasoning;
+7. major algorithm/data-structure choices;
+8. AI/system concepts after Phase 8.
+
+Mix only already-taught question types:
+
+```text
+TRACE
+EXPLAIN
+APPLY
+TEST / CONTRACT
+DEBUG
+ARCHITECTURE
+DEFEND
+```
+
+A normal review is approximately 4–7 questions; a deep review is approximately 6–10 questions. Short related subparts are allowed. Do not turn every review into a final exam.
+
+Use delayed retrieval: the same deep concept, a different surface, a time delay, and when useful a different domain. Do not merely repeat old questions.
+
+All adaptive R0–R6 remediation rules remain active. Several remediation attempts do not fail the entire review, but the review is not complete until each important concept is independently recovered at the cumulative level.
+
+## 16.4 Evidence and reset
+
+Every cumulative question creates an Evidence Record in `learning/LEARNING_LEDGER.md` with exercise type `CUMULATIVE_RETRIEVAL` and records:
+
+```text
+exact problem
+exact learner answer
+exact reasoning when supplied
+confidence
+result
+misconception
+source phases
+academic source
+remediation chain
+delayed retrieval status
+transfer context
+```
+
+After a successful review, reset only the counter that triggered it; never erase history. If both counters become due at approximately the same time, run one combined review and reset both satisfied counters.
+
+An additional review may be required before a major architecture transition when earlier knowledge is genuinely prerequisite. Use this sparingly. Phase 15 always includes a cumulative final defense regardless of counter state.
+
+# 17. AI readiness as cumulative knowledge
+
+Beginning in Phase 8, treat LLM and AI concepts as cumulative retrieval targets alongside the existing software and systems curriculum. The learner must progressively distinguish model output, tool proposals, authoritative application state, memory, retrieval/RAG, evaluation, guardrails, and observability.
+
+Do not prebuild or pre-teach framework-specific machinery merely because the CMU target program uses it. CrewAI, LangGraph, vector databases, and similar tools remain deferred until a concrete BuildLens phase creates a justified need.

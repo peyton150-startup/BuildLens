@@ -542,6 +542,22 @@ modeling / scaffolding
 
 and keeps retrieval low-stakes: repeated incorrect attempts are expected evidence, not penalties.
 
+## Cumulative review checkpoints
+
+Maintain two completion counters:
+
+```text
+smaller/foundation phases (baseline 0–6)
+→ cumulative review after every 3 completed phases
+
+major/deep phases (baseline 7–15)
+→ cumulative review after every 2 completed phases
+```
+
+Before significant work in a new phase, check both counters. If due, stop implementation and complete one cumulative retrieval review first. If both are due together, combine them. Reset only the satisfied counter(s), never the history. Phase 2 completion triggers the first Phase 0–2 review before substantial Phase 3 work, and Phase 15 always includes a cumulative final defense.
+
+Normal reviews are approximately 4–7 questions; deep reviews are approximately 6–10. Use already-taught trace, explain, apply, test/contract, debug, architecture, and defend formats. Prioritize later prerequisites, deep architecture, prior misconceptions/remediation, neglected concepts, authority boundaries, testing/debugging, algorithm/data-structure choices, and AI/system concepts after Phase 8. Every question uses exercise type `CUMULATIVE_RETRIEVAL` and the existing verbatim Evidence Record/remediation rules.
+
 ---
 
 # 5. Lifecycle
@@ -615,6 +631,14 @@ The learner advances by accurately predicting state, not by starting with a hard
 
 **Curriculum:** Strand 1 + Strand 4. **Python:** control flow/functions tutorial.
 
+### Academic anchors
+
+`CMU-15112-2026`, `MIT-60001-OCW`, `MIT-6100L-OCW`.
+
+### Knowledge gate addition / transfer expectation
+
+Trace assignment, expressions, branches, strings, calls, and returns in one new micro-problem, then transfer the same execution-order skill to a different domain. AI is explicitly out of scope.
+
 ### Knowledge gate
 
 Tiny sequential Python traces.
@@ -639,7 +663,7 @@ Claude models how to decompose the problem, but does not solve the knowledge gat
 
 ### Source anchors
 
-CMU-112-ALGO, CMU-112, CMU-EBERLY-RETRIEVAL.
+`CMU-112-ALGO`, `CMU-112`, `CMU-15112-2026`, `MIT-60001-OCW`, `MIT-6100L-OCW`, `CMU-EBERLY-RETRIEVAL`.
 
 ---
 
@@ -707,6 +731,14 @@ Only combine those concepts again after each required prerequisite is stable.
 Arithmetic in these exercises should be deliberately easy so that arithmetic does not hide the programming concept.
 
 **Curriculum:** Strands 1, 1.5, 4. **Python:** control flow/functions + built-in string/sequence behavior.
+
+### Academic anchors
+
+`CMU-15112-2026`, `MIT-60001-OCW`, `MIT-6100L-OCW`.
+
+### Knowledge gate addition / transfer expectation
+
+Require one new execution trace and a different-looking transfer that preserves call/return and branch-order reasoning. Do not introduce AI.
 
 ### Knowledge gate
 
@@ -778,6 +810,18 @@ Teach dataclass fields and `frozen=True` without calling it deep immutability. T
 
 **Curriculum:** Strands 1.5, 2, 4. **Python:** `dataclasses`.
 
+### Academic anchors
+
+`CMU-15122-2026`, `MIT-6102-2026`; introduce `CMU-15210-2026` / `MIT-6006-OCW` lightly.
+
+### Adjacent concept additions
+
+Write a simple specification with precondition, postcondition, and invariant. Partition normal, boundary, empty, and invalid inputs. Ask which operations dominate and why the chosen representation fits them.
+
+### Knowledge gate addition / transfer expectation
+
+Given a new one-string classifier, define its allowed result, non-mutation invariant, and test partitions, then transfer that contract/representation reasoning to a non-diff domain.
+
 ### Knowledge gate
 
 Before Claude shows tests, design normal, boundary, empty, and invalid cases.
@@ -828,6 +872,14 @@ Mutation, aliases, copies, object identity, ownership of mutable state, previous
 Session state is the reason to learn Python references and mutation. For every state exercise ask: who owns the list, who aliases it, what mutates in place, what creates a new object, and which snapshot could change unexpectedly?
 
 **Curriculum:** Strands 1, 3, 4.
+
+### Academic anchors
+
+`MIT-60001-OCW`, `MIT-6100L-OCW`, `MIT-6102-2026`.
+
+### Knowledge gate addition / transfer expectation
+
+Trace alias, mutation, clone/copy, identity, ownership, and a state invariant in Session, then solve a different-looking mutable-state problem.
 
 ### Knowledge gate
 
@@ -892,6 +944,14 @@ Top-down design, cohesion, coupling, responsibility boundaries, refactoring vers
 Refactoring into files creates the module/import lesson. For each new import, identify the name used, why that dependency exists, and whether it preserves the intended dependency direction. Use the code-reading playbook on every meaningful module.
 
 **Curriculum:** Strands 5, 7, 11.
+
+### Academic anchors
+
+`MIT-6102-2026`, `CMU-15122-2026`.
+
+### Knowledge gate addition / transfer expectation
+
+Explain each module's responsibility, interface, hidden representation, client assumptions, and dependency direction; transfer the decomposition to a small unrelated program.
 
 ### Knowledge gate
 
@@ -972,6 +1032,14 @@ For every contract ask what the annotation communicates, what code actually vali
 
 **Curriculum:** Strands 7, 11, 12. **Python:** `typing`.
 
+### Academic anchors
+
+`MIT-6102-2026`, `CMU-15122-2026`.
+
+### Knowledge gate addition / transfer expectation
+
+Specify a boundary as an abstraction/ADT contract, separate representation from client-visible behavior, and test the same distinction in a new domain.
+
 ### Knowledge gate
 
 Given a new multi-function example, draw caller/callee frames.
@@ -1037,6 +1105,14 @@ shell → arguments → Python entry point → application → stdout/stderr →
 If `argparse` is used, separate argument parsing from domain behavior. Include one bad-input exercise and explain what the user sees and whether the process should succeed.
 
 **Curriculum:** Strands 7, 8, 11. **Python:** `argparse`.
+
+### Academic anchors
+
+`CMU-15210-2026`, `MIT-6006-OCW`, with early systems context from `CMU-15213-SYSTEMS`.
+
+### Knowledge gate addition / transfer expectation
+
+For the complete slice, identify the problem, algorithm, dominant operations, representation choices, and rough growth; transfer the same end-to-end/cost analysis to another small CLI.
 
 ### Knowledge gate
 
@@ -1114,6 +1190,14 @@ BuildLens Python process
 Exercise executable-not-found, non-zero exit, timeout, and valid-process/malformed-output cases. Captured output is bytes by default and can be decoded/text mode. Avoid `shell=True` unless a concrete requirement is defended.
 
 **Curriculum:** Strands 6, 7, 8, 9.5. **Python:** `subprocess`, `pathlib`.
+
+### Academic anchors
+
+`CMU-15213-SYSTEMS`, `MIT-61800-2026`.
+
+### Knowledge gate addition / transfer expectation
+
+Trace Python process → child process → stdout/stderr → return code → interpretation, including executable failure, timeout, bytes/text, and path/I/O boundaries. Transfer to a non-Git child process.
 
 ### Knowledge gate
 
@@ -1218,6 +1302,18 @@ Teach JSON object/list/null mappings and that successful parsing is not the same
 
 **Curriculum:** Strands 1.5, 7, 8, 9.5, 9.75. **Python:** `json`, `hashlib`, `pathlib`.
 
+### Academic anchors
+
+`CMU-11667-LLM`.
+
+### Adjacent concept additions
+
+Teach `text → tokens → model/context → generation → model output`. The non-negotiable trust boundary is `MODEL OUTPUT ≠ AUTHORITATIVE APPLICATION STATE`. Distinguish probabilistic model output, deterministic validation/effects, prompt/context input, tool proposal, and tool execution.
+
+### Knowledge gate addition / transfer expectation
+
+Given a model-produced tool proposal, identify what may be suggested, what must be validated, what deterministic code may execute, and where truth remains. Transfer to a non-Claude LLM integration.
+
 ### Knowledge gate
 
 Given an unfamiliar hook payload, decide:
@@ -1313,6 +1409,18 @@ A hash detects differing bytes; it cannot explain intent or choose a correct mer
 
 **Curriculum:** Strands 3, 5, 8, 8.5, 9.
 
+### Academic anchors
+
+`CMU-15440-2026`, `CMU-15281-2026`, `MIT-6034-OCW`.
+
+### Adjacent concept additions
+
+Connect `state → possible actions → choose → act/tool → observe → new state → repeat/stop` to the event loop. Explicitly distinguish a deterministic state machine from an LLM-assisted agent loop, and connect retries, duplicates, stale state, partial failure, idempotence, and ordering. Do not add an agent framework.
+
+### Knowledge gate addition / transfer expectation
+
+Trace both a deterministic event state machine and a simplified agent loop through the same failure scenario, then transfer the reasoning to a different tool/action domain.
+
 ### Knowledge gate
 
 Trace:
@@ -1388,6 +1496,18 @@ generated exercise content ≠ authoritative attempt record
 
 **Curriculum:** Strands 3, 4, 12.
 
+### Academic anchors
+
+`CMU-11667-LLM`.
+
+### Adjacent concept additions
+
+Teach `model produced an answer ≠ system succeeded`: define task-level criteria, deterministic checks, representative evaluation sets, repeated evidence, automatic evaluation, human evaluation, and the limitations of model-based judging.
+
+### Knowledge gate addition / transfer expectation
+
+Design an evaluation set and success criteria for one generated BuildLens exercise, then transfer the evaluation design to a different LLM task.
+
 ### Knowledge gate
 
 The learning engine tests *you* on previous phases.
@@ -1461,6 +1581,18 @@ Include one two-write failure case and predict what commits/rolls back.
 
 **Curriculum:** Strands 1.5, 7, 9, 9.5. **Python:** `sqlite3`.
 
+### Academic anchors
+
+`CMU-15445-2025`, `MIT-65830-2026`, `CMU-11667-LLM`.
+
+### Adjacent concept additions
+
+Add indexes and recovery to schema/transaction reasoning. Introduce only the representation concept `text → embedding vector`; do not implement an embedding model or vector database.
+
+### Knowledge gate addition / transfer expectation
+
+Defend a schema, transaction boundary, and index for a concrete workload, then explain how an embedding is a representation rather than authoritative application state in another domain.
+
 ### Knowledge gate
 
 Take one object from Python memory and trace how it becomes a database row and comes back.
@@ -1527,6 +1659,18 @@ HTTP payload → JSON parse → request model → domain
 Ask where `None` becomes `null`, what Python-specific values JSON cannot encode directly, and where malformed versus semantically invalid input is rejected. Keep transport validation, domain invariants, and authority/authorization conceptually separate.
 
 **Curriculum:** Strands 1.5, 7, 8, 9.5, 9.75. **Python:** `json`.
+
+### Academic anchors
+
+`MIT-6102-2026`, `MIT-61800-2026`, `CMU-11667-LLM`, `CMU-11442-SEARCH-2026`.
+
+### Adjacent concept additions
+
+Strengthen API/process/network contracts and introduce the RAG flow: document/query representation → retrieval/similarity → selected documents → model context → answer. Keep retrieval, memory, model context, and persistent application state distinct.
+
+### Knowledge gate addition / transfer expectation
+
+Trace one value across the network contract and separately trace one document through a conceptual RAG flow; transfer both boundary distinctions to another local service.
 
 ### Knowledge gate
 
@@ -1808,6 +1952,18 @@ Do not claim Python `flush()` alone means physical durability. If stronger durab
 
 **Curriculum:** Strands 3, 6, 8, 9, 9.75, 10, 12. **Python:** `hashlib`, `tempfile`, `os.replace`, `pathlib`.
 
+### Academic anchors
+
+`CMU-15440-2026`, `MIT-61800-2026`, `MIT-6102-2026`.
+
+### Adjacent concept additions
+
+Frame collaborative editing as multiple actors plus stale versions, lost updates, conflict, partial failure, recovery, atomicity versus durability, and trust/security. Preserve the existing no-silent-overwrite design exactly.
+
+### Knowledge gate addition / transfer expectation
+
+Classify and defend a new reconciliation/recovery scenario, then transfer the same distributed-state reasoning to a non-editor domain.
+
 ### Knowledge gate — collaborative editing architecture
 
 Claude gives a **new** base/human/Claude example.
@@ -1973,6 +2129,14 @@ At least one quality scenario needs a measurable response rather than a vague ad
 
 **Curriculum:** Strands 8.5, 9.75, 10, 12.
 
+### Academic anchors
+
+`MIT-61800-2026`, `CMU-SEI-ATAM`, `CMU-SEI-ATAM-2026`, `CMU-EXEC-AGENTIC-AI`.
+
+### Knowledge gate addition / transfer expectation
+
+Defend one choice from line/function through process, network/database, AI/agent boundary, failure, architecture, and tradeoff using constraint → alternative → choice → mechanism → downside → evidence → reversal condition. Transfer the defense to an unfamiliar system.
+
 ### Knowledge gate
 
 Rebuild one architecture view from memory.
@@ -2056,7 +2220,37 @@ syntax → function → data structure → module → process/network/database
 
 The learner must label claims as: **known from code, verified from docs, measured, inferred, or not known yet**. The final goal is line-to-system understanding without bluffing.
 
-**Curriculum:** cumulative.
+**Curriculum:** cumulative. **Academic target:** `MIT-61800-2026`, CMU SEI sources, `CMU-EXEC-AGENTIC-AI`.
+
+### Agentic-AI readiness gate
+
+Draw from memory:
+
+```text
+USER
+↓
+API
+↓
+AGENT LOOP
+├── MODEL
+├── MEMORY
+├── RETRIEVAL / RAG
+└── TOOLS
+↓
+DETERMINISTIC APPLICATION
+↓
+TRANSACTION / EXTERNAL SYSTEM
+↓
+OBSERVATION
+↓
+AGENT CONTINUES OR STOPS
+
+alongside EVALUATION, GUARDRAILS, and LOGGING / OBSERVABILITY
+```
+
+Defend: agent versus deterministic code; what the LLM may and may not control; authoritative state; memory versus retrieval versus RAG versus persistent state; ambiguous tool success and duplicate mutation; retrieved-context trust; agent evaluation; one versus multiple agents; added multi-agent failures; supporting evidence; and redesign triggers. No specific agent framework must be memorized.
+
+Phase 15 always includes the cumulative final defense regardless of review counters.
 
 ### Exam sequence
 

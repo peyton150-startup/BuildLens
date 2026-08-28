@@ -239,6 +239,213 @@ A source is useful only when it changes the curriculum, exercise design, archite
 
 Do not add references simply to increase the number of sources.
 
+## CMU + MIT academic backbone
+
+These official/public pages are the preferred locations for course objectives, topic sequence, lectures, notes, and problem style. BuildLens uses them to identify underlying skills and generate new exercises; it does not copy university homework or exam questions.
+
+### Early Python and computation
+
+#### CMU-15112-2026
+
+**CMU 15-112 — Fundamentals of Programming and Computer Science**
+
+- Current public course: https://www.cs.cmu.edu/~112-s26/
+- Department profile: https://csd.cmu.edu/15112-fundamentals-of-programming-computer-science
+- BuildLens use: code tracing; sequential/conditional/loop execution; strings and collections; functions; recursion; top-down design; testing/debugging; efficiency.
+- Primary phases: 0–3.
+
+#### MIT-60001-OCW
+
+**MIT 6.0001 — Introduction to Computer Science and Programming in Python**
+
+- Public OCW course: https://ocw.mit.edu/courses/6-0001-introduction-to-computer-science-and-programming-in-python-fall-2016/
+- BuildLens use: variables/bindings, strings, branching, functions, loops, tuples/lists, and basic algorithmic thinking.
+- Primary phases: 0–3.
+
+#### MIT-6100L-OCW
+
+**MIT 6.100L — Introduction to CS and Programming Using Python**
+
+- Public OCW course: https://ocw.mit.edu/courses/6-100l-introduction-to-cs-and-programming-using-python-fall-2022/
+- Current-course context: https://introcomp.mit.edu/6.100A_fa25
+- BuildLens use: bindings, indentation/control flow, functions, iteration, sequences, aliasing, mutation, cloning/copying.
+- Public-material note: the Fall 2025 course site exposes only limited material without MIT login. Prefer the OCW course for revisitable exercises and lecture material.
+- Primary phases: 0–3.
+
+### Software construction and contracts
+
+#### CMU-15122-2026
+
+**CMU 15-122 — Principles of Imperative Computation**
+
+- Public course description/resources: https://www.cs.cmu.edu/~15122-archive/s26/about.shtml
+- BuildLens use: deliberate programming, contracts, correctness, abstraction, complexity, modularity, data structures, and translating an algorithm into a correct implementation.
+- Language adaptation: extract the software-reasoning idea and apply it in Python/BuildLens; do not require C0/C merely because the source course uses it.
+- Primary phases: 2–5.
+
+#### MIT-6102-2026
+
+**MIT 6.102 — Software Construction**
+
+- Current course: https://web.mit.edu/6.102/www/sp26/
+- Objectives/general information: https://web.mit.edu/6.102/www/sp26/general/
+- Topics index: https://web.mit.edu/6.102/www/sp26/general/toc.html
+- BuildLens use: specifications; systematic testing; input partitioning and boundary tests; abstraction; ADTs; representation independence; invariants; interfaces; unit/integration testing; parsing; client/server reasoning; later concurrency.
+- Primary phases: 2–5 and 12–13.
+
+### Algorithms and data structures
+
+#### CMU-15210-2026
+
+**CMU 15-210 — Parallel and Sequential Data Structures and Algorithms**
+
+- Current public course: https://www.cs.cmu.edu/~15210/
+- BuildLens use: problem versus algorithm; sequences; sets/maps; trees; hashing; search; divide and conquer; selective dynamic programming; work/cost reasoning.
+- Scope limit: use only the mathematical depth required by a real BuildLens or transfer problem.
+- Primary phases: recurring strand in 2–6, then as triggered later.
+
+#### MIT-6006-OCW
+
+**MIT 6.006 — Introduction to Algorithms**
+
+- Public OCW course: https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-fall-2011/
+- Lecture notes: https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-fall-2011/resources/lecture-notes/
+- Python cost model: https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-fall-2011/pages/readings/python-cost-model/
+- BuildLens use: asymptotic reasoning, Python operation costs, hashing, heaps, search trees, BFS/DFS, and choosing structures for workload.
+- Primary phases: recurring strand in 2–6, then as triggered later.
+
+### Systems, networking, and distributed failure
+
+#### CMU-15213-SYSTEMS
+
+**CMU 15-213 — Introduction to Computer Systems**
+
+- Department profile: https://csd.cs.cmu.edu/15213-introduction-to-computer-systems
+- BuildLens use: programmer's execution model, performance, memory, files/I/O, networking, concurrent computation, processes, and robustness.
+- Scope limit: build a programmer's mental model; do not turn BuildLens into a C/assembly course.
+- Primary phases: 7–15.
+
+#### MIT-61800-2026
+
+**MIT 6.1800 — Computer Systems Engineering**
+
+- Current course/schedule: https://web.mit.edu/6.1800/www/
+- Public lecture index: https://web.mit.edu/6.1800/www/lectures.shtml
+- System critique/design communication: https://web.mit.edu/6.1800/2026/wwwdocs/comm.shtml
+- BuildLens use: OS, networking, distributed systems, security, modularity/abstraction, reliability, performance, scalability, system critique, and explaining/defending designs.
+- Primary phases: 7–15, especially 14–15.
+
+#### CMU-15440-2026
+
+**CMU 15-440/15-640 — Distributed Systems**
+
+- Spring 2026: https://www.andrew.cmu.edu/course/15-440/
+- Fall 2026: https://courseweb.sp.cs.cmu.edu/15-440/fall-2026/
+- BuildLens use: concurrency, communication, latency, imperfect communication, partial failure, locking/scheduling, abstraction, protection boundaries, instrumentation/debugging, and distributed-system design.
+- Primary phases: 9 onward.
+
+### Databases
+
+#### CMU-15445-2025
+
+**CMU 15-445/645 — Intro to Database Systems**
+
+- Public syllabus: https://15445.courses.cs.cmu.edu/fall2025/syllabus.html
+- Public schedule/materials: https://15445.courses.cs.cmu.edu/fall2025/schedule.html
+- BuildLens use: relational models, schemas, indexes, transactions, conceptual concurrency control, recovery, query execution/cost, and database architecture tradeoffs.
+- Scope limit: do not make BuildLens implement a database engine.
+- Primary phases: 11 onward.
+
+#### MIT-65830-2026
+
+**MIT 6.5830/6.5831 — Database Systems**
+
+- Current course: https://dsg.csail.mit.edu/6.5830/index.php
+- Syllabus: https://dsg.csail.mit.edu/6.5830/syllabus.php
+- Public lecture notes/assignments index: https://dsg.csail.mit.edu/6.5830/assign.php
+- BuildLens use: selective reinforcement of schema, indexing, transactions, concurrency, recovery, and query-system reasoning beside CMU 15-445.
+- Primary phases: 11 onward.
+
+### Classical AI
+
+#### CMU-15281-2026
+
+**CMU 15-281 — Artificial Intelligence: Representation and Problem Solving**
+
+- Current public course: https://www.cs.cmu.edu/~15281/
+- BuildLens use: state/problem representation, actions, goals, search, intelligent agents, alternatives, and uncertainty at an appropriate conceptual level.
+- Primary phases: bridge into Phase 9 agent-loop reasoning.
+
+#### MIT-6034-OCW
+
+**MIT 6.034 — Artificial Intelligence**
+
+- Public OCW course: https://ocw.mit.edu/courses/6-034-artificial-intelligence-fall-2010/
+- BuildLens use: selective search, heuristic reasoning, problem solving, knowledge representation, and intelligent-system structure.
+- Primary phases: bridge into Phase 9 agent-loop reasoning.
+
+### LLMs, retrieval, and RAG
+
+#### CMU-11667-LLM
+
+**CMU 11-667 — Large Language Models: Methods and Applications**
+
+- Public syllabus: https://2023.cmu-llms.org/
+- Public lecture directory: https://www.andrew.cmu.edu/course/11-667/lectures/
+- BuildLens use: LM fundamentals, high-level transformer/context concepts, prompt engineering, model inference/output, automatic and human evaluation, AI agents, LLM search, retrieval, and retrieval augmentation.
+- Scope limit: do not require neural-network implementation, transformer mathematics, or the source course's graduate ML prerequisites unless a later concrete need explicitly justifies them.
+- Primary phases: 8 onward.
+
+#### CMU-11442-SEARCH-2026
+
+**CMU 11-442/11-642 — Search Engines**
+
+- Current public course: https://boston.lti.cs.cmu.edu/classes/11-442/index.html
+- Course description/objectives: https://boston.lti.cs.cmu.edu/classes/11-642/description.html
+- Current schedule: https://boston.lti.cs.cmu.edu/classes/11-642/schedule.html
+- BuildLens use: lexical retrieval, document/query representation, indexing, offline/online evaluation, neural sparse/dense retrieval, dense indexes, RAG, and large-scale/distributed search.
+- Public-material note: some readings, notes, datasets, and homework services require CMU access. Use the public course description and schedule; do not infer restricted content.
+- Scope limit: do not require a production search-engine implementation.
+- Primary phases: 11–12 and later evaluation/defense.
+
+### Target program
+
+#### CMU-EXEC-AGENTIC-AI
+
+**CMU School of Computer Science Executive Education — Agentic AI Program**
+
+- Official program: https://execonline.cs.cmu.edu/agentic-ai-program
+- Role: target/readiness source, not the source of every BuildLens exercise.
+- Current prerequisite expectations: functional Python, algorithm design, data structures, LLMs, and AI.
+- Current learning areas: LLM/agentic foundations; memory; tools; reasoning loops; RAG; embeddings/vector databases; Tree-of-Thought and other structured reasoning; single- and multi-agent systems; CrewAI/LangGraph; evaluation; guardrails; logging/observability; capstone work.
+- Scope limit: BuildLens prepares the underlying system understanding. Framework-specific material generally remains in the target program unless a later BuildLens requirement independently justifies it.
+
+## Academic source-selection rule
+
+When creating or refining an exercise, explicitly map:
+
+```text
+BUILD PHASE: current BuildLens phase
+IMPLEMENTATION TRIGGER: what BuildLens is currently doing
+ACADEMIC SOURCE: one or two stable source IDs/pages above
+DEEP SKILL: what the university material is actually teaching
+BUILDLENS EXERCISE: a new, smaller problem testing that skill
+TRANSFER: a different-looking example
+```
+
+Do not use all sources at once. Prefer the smallest number of authoritative sources necessary for the current concept.
+
+## Public-material rule
+
+If exact university material is unavailable publicly:
+
+1. do not fabricate its contents;
+2. use the public course description/objectives;
+3. use a publicly accessible archived or OCW source for the same concept;
+4. record the access limitation in this file.
+
+Prefer public lecture notes, slides, schedules, course descriptions, practice material, and OCW archives that can be revisited later.
+
 
 ---
 
