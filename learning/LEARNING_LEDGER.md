@@ -10869,3 +10869,292 @@ twelve blanks at once
 RECOVERY STATUS:
 gate-passed
 ```
+
+---
+
+## EV-P1-HEADER-097
+
+DATE: 2026-08-28
+PHASE: 1 (review session, no implementation)
+TAG: file_header, unified_diff_metadata_meaning
+RESULT: correct
+
+PROMPT (verbatim):
+Here is a unified diff you have not seen. It is from a garden-planner project, not BuildLens.
+
+```text
+1   --- a/planting/schedule.py
+2   +++ b/planting/schedule.py
+3   @@ -8,6 +8,7 @@
+4        rows = load_rows(bed)
+5   -    total = 0
+6   +    total = len(rows)
+7   +    logged = True
+8        return total
+```
+
+For each numbered line, tell me what it is. Give me eight answers, one per line number, then your
+confidence tag.
+
+LEARNER'S FIRST COMMITTED ANSWER (verbatim):
+1.metadata
+2.metadata
+3.metadata
+4.context
+5.removed
+6.added
+7.added
+8.context
+80
+
+EVALUATION:
+All eight correct, on an unseen diff, in an unseen domain, cold, with no lead-in. Line 3 was
+included specifically because the hunk header is the one most often mislabelled context; the
+learner labelled it metadata unaided.
+
+This is the concept marked in the handoff as the single most persistent gap in the project —
+thirteen prior appearances. First clean unaided pass on a novel surface form.
+
+Confidence 80 on a fully correct answer. Consistent with the recorded underrating pattern.
+
+PRIMARY BLOCKER:
+none
+
+SCAFFOLD RUNG:
+R6
+
+RECOVERY STATUS:
+gate-passed
+
+TRANSFER / NEXT RETRIEVAL:
+Do not re-teach. Retrieve again after a long gap, with a diff containing `diff --git` and
+`index ` lines, which this one deliberately omitted.
+
+---
+
+## EV-P1-BRANCH-098
+
+DATE: 2026-08-28
+PHASE: 1 (review session)
+TAG: branch_precedence
+RESULT: partial
+
+PROMPT (verbatim):
+This is `classify.py` as it exists in your repo right now. [classify_diff_line shown in full]
+Suppose someone moves the `startswith("+")` branch and the `startswith("-")` branch above the
+metadata branch, changing nothing else — same conditions, same return values, just reordered.
+[reordered version shown in full]
+Feed the eight lines from Question 1 into this reordered version. Which line numbers get a
+different label than before, and what does each of those become? Confidence tag.
+
+LEARNER'S FIRST COMMITTED ANSWER (verbatim):
+the meta data becomes added which is incorrect, 80, you switched the metadata and the added in the
+elif, which makes it call metadata added because they both start with a +
+
+EVALUATION:
+The MECHANISM is correct and was stated unaided: the first matching branch wins, so a metadata
+line never reaches the metadata check once an earlier branch catches it. That is the whole point
+of the exercise and the learner produced it without help.
+
+The ENUMERATION was not given. The question asked which line numbers and what each becomes. The
+learner answered with one undifferentiated bucket, "the metadata", which is false as a blanket
+claim:
+
+```text
+line 1   --- a/...   starts with -   becomes removed   CHANGED
+line 2   +++ b/...   starts with +   becomes added     CHANGED
+line 3   @@ -8,6 ...  starts with neither             UNCHANGED, still metadata
+```
+
+REMEDIATION CHAIN:
+Asked for lines 1, 2, 3 individually. Learner answered "1 and 2 and i said they become added" —
+line 1 misread as starting with `+`. Descended to R1, a bare `startswith` expression on the literal
+string. Before answering, the learner self-corrected: "ok i misread the line, line 1 is removed and
+line 2 is added". Line 3 then answered unaided: "metadata, the prefix is not caught in the added or
+removed umbrella" — correct, with correct reasoning.
+
+PRIMARY BLOCKER:
+not CONDITION_EVALUATION. The learner reads the branch chain correctly. The blocker is answering
+a per-item question at the group level instead of evaluating each item separately.
+
+SCAFFOLD RUNG:
+target R6, descended to R1, returned to R6 within the same exercise
+
+RECOVERY STATUS:
+remediated
+
+---
+
+## EV-P1-BRANCH-098-TRANSFER
+
+DATE: 2026-08-28
+PHASE: 1 (review session)
+TAG: branch_precedence
+RESULT: partial
+
+PROMPT (verbatim):
+Different domain, no diffs anywhere in it. [original `route` shown] Someone moves the
+`startswith("/")` branch to the top, changing nothing else. [reordered `route` shown]
+Four inputs: "/admin/health", "/admin/users", "/about", "reports". For each one: what did the
+original return, what does the reordered version return, and does it change? Confidence tag.
+
+LEARNER'S FIRST COMMITTED ANSWER (verbatim):
+. all lines exept for reports become page and reports stays invalid, 80
+
+EVALUATION:
+All four resulting labels correct. The general branch swallowing the specific ones was recognised
+immediately in a domain with no diff vocabulary in it — genuine transfer of the principle.
+
+The change/no-change half was then asked as a precision check and answered:
+
+"i told you the top 3 lines, so admin health admin users and about / 90"
+
+Incorrect, and at the highest confidence of the session. "/about" returned `page` in the ORIGINAL
+too — it fails both admin branches and matches "/". Only two of the four change. This is the same
+failure shape as EV-P1-BRANCH-098: grouping by position rather than evaluating each item.
+
+REMEDIATION CHAIN:
+Descended to R3 — the original function alone, one input, no comparison. "What does
+route("/about") return?" Learner: "page, ok i misread again". Correct, and self-diagnosed.
+
+PRIMARY BLOCKER:
+same as EV-P1-BRANCH-098. Answering the group instead of checking each item. Twice in one session,
+both times self-corrected the moment the item was isolated.
+
+This is a process habit, not a missing model. Distinguish the two when it recurs. The remedy is
+procedural — force per-item enumeration — not conceptual re-teaching.
+
+SCAFFOLD RUNG:
+target R6, descended to R3, correct
+
+RECOVERY STATUS:
+remediated
+
+TRANSFER / NEXT RETRIEVAL:
+branch_precedence is now demonstrated in two domains, one of them non-diff. The OWED unaided
+retrieval named in the prior handoff has been given and passed on the mechanism. Not yet MASTERED:
+the enumeration half failed twice. Retrieve once more after a gap, phrased as "which inputs
+change", and require the answer item by item.
+
+---
+
+## EV-P1-NEST-099
+
+DATE: 2026-08-28
+PHASE: 1 (review session)
+TAG: nested_call_evaluation, branch_precedence
+RESULT: correct
+
+PROMPT (verbatim):
+2 calls, one branch. Predict by hand; nothing gets run until you commit.
+
+```python
+def bump(n):
+    if n > 3:
+        return n + 10
+    return n + 1
+
+
+def apply_twice(n):
+    return bump(bump(n))
+
+
+print(apply_twice(3))
+```
+
+Two things: a) what does this print b) which bump call finishes first, the inner one or the outer
+one. Confidence tag.
+
+LEARNER'S FIRST COMMITTED ANSWER (verbatim):
+. apply twice runs first it calls bump first inside the brackets and then the outside, inside
+returns 4 because it is equal to 3 then it calls bump again with that value so then it is greater
+than 3 so it returns 14 and then it prints 14
+90
+
+EVALUATION:
+Correct in full, unaided, and traced rather than guessed. Named the inner call as first, carried
+the intermediate value 4 forward, and handled the boundary correctly — 3 > 3 is false, so the
+first call takes the `+ 1` path. Confirmed by running afterwards: 14.
+
+This is the Phase 1 knowledge gate as written in IMPLEMENTATION_PLAN.md — "trace a new function
+problem with 2-3 calls and one branch". It closes nested_call_evaluation, which the handoff listed
+as having two prior appearances and no clean unaided check.
+
+PRIMARY BLOCKER:
+none
+
+SCAFFOLD RUNG:
+R6
+
+RECOVERY STATUS:
+gate-passed
+
+---
+
+## EV-P1-RETURN-100
+
+DATE: 2026-08-28
+PHASE: 1 (review session)
+TAG: return_value_is_the_call_expression, print_vs_return
+RESULT: partial, self-corrected before reveal
+
+PROMPT (verbatim):
+Predict before anything runs.
+
+```python
+def label(n):
+    if n > 0:
+        print("positive")
+    else:
+        print("negative")
+
+
+def describe(n):
+    return "answer: " + str(label(n))
+
+
+print(describe(4))
+```
+
+`str(x)` just turns whatever `x` is into text. What appears on screen, in order, exactly?
+Confidence tag.
+
+LEARNER'S FIRST COMMITTED ANSWER (verbatim):
+starts at decsribe runs label it returns positive and then anser: + "positive",40, what does str do
+for this problem, also label returns nothing it prints it so it would be positive anser: + idk
+
+EVALUATION:
+Actual output:
+
+```text
+positive
+answer: None
+```
+
+The first answer was wrong — "answer: positive", treating the printed text as the returned value.
+The learner then reversed it inside the same answer, unprompted: "also label returns nothing it
+prints it". That is exactly the target concept, retrieved without help.
+
+The remaining gap was not the concept. It was the fact that `str(None)` is the four characters
+`None`. Supplied, as a fact rather than a lesson.
+
+print_vs_return is the sharper name for this than return_value_is_the_call_expression. A function
+whose body only prints still hands back `None`, and the caller receives the None, not the text the
+screen showed.
+
+PRIMARY BLOCKER:
+none persisting. RETURN_VALUE was the initial blocker and the learner cleared it themselves.
+
+SCAFFOLD RUNG:
+R6
+
+RECOVERY STATUS:
+remediated, self-corrected
+
+TRANSFER / NEXT RETRIEVAL:
+Not cold yet — the first instinct was still the printed value. This is now the second slip in a row
+across sessions (see EV-P3-LEAK-095-CLOSE) that was self-corrected rather than answered right the
+first time. Retrieve again after a gap, in a form where the None goes somewhere non-obvious: stored
+in a list, compared with ==, or used in an if.
+
+---

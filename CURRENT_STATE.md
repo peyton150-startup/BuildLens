@@ -2136,3 +2136,152 @@ Phase 13  Safe Collaborative Editing
 
 A list quietly reordered by `.sort()` is the toy version of what Phase 13 spends its entire length
 preventing. Raise this thread again at Phase 5 and confirm the learner still holds it.
+
+---
+
+# SESSION CLOSE — 2026-08-28, quiz session 2
+
+## Phase
+
+Still Phase 3 complete, Phase 4 not started. No product code was written this session. No
+implementation was attempted and none should have been.
+
+## Exact code that exists
+
+Unchanged from the previous close:
+
+```text
+classify.py     classify_diff_line(line) -> file_header | metadata | added | removed | context
+summarize.py    summarize_diff(diff_text) -> dict of three counts
+session.py      class Session: __init__, record, history
+
+test_classify.py     green
+test_summarize.py    green
+test_session.py      green, five tests
+```
+
+All three verified exit 0 at the start of this session before any quizzing, per the handoff's
+instruction not to assert it from the document.
+
+## New files
+
+```text
+HANDOFF_QUIZ_2.md   handoff for the next quiz session, supersedes HANDOFF_QUIZ.md
+QUIZZES.md          verbatim questions and verbatim answers, session by session
+```
+
+## Evidence added
+
+Records 97 to 100. Ledger is now 100 records.
+
+```text
+EV-P1-HEADER-097            correct
+EV-P1-BRANCH-098            partial, remediated
+EV-P1-BRANCH-098-TRANSFER   partial, remediated
+EV-P1-NEST-099              correct
+EV-P1-RETURN-100            partial, self-corrected before reveal
+```
+
+## Concepts known cold — changed this session
+
+```text
+file_header             was the project's most persistent gap at 13 appearances.
+                        Given cold on an unseen diff in an unseen domain, eight
+                        lines, all eight correct including the @@ hunk header.
+                        Moved to known. Do not re-teach. Retrieve after a long gap
+                        with a diff containing `diff --git` and `index ` lines,
+                        which this probe deliberately omitted.
+
+nested_call_evaluation  bump(bump(3)) traced unaided. Named the inner call as
+                        first, carried the intermediate value forward, handled the
+                        3 > 3 boundary correctly. This is the Phase 1 knowledge
+                        gate as written in IMPLEMENTATION_PLAN.md. Closed.
+```
+
+## Uncertain concepts
+
+```text
+branch_precedence       mechanism proven twice, including transfer to a non-diff
+                        routing domain. The "which items actually change" half
+                        failed twice. Not MASTERED. Retrieve once more, phrased
+                        per-item.
+
+print_vs_return         first instinct was still the printed value; the learner
+                        reversed themselves unaided inside the same answer. This
+                        is the second consecutive session where this idea was
+                        self-corrected rather than answered right initially
+                        (see EV-P3-LEAK-095-CLOSE). Not cold.
+
+str(None) is "None"     supplied as a fact this session, not tested.
+```
+
+## The finding worth carrying forward
+
+The learner's misses this session were **procedural, not conceptual**.
+
+Twice they answered a per-item question at the group level — "the metadata becomes added", "the
+top 3 lines" — and both times, the moment a single item was isolated, they answered correctly and
+diagnosed it themselves. The branch-selection model is sound. The habit of scanning a group and
+answering for the group is what fails.
+
+The remedy is procedural. Force per-item enumeration in the question itself. Do not descend into a
+concept lesson, which is what the remediation ladder would otherwise suggest — the prerequisite is
+already stable.
+
+## Calibration
+
+The underrating pattern held, and sharpened. An 80 on a flawless eight-line answer. A 90 on a
+fully correct unaided trace. A 40 on the answer where they self-corrected to the right concept.
+
+The one overconfident answer of the session — 90 — was the grouping miss. Not raised with the
+learner beyond a single factual line, per the handoff.
+
+## Last knowledge gate
+
+Phase 1 gate, passed: "trace a new function problem with 2-3 calls and one branch"
+(`EV-P1-NEST-099`).
+
+## Next retrieval due
+
+```text
+print_vs_return                        with the None somewhere non-obvious:
+                                       in a list, compared with ==, or as an
+                                       if condition. NOT another concatenation.
+
+output_and_exit_status_are_independent OWED, untouched, still constrained:
+                                       unaided, unannounced, and NOT via a
+                                       Python test run.
+
+branch_precedence enumeration          per-item phrasing, after a gap
+
+splitlines / string immutability       test whether word.upper() and
+                                       sorted() vs .sort() read as ONE
+                                       principle or two facts
+```
+
+## Still open
+
+```text
+EV-P2-MODEL-060   right three fields, wrong diff, individual values never named
+EV-P3-RECORD-094  self binding, = vs ==, == comparing list contents in order
+```
+
+Neither was reached. `EV-P3-RECORD-094` pairs naturally with the `print_vs_return` retrieval, since
+`==` against a `None` result is one question rather than two.
+
+## Next implementation step
+
+None. Phase 4 remains blocked on the two outstanding Phase 3 milestones:
+
+```text
+learner explanation   teach session.py aloud, in their own words
+transfer variant      the aliasing/copying idea in a domain with no sessions in it
+```
+
+Both were listed as owed in the previous handoff and neither was reached this session. They gate
+the move to Phase 4.
+
+## Files the learner should be able to teach
+
+Unchanged: `classify.py`, `summarize.py`, `session.py`. The teach-aloud on `session.py` is still
+owed and is now the oldest outstanding item in the project.
