@@ -371,3 +371,103 @@ answer: None
 `EV-P1-RETURN-100`, result `partial, self-corrected before reveal`.
 
 ---
+
+## Q6 — exit status vs output (shell, not Python)
+
+**Asked:**
+
+Nothing to do with Python here — this is a shell transcript. `echo $?` prints the exit status of
+the command that just finished.
+
+There's a file `fruits.txt` containing exactly two lines:
+
+```text
+apple
+banana
+```
+
+Here is the session. Two commands run, and I've blanked what `echo $?` printed each time:
+
+```bash
+$ grep "apple" fruits.txt
+apple
+$ echo $?
+A
+
+$ grep "cherry" fruits.txt
+$ echo $?
+B
+```
+
+Tell me what number `A` is and what number `B` is.
+
+Then one more thing: a teammate wires up CI so that a build step counts as **passing** if the
+command printed any output at all. Give me one concrete case where that rule reports the wrong
+result. Confidence tag.
+
+**Answered:**
+
+```text
+apple
+cherry, 20
+```
+
+---
+
+### Q6 remediation 1 — syntax-only help on `$?`
+
+**Asked:** after explaining that `$?` holds one number, the exit status, 0 for success and
+non-zero for failure — what number is `A`, what number is `B`?
+
+**Answered:**
+
+```text
+1 and 1, my thinking is that there is something there so it is 1 and nothing would be 0, 30
+```
+
+---
+
+### Q6 remediation 2 — the truthiness collision named, `A` alone
+
+**Asked:** after naming the collision (1 is truthy in Python; 0 is success in exit statuses,
+because the status answers "how many problems", not "did you find something") — just `A`.
+
+**Answered:**
+
+```text
+1, 40
+```
+
+---
+
+### Q6 remediation 3 — real transcript shown
+
+Ran it. `A` is 0, `B` is 1.
+
+**Learner then asked:**
+
+```text
+so does that mean apple was inside of fruits.txt and cherry was not?
+```
+
+Correct model of grep. Confirmed.
+
+---
+
+### Q6 — CI half
+
+**Asked:** in your own words, name one concrete way the "passing if it printed any output" rule
+reports the wrong answer. Confidence tag.
+
+**Answered:**
+
+```text
+. isn't pruning 1 still an output, there has to be another usecase i am missing, 30
+```
+
+**Outcome:** conflated the status with the command's output — the `1` was printed by `echo`, not
+by grep. Worked-example rescue used: a build log printing four lines including `ERROR` and exiting
+2. `EV-P1-EXIT-101`, result `wrong, remediated to partial`. **This retrieval does not count** —
+the learner saw the answer rather than producing it. Re-run from the worked example.
+
+---

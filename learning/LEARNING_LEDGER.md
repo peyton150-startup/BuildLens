@@ -11158,3 +11158,77 @@ first time. Retrieve again after a gap, in a form where the None goes somewhere 
 in a list, compared with ==, or used in an if.
 
 ---
+
+---
+
+## EV-P1-EXIT-101
+
+DATE: 2026-08-28
+PHASE: 1 (review session)
+TAG: output_and_exit_status_are_independent, exit_status_convention
+RESULT: wrong, remediated to partial
+
+PROMPT (verbatim):
+Nothing to do with Python here - this is a shell transcript. `echo $?` prints the exit status of
+the command that just finished. There's a file `fruits.txt` containing exactly two lines: apple,
+banana. Here is the session. Two commands run, and I've blanked what `echo $?` printed each time:
+
+```bash
+$ grep "apple" fruits.txt
+apple
+$ echo $?
+A
+
+$ grep "cherry" fruits.txt
+$ echo $?
+B
+```
+
+Tell me what number `A` is and what number `B` is. Then one more thing: a teammate wires up CI so
+that a build step counts as passing if the command printed any output at all. Give me one concrete
+case where that rule reports the wrong result. Confidence tag.
+
+LEARNER'S FIRST COMMITTED ANSWER (verbatim):
+apple
+cherry, 20
+
+EVALUATION:
+Correct values were A=0, B=1, verified by running it.
+
+The first answer read the grep output rather than the echo output - a syntax gap, not a concept
+gap. `$?` was unknown. Confidence 20 correctly signalled being lost.
+
+REMEDIATION CHAIN:
+1. Syntax-only help per CLAUDE.md: explained `$?` alone, no worked numbers, re-asked A and B.
+   Answer: "1 and 1, my thinking is that there is something there so it is 1 and nothing would be
+   0, 30". Self-inconsistent - the stated rule implies 1 and 0, the committed answer was 1 and 1.
+2. Named the collision explicitly: 1 is truthy in Python, 0 is success in exit statuses; the status
+   answers "how many problems", not "did you find something". Asked for A alone.
+   Answer: "1, 40". Still inverted.
+3. Ran it and showed the real transcript. Learner then asked: "so does that mean apple was inside
+   of fruits.txt and cherry was not?" - correct model of grep, confirmed.
+4. CI half attempted: "isn't pruning 1 still an output, there has to be another usecase i am
+   missing, 30". This conflates the status with the command's output - the 1 was printed by echo,
+   not by grep. Clarified: a status is never part of a command's output.
+5. Worked-example rescue used (14.6 step A): one build log printing four lines including "ERROR"
+   and exiting 2, which the teammate's rule would call passing.
+
+PRIMARY BLOCKER:
+SYNTAX_READING first (`$?` unknown), then OPERATOR_MEANING - the 0-is-success convention did not
+survive two separate statements of it, because it collides with 1-is-truthy from Python.
+
+SCAFFOLD RUNG:
+target R6, descended to R0, ended in worked-example rescue
+
+RECOVERY STATUS:
+NOT remediated. Steps B, C and D of the worked-example sequence were not performed - the session
+ended before the learner explained the worked case back or solved a fresh one.
+
+TRANSFER / NEXT RETRIEVAL:
+This retrieval is NOT closed and does not count. The learner saw the answer rather than producing
+it. Re-run from the worked example: have them explain the build-log case in their own words, then
+give a fresh one - a step that SUCCEEDS silently and gets marked failing, which is the reverse
+direction and was never touched.
+
+The 0-is-success convention needs its own retrieval first, cold, before the CI-rule question is
+worth asking again. It failed twice today after being stated twice.

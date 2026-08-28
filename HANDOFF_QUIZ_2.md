@@ -26,7 +26,7 @@ Confirm this yourself before quizzing. Never assert it from this document.
 cd C:/Users/nicol/BuildLens_Project && python test_classify.py && python test_summarize.py && python test_session.py
 ```
 
-100 evidence records in `learning/LEARNING_LEDGER.md`. `CURRENT_STATE.md` is authoritative.
+101 evidence records in `learning/LEARNING_LEDGER.md`. `CURRENT_STATE.md` is authoritative.
 
 ---
 
@@ -116,11 +116,25 @@ Retrieve it in a form where the `None` goes somewhere non-obvious: stored in a l
 Mechanism is proven twice. The "which items actually change" half failed twice. Give it once more
 after a gap, phrased as a per-item question, and require item-by-item answers.
 
-### 3. `output_and_exit_status_are_independent` — OWED, still untouched
+### 3. `output_and_exit_status_are_independent` — ATTEMPTED AND FAILED, must be re-run
 
-Never reached in session 1. The constraint from `CURRENT_STATE.md` still stands: **unaided,
-unannounced, and NOT via a Python test run.** Use a shell command or a non-Python program, or the
-retrieval does not count.
+Given at the end of session 1 as a shell/grep transcript, per the constraint. It **failed**, and
+the constraint means it does not count: the learner ended up seeing the answer rather than
+producing it. See `EV-P1-EXIT-101`.
+
+Two blockers surfaced, in this order:
+
+```text
+1  `$?` was unreadable        the learner read grep's output instead of echo's
+2  0-is-success did not stick  stated twice, inverted both times, because it
+                              collides with 1-is-truthy from Python
+```
+
+Do NOT re-ask the CI question first. The convention itself needs a cold retrieval before the
+independence idea is worth testing again. Then resume the worked-example sequence at step B: the
+learner explains the build-log case back in their own words, then solves a fresh one in the
+**reverse** direction — a step that succeeds silently, prints nothing, and gets marked failing.
+That direction was never touched.
 
 ### 4. The `splitlines` family and string-method immutability
 

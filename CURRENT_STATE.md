@@ -2285,3 +2285,54 @@ the move to Phase 4.
 
 Unchanged: `classify.py`, `summarize.py`, `session.py`. The teach-aloud on `session.py` is still
 owed and is now the oldest outstanding item in the project.
+
+---
+
+## ADDENDUM — exit status retrieval attempted and failed
+
+Added after the session-close section above. One further exercise was run before the learner
+switched tools.
+
+`EV-P1-EXIT-101`, tag `output_and_exit_status_are_independent`. Ledger is now 101 records.
+
+The retrieval owed since Phase 1 was finally given, in the constrained form the state file
+required: a shell transcript with grep, not a Python test run, unannounced.
+
+It failed, and it does not count as delivered. The learner saw the answer rather than producing
+it. Two blockers, in order:
+
+```text
+1  `$?` unreadable            read grep's output instead of echo's
+                              first answer was "apple / cherry" - fruit, not numbers
+
+2  0-is-success not retained  stated twice in different framings, inverted both
+                              times. Answered "1 and 1" with reasoning that implied
+                              1 and 0, then "1" again after the collision was named
+```
+
+The second blocker is the interesting one. It is not carelessness — it is direct interference from
+Python, where 1 is truthy and 0 is falsy. The shell reverses that, because an exit status answers
+"how many problems occurred", not "did you find something". The learner has a correct model that
+is actively fighting the new one.
+
+A third confusion appeared at the end: "isn't printing 1 still an output". The status was being
+treated as part of the command's output. It is not — grep printed nothing when it failed, and the
+`1` on screen came from `echo`. Clarified but not retested.
+
+Worked-example rescue was entered (rule 14.6 step A) and the session ended there. Steps B, C and D
+were not performed.
+
+NEXT RETRIEVAL, revised:
+
+```text
+0-is-success convention      cold, on its own, before anything else. It has now
+                             failed twice after being stated twice.
+
+worked-example step B        learner explains the build-log case back
+
+fresh case, reverse direction a step that SUCCEEDS silently, prints nothing, and
+                             the teammate's rule marks it failing. Never touched.
+```
+
+Do not re-ask the CI question before the convention is stable. The independence idea cannot be
+tested through a convention the learner is still inverting.
