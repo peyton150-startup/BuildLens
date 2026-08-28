@@ -14012,3 +14012,870 @@ mandatory simpler follow-up tonight.
 TRANSFER / NEXT RETRIEVAL:
 Next session: compare `x = +1` and `x += 1` as two isolated syntax forms, then use one sequential
 near-transfer before returning to a loop accumulator.
+
+---
+
+## EV-P1-ACCUMULATOR-155
+
+DATE: 2026-08-28
+PHASE: 1 (fundamentals review; learner limited quiz scope to completed Phases 0–2)
+TAG: assignment_vs_augmented_assignment
+RESULT: correct values; mechanism explanation due
+
+PROMPT (verbatim):
+Yes. We’ll resume with the open accumulator concept and record new questions in `QUIZZES.md`.
+
+Start with:
+
+```python
+count = 5
+count = +1
+```
+
+versus:
+
+```python
+count = 5
+count += 1
+```
+
+For each version:
+
+1. What is the final value of `count`?
+2. What does the second line do?
+3. Are `= +` and `+=` the same operator or different forms?
+4. Confidence: 0–100.
+
+LEARNER'S FIRST COMMITTED ANSWER (verbatim):
+in the first one it is 1 and the second one it is 6, 100
+
+EVALUATION:
+Both state predictions are correct at confidence 100. `count = +1` ends at `1`; `count += 1` ends
+at `6`. The requested description of each second line and explicit same-versus-different answer
+were omitted, so the mechanism explanation remains due before climbing.
+
+PRIMARY BLOCKER:
+none in state prediction; completing the operator explanation
+
+SCAFFOLD RUNG:
+R0/R1
+
+RECOVERY STATUS:
+correct values; teach-back pending
+
+TRANSFER / NEXT RETRIEVAL:
+Explain `= +1` as assignment of positive one and `+= 1` as old value plus one, and state that they
+are different forms.
+
+---
+
+## EV-P1-ACCUMULATOR-156
+
+DATE: 2026-08-28
+PHASE: 1 (fundamentals review; learner limited quiz scope to completed Phases 0–2)
+TAG: assignment_vs_augmented_assignment, teach_back
+RESULT: correct
+
+PROMPT (verbatim):
+Correct: `= +1` assigns positive one, while `+= 1` adds one to the current value and stores the
+result.
+
+Please add your confidence from 0–100.
+
+LEARNER'S FIRST COMMITTED ANSWER (verbatim):
+90, skip this one i am looking for harder questions
+
+PRECEDING MECHANISM ANSWER (verbatim):
+\= +1 is poitive one and += is add ont to the number
+
+EVALUATION:
+Correct at confidence 90. The learner distinguished assignment of positive one from adding one to
+the existing value and explicitly requested harder questions. Stop the micro-drill and fade to a
+target-level composed accumulator trace.
+
+PRIMARY BLOCKER:
+none at the syntax rung
+
+SCAFFOLD RUNG:
+R0/R1 teach-back
+
+RECOVERY STATUS:
+operator distinction passed; target-level loop retrieval next
+
+TRANSFER / NEXT RETRIEVAL:
+Two independent function calls, each with a local loop accumulator and multiple branches.
+
+---
+
+## EV-P1-ACCUMULATOR-157
+
+DATE: 2026-08-28
+PHASE: 1 (fundamentals review; learner limited quiz scope to completed Phases 0–2)
+TAG: loop_accumulation, local_state_per_call, multi_call_trace
+RESULT: correct trace; local-state explanation due
+
+PROMPT (verbatim):
+Harder target-level trace—predict without running:
+
+```python
+def change_score(labels):
+    score = 0
+
+    for label in labels:
+        if label == "added":
+            score += 2
+        elif label == "removed":
+            score += 1
+
+    return score
+
+
+first = change_score(["added", "context", "removed"])
+second = change_score(["removed", "added", "added"])
+
+print(first + second)
+```
+
+Answer:
+
+1. Track `score` after every label in the first call.
+2. Track `score` after every label in the second call.
+3. Give `first`, `second`, and the printed result.
+4. Why does the second call start with its own `score = 0` instead of continuing from `first`?
+5. Confidence: 0–100.
+
+LEARNER'S FIRST COMMITTED ANSWER (verbatim):
+first is called then we start the loop, it goes added so plus 2 then context so nothing happens and then removed so 2 + 1 first = 3, then second removed so +1 then added 1+2 then added 3+2 so second = 5  and finally it rints first +second which is 3+5 which is 8 
+
+CONFIDENCE FOLLOW-UP (verbatim):
+90
+
+EVALUATION:
+The full computational trace is correct at confidence 90. First-call states are `2, 2, 3`;
+second-call states are `1, 3, 5`; `first=3`, `second=5`, and the program prints `8`. The learner
+did not explain why the second call has fresh local state, even after a direct follow-up, so that
+reasoning remains due.
+
+PRIMARY BLOCKER:
+Completing the local-state/lifetime explanation, not accumulation arithmetic.
+
+SCAFFOLD RUNG:
+R6 computation passed
+
+RECOVERY STATUS:
+target accumulator trace passed; call-local reasoning pending
+
+TRANSFER / NEXT RETRIEVAL:
+Ask conceptually where each call's `score` lives, what survives after return, and why `first` does
+not become the second call's starting score.
+
+---
+
+## EV-P1-LOCAL-158
+
+DATE: 2026-08-28
+PHASE: 1 (fundamentals review; learner limited quiz scope to completed Phases 0–2)
+TAG: local_state_per_call, function_call_lifetime
+RESULT: correct
+
+PROMPT (verbatim):
+The full trace and printed result `8` are correct.
+
+Two remaining parts:
+
+1. Why does the second function call start with a new local `score = 0` instead of continuing from
+   `first = 3`?
+2. Confidence: 0–100.
+
+LEARNER'S FIRST COMMITTED ANSWER (verbatim):
+the score =0 happens everytime you call  change score before the loop
+
+CONFIDENCE FOLLOW-UP (verbatim):
+90
+
+EVALUATION:
+Correct at confidence 90. Every call executes `score = 0` before its loop, creating fresh local
+state. The returned number is then stored by the caller in `first` or `second`; it does not become
+the next call's starting local variable.
+
+PRIMARY BLOCKER:
+none
+
+SCAFFOLD RUNG:
+R6 explanation
+
+RECOVERY STATUS:
+accumulator operator, target trace, and local-state explanation recovered
+
+TRANSFER / NEXT RETRIEVAL:
+Harder debugging transfer where an accumulator is external and therefore leaks across calls.
+
+---
+
+## EV-P1-DICT-159
+
+DATE: 2026-08-28
+PHASE: 1 (fundamentals review; learner limited quiz scope to completed Phases 0–2)
+TAG: dictionary_key_value, dictionary_lookup, syntax_reading
+RESULT: partial
+
+PROMPT (verbatim):
+No—this colon is dictionary syntax, not a type annotation.
+
+```python
+totals = {"added": 0}
+```
+
+means:
+
+```text
+dictionary
+key       → value
+"added"   → 0
+```
+
+- `"added"` is a string key—the label used to find something.
+- `0` is the value stored under that key.
+- The colon separates the key from its value.
+- `totals["added"]` looks up the value and currently produces `0`.
+
+This differs from:
+
+```python
+amount: int
+```
+
+where the colon introduces a type annotation.
+
+Syntax-only check:
+
+```python
+fruit_counts = {"apples": 2}
+print(fruit_counts["apples"])
+```
+
+What does `fruit_counts["apples"]` retrieve, and what is printed? Confidence: 0–100.
+
+LEARNER'S FIRST COMMITTED ANSWER (verbatim):
+it should print 2 because that is the value, it retireves "apples" but the vlaue of apples was set to 2, 90
+
+EVALUATION:
+The exact printed result `2` and the key/value association are understood. The phrase "retrieves
+apples" is inaccurate: `"apples"` is the key supplied to the lookup, while the expression
+retrieves/evaluates to its associated value `2`.
+
+PRIMARY BLOCKER:
+Separating the lookup key from the value returned by the lookup expression.
+
+SCAFFOLD RUNG:
+R1 syntax-only partial
+
+RECOVERY STATUS:
+in progress; larger external-state trace paused
+
+TRANSFER / NEXT RETRIEVAL:
+Ask only what value one fresh dictionary lookup expression evaluates to.
+
+---
+
+## EV-P1-DICT-160
+
+DATE: 2026-08-28
+PHASE: 1 (fundamentals review; learner limited quiz scope to completed Phases 0–2)
+TAG: dictionary_key_value, dictionary_lookup
+RESULT: correct
+
+PROMPT (verbatim):
+One quick syntax bridge, then back to the harder problem:
+
+```python
+settings = {"retries": 3}
+value = settings["retries"]
+```
+
+What value is assigned to `value`? In your explanation, identify the key and the retrieved value
+separately. Confidence: 0–100.
+
+LEARNER'S FIRST COMMITTED ANSWER (verbatim):
+value is assinged 3, it looks up "retries" and the value stored under that key is 3, 100
+
+EVALUATION:
+Correct at confidence 100. `"retries"` is the key, the lookup retrieves the associated integer
+value `3`, and assignment binds `value` to `3`.
+
+PRIMARY BLOCKER:
+none on lookup syntax
+
+SCAFFOLD RUNG:
+R1
+
+RECOVERY STATUS:
+lookup syntax recovered; one dictionary-update bridge next
+
+TRANSFER / NEXT RETRIEVAL:
+Apply `+= 1` to one dictionary entry and track the mutated mapping.
+
+---
+
+## EV-P1-DICT-161
+
+DATE: 2026-08-28
+PHASE: 1 (fundamentals review; learner limited quiz scope to completed Phases 0–2)
+TAG: dictionary_update, dictionary_mutation
+RESULT: partial
+
+PROMPT (verbatim):
+Dictionary-update bridge:
+
+```python
+totals = {"added": 0}
+totals["added"] += 1
+```
+
+1. What value is now stored under the key `"added"`?
+2. Did this create a new dictionary or mutate the existing `totals` dictionary?
+3. Confidence: 0–100.
+
+LEARNER'S FIRST COMMITTED ANSWER (verbatim):
+time to guess, so the value looked up by "added" is 0 so then we take 0 and += 1 so the value under added becomes 1, 2. i have no idea, 40
+
+EVALUATION:
+Part 1 is correct at confidence 40: the lookup retrieves `0`, augmented assignment computes `1`,
+and the key now maps to `1`. Part 2 was explicitly unknown. Assignment through a dictionary key
+mutates the existing dictionary object; it does not create a replacement dictionary.
+
+PRIMARY BLOCKER:
+Recognizing subscript assignment as mutation of the dictionary object.
+
+SCAFFOLD RUNG:
+R1 partial; use one alias-observation transfer
+
+RECOVERY STATUS:
+entry arithmetic passed; mutation identity remains open
+
+TRANSFER / NEXT RETRIEVAL:
+Alias a dictionary, update one entry through the original name, and ask what the alias observes.
+
+---
+
+## EV-P1-DICT-162
+
+DATE: 2026-08-28
+PHASE: 1 (fundamentals review; learner limited quiz scope to completed Phases 0–2)
+TAG: dictionary_mutation, aliasing, subscript_assignment
+RESULT: wrong
+
+PROMPT (verbatim):
+Use the same aliasing principle you already applied to lists:
+
+```python
+totals = {"added": 0}
+alias = totals
+
+totals["added"] += 1
+```
+
+```text
+totals ─┐
+        ├──> one dictionary object
+alias  ─┘
+```
+
+1. What value does `alias["added"]` retrieve afterward?
+2. Why can `alias` observe an update performed through `totals`?
+3. Confidence: 0–100.
+
+LEARNER'S FIRST COMMITTED ANSWER (verbatim):
+alias is still 0, so it createss a new object, 2. i have no idea 40
+
+EVALUATION:
+Incorrect at confidence 40. `alias` and `totals` refer to the same dictionary object. Updating the
+entry through `totals` mutates that object, so `alias["added"]` retrieves `1`. No new dictionary is
+created by subscript augmented assignment.
+
+PRIMARY BLOCKER:
+Dictionary entry mutation is being modeled as rebinding `totals` to a new dictionary, despite the
+shared-object diagram.
+
+SCAFFOLD RUNG:
+R2 failed; descend to familiar list-element mutation through aliases
+
+RECOVERY STATUS:
+not remediated; external-state target remains paused
+
+TRANSFER / NEXT RETRIEVAL:
+Use a one-item list, alias it, replace index zero, and ask what the alias observes.
+
+---
+
+## EV-P1-ALIAS-163
+
+DATE: 2026-08-28
+PHASE: 1 (fundamentals review; learner limited quiz scope to completed Phases 0–2)
+TAG: list_mutation, aliasing, subscript_assignment, dictionary_mapping_question
+RESULT: correct list transfer; dictionary connection still unclear
+
+PROMPT (verbatim):
+Step back to a list:
+
+```python
+numbers = [0]
+alias = numbers
+
+numbers[0] = 1
+```
+
+1. What does `alias[0]` retrieve afterward?
+2. Did `numbers[0] = 1` create a new list or mutate the shared list?
+3. Confidence: 0–100.
+
+LEARNER'S FIRST COMMITTED ANSWER (verbatim):
+i just do not understand the rules of apples : 3 and how it applies to the other conecpts we have gone over, alias[0] =1, it mutated the shared list, 90
+
+EVALUATION:
+The list aliasing answer is fully correct at confidence 90: indexed assignment mutates the shared
+list, so `alias[0]` retrieves `1`. The learner explicitly identifies the remaining blocker as the
+dictionary mapping notation—how `"apples": 3` connects to familiar lookup and mutation concepts.
+
+PRIMARY BLOCKER:
+Mapping dictionary keys/values onto the already-stable container/subscript/alias model.
+
+SCAFFOLD RUNG:
+R1 list prerequisite passed
+
+RECOVERY STATUS:
+list aliasing stable; direct list-versus-dictionary comparison next
+
+TRANSFER / NEXT RETRIEVAL:
+Explain list index-to-value and dictionary key-to-value as two subscriptable mutable containers,
+then update one dictionary key through an alias.
+
+---
+
+## EV-P1-ALIAS-164
+
+DATE: 2026-08-28
+PHASE: 1 (fundamentals review; learner limited quiz scope to completed Phases 0–2)
+TAG: list_aliasing, indexed_mutation, shared_object
+RESULT: wrong
+
+PROMPT (verbatim):
+From the list’s point of view, yes: it removes its reference to `3` from slot `0` and stores a
+reference to `4` there instead.
+
+But `3` is not necessarily destroyed. Another name could still hold it:
+
+```python
+numbers = [3]
+old_value = numbers[0]
+
+numbers[0] = 4
+```
+
+Afterward:
+
+```text
+numbers   → [4]
+old_value → 3
+```
+
+The list stopped referring to `3`, but `old_value` still refers to it.
+
+Now with:
+
+```python
+numbers = [3]
+alias = numbers
+numbers[0] = 4
+```
+
+What does `alias[0]` retrieve, and why? Confidence: 0–100.
+
+LEARNER'S FIRST COMMITTED ANSWER (verbatim):
+alias would still have 3 becasue it only threw away the 3 in the list for numbers, 30
+
+EVALUATION:
+Incorrect at confidence 30. `alias = numbers` does not create a copied list. Both names refer to
+one list object, so replacing slot zero through `numbers` makes `alias[0]` retrieve `4`.
+
+PRIMARY BLOCKER:
+The learner now models alias assignment as creating separate per-name list containers, despite an
+earlier correct alias transfer.
+
+SCAFFOLD RUNG:
+R2 failed; descend to R0 object-count recognition before mutation
+
+RECOVERY STATUS:
+not remediated; dictionary target remains paused
+
+TRANSFER / NEXT RETRIEVAL:
+Given `numbers = [3]; alias = numbers`, ask whether one or two list objects were created.
+
+---
+
+## EV-P1-ALIAS-165
+
+DATE: 2026-08-28
+PHASE: 1 (fundamentals review; learner limited quiz scope to completed Phases 0–2)
+TAG: list_aliasing, shared_object
+RESULT: correct
+
+PROMPT (verbatim):
+Before any mutation:
+
+```python
+numbers = [3]
+alias = numbers
+```
+
+How many list objects were created?
+
+```text
+A. One list object with two names pointing to it
+B. Two separate list objects
+```
+
+Answer `A` or `B`, explain briefly, and give confidence from 0–100.
+
+LEARNER'S FIRST COMMITTED ANSWER (verbatim):
+one list, both pointing at the same list
+
+CONFIDENCE FOLLOW-UP (verbatim):
+100
+
+EVALUATION:
+Correct at confidence 100. The list literal creates one list object, and `alias = numbers` binds a
+second name to that same object rather than copying it.
+
+PRIMARY BLOCKER:
+none at R0
+
+SCAFFOLD RUNG:
+R0
+
+RECOVERY STATUS:
+list object-count prerequisite passed; fresh dictionary object-count transfer next
+
+TRANSFER / NEXT RETRIEVAL:
+Given a dictionary and `alias = counts`, ask whether one or two dictionary objects exist.
+
+---
+
+## EV-P1-DICT-166
+
+DATE: 2026-08-28
+PHASE: 1 (fundamentals review; learner limited quiz scope to completed Phases 0–2)
+TAG: dictionary_aliasing, shared_object, composition_tracking
+RESULT: correct state model; container term corrected
+
+PROMPT (verbatim):
+That matches the evidence: you understand each individual rule, but adding one operation makes the
+earlier state disappear from your mental model. That is a composition/tracking issue, not a failure
+to understand aliasing.
+
+Use this procedure:
+
+```text
+Read one line
+→ update the state
+→ freeze that state
+→ then read the next line
+```
+
+For the next trace, complete one state at a time:
+
+```python
+counts = {"apples": 3}
+alias = counts
+```
+
+After line 1:
+
+```text
+dictionary objects: ?
+names that exist: ?
+```
+
+After line 2:
+
+```text
+dictionary objects: ?
+counts points to: ?
+alias points to: ?
+```
+
+Does line 2 create a new dictionary, or only add another name? Confidence: 0–100.
+
+LEARNER'S FIRST COMMITTED ANSWER (verbatim):
+line 1 counts is a list with apples as a key and 3 as the lookup value, then alias is created pointing at the same list
+
+CONFIDENCE FOLLOW-UP (verbatim):
+90
+
+EVALUATION:
+The state/identity model is correct at confidence 90: the first line creates one container, and
+the second line adds a name pointing to the same object rather than copying it. The learner called
+the object a list; it is a dictionary. That term is corrected because container type is the active
+concept, but no separate terminology drill is needed.
+
+The learner also stated immediately before this exercise: "for some reason adding the one extra
+step throws me off." The successful line-by-line state freeze supports diagnosing composition
+load rather than an aliasing-rule gap.
+
+PRIMARY BLOCKER:
+Composition tracking; dictionary identity itself is correct under line-by-line state freezing.
+
+SCAFFOLD RUNG:
+R1/R2 state movie
+
+RECOVERY STATUS:
+two-line dictionary alias composition passed; add exactly one mutation step next
+
+TRANSFER / NEXT RETRIEVAL:
+Add `counts["apples"] = 4` and track the same dictionary and both names one line at a time.
+
+---
+
+## EV-P1-DICT-167
+
+DATE: 2026-08-28
+PHASE: 1 (fundamentals review; learner limited quiz scope to completed Phases 0–2)
+TAG: dictionary_mutation, dictionary_aliasing, composition_tracking
+RESULT: correct core state
+
+PROMPT (verbatim):
+Add exactly one step:
+
+```python
+counts = {"apples": 3}
+alias = counts
+counts["apples"] = 4
+```
+
+Freeze the state after line 3:
+
+1. How many dictionary objects exist?
+2. What does `counts["apples"]` retrieve?
+3. What does `alias["apples"]` retrieve?
+4. Did either name move to a new object, or did the shared object change?
+5. Confidence: 0–100.
+
+LEARNER'S FIRST COMMITTED ANSWER (verbatim):
+1 list exssts, count apples and count alias both point at the same lsit, so now apples is 4 for the lookup value for both objects
+
+CONFIDENCE FOLLOW-UP (verbatim):
+90
+
+EVALUATION:
+The core state is correct at confidence 90: one dictionary object exists; `counts` and `alias`
+refer to it; both lookups produce `4`; and the shared object changed without either name being
+rebound. The learner called it a list and ended with "both objects," but the explicit one-object /
+same-container model is clear. Accept the concept under the learner's no-nitpicking preference and
+do not issue a terminology drill.
+
+PRIMARY BLOCKER:
+none under line-by-line state tracking; composition should now be faded gradually
+
+SCAFFOLD RUNG:
+R2 state movie
+
+RECOVERY STATUS:
+dictionary alias mutation recovered with scaffolding; harder shared-counter transfer next
+
+TRANSFER / NEXT RETRIEVAL:
+Use three names for one dictionary and two augmented updates, with no filled state prompts.
+
+---
+
+## EV-P1-DICT-168
+
+DATE: 2026-08-28
+PHASE: 1 (fundamentals review; learner limited quiz scope to completed Phases 0–2)
+TAG: dictionary_aliasing, shared_mutation, composition_tracking
+RESULT: correct
+
+PROMPT (verbatim):
+Harder shared-counter transfer—no filled state prompts:
+
+```python
+shared = {"hits": 0}
+first = shared
+second = shared
+
+first["hits"] += 2
+second["hits"] += 3
+```
+
+1. How many dictionary objects exist?
+2. What does each of these retrieve at the end?
+
+```python
+shared["hits"]
+first["hits"]
+second["hits"]
+```
+
+3. Explain why the second update starts from the result of the first update.
+4. Confidence: 0–100.
+
+LEARNER'S FIRST COMMITTED ANSWER (verbatim):
+so all of them point at the same list, hits starts at zero and then first adds 2 and then second adds 3 so they all retireve 5, 90
+
+EVALUATION:
+Correct at confidence 90. One dictionary exists; all names refer to it; the first update stores
+`2`; the second reads that shared state and stores `5`; and all three lookups retrieve `5`. The
+learner again said list, but the shared mapping behavior is fully correct and the terminology is
+not drilled under the stated preference.
+
+PRIMARY BLOCKER:
+none at composed alias-update level
+
+SCAFFOLD RUNG:
+R4 composed transfer
+
+RECOVERY STATUS:
+dictionary alias mutation recovered without filled state prompts; fresh external-function target
+next
+
+TRANSFER / NEXT RETRIEVAL:
+Use a fresh external dictionary counter across two function calls, then diagnose purity and name a
+local-state repair.
+
+---
+
+## EV-P1-EXTERNAL-169
+
+DATE: 2026-08-28
+PHASE: 1 (fundamentals review; learner limited quiz scope to completed Phases 0–2)
+TAG: external_state, cross_call_leakage, purity, print_arguments
+RESULT: partial
+
+PROMPT (verbatim):
+Fresh target-level debugging problem—predict without running:
+
+```python
+stats = {"errors": 0}
+
+
+def count_errors(events):
+    for event in events:
+        if event == "error":
+            stats["errors"] += 1
+
+    return stats["errors"]
+
+
+first = count_errors(["error", "ok"])
+second = count_errors(["error", "error"])
+
+print(first, second)
+```
+
+Answer:
+
+1. Track `stats["errors"]` through both calls.
+2. Give `first`, `second`, and what is printed.
+3. Why does the second call inherit the first call’s count?
+4. Is the function pure, or does it mutate state outside itself?
+5. What small design change would make each call count independently?
+6. Confidence: 0–100.
+
+LEARNER'S FIRST COMMITTED ANSWER (verbatim):
+first is 1 and second is 3, this is a cool conecpt you can make the key you are counting very obious so then the key and the lookup value are simple and convientent, it prints 4, the stats error : 0 is at the top of the file instead of before the loop in the function so it only is set to 0 at the start of the file call, that is a good question and i have no idea for number 4, i think it would mutate every object in the list but i am not sure. put the errors : 0  under def count errors and befroe the loop
+
+CONFIDENCE FOLLOW-UP (verbatim):
+90
+
+EVALUATION:
+The difficult state trace is correct at confidence 90: `first=1`, `second=3`, and the second call
+starts from external state left by the first. The learner also identified the correct design
+direction—initialize call-local state inside the function before the loop—and made a valid data-
+representation observation about named keys.
+
+Purity was explicitly unknown; the function mutates the external `stats` dictionary, not every
+event/list object, so it is impure. The learner subsequently asked that the `print(first, second)`
+slip be disregarded as "just blind." Honor that preference and do not remediate output.
+
+PRIMARY BLOCKER:
+Identifying the exact external object changed and using that to judge purity.
+
+SCAFFOLD RUNG:
+R6 target partial; isolate purity conceptually
+
+RECOVERY STATUS:
+cross-call state and repair direction passed; output slip disregarded; purity pending
+
+TRANSFER / NEXT RETRIEVAL:
+Ask whether mutating the external `stats` dictionary makes the function pure or impure, and whether
+the input `events` list changes.
+
+---
+
+## EV-P1-PURITY-170
+
+DATE: 2026-08-28
+PHASE: 1 (fundamentals review; learner limited quiz scope to completed Phases 0–2)
+TAG: purity, external_state, input_vs_external_mutation
+RESULT: wrong
+
+PROMPT (verbatim):
+After defining pure as depending only on inputs and making no observable external changes, the
+learner was asked to classify the external-counter `count_errors` function, identify which object
+changes, and give confidence.
+
+LEARNER'S FIRST COMMITTED ANSWER (verbatim):
+ok then it is pure, it returns a number and does not mutate any of the lsits, the result is a count of a certian criteria of the inputs so the input is directly responsible for the result output, 90
+
+EVALUATION:
+Incorrect at confidence 90. The input lists are unchanged, but purity requires scanning all
+observable state. The function mutates the external counter dictionary, and later calls observe
+that changed state, so the function is impure.
+
+PRIMARY BLOCKER:
+Side-effect analysis stopped at the inputs and missed mutation of a different external object.
+
+SCAFFOLD RUNG:
+R6 judgment failed; contrast external and local counters
+
+RECOVERY STATUS:
+not remediated in this attempt
+
+TRANSFER / NEXT RETRIEVAL:
+Compare the external-counter version with a fresh local counter inside the function.
+
+---
+
+## EV-P1-PURITY-171
+
+DATE: 2026-08-28
+PHASE: 1 (fundamentals review; learner limited quiz scope to completed Phases 0–2)
+TAG: purity, local_state, external_state
+RESULT: correct
+
+PROMPT (verbatim):
+State the contrast in your own words:
+
+1. Why is the external-`stats` version impure?
+2. Why is the local-`error_count` version pure?
+3. Confidence: 0–100.
+
+LEARNER'S FIRST COMMITTED ANSWER (verbatim):
+becasue it changes the counter outside the function, the count is created inside the function adn so it does not affecct anything outside the function, 90, can you push i need to move locations
+
+EVALUATION:
+Correct at confidence 90. The external version is impure because it changes a counter outside the
+call. The local version creates fresh call-owned state, reads but does not mutate the input, and
+does not affect external state, so it is pure.
+
+PRIMARY BLOCKER:
+none on the explicit contrast
+
+SCAFFOLD RUNG:
+R4/R6 teach-back
+
+RECOVERY STATUS:
+purity distinction recovered with direct contrast; delayed fresh transfer remains due
+
+TRANSFER / NEXT RETRIEVAL:
+Delayed new-domain purity judgment with more than one external object; require a complete
+side-effect scan.

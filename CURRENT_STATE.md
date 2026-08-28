@@ -2690,3 +2690,114 @@ Do not treat this wrong attempt as a phase failure.
 ## Next implementation step
 
 None. The learner requested quiz-only work on Phases 0–2. Phase 4 remains out of scope.
+
+## QUIZ RESUMED — 2026-08-28
+
+Evidence `EV-P1-ACCUMULATOR-155`: at confidence 100, the learner correctly predicted
+`count = +1` ends at `1` and `count += 1` ends at `6` from a starting value of `5`. Mechanism
+explanation and explicit different-form statement were omitted; require that teach-back before
+climbing. New quiz transcripts are now also being appended to `QUIZZES.md`.
+
+Evidence `EV-P1-ACCUMULATOR-156`: mechanism teach-back correct at confidence 90. The learner
+distinguished `= +1` from `+= 1` and requested harder questions. End micro-scaffolding and return
+directly to a fresh target-level two-call accumulator trace.
+
+Evidence `EV-P1-ACCUMULATOR-157`: harder two-call accumulator trace fully correct at confidence
+90: states `2,2,3` and `1,3,5`, returned values `3` and `5`, printed sum `8`. The learner omitted
+the explanation of fresh local state twice. Ask that as a conceptual lifetime/ownership question;
+do not repeat accumulator arithmetic.
+
+Evidence `EV-P1-LOCAL-158`: local-state explanation correct at confidence 90. The learner said
+`score = 0` runs at the start of every call before the loop. The accumulator blocker is recovered
+at target level. Rotate to a harder debugging transfer involving external state leaking across
+calls.
+
+External-state target paused when the learner could not read `{"added": 0}` and asked whether its
+colon was a dataclass annotation. Evidence `EV-P1-DICT-159`: syntax-only lookup partial at
+confidence 90. Printed value `2` and key/value association were understood, but the learner said
+the lookup retrieves the key. Ask one fresh lookup result only; do not resume the target yet.
+
+Evidence `EV-P1-DICT-160`: fresh lookup correct at confidence 100. The learner separately named
+the key `"retries"`, retrieved value `3`, and assignment to `value`. Give one dictionary-entry
+`+= 1` bridge, then resume the external-state target.
+
+Evidence `EV-P1-DICT-161`: dictionary-entry arithmetic correct at confidence 40: the learner
+looked up `0`, added one, and stored `1`. Whether this mutates or replaces the dictionary was
+explicitly unknown. Explain that subscript assignment mutates the existing mapping, then test it
+through an alias before resuming the target.
+
+Evidence `EV-P1-DICT-162`: dictionary alias transfer wrong at confidence 40. Despite the
+same-object diagram, the learner said `totals["added"] += 1` creates a new dictionary and leaves
+the alias at zero. Descend to the already-familiar list alias case with one indexed replacement,
+then transfer back to dictionaries gradually.
+
+Evidence `EV-P1-ALIAS-163`: list alias prerequisite correct at confidence 90. The learner said
+`numbers[0] = 1` mutates the shared list and `alias[0]` sees `1`, while explicitly asking how
+`"apples": 3` connects to prior concepts. Give a direct index-to-value versus key-to-value
+comparison, then one dictionary alias update.
+
+Evidence `EV-P1-ALIAS-164`: indexed list alias transfer wrong at confidence 30. The learner said
+`alias` keeps `3` because only "the list for numbers" changed, revealing a copied-container model.
+Descend to R0: ask whether `alias = numbers` creates one or two list objects before any mutation.
+Dictionary target remains paused.
+
+Evidence `EV-P1-ALIAS-165`: R0 list object-count recovery correct at confidence 100. The learner
+said one list exists with both names pointing to it. Transfer the same object-count question to a
+dictionary before reintroducing entry mutation.
+
+Evidence `EV-P1-DICT-166`: line-by-line dictionary state movie passed at confidence 90. The
+learner created one object and correctly bound `alias` to the same object, though called the
+dictionary a list. The learner's own diagnosis—"adding the one extra step throws me off"—matches
+the evidence: individual rules are stable, composition tracking fails. Continue with explicit
+state freezing and add exactly one mutation step.
+
+Evidence `EV-P1-DICT-167`: three-line dictionary alias mutation passed at confidence 90. The
+learner kept one shared object and correctly said both names see value `4`. Container terminology
+was inconsistent, but the identity/state model was explicit and accepted under the no-nitpicking
+preference. Fade filled state prompts and give a harder shared-counter transfer.
+
+Evidence `EV-P1-DICT-168`: composed shared-counter transfer passed at confidence 90 without filled
+state prompts. The learner tracked two updates through three names and correctly concluded all
+lookups return `5`. Dictionary alias mutation is recovered sufficiently to resume a fresh
+external-state function target.
+
+Evidence `EV-P1-EXTERNAL-169`: fresh external-state target partial at confidence 90. The learner
+correctly derived `first=1`, `second=3`, explained why the second call inherits external state,
+and proposed moving initialization inside the function. `print(first, second)` was read as sum `4`,
+and purity was explicitly unknown. Remediate output first with a bare two-argument print, then
+isolate purity.
+
+Learner correction to grading: disregard the two-argument `print` slip as "just blind." Honor it;
+do not remediate output. Isolate purity only: the function mutates external `stats` while leaving
+the input `events` list unchanged.
+
+Evidence `EV-P1-PURITY-170`: purity judgment wrong at confidence 90. The learner checked that
+inputs remain unchanged but missed mutation of a separate external dictionary. Evidence
+`EV-P1-PURITY-171`: after contrasting external and local counters, the learner correctly explained
+that the external version is impure and the fresh-local version is pure, confidence 90. Retrieve
+later in a new domain; do not drill immediately.
+
+## SESSION HANDOFF — location change, 2026-08-28
+
+The learner requested a push before moving locations. Quiz remains limited to completed Phases
+0–2; no product code changed. New questions and answers were recorded in `QUIZZES.md` as requested.
+
+Strongest new results:
+
+```text
+accumulator target       two-call loop trace and local reset explanation passed
+dictionary mapping       key/value lookup and shared mutation recovered through state movies
+purity                   external versus local counter contrast passed
+```
+
+Still due after a delay:
+
+```text
+composition tracking     learner explicitly said one extra step causes loss of earlier state;
+                         line-by-line state freezing worked
+purity transfer          new domain with a complete scan of all external objects
+per-item enumeration     aggregate branch answer remains easier than complete rows
+```
+
+Next session should not restart syntax drills cold. Begin with one moderately composed state movie,
+then fade the table if correct.
