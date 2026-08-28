@@ -11232,3 +11232,2783 @@ direction and was never touched.
 
 The 0-is-success convention needs its own retrieval first, cold, before the CI-rule question is
 worth asking again. It failed twice today after being stated twice.
+
+---
+
+## EV-P1-EXIT-102
+
+DATE: 2026-08-28
+PHASE: 1 (fundamentals review; learner limited quiz scope to completed Phases 0–2)
+TAG: exit_status_convention
+RESULT: correct
+
+PROMPT (verbatim):
+Phase 3 remains complete in code; all three test suites pass. Phase 4 is still blocked on the quiz
+milestones.
+
+First, the smallest unresolved prerequisite:
+
+In shell exit-status conventions, which number means the command succeeded: `0` or `1`?
+
+Answer with:
+
+1. The number
+2. One sentence explaining what that number means
+3. Confidence: 0–100
+
+Don’t run anything—predict from memory.
+
+LEARNER'S FIRST COMMITTED ANSWER (verbatim):
+0, it means exit code zero and i am not sure past that 70
+
+EVALUATION:
+Correct. The learner retrieved `0` as the shell success status without running anything. The
+explanation restated the convention but did not yet explain its operational meaning, so the next
+exercise remains at the same rung and places a successful status beside no printed output.
+
+PRIMARY BLOCKER:
+none on the convention; independence from printed output remains open
+
+SCAFFOLD RUNG:
+R1
+
+RECOVERY STATUS:
+in progress; isolated prerequisite passed, fresh same-rung near-transfer next
+
+TRANSFER / NEXT RETRIEVAL:
+A command that succeeds silently: predict its exit status separately from its output.
+
+---
+
+## EV-P1-EXIT-103
+
+DATE: 2026-08-28
+PHASE: 1 (fundamentals review; learner limited quiz scope to completed Phases 0–2)
+TAG: output_and_exit_status_are_independent
+RESULT: correct prediction, explanation still due
+
+PROMPT (verbatim):
+Next micro-problem:
+
+A cleanup command finishes successfully, finds nothing to remove, and prints nothing.
+
+Answer separately:
+
+1. What is its exit status?
+2. What appears on screen?
+3. Confidence: 0–100
+
+LEARNER'S FIRST COMMITTED ANSWER (verbatim):
+also if at all possbile could you draw a picture for the harder questions, exit code 0, nothing appears on the screen i am not sure what you are talking about
+
+EVALUATION:
+Both predicted values are correct: status `0`, and no screen output. The learner explicitly said
+the scenario was not understood, so this is not yet a conceptual pass. Supply a small diagram only
+after preserving the answer, then require the learner to explain the two channels in their own
+words. The learner requested pictures for harder questions; use diagrams when they clarify the
+structure without revealing an unanswered result.
+
+PRIMARY BLOCKER:
+The distinction between a command's screen output and its separate exit status is not yet
+understood, despite the correct values.
+
+SCAFFOLD RUNG:
+R1
+
+RECOVERY STATUS:
+in progress; correct prediction, teach-back due
+
+TRANSFER / NEXT RETRIEVAL:
+Learner reads a two-channel diagram and explains how successful execution can coexist with no
+printed output.
+
+---
+
+## EV-P1-EXIT-104
+
+DATE: 2026-08-28
+PHASE: 1 (fundamentals review; learner limited quiz scope to completed Phases 0–2)
+TAG: output_and_exit_status_are_independent
+RESULT: correct
+
+PROMPT (verbatim):
+Your answer was correct. Here’s the picture:
+
+```mermaid
+flowchart LR
+    A[Cleanup command runs] --> B[Screen output]
+    A --> C[Exit status]
+    B --> D[Nothing printed]
+    C --> E[0 = succeeded]
+```
+
+These are two separate channels:
+
+- Screen output is what the command says to you. It can be empty.
+- Exit status is a hidden result for the shell or another program.
+- `echo $?` is a separate command that displays that hidden status.
+
+Now explain in your own words: How can a command print nothing but still succeed? Include
+confidence from 0–100.
+
+LEARNER'S FIRST COMMITTED ANSWER (verbatim):
+it can print nothing but it has a hidden status so the shell knows it succeeded
+
+CONFIDENCE FOLLOW-UP (verbatim):
+70
+
+EVALUATION:
+Correct. The learner separated the empty screen-output channel from the hidden status channel and
+explained that the shell uses the latter to recognize success. The required confidence tag was
+omitted initially and supplied after one reminder.
+
+PRIMARY BLOCKER:
+none on the two-channel model
+
+SCAFFOLD RUNG:
+R1 teach-back
+
+RECOVERY STATUS:
+worked-example step B passed; climb to a partially scaffolded reverse-direction case
+
+TRANSFER / NEXT RETRIEVAL:
+A successful silent command is incorrectly judged by a rule that looks only for printed output.
+
+---
+
+## EV-P1-EXIT-105
+
+DATE: 2026-08-28
+PHASE: 1 (fundamentals review; learner limited quiz scope to completed Phases 0–2)
+TAG: output_and_exit_status_are_independent, silence_does_not_imply_success
+RESULT: partial
+
+PROMPT (verbatim):
+```mermaid
+flowchart LR
+    A[Backup command] --> B[Screen: nothing]
+    A --> C[Exit status: 0]
+    B --> D{Teammate checks only screen output}
+    D --> E[Their verdict: ?]
+    C --> F[Correct verdict: ?]
+```
+
+The teammate’s rule is:
+
+> If something appears on screen, mark PASS. Otherwise, mark FAIL.
+
+Answer separately:
+
+1. What verdict does the teammate give?
+2. What verdict should the command receive?
+3. Why is the teammate’s rule wrong?
+4. Confidence: 0–100
+
+LEARNER'S FIRST COMMITTED ANSWER (verbatim):
+the teammate gives the fail verdict and the command receives pass, for me looking on screen in a terminal if the output is nothing and i am not calling print i assume it is a pass, is that a bad instinct, 80
+
+EVALUATION:
+The two requested verdicts are correct: the teammate's output-only rule produces FAIL, while exit
+status `0` means the command should receive PASS. The proposed replacement heuristic, silence
+means pass, is not reliable. Screen output is optional diagnostic or informational text; neither
+its presence nor its absence determines success.
+
+PRIMARY BLOCKER:
+The learner now separates the channels but still wants to infer status from the screen channel
+when the actual status is not visible.
+
+SCAFFOLD RUNG:
+R2 target; descend to R1 channel-choice problem
+
+RECOVERY STATUS:
+in progress
+
+TRANSFER / NEXT RETRIEVAL:
+Give conflicting screen text and exit status, then ask which channel determines the shell's
+success judgment.
+
+---
+
+## EV-P1-EXIT-106
+
+DATE: 2026-08-28
+PHASE: 1 (fundamentals review; learner limited quiz scope to completed Phases 0–2)
+TAG: output_and_exit_status_are_independent, status_is_authoritative
+RESULT: correct
+
+PROMPT (verbatim):
+Yes, that instinct is unsafe. A command can fail silently or succeed while printing many lines.
+Treat screen output as information and exit status as the shell’s verdict.
+
+Simpler check:
+
+```mermaid
+flowchart LR
+    A[Command finishes] --> B[Screen says: Completed]
+    A --> C[Exit status: 1]
+    B --> D{Which channel determines success?}
+    C --> D
+```
+
+Does the shell consider this command a success or failure? Explain which channel decides, then
+give confidence from 0–100.
+
+LEARNER'S FIRST COMMITTED ANSWER (verbatim):
+the status determins it is a fail, i would trust the status over anything, 80
+
+EVALUATION:
+Correct. Despite reassuring screen text, the learner used nonzero status `1` to classify the
+command as failure and explicitly chose the status over screen output.
+
+PRIMARY BLOCKER:
+none at R1
+
+SCAFFOLD RUNG:
+R1
+
+RECOVERY STATUS:
+correct; same-rung near-transfer in the opposite direction next
+
+TRANSFER / NEXT RETRIEVAL:
+Give alarming screen text with status `0`; ask for the shell/CI verdict and the controlling
+channel.
+
+---
+
+## EV-P1-EXIT-107
+
+DATE: 2026-08-28
+PHASE: 1 (fundamentals review; learner limited quiz scope to completed Phases 0–2)
+TAG: output_and_exit_status_are_independent, status_is_authoritative
+RESULT: correct
+
+PROMPT (verbatim):
+Opposite-direction check:
+
+A command prints:
+
+```text
+ERROR found in archived log
+```
+
+Then it exits with status `0`.
+
+As far as the shell or CI is concerned:
+
+1. Is the command a success or failure?
+2. Which channel determines that verdict?
+3. Confidence: 0–100
+
+LEARNER'S FIRST COMMITTED ANSWER (verbatim):
+it is a success on the shell and CI but I would investigate it further since it is on the screen output telling me there is an error and i would at least ask the question
+
+CONFIDENCE FOLLOW-UP (verbatim):
+70
+
+EVALUATION:
+Correct and appropriately nuanced. The learner classified the command as success from status `0`
+while treating alarming output as evidence worth investigating rather than as the shell's verdict.
+The confidence tag was supplied after one reminder.
+
+PRIMARY BLOCKER:
+none
+
+SCAFFOLD RUNG:
+R1 near-transfer
+
+RECOVERY STATUS:
+same-rung near-transfer passed; climb to one fresh target-level two-command case
+
+TRANSFER / NEXT RETRIEVAL:
+Two commands with opposing output/status combinations, evaluated separately.
+
+---
+
+## EV-P1-EXIT-108
+
+DATE: 2026-08-28
+PHASE: 1 (fundamentals review; learner limited quiz scope to completed Phases 0–2)
+TAG: output_and_exit_status_are_independent, status_is_authoritative
+RESULT: correct
+
+PROMPT (verbatim):
+Last exit-status problem—answer each command separately.
+
+```mermaid
+flowchart TB
+    R[Teammate's rule: output means PASS; silence means FAIL]
+    A[Command A<br/>prints: Uploaded 12 files<br/>exit status: 1]
+    B[Command B<br/>prints nothing<br/>exit status: 0]
+    R --> A
+    R --> B
+```
+
+For each command, give one separate line containing:
+
+- Teammate’s verdict
+- Correct shell/CI verdict
+- Whether the teammate is wrong
+
+Then give confidence from 0–100.
+
+LEARNER'S FIRST COMMITTED ANSWER (verbatim):
+for A: teammate pass, shell fail
+for B: teammate fail, shell pass
+80
+
+EVALUATION:
+Correct in both directions and enumerated separately. For A, the output-only rule says PASS while
+status `1` says failure. For B, the rule says FAIL while status `0` says success. The teammate is
+wrong for both commands, which is implicit in the two opposing verdicts even though the learner
+did not separately write that phrase.
+
+PRIMARY BLOCKER:
+none
+
+SCAFFOLD RUNG:
+R2 target-level transfer
+
+RECOVERY STATUS:
+remediated; isolated convention, teach-back, same-rung transfers, climb, and fresh target-level
+variant all passed
+
+TRANSFER / NEXT RETRIEVAL:
+Delayed retrieval later in a new surface. Rotate now to another Phase 0–2 fundamental.
+
+---
+
+## EV-P1-RETURN-109
+
+DATE: 2026-08-28
+PHASE: 1 (fundamentals review; learner limited quiz scope to completed Phases 0–2)
+TAG: print_vs_return, missing_return_is_none, list_equality, exit_status_interference
+RESULT: partial
+
+PROMPT (verbatim):
+Predict by hand; don’t run it.
+
+```python
+def announce(word):
+    print(word.upper())
+
+
+results = []
+results.append(announce("go"))
+
+print(results == ["GO"])
+```
+
+```mermaid
+flowchart LR
+    A[announce called] --> B[Text printed: ?]
+    A --> C[Call value: ?]
+    C --> D[Value appended to results]
+    D --> E[Comparison result: ?]
+```
+
+Answer separately:
+
+1. What appears on screen, in exact order?
+2. What value is appended to `results`?
+3. Why isn’t the printed text necessarily the call’s value?
+4. Confidence: 0–100
+
+LEARNER'S FIRST COMMITTED ANSWER (verbatim):
+GO&#x20;
+exit code 1&#x20;
+the function does not return upper it prints it so the announce returns None and that is not equal to GO, 80, None is appended to results
+
+EVALUATION:
+The target `print_vs_return` reasoning is correct: `announce` prints `GO`, has no explicit return,
+therefore its call value is `None`, and that `None` is appended to `results`. The learner also
+correctly states that `None` is not equal to `"GO"`.
+
+The exact second screen line was incorrectly expressed as `exit code 1`. The final statement is a
+Python `print` of a Boolean list comparison; it does not display the process exit status. This is
+likely immediate interference from the just-completed exit-status sequence, not a return-value
+failure.
+
+PRIMARY BLOCKER:
+Distinguishing a printed Python Boolean from a shell exit status.
+
+SCAFFOLD RUNG:
+R4 target; descend to R1 list-equality expression
+
+RECOVERY STATUS:
+in progress; print-versus-return mechanism correct, exact final output not yet recovered
+
+TRANSFER / NEXT RETRIEVAL:
+Evaluate and print `[None] == ["GO"]` with no function or shell context.
+
+---
+
+## EV-P1-EQUALITY-110
+
+DATE: 2026-08-28
+PHASE: 1 (fundamentals review; learner limited quiz scope to completed Phases 0–2)
+TAG: list_equality, printed_boolean_vs_exit_status
+RESULT: correct
+
+PROMPT (verbatim):
+Simpler Python-only problem:
+
+```python
+print([None] == ["GO"])
+```
+
+1. Is `[None] == ["GO"]` `True` or `False`?
+2. What exactly appears on screen?
+3. Confidence: 0–100
+
+LEARNER'S FIRST COMMITTED ANSWER (verbatim):
+it would print False&#x20;
+80
+
+EVALUATION:
+Correct. The unequal one-item lists produce Boolean `False`, and Python prints the word `False`.
+No exit status was substituted.
+
+PRIMARY BLOCKER:
+none at R1
+
+SCAFFOLD RUNG:
+R1
+
+RECOVERY STATUS:
+correct; same-rung near-transfer next
+
+TRANSFER / NEXT RETRIEVAL:
+Compare lists containing the same values in a different order.
+
+---
+
+## EV-P1-EQUALITY-111
+
+DATE: 2026-08-28
+PHASE: 1 (fundamentals review; learner limited quiz scope to completed Phases 0–2)
+TAG: list_equality_compares_contents_in_order
+RESULT: wrong
+
+PROMPT (verbatim):
+Same-level check:
+
+```python
+print(["red", "blue"] == ["blue", "red"])
+```
+
+The two lists contain the same two words, but in different positions.
+
+1. What exactly appears on screen?
+2. Does list equality care about order?
+3. Confidence: 0–100
+
+LEARNER'S FIRST COMMITTED ANSWER (verbatim):
+True, == is checking the contents not the order, 80
+
+EVALUATION:
+Incorrect. Python list equality compares contents in corresponding positions as well as length.
+These lists contain the same members but the first positions already differ, so the comparison is
+`False` and Python prints `False`.
+
+PRIMARY BLOCKER:
+The learner models list equality as unordered membership rather than ordered positional equality.
+
+SCAFFOLD RUNG:
+R1; simplify further to one corresponding pair
+
+RECOVERY STATUS:
+not remediated
+
+TRANSFER / NEXT RETRIEVAL:
+Compare only the first item from each list, stated in plain language before reintroducing whole
+lists.
+
+---
+
+## EV-P1-EQUALITY-112
+
+DATE: 2026-08-28
+PHASE: 1 (fundamentals review; learner limited quiz scope to completed Phases 0–2)
+TAG: list_equality_compares_contents_in_order
+RESULT: correct
+
+PROMPT (verbatim):
+Compare only the first position:
+
+```text
+left list first item:  "red"
+right list first item: "blue"
+```
+
+Is `"red" == "blue"` `True` or `False`? Explain briefly and give confidence from 0–100.
+
+LEARNER'S FIRST COMMITTED ANSWER (verbatim):
+false, i understand the conecept now == wants the list to have the same contents in the same order
+
+CONFIDENCE FOLLOW-UP (verbatim):
+100
+
+EVALUATION:
+Correct. The first corresponding items differ, so their equality is `False`. The learner also
+restated the broader list rule correctly: same contents in the same order. Confidence was supplied
+after one reminder.
+
+PRIMARY BLOCKER:
+none at the isolated-pair rung
+
+SCAFFOLD RUNG:
+R1
+
+RECOVERY STATUS:
+isolated prerequisite passed; fresh same-rung near-transfer next
+
+TRANSFER / NEXT RETRIEVAL:
+One new corresponding string pair, then rebuild whole-list equality.
+
+---
+
+## EV-P1-EQUALITY-113
+
+DATE: 2026-08-28
+PHASE: 1 (fundamentals review; learner limited quiz scope to completed Phases 0–2)
+TAG: positional_equality
+RESULT: correct
+
+PROMPT (verbatim):
+Fresh single-pair check:
+
+```text
+left item:  "green"
+right item: "green"
+```
+
+1. Is `"green" == "green"` `True` or `False`?
+2. Why?
+3. Confidence: 0–100
+
+LEARNER'S FIRST COMMITTED ANSWER (verbatim):
+true, becasue they are the saem string, 100
+
+EVALUATION:
+Correct. The corresponding string values are the same, so the comparison is `True`.
+
+PRIMARY BLOCKER:
+none
+
+SCAFFOLD RUNG:
+R1 near-transfer
+
+RECOVERY STATUS:
+same-rung near-transfer passed; climb to a two-position whole-list comparison
+
+TRANSFER / NEXT RETRIEVAL:
+Compare two lists position by position and then give the whole-list Boolean.
+
+---
+
+## EV-P1-EQUALITY-114
+
+DATE: 2026-08-28
+PHASE: 1 (fundamentals review; learner limited quiz scope to completed Phases 0–2)
+TAG: list_equality_compares_contents_in_order, exact_boolean_spelling
+RESULT: partial
+
+PROMPT (verbatim):
+```mermaid
+flowchart TB
+    L["Left: red, blue"]
+    R["Right: red, green"]
+    L --> P1["Position 1: red vs red → ?"]
+    R --> P1
+    L --> P2["Position 2: blue vs green → ?"]
+    R --> P2
+    P1 --> W["Whole lists equal?"]
+    P2 --> W
+```
+
+For this code:
+
+```python
+print(["red", "blue"] == ["red", "green"])
+```
+
+Answer separately:
+
+1. Position 1 comparison: `True` or `False`
+2. Position 2 comparison: `True` or `False`
+3. Whole-list comparison: `True` or `False`
+4. Exact screen output
+5. Confidence: 0–100
+
+LEARNER'S FIRST COMMITTED ANSWER (verbatim):
+true
+fasle
+false
+false
+100
+
+EVALUATION:
+The positional and whole-list logic is fully correct: position 1 is true, position 2 is false, and
+the whole comparison is false. The exact screen output was written lowercase `false`; Python's
+exact Boolean spelling is `False`. The `fasle` typo on position 2 does not obscure the intended
+answer because the following whole-list answers are consistent.
+
+PRIMARY BLOCKER:
+Exact capitalization/transcription, not list equality.
+
+SCAFFOLD RUNG:
+R2 whole list; descend to R0 exact Boolean spelling
+
+RECOVERY STATUS:
+ordered list-equality concept recovered; exact output precision remains
+
+TRANSFER / NEXT RETRIEVAL:
+Choose Python's exact spelling between `False` and `false`.
+
+---
+
+## EV-P1-BOOLEAN-115
+
+DATE: 2026-08-28
+PHASE: 1 (fundamentals review; learner limited quiz scope to completed Phases 0–2)
+TAG: exact_boolean_spelling
+RESULT: correct
+
+PROMPT (verbatim):
+Which is Python’s exact Boolean spelling?
+
+```text
+False
+```
+
+or
+
+```text
+false
+```
+
+Answer with the exact spelling and confidence from 0–100.
+
+LEARNER'S FIRST COMMITTED ANSWER (verbatim):
+i understand now i need a captial F or T when it comes to booleans
+
+CONFIDENCE FOLLOW-UP (verbatim):
+100
+
+EVALUATION:
+Correct. The learner stated the general Python convention: `False` and `True` use capital initial
+letters. Confidence was supplied after one reminder.
+
+PRIMARY BLOCKER:
+none
+
+SCAFFOLD RUNG:
+R0
+
+RECOVERY STATUS:
+exact-output capitalization corrected; return to a fresh target-level `print_vs_return` trace
+
+TRANSFER / NEXT RETRIEVAL:
+A printing function with no explicit return whose call value is stored inside a list.
+
+---
+
+## EV-P1-RETURN-116
+
+DATE: 2026-08-28
+PHASE: 1 (fundamentals review; learner limited quiz scope to completed Phases 0–2)
+TAG: print_vs_return, missing_return_is_none, list_representation, exit_status_interference
+RESULT: partial
+
+PROMPT (verbatim):
+Predict by hand; don’t run it.
+
+```python
+def mark():
+    print("saved")
+
+
+box = [mark()]
+print(box)
+```
+
+```mermaid
+flowchart LR
+    A[mark called] --> B[Screen output: ?]
+    A --> C[Call value: ?]
+    C --> D[box contains: ?]
+    D --> E[Final printed line: ?]
+```
+
+Answer separately:
+
+1. What appears on screen, in exact order?
+2. What value does `mark()` contribute to `box`?
+3. Why?
+4. Confidence: 0–100
+
+LEARNER'S FIRST COMMITTED ANSWER (verbatim):
+saved
+None on screen
+exit code 0 box contains None ,saved None, 100, mark does not return anything so it returns None it does however print saved
+
+EVALUATION:
+The `print_vs_return` model is correct: `mark()` prints `saved`, lacks an explicit return, therefore
+contributes `None`, and `box` contains `None`. The exact second printed line was given as bare
+`None` or ambiguously as `saved None`, rather than the list representation `[None]`. An unrequested
+`exit code 0` was also inserted even though the program never prints its process status.
+
+PRIMARY BLOCKER:
+Exact display of a list containing `None`; exit-status material is still intruding into Python
+screen-output traces.
+
+SCAFFOLD RUNG:
+R4 target; descend to R1 printing a literal one-item list
+
+RECOVERY STATUS:
+`print_vs_return` mechanism correct; exact-output trace still in progress
+
+TRANSFER / NEXT RETRIEVAL:
+Print `[None]` directly, with no function and no shell context.
+
+---
+
+## EV-P1-LIST-117
+
+DATE: 2026-08-28
+PHASE: 1 (fundamentals review; learner limited quiz scope to completed Phases 0–2)
+TAG: one_item_list_representation, container_vs_item
+RESULT: wrong
+
+PROMPT (verbatim):
+Simpler Python-only trace:
+
+```python
+box = [None]
+print(box)
+```
+
+What exactly appears on screen, including punctuation and capitalization? Give confidence from
+0–100.
+
+LEARNER'S FIRST COMMITTED ANSWER (verbatim):
+None 30
+
+LEARNER'S ASSISTED CORRECTION (verbatim):
+[None]
+
+CONFIDENCE ON ASSISTED CORRECTION (verbatim):
+80, you hinted at it
+
+EVALUATION:
+Incorrect. Printing the list displays `[None]`, including the list brackets. The learner printed
+the contained item as though `box` referred directly to `None`, losing the container
+representation. Confidence 30 appropriately signaled uncertainty.
+
+PRIMARY BLOCKER:
+Container versus contained item: `[None]` is a one-item list, not bare `None`.
+
+SCAFFOLD RUNG:
+R1 failed; descend to R0 syntax recognition with no print operation
+
+RECOVERY STATUS:
+not independently remediated; corrected to `[None]` after the bracket/container distinction was
+explicitly supplied, and the learner correctly identified that it was hinted
+
+TRANSFER / NEXT RETRIEVAL:
+Fresh one-item list with a numeric item, no output hint.
+
+---
+
+## EV-P1-LIST-118
+
+DATE: 2026-08-28
+PHASE: 1 (fundamentals review; learner limited quiz scope to completed Phases 0–2)
+TAG: one_item_list_representation, container_vs_item
+RESULT: correct
+
+PROMPT (verbatim):
+Fresh problem—predict without running:
+
+```python
+numbers = [7]
+print(numbers)
+```
+
+What exactly appears on screen, including punctuation? Give confidence from 0–100.
+
+LEARNER'S FIRST COMMITTED ANSWER (verbatim):
+[7], 100
+
+EVALUATION:
+Correct and independent. Printing the one-item list displays `[7]`, preserving the container's
+brackets.
+
+PRIMARY BLOCKER:
+none at R1
+
+SCAFFOLD RUNG:
+R1
+
+RECOVERY STATUS:
+isolated prerequisite passed independently; fresh same-rung near-transfer next
+
+TRANSFER / NEXT RETRIEVAL:
+Print a fresh list with two numeric items, then climb back toward the function/list target.
+
+---
+
+## EV-P1-LIST-119
+
+DATE: 2026-08-28
+PHASE: 1 (fundamentals review; learner limited quiz scope to completed Phases 0–2)
+TAG: list_representation, exact_output_spacing
+RESULT: partial, self-corrected after precision prompt
+
+PROMPT (verbatim):
+Fresh near-transfer:
+
+```python
+numbers = [3, 8]
+print(numbers)
+```
+
+What exactly appears on screen, including all punctuation and spacing? Give confidence from
+0–100.
+
+LEARNER'S FIRST COMMITTED ANSWER (verbatim):
+[3,8]
+
+CONFIDENCE / CORRECTION FOLLOW-UP (verbatim):
+100, ok i need to add a spce after the comma
+
+EVALUATION:
+The first answer preserved the list container and values but omitted Python's default space after
+the comma. After being reminded that exact spacing would be evaluated, the learner self-corrected
+to the rule that a space is needed. Exact output is `[3, 8]`. Confidence 100 applies to the
+corrected model, not the original transcription.
+
+PRIMARY BLOCKER:
+Exact default spacing in printed list representation.
+
+SCAFFOLD RUNG:
+R1 generation; descend to R0 recognition between two spellings
+
+RECOVERY STATUS:
+in progress; correction was prompted by the spacing reminder
+
+TRANSFER / NEXT RETRIEVAL:
+Choose which of two two-item list spellings Python prints.
+
+---
+
+## EV-P1-LIST-120
+
+DATE: 2026-08-28
+PHASE: 1 (fundamentals review; learner limited quiz scope to completed Phases 0–2)
+TAG: list_representation, exact_output_spacing
+RESULT: correct
+
+PROMPT (verbatim):
+For this Python code:
+
+```python
+print([4, 5])
+```
+
+Which exact output does Python display?
+
+```text
+A. [4,5]
+B. [4, 5]
+```
+
+Answer `A` or `B`, copy the exact output, and give confidence from 0–100.
+
+LEARNER'S FIRST COMMITTED ANSWER (verbatim):
+B, 100
+after this no more nitpicking that is what this is, can we move on to a different part of phase 0,1,2
+
+EVALUATION:
+Correct at confidence 100. Python's displayed two-item list uses a space after the comma. The
+learner requested no further nitpicking and a move to another part of Phases 0–2. Honor that
+preference: do not continue formatting drills, and raise precision only when it changes meaning or
+is the concept under test.
+
+PRIMARY BLOCKER:
+none
+
+SCAFFOLD RUNG:
+R0 recognition
+
+RECOVERY STATUS:
+exact list representation recovered sufficiently for this review; rotate topics
+
+TRANSFER / NEXT RETRIEVAL:
+Phase 2 summary-model fundamentals, targeting the still-open individual count values.
+
+---
+
+## EV-P2-MODEL-121
+
+DATE: 2026-08-28
+PHASE: 2 (fundamentals review; learner limited quiz scope to completed Phases 0–2)
+TAG: diff_summary_model, classification_to_count, per_item_enumeration
+RESULT: partial
+
+PROMPT (verbatim):
+Phase 2 summary problem. Predict without running code.
+
+```text
+diff --git a/menu.txt b/menu.txt
+index 1111111..2222222 100644
+--- a/menu.txt
++++ b/menu.txt
+@@ -1,2 +1,3 @@
+-tea
++coffee
++water
+ cake
+```
+
+```mermaid
+flowchart LR
+    D[Whole diff] --> F[files_changed = ?]
+    D --> A[lines_added = ?]
+    D --> R[lines_removed = ?]
+```
+
+Give each field separately:
+
+1. `files_changed`
+2. `lines_added`
+3. `lines_removed`
+4. Briefly explain which lines caused each count
+5. Confidence: 0–100
+
+LEARNER'S FIRST COMMITTED ANSWER (verbatim):
+files changed =1&#x20;
+lines added = 2
+removed = 1
+cake is context everything else is metadata, the function uses prefixes to evalutae which line is which, 80
+
+EVALUATION:
+All three requested values are correct on the presented diff: one file changed, two lines added,
+and one removed. This supplies the individual Phase 2 model values that remained open from
+`EV-P2-MODEL-060` on a fresh diff.
+
+The explanation is partial. `cake` is context, but "everything else is metadata" incorrectly
+groups the contributing lines: `diff --git` is `file_header`; `-tea` is removed; `+coffee` and
+`+water` are added; only the remaining header/hunk lines are metadata. This repeats the procedural
+grouping pattern from `EV-P1-BRANCH-098`, not a failure to compute the summary.
+
+PRIMARY BLOCKER:
+Per-item enumeration in the explanation; the three-field Phase 2 summary model and values are
+correct.
+
+SCAFFOLD RUNG:
+R6 summary; descend to R1 with one contributing line
+
+RECOVERY STATUS:
+`EV-P2-MODEL-060` value gap closed; explanation remediation in progress
+
+TRANSFER / NEXT RETRIEVAL:
+Classify `-tea` alone and state which counter it changes.
+
+---
+
+## EV-P2-MAP-122
+
+DATE: 2026-08-28
+PHASE: 2 (fundamentals review; learner limited quiz scope to completed Phases 0–2)
+TAG: classification_to_count, per_item_enumeration
+RESULT: correct
+
+PROMPT (verbatim):
+One line only:
+
+```text
+-tea
+```
+
+1. What label does the classifier give it?
+2. Which Phase 2 summary counter does it increase?
+3. Confidence: 0–100
+
+LEARNER'S FIRST COMMITTED ANSWER (verbatim):
+removed, lines removed 100
+
+EVALUATION:
+Correct. `-tea` is labelled `removed` and increments `lines_removed`.
+
+PRIMARY BLOCKER:
+none at R1
+
+SCAFFOLD RUNG:
+R1
+
+RECOVERY STATUS:
+isolated mapping passed; fresh same-rung near-transfer next
+
+TRANSFER / NEXT RETRIEVAL:
+Classify one added line and state its counter.
+
+---
+
+## EV-P2-MAP-123
+
+DATE: 2026-08-28
+PHASE: 2 (fundamentals review; learner limited quiz scope to completed Phases 0–2)
+TAG: classification_to_count, assistance_fading
+RESULT: correct
+
+PROMPT (verbatim):
+Fresh line:
+
+```text
++coffee
+```
+
+1. What label does it receive?
+2. Which summary counter does it increase?
+3. Confidence: 0–100
+
+LEARNER'S FIRST COMMITTED ANSWER (verbatim):
+ok these are too simple of questions, this is added, it increases lines added, 100
+
+EVALUATION:
+Correct at confidence 100. `+coffee` is `added` and increments `lines_added`. The learner said the
+rung is too simple; this is accurate evidence that the scaffold should fade. End isolated line
+mapping and move to a harder Phase 0–2 transfer.
+
+PRIMARY BLOCKER:
+none
+
+SCAFFOLD RUNG:
+R1 near-transfer
+
+RECOVERY STATUS:
+same-rung near-transfer passed; simple classification-to-counter mapping is stable for this review
+
+TRANSFER / NEXT RETRIEVAL:
+Rotate to a composed mutation-versus-new-value trace involving a string and a list.
+
+---
+
+## EV-P2-MUTATION-124
+
+DATE: 2026-08-28
+PHASE: 2 (fundamentals review; learner limited quiz scope to completed Phases 0–2)
+TAG: string_immutability, sorted_vs_sort, syntax_reading
+RESULT: incomplete; syntax-only remediation entered
+
+PROMPT (verbatim):
+Harder transfer—predict the state without running it:
+
+```python
+word = "build"
+upper_word = word.upper()
+
+numbers = [3, 1, 2]
+ordered = sorted(numbers)
+
+numbers.sort()
+```
+
+```mermaid
+flowchart TB
+    W[word = build] --> U[word.upper]
+    U --> W2[word afterward = ?]
+    U --> UW[upper_word = ?]
+
+    N[numbers = 3, 1, 2] --> S[sorted numbers]
+    S --> N2[numbers afterward = ?]
+    S --> O[ordered = ?]
+    N2 --> M[numbers.sort]
+    M --> N3[numbers afterward = ?]
+    M --> O2[ordered afterward = ?]
+```
+
+Answer each checkpoint separately:
+
+1. After `word.upper()`: `word` and `upper_word`
+2. After `sorted(numbers)`: `numbers` and `ordered`
+3. After `numbers.sort()`: `numbers` and `ordered`
+4. Which operations created new values, and which mutated an existing value?
+5. What single principle connects the string and list cases?
+6. Confidence: 0–100
+
+LEARNER'S FIRST COMMITTED ANSWER (verbatim):
+word does not change, numbers does change i am not sure when i have not looked at sorted yet
+
+CONFIDENCE FOLLOW-UP (verbatim):
+for the word part 100
+
+EVALUATION:
+The learner correctly states at confidence 100 that `word` does not change. They did not give
+`upper_word`, and they explicitly cannot yet read `sorted(...)`, so evaluation of the list portion
+stops. Per syntax-only help mode, do not solve or continue the composed trace. Explain only the
+`sorted(list)` syntax and give an R1 example.
+
+PRIMARY BLOCKER:
+SYNTAX_READING: `sorted(numbers)` has not been learned.
+
+SCAFFOLD RUNG:
+R6 target; descend immediately to R1 for `sorted(...)`
+
+RECOVERY STATUS:
+in progress; target problem paused
+
+TRANSFER / NEXT RETRIEVAL:
+One two-item list passed to `sorted`, tracking the original and returned list.
+
+---
+
+## EV-P2-SORTED-125
+
+DATE: 2026-08-28
+PHASE: 2 (fundamentals review; learner limited quiz scope to completed Phases 0–2)
+TAG: sorted_returns_new_list, mutation_vs_new_value
+RESULT: correct
+
+PROMPT (verbatim):
+`sorted(numbers)` means:
+
+> Make and return a new list containing the same items in sorted order.
+
+It does not change `numbers`.
+
+Tiny example:
+
+```python
+numbers = [2, 1]
+ordered = sorted(numbers)
+```
+
+Without running it:
+
+1. What does `numbers` contain afterward?
+2. What does `ordered` contain?
+3. Confidence: 0–100
+
+LEARNER'S FIRST COMMITTED ANSWER (verbatim):
+so does numbers contain [2, 1] adn ordered is [1, 2], what about sort(), 100
+
+EVALUATION:
+Correct at confidence 100. `sorted(numbers)` leaves the original list `[2, 1]` unchanged and
+returns the new sorted list `[1, 2]`, assigned to `ordered`. The learner immediately asked about
+`.sort()`, which is the appropriate contrasting syntax step.
+
+PRIMARY BLOCKER:
+none for `sorted(...)`; `.sort()` remains unread
+
+SCAFFOLD RUNG:
+R1
+
+RECOVERY STATUS:
+`sorted(...)` syntax understood; teach `.sort()` in isolation next
+
+TRANSFER / NEXT RETRIEVAL:
+One two-item list followed by `numbers.sort()`, tracking the mutated list and the call value.
+
+---
+
+## EV-P2-SORT-126
+
+DATE: 2026-08-28
+PHASE: 2 (fundamentals review; learner limited quiz scope to completed Phases 0–2)
+TAG: sort_mutates, sort_returns_none, mutation_vs_return
+RESULT: partial
+
+PROMPT (verbatim):
+`numbers.sort()` works differently:
+
+- It rearranges the existing `numbers` list itself.
+- It does not create a sorted list as its call value.
+- Its call value is `None`.
+
+```mermaid
+flowchart LR
+    A["numbers: [2, 1]"] --> B["numbers.sort()"]
+    B --> C["same list becomes: [1, 2]"]
+    B --> D["call value: None"]
+```
+
+Now predict:
+
+```python
+numbers = [3, 1, 2]
+result = numbers.sort()
+```
+
+1. What does `numbers` contain afterward?
+2. What does `result` contain?
+3. Confidence: 0–100
+
+LEARNER'S FIRST COMMITTED ANSWER (verbatim):
+Numbers = [1, ,2 ,3] and resutl is the same, 100
+
+EVALUATION:
+The learner correctly intends that `numbers` itself becomes sorted; the extra comma is treated as
+a harmless transcription typo per the learner's stated preference. The conceptual error is saying
+`result` is the same sorted list. Assignment receives the call value, and `.sort()` returns
+`None`, even though it mutates `numbers`.
+
+PRIMARY BLOCKER:
+The changed object is being conflated with the mutating method's return value.
+
+SCAFFOLD RUNG:
+R1 failed; descend to R0 choice about the assigned call value
+
+RECOVERY STATUS:
+in progress
+
+TRANSFER / NEXT RETRIEVAL:
+Choose whether `result = numbers.sort()` assigns the list or `None`, without also tracking list
+contents.
+
+---
+
+## EV-P2-SORT-127
+
+DATE: 2026-08-28
+PHASE: 2 (fundamentals review; learner limited quiz scope to completed Phases 0–2)
+TAG: sort_returns_none, mutation_vs_return
+RESULT: wrong; worked-example rescue entered
+
+PROMPT (verbatim):
+Focus only on the assignment:
+
+```python
+result = numbers.sort()
+```
+
+Which value is assigned to `result`?
+
+```text
+A. The sorted list
+B. None
+```
+
+Answer `A` or `B`, explain briefly, and give confidence from 0–100.
+
+LEARNER'S FIRST COMMITTED ANSWER (verbatim):
+A,  is my guess if we were to print reslut afterwards it would give us the sorted list but assinged i am not sure, 40
+
+EVALUATION:
+Incorrect. `.sort()` mutates the existing list and returns `None`, so `result` receives `None`.
+The learner remains unsure whether later printing `result` somehow accesses the changed list. It
+does not: `result` holds the call value that assignment received.
+
+PRIMARY BLOCKER:
+Mutation of the receiver and return value of the method are still modeled as the same channel.
+
+SCAFFOLD RUNG:
+R0 failed after the fact was explicitly taught; enter worked-example rescue
+
+RECOVERY STATUS:
+not remediated; worked-example step A next
+
+TRANSFER / NEXT RETRIEVAL:
+Show one solved neighboring `.append()` example with the changed list and returned `None` drawn as
+separate paths, then require learner teach-back.
+
+---
+
+## EV-P2-MUTATION-128
+
+DATE: 2026-08-28
+PHASE: 2 (fundamentals review; learner limited quiz scope to completed Phases 0–2)
+TAG: mutation_vs_return, assignment_receives_call_value, aliasing
+RESULT: wrong; worked-example teach-back failed
+
+PROMPT (verbatim):
+Solved neighboring example:
+
+```python
+items = ["a"]
+result = items.append("b")
+```
+
+```mermaid
+flowchart LR
+    A["items starts as: a"] --> B["items.append(b)"]
+    B --> C["Mutation path<br/>items becomes: a, b"]
+    B --> D["Return path<br/>call returns: None"]
+    D --> E["Assignment path<br/>result becomes: None"]
+```
+
+The method does two separate things:
+
+- It changes `items`.
+- It returns `None`, which is assigned to `result`.
+
+Explain this example back in your own words:
+
+1. Why does `items` contain `"b"`?
+2. Why does `result` contain `None` instead of the changed list?
+3. What would `print(result)` display?
+4. Confidence: 0–100
+
+LEARNER'S FIRST COMMITTED ANSWER (verbatim):
+because we appended b and items and results now point at the same list, 2. i have no idea, 3. it would print [a, b], 80
+
+EVALUATION:
+Incorrect. `append` mutates `items`, but its call value is `None`; therefore `result` is `None`,
+not an alias of `items`, and `print(result)` displays `None`. The diagram and explicit solved facts
+did not survive into the teach-back.
+
+PRIMARY BLOCKER:
+Assignment is being modeled as linking the left-hand name to whichever object the method mutated,
+rather than binding it to the value produced by the right-hand expression.
+
+SCAFFOLD RUNG:
+Worked-example step B failed; descend below method calls to R0 assignment
+
+RECOVERY STATUS:
+not remediated
+
+TRANSFER / NEXT RETRIEVAL:
+Use only `result = None`; ask what value the name receives and what printing it displays.
+
+---
+
+## EV-P1-NONE-129
+
+DATE: 2026-08-28
+PHASE: 1 (fundamentals review; learner limited quiz scope to completed Phases 0–2)
+TAG: none_is_a_value, assignment
+RESULT: partial
+
+PROMPT (verbatim):
+Smallest assignment:
+
+```python
+result = None
+print(result)
+```
+
+1. What value is assigned to `result`?
+2. What does `print(result)` display?
+3. Confidence: 0–100
+
+LEARNER'S FIRST COMMITTED ANSWER (verbatim):
+result has no value, it prints None, 80
+
+EVALUATION:
+The printed output is correct. The statement that `result` has no value is not: `None` is itself a
+Python value used to represent absence or no meaningful result. The name `result` exists and is
+bound to that value.
+
+PRIMARY BLOCKER:
+`None` is being treated as the nonexistence of a binding rather than a value that a name can hold.
+
+SCAFFOLD RUNG:
+R0
+
+RECOVERY STATUS:
+in progress
+
+TRANSFER / NEXT RETRIEVAL:
+Ask whether a name assigned `None` exists and what value it holds.
+
+---
+
+## EV-P1-NONE-130
+
+DATE: 2026-08-28
+PHASE: 1 (fundamentals review; learner limited quiz scope to completed Phases 0–2)
+TAG: none_is_a_value, assignment
+RESULT: correct
+
+PROMPT (verbatim):
+After this assignment:
+
+```python
+result = None
+```
+
+1. Does the name `result` exist?
+2. What value is it bound to?
+3. Confidence: 0–100
+
+LEARNER'S FIRST COMMITTED ANSWER (verbatim):
+yes, the value = None, 100
+
+EVALUATION:
+Correct. The name exists and is bound to the Python value `None`.
+
+PRIMARY BLOCKER:
+none at R0
+
+SCAFFOLD RUNG:
+R0
+
+RECOVERY STATUS:
+isolated prerequisite passed; one assignment near-transfer next
+
+TRANSFER / NEXT RETRIEVAL:
+Copy the `None` value from one existing name to another through assignment.
+
+---
+
+## EV-P1-NONE-131
+
+DATE: 2026-08-28
+PHASE: 1 (fundamentals review; learner limited quiz scope to completed Phases 0–2)
+TAG: none_is_not_string, assignment, aliasing_language
+RESULT: partial
+
+PROMPT (verbatim):
+One bridge question:
+
+```python
+result = None
+copy = result
+```
+
+What value is assigned to `copy`, and why? Confidence: 0–100.
+
+LEARNER'S FIRST COMMITTED ANSWER (verbatim):
+None, they are pointing at the same string, 100
+
+EVALUATION:
+The assigned value is correct: `copy` receives `None`. The explanation misclassifies `None` as a
+string. Unquoted `None` is Python's singleton absence value; quoted `"None"` is a string. Both names
+are bound to the same `None` object, but calling it a string is a type-model error rather than a
+wording nit.
+
+PRIMARY BLOCKER:
+Distinguishing the `None` value from the string `"None"`.
+
+SCAFFOLD RUNG:
+R1 bridge partial; descend to R0 quoted-versus-unquoted recognition
+
+RECOVERY STATUS:
+in progress
+
+TRANSFER / NEXT RETRIEVAL:
+Choose which of `None` and `"None"` is a string.
+
+---
+
+## EV-P1-ASSIGN-132
+
+DATE: 2026-08-28
+PHASE: 1 (fundamentals review; learner limited quiz scope to completed Phases 0–2)
+TAG: assignment_same_object, none_is_not_string, mutability
+RESULT: correct teach-back
+
+PROMPT (verbatim):
+No—`copy` and `result` are bound to the same single `None` object. Python does not create a
+different `None`.
+
+```text
+result ──┐
+         ├──> None
+copy   ──┘
+```
+
+`copy = result` means:
+
+1. Look up the value currently bound to `result`.
+2. That value is `None`.
+3. Bind `copy` to that same value.
+
+Your “pointing at the same thing” idea was right. The only incorrect part was calling that thing a
+string:
+
+- `None` is Python’s special absence value.
+- `"None"` is a string because it has quotation marks.
+
+Now teach it back: do `result` and `copy` refer to the same or different object, and is that object
+`None` or `"None"`? Include confidence from 0–100.
+
+LEARNER'S FIRST COMMITTED ANSWER (verbatim):
+ok so my thinking was correct because i was treating it as a string or list where when you make them equal it makes them point to the same string or list and now you are saying the same thing for values, so it points to the same value as well, 100
+
+EVALUATION:
+Correct core assignment model at confidence 100. Evaluating the right-hand name produces its
+current object/value, and assignment binds the left-hand name to that same object. In this case the
+object is `None`, not the string `"None"`. Preserve a later distinction: shared mutable lists expose
+changes through either name, while strings and `None` are immutable.
+
+PRIMARY BLOCKER:
+none on assignment identity; mutation versus return still must be rebuilt
+
+SCAFFOLD RUNG:
+R0/R1 teach-back
+
+RECOVERY STATUS:
+assignment prerequisite passed; resume worked-example step C with one missing return value
+
+TRANSFER / NEXT RETRIEVAL:
+Give the mutated list state and ask only what value `append` assigns to a result name.
+
+---
+
+## EV-P1-MUTABILITY-133
+
+DATE: 2026-08-28
+PHASE: 1 (fundamentals review; learner limited quiz scope to completed Phases 0–2)
+TAG: immutable_rebinding, mutable_aliasing, objects_and_values
+RESULT: correct
+
+PROMPT (verbatim):
+Exactly. That is the key distinction.
+
+With an immutable object, an operation cannot alter the original object. The name is rebound to
+another value:
+
+```python
+a = 7
+b = a
+a = a + 1
+```
+
+```text
+Before: a ─┐
+            ├──> 7
+        b ─┘
+
+After:  a ────> 8
+        b ────> 7
+```
+
+The integer `7` was not changed into `8`. `a` was rebound.
+
+With a mutable list:
+
+```python
+items = [1]
+alias = items
+items.append(2)
+```
+
+```text
+items ─┐
+       ├──> [1, 2]
+alias ─┘
+```
+
+The existing list was changed, so both names observe the change.
+
+Your principle is right:
+
+> Immutable operation → usually produce another value and possibly rebind a name.  
+> Mutable operation → change the existing object, so aliases observe it.
+
+Quick transfer:
+
+```python
+word = "cat"
+copy = word
+word = word.upper()
+
+numbers = [2]
+alias = numbers
+numbers.append(5)
+```
+
+What do `word`, `copy`, `numbers`, and `alias` contain afterward? Explain the difference and give
+confidence from 0–100.
+
+LEARNER'S FIRST COMMITTED ANSWER (verbatim):
+word is CAT, copy is cat, numbers is [2, 5] and so it alias, 100
+
+EVALUATION:
+Correct at confidence 100. `word.upper()` produces a new string and rebinds only `word`, leaving
+`copy` as `"cat"`. `numbers.append(5)` mutates the shared list, so both `numbers` and `alias`
+observe `[2, 5]`.
+
+PRIMARY BLOCKER:
+none on immutable rebinding versus mutable aliasing
+
+SCAFFOLD RUNG:
+R4/R6 transfer
+
+RECOVERY STATUS:
+object/mutability distinction passed; resume worked-example step C for method return value
+
+TRANSFER / NEXT RETRIEVAL:
+Return to `returned = items.append("y")` with the mutated list state supplied and ask only for
+`returned`.
+
+---
+
+## EV-P2-APPEND-134
+
+DATE: 2026-08-28
+PHASE: 2 (fundamentals review; learner limited quiz scope to completed Phases 0–2)
+TAG: mutation_vs_return, append_returns_none
+RESULT: correct
+
+PROMPT (verbatim):
+Return to the paused example:
+
+```python
+items = ["x"]
+returned = items.append("y")
+```
+
+Given:
+
+```text
+items is now ["x", "y"]
+```
+
+What value is assigned to `returned`? Explain why that value is separate from the mutation of
+`items`, then give confidence from 0–100.
+
+LEARNER'S FIRST COMMITTED ANSWER (verbatim):
+None, the only purpose of that line is to mutate the list items
+
+CONFIDENCE FOLLOW-UP (verbatim):
+90
+
+EVALUATION:
+Correct at confidence 90. `append` mutates `items` and returns `None`, which is assigned to
+`returned`. The wording "only purpose" refers correctly to the method's useful effect; the full
+statement also assigns its `None` call value.
+
+PRIMARY BLOCKER:
+none at the partially scaffolded rung
+
+SCAFFOLD RUNG:
+worked-example step C
+
+RECOVERY STATUS:
+step C passed; fresh unaided step D next
+
+TRANSFER / NEXT RETRIEVAL:
+Use `.sort()` on a fresh list and ask for both the mutated list and assigned call value.
+
+---
+
+## EV-P2-SORT-135
+
+DATE: 2026-08-28
+PHASE: 2 (fundamentals review; learner limited quiz scope to completed Phases 0–2)
+TAG: sort_mutates, sort_returns_none, mutation_vs_return
+RESULT: correct
+
+PROMPT (verbatim):
+Fresh problem—predict without running:
+
+```python
+numbers = [4, 1, 3]
+returned = numbers.sort()
+```
+
+1. What does `numbers` contain afterward?
+2. What value is assigned to `returned`?
+3. Explain how one line can mutate `numbers` while assigning a different value to `returned`.
+4. Confidence: 0–100
+
+LEARNER'S FIRST COMMITTED ANSWER (verbatim):
+returned equals None and the numbers are now sorted afterward, ok so for append and sort do  they all have the same behavior because they are in the pyhton library?
+
+CONFIDENCE FOLLOW-UP (verbatim):
+80
+
+EVALUATION:
+Correct at confidence 80. `.sort()` mutates `numbers` into sorted order and returns `None`, which
+is assigned to `returned`. This is the fresh unaided step D required after worked-example rescue.
+The learner then asked whether `.append()` and `.sort()` behave alike merely because both are in
+Python's library; answer that design question before resuming the larger composed trace.
+
+PRIMARY BLOCKER:
+none on the trace; API-contract generalization is the next question
+
+SCAFFOLD RUNG:
+worked-example step D, fresh R1
+
+RECOVERY STATUS:
+worked-example recovery completed at the micro level; original composed trace still needs a fresh
+target-level return
+
+TRANSFER / NEXT RETRIEVAL:
+Explain that mutating-and-returning-None is a common list-method convention, not a universal
+library rule; contrast `.append()`, `.sort()`, `sorted()`, `.upper()`, and `.pop()`.
+
+---
+
+## EV-P2-POP-136
+
+DATE: 2026-08-28
+PHASE: 2 (fundamentals review; learner limited quiz scope to completed Phases 0–2)
+TAG: mutation_vs_return, pop_mutates_and_returns
+RESULT: correct
+
+PROMPT (verbatim):
+No. They do not behave that way merely because they belong to Python’s library. Each operation has
+its own contract.
+
+- `list.append(x)` mutates the list and returns `None`.
+- `list.sort()` mutates the list and returns `None`.
+- `sorted(list)` leaves the original alone and returns a new sorted list.
+- `word.upper()` returns a new string because strings are immutable.
+- `list.pop()` mutates the list but also returns the item it removed.
+
+Python commonly makes methods whose sole purpose is mutating a collection return `None`, helping
+signal that the original object changed. But that is not a universal rule—`pop()` demonstrates the
+exception.
+
+A useful question for any operation is:
+
+> What does it mutate, and what value does it return?
+
+Fresh transfer:
+
+```python
+items = ["a", "b"]
+returned = items.pop()
+```
+
+`pop()` removes and returns the last item. What do `items` and `returned` contain afterward?
+Confidence: 0–100.
+
+LEARNER'S FIRST COMMITTED ANSWER (verbatim):
+items has a and returned has b, 100
+
+EVALUATION:
+Correct at confidence 100. `items` is mutated to contain only `"a"`, while `returned` receives the
+removed value `"b"`. This proves the learner is no longer assuming that every mutating method must
+return `None`; mutation and return are separate parts of an API contract.
+
+PRIMARY BLOCKER:
+none
+
+SCAFFOLD RUNG:
+R1 transfer
+
+RECOVERY STATUS:
+API-contract distinction passed; return to fresh composed target
+
+TRANSFER / NEXT RETRIEVAL:
+Compose string immutability, `sorted()` returning a new list, and `.sort()` mutating and returning
+`None`.
+
+---
+
+## EV-P2-MUTATION-137
+
+DATE: 2026-08-28
+PHASE: 2 (fundamentals review; learner limited quiz scope to completed Phases 0–2)
+TAG: string_immutability, sorted_returns_new_list, sort_mutates, sort_returns_none, composition
+RESULT: partial
+
+PROMPT (verbatim):
+Harder composed problem—predict without running:
+
+```python
+word = "lens"
+loud = word.upper()
+
+values = [4, 2, 3]
+snapshot = sorted(values)
+returned = values.sort()
+```
+
+```mermaid
+flowchart TB
+    W[word] --> U[upper]
+    U --> L[loud]
+    V[values] --> S[sorted]
+    S --> SS[snapshot]
+    V --> M[sort]
+    M --> R[returned]
+```
+
+Give the final value of each name:
+
+1. `word`
+2. `loud`
+3. `values`
+4. `snapshot`
+5. `returned`
+6. Are `values` and `snapshot` the same list object or separate list objects?
+7. Which operations mutated an existing object?
+8. Confidence: 0–100
+
+LEARNER'S FIRST COMMITTED ANSWER (verbatim):
+word= lens
+loud = LENS
+values= 2,3,4
+snapshot = 2,3,4
+returned= 2,3,4
+they are seprerate list obejcts&#x20;
+sort() only&#x20;
+100
+
+LEARNER'S ASSISTED CORRECTION (verbatim):
+your right retuerned returns none
+
+CONFIDENCE ON ASSISTED CORRECTION (verbatim):
+80
+
+EVALUATION:
+Six conceptual parts are correct: `word` remains lowercase, `loud` is uppercase, `values` and
+`snapshot` both have sorted contents, the two lists are separate objects, and only `.sort()`
+mutates. List-bracket omission is ignored per the learner's no-nitpicking preference.
+
+The one conceptual miss is `returned`: `.sort()` returns `None`, so `returned` is `None`, not the
+sorted list. The micro-level recovery from `EV-P2-SORT-135` did not survive composition, and the
+miss occurred at confidence 100.
+
+PRIMARY BLOCKER:
+Retaining a mutating method's separate `None` return value when several operations are composed.
+
+SCAFFOLD RUNG:
+R6 target partial; descend only the failed edge to fresh R1 `.sort()` return
+
+RECOVERY STATUS:
+not yet recovered independently at target level; all non-return edges passed, and `returned=None`
+was accepted after reveal at confidence 80
+
+TRANSFER / NEXT RETRIEVAL:
+Give a fresh `.sort()` call with the mutated list state supplied; ask only for the assigned return
+value, then climb back with one added operation.
+
+---
+
+## EV-P2-SORT-138
+
+DATE: 2026-08-28
+PHASE: 2 (fundamentals review; learner limited quiz scope to completed Phases 0–2)
+TAG: sort_mutates, sort_returns_none
+RESULT: correct
+
+PROMPT (verbatim):
+Fresh isolated check:
+
+```python
+scores = [8, 3]
+outcome = scores.sort()
+```
+
+Given that `scores` becomes sorted, what value is assigned to `outcome`, and why? Confidence:
+0–100.
+
+LEARNER'S FIRST COMMITTED ANSWER (verbatim):
+scores is sorted and outcome is None, 100
+
+EVALUATION:
+Correct and independent at confidence 100. `.sort()` mutates `scores` and its separate call value
+is `None`, which assignment binds to `outcome`. The learner asked an intervening clarification
+about `pop()` before answering; that clarification did not reveal the `.sort()` answer.
+
+PRIMARY BLOCKER:
+none at R1
+
+SCAFFOLD RUNG:
+R1 fresh recovery
+
+RECOVERY STATUS:
+isolated edge recovered independently; climb one rung by adding `sorted(...)`
+
+TRANSFER / NEXT RETRIEVAL:
+Track `sorted()` returning a new list and `.sort()` mutating/returning `None` in the same short
+trace.
+
+---
+
+## EV-P2-SORT-139
+
+DATE: 2026-08-28
+PHASE: 2 (fundamentals review; learner limited quiz scope to completed Phases 0–2)
+TAG: sorted_returns_new_list, sort_mutates, sort_returns_none, composition
+RESULT: correct
+
+PROMPT (verbatim):
+One-step climb:
+
+```python
+scores = [8, 3]
+snapshot = sorted(scores)
+outcome = scores.sort()
+```
+
+Give the final value of:
+
+1. `scores`
+2. `snapshot`
+3. `outcome`
+4. Which operation mutated `scores`?
+5. Confidence: 0–100
+
+LEARNER'S FIRST COMMITTED ANSWER (verbatim):
+scores is mutated by sort(), [3, 8] , [3, 8] not the same object as scores, None, 100
+
+EVALUATION:
+Fully correct at confidence 100. `scores` is `[3, 8]` after `.sort()`, `snapshot` is a separate
+`[3, 8]` list created by `sorted()`, `outcome` is `None`, and only `.sort()` mutated `scores`.
+
+PRIMARY BLOCKER:
+none at the two-operation rung
+
+SCAFFOLD RUNG:
+R2/R4 composition
+
+RECOVERY STATUS:
+one-step climb passed; fresh full target with string operation next
+
+TRANSFER / NEXT RETRIEVAL:
+Add one immutable string transformation on fresh data and require the full final state.
+
+---
+
+## EV-P2-MUTATION-140
+
+DATE: 2026-08-28
+PHASE: 2 (fundamentals review; learner limited quiz scope to completed Phases 0–2)
+TAG: string_immutability, sorted_returns_new_list, sort_mutates, sort_returns_none, composition
+RESULT: correct
+
+PROMPT (verbatim):
+Fresh full transfer:
+
+```python
+label = "mix"
+upper_label = label.upper()
+
+numbers = [5, 1, 4]
+ordered = sorted(numbers)
+sort_result = numbers.sort()
+```
+
+Give the final value of each, one line per name:
+
+1. `label`
+2. `upper_label`
+3. `numbers`
+4. `ordered`
+5. `sort_result`
+6. Which operation mutated an existing object?
+7. Confidence: 0–100
+
+LEARNER'S FIRST COMMITTED ANSWER (verbatim):
+mix, MIX, [1,4,5], [1,4,5] but not the same object as numbers, None, sort() is the mutater, 100
+
+EVALUATION:
+Fully correct at confidence 100. `label` remains `"mix"`; `upper_label` receives the new uppercase
+string; `ordered` is a separate sorted list; `.sort()` mutates `numbers`; and `sort_result` is
+`None`. Spacing inside list displays is ignored per the learner's preference.
+
+PRIMARY BLOCKER:
+none
+
+SCAFFOLD RUNG:
+R6 full composition
+
+RECOVERY STATUS:
+target-level recovery complete
+
+TRANSFER / NEXT RETRIEVAL:
+Delayed retrieval later. Rotate to Phase 1 branch-precedence enumeration, requiring one line per
+input.
+
+---
+
+## EV-P1-BRANCH-141
+
+DATE: 2026-08-28
+PHASE: 1 (fundamentals review; learner limited quiz scope to completed Phases 0–2)
+TAG: branch_precedence, per_item_enumeration
+RESULT: partial
+
+PROMPT (verbatim):
+Harder branch-precedence transfer. Two versions use the same conditions but in different orders.
+
+Original:
+
+```python
+def classify_plan(code):
+    if code.startswith("PRO-ANNUAL"):
+        return "annual"
+    elif code.startswith("PRO-"):
+        return "pro"
+    elif code.startswith("P"):
+        return "product"
+    return "other"
+```
+
+Reordered:
+
+```python
+def classify_plan(code):
+    if code.startswith("P"):
+        return "product"
+    elif code.startswith("PRO-ANNUAL"):
+        return "annual"
+    elif code.startswith("PRO-"):
+        return "pro"
+    return "other"
+```
+
+```mermaid
+flowchart TB
+    P[Starts with P]
+    P --> PRO[Starts with PRO-]
+    PRO --> A[Starts with PRO-ANNUAL]
+```
+
+Evaluate every input separately—one line per item:
+
+1. `"PRO-ANNUAL-TEAM"`
+2. `"PRO-MONTHLY"`
+3. `"PERSONAL"`
+4. `"BASIC"`
+
+For each line give:
+
+```text
+original result → reordered result → changed yes/no
+```
+
+Then explain why order matters and give confidence from 0–100.
+
+LEARNER'S FIRST COMMITTED ANSWER (verbatim):
+1,2,3 retunr product and 4 is other
+
+CONFIDENCE FOLLOW-UP (verbatim):
+100
+
+EVALUATION:
+The stated reordered results are all correct: inputs 1–3 return `product`, and input 4 returns
+`other`. The answer omitted every original result, every explicit changed yes/no decision, and the
+requested explanation. It also grouped items 1–3 rather than enumerating them separately.
+
+This repeats the procedural pattern from `EV-P1-BRANCH-098`: the branch mechanism appears sound,
+but a per-item comparison is answered at group level. Do not re-teach precedence. Isolate one item
+and one version.
+
+PRIMARY BLOCKER:
+Per-item enumeration and completing every requested comparison field.
+
+SCAFFOLD RUNG:
+R6 partial; descend to R3 with one input and the original function only
+
+RECOVERY STATUS:
+in progress
+
+TRANSFER / NEXT RETRIEVAL:
+For `"PRO-ANNUAL-TEAM"`, ask only for the original result and the first true condition.
+
+---
+
+## EV-P1-BRANCH-142
+
+DATE: 2026-08-28
+PHASE: 1 (fundamentals review; learner limited quiz scope to completed Phases 0–2)
+TAG: branch_precedence, version_selection, prompt_reading
+RESULT: wrong
+
+PROMPT (verbatim):
+One item, original function only:
+
+```python
+classify_plan("PRO-ANNUAL-TEAM")
+```
+
+The branches are checked in this order:
+
+```text
+1. starts with "PRO-ANNUAL"
+2. starts with "PRO-"
+3. starts with "P"
+```
+
+Which condition is the first true one, and what does the original function return? Confidence:
+0–100.
+
+LEARNER'S FIRST COMMITTED ANSWER (verbatim):
+since you changed the prefix to the shortest vewrson the longer prefex is never seen 100
+
+EVALUATION:
+Incorrect for the selected version. The answer describes the reordered function, but the prompt
+explicitly selected the original function and restated its longest-to-shortest order. In the
+original, the first condition is true and returns `"annual"`.
+
+PRIMARY BLOCKER:
+Selecting the function version named in the prompt, not branch-condition understanding.
+
+SCAFFOLD RUNG:
+R3 failed procedurally; descend to R1 one `startswith` Boolean
+
+RECOVERY STATUS:
+in progress
+
+TRANSFER / NEXT RETRIEVAL:
+Evaluate `"PRO-ANNUAL-TEAM".startswith("PRO-ANNUAL")` alone.
+
+---
+
+## EV-P1-PREFIX-143
+
+DATE: 2026-08-28
+PHASE: 1 (fundamentals review; learner limited quiz scope to completed Phases 0–2)
+TAG: startswith, branch_precedence
+RESULT: correct
+
+PROMPT (verbatim):
+Evaluate only this expression:
+
+```python
+"PRO-ANNUAL-TEAM".startswith("PRO-ANNUAL")
+```
+
+Is it `True` or `False`? Explain briefly and give confidence from 0–100.
+
+LEARNER'S FIRST COMMITTED ANSWER (verbatim):
+true 100, it does start with pro annual
+
+EVALUATION:
+Correct at confidence 100. The string begins with the requested prefix, so the expression is
+`True`.
+
+PRIMARY BLOCKER:
+none on condition evaluation; version selection still needs a fresh check
+
+SCAFFOLD RUNG:
+R1
+
+RECOVERY STATUS:
+isolated condition passed; fresh single-version bridge next
+
+TRANSFER / NEXT RETRIEVAL:
+Use a new prefix domain with one explicitly named version and ask for the first match and return.
+
+---
+
+## EV-P1-BRANCH-144
+
+DATE: 2026-08-28
+PHASE: 1 (fundamentals review; learner limited quiz scope to completed Phases 0–2)
+TAG: branch_precedence, first_match_wins, version_selection
+RESULT: correct
+
+PROMPT (verbatim):
+Fresh single-version bridge:
+
+```python
+def classify_member(code):
+    if code.startswith("VIP-GOLD"):
+        return "gold"
+    elif code.startswith("VIP"):
+        return "vip"
+    return "regular"
+```
+
+For:
+
+```python
+classify_member("VIP-GOLD-TEAM")
+```
+
+Which condition matches first, what does the function return, and are later branches checked?
+Confidence: 0–100.
+
+LEARNER'S FIRST COMMITTED ANSWER (verbatim):
+this is the correct order, so the longest prefixes do not get skipped and this condition returns gold and the later branches are correctly not checked becasue it is the logest prefix first, 100
+
+EVALUATION:
+Correct at confidence 100. `VIP-GOLD` is the first true condition, the function returns `gold`,
+and later branches are not evaluated. The learner accurately connected specific-before-general
+ordering to preserving the specific result.
+
+PRIMARY BLOCKER:
+none on single-version branch logic
+
+SCAFFOLD RUNG:
+R3/R5
+
+RECOVERY STATUS:
+single-version bridge passed; fresh paired-version target next
+
+TRANSFER / NEXT RETRIEVAL:
+Use a new domain, four inputs, and require Version A result, Version B result, and changed yes/no
+on a separate line for each input.
+
+---
+
+## EV-P1-BRANCH-145
+
+DATE: 2026-08-28
+PHASE: 1 (fundamentals review; learner limited quiz scope to completed Phases 0–2)
+TAG: branch_precedence, per_item_enumeration, version_comparison
+RESULT: partial
+
+PROMPT (verbatim):
+Fresh target. Read Version A and Version B separately.
+
+Version A:
+
+```python
+def classify_code(code):
+    if code.startswith("TEAM-ADMIN"):
+        return "admin"
+    elif code.startswith("TEAM-"):
+        return "team"
+    elif code.startswith("T"):
+        return "t-code"
+    return "other"
+```
+
+Version B:
+
+```python
+def classify_code(code):
+    if code.startswith("T"):
+        return "t-code"
+    elif code.startswith("TEAM-ADMIN"):
+        return "admin"
+    elif code.startswith("TEAM-"):
+        return "team"
+    return "other"
+```
+
+Complete all four lines:
+
+```text
+1. "TEAM-ADMIN-EAST": A = ? → B = ? → changed yes/no
+2. "TEAM-MEMBER":     A = ? → B = ? → changed yes/no
+3. "TOOLS":           A = ? → B = ? → changed yes/no
+4. "BASIC":           A = ? → B = ? → changed yes/no
+```
+
+Then state the shared branch-order principle and give confidence from 0–100.
+
+LEARNER'S FIRST COMMITTED ANSWER (verbatim):
+it will only reutnr t-code for all 3 adn basic will not change so a change for 1 and 2 
+
+CONFIDENCE FOLLOW-UP (verbatim):
+90
+
+EVALUATION:
+The conclusion is conceptually correct. Version B returns `t-code` for inputs 1–3; input 4 remains
+`other`; and only inputs 1 and 2 change. However, the answer again groups the first three inputs,
+omits every explicit Version A result, does not complete four separate rows, and omits the shared
+principle.
+
+This is procedural enumeration, not a branch-precedence failure. The learner correctly identified
+the changed set that was missed in prior sessions, but has not yet demonstrated the requested
+item-by-item comparison process.
+
+PRIMARY BLOCKER:
+Completing every field per item instead of giving only the aggregate conclusion.
+
+SCAFFOLD RUNG:
+R6 partial; descend to one complete comparison row
+
+RECOVERY STATUS:
+in progress; changed-item set correct, enumeration format not recovered
+
+TRANSFER / NEXT RETRIEVAL:
+Ask only for Version A result, Version B result, and changed yes/no for `TEAM-ADMIN-EAST`.
+
+---
+
+## EV-P1-BRANCH-146
+
+DATE: 2026-08-28
+PHASE: 1 (fundamentals review; learner limited quiz scope to completed Phases 0–2)
+TAG: branch_precedence, per_item_enumeration, version_comparison
+RESULT: correct
+
+PROMPT (verbatim):
+Complete only this one row:
+
+```text
+"TEAM-ADMIN-EAST": Version A = ? → Version B = ? → changed yes/no
+```
+
+Give all three fields, then confidence from 0–100.
+
+LEARNER'S FIRST COMMITTED ANSWER (verbatim):
+yes changede
+verson a admin&#x20;
+verson b t-code
+100
+
+EVALUATION:
+Correct at confidence 100. Version A returns `admin`, Version B returns `t-code`, and the item
+changes. The response order differs from the template but all fields are explicit, so this is not
+treated as a formatting issue.
+
+PRIMARY BLOCKER:
+none on one complete row
+
+SCAFFOLD RUNG:
+R3 one-row comparison
+
+RECOVERY STATUS:
+one row passed; fresh same-rung row next
+
+TRANSFER / NEXT RETRIEVAL:
+Complete the Version A, Version B, and changed fields for `TEAM-MEMBER`.
+
+---
+
+## EV-P1-BRANCH-147
+
+DATE: 2026-08-28
+PHASE: 1 (fundamentals review; learner limited quiz scope to completed Phases 0–2)
+TAG: branch_precedence, per_item_enumeration
+RESULT: correct under learner's no-nitpicking preference
+
+PROMPT (verbatim):
+Complete this row:
+
+```text
+"TEAM-MEMBER": Version A = ? → Version B = ? → changed yes/no
+```
+
+Give all three fields and confidence from 0–100.
+
+LEARNER'S FIRST COMMITTED ANSWER (verbatim):
+a team-
+b t-code&#x20;
+yes change&#x20;
+100
+
+EVALUATION:
+Version A selected the `TEAM-` branch, Version B returned `t-code`, and changed yes was correct.
+The learner subsequently asked that `team-` versus the branch label `team` be treated as a
+non-substantive nitpick. Honor that grading preference and treat the row as correct; do not issue a
+precision-remediation drill.
+
+PRIMARY BLOCKER:
+none under the learner's stated grading preference
+
+SCAFFOLD RUNG:
+R3 one-row comparison
+
+RECOVERY STATUS:
+row accepted as correct; rotate topics
+
+TRANSFER / NEXT RETRIEVAL:
+No label-precision drill. Rotate to Phase 2 data-representation reasoning.
+
+---
+
+## EV-P2-MODEL-148
+
+DATE: 2026-08-28
+PHASE: 2 (fundamentals review; learner limited quiz scope to completed Phases 0–2)
+TAG: named_fields, positional_representation, validation
+RESULT: partial
+
+PROMPT (verbatim):
+Different Phase 2 fundamental: data representation.
+
+```python
+summary = DiffSummary(
+    files_changed=2,
+    lines_added=5,
+    lines_removed=1,
+)
+```
+
+Another programmer proposes representing the same result as:
+
+```python
+summary = [2, 5, 1]
+```
+
+```mermaid
+flowchart LR
+    D[Diff text] --> S[summarize_diff]
+    S --> R[One summary result]
+    R --> F[files_changed]
+    R --> A[lines_added]
+    R --> M[lines_removed]
+```
+
+Reason about the design:
+
+1. Why might named fields be safer or clearer than `[2, 5, 1]`?
+2. Give one realistic mistake a caller could make with the list representation.
+3. Does using `DiffSummary` automatically prevent invalid values such as `lines_added=-5`? Why or
+   why not?
+4. Give one situation where the simple list might still be acceptable.
+5. Confidence: 0–100
+
+LEARNER'S FIRST COMMITTED ANSWER (verbatim):
+it gives you the variable names so you know the order and so that when you call them the order does not matter and it is explicitly clear that the value is labeled, it would think lines added is the third position when it is the seoncd positon, 3. i have no idea that is a cool conecpt, it is acceptable if the function calling it clearnly outlines the order of the list and knows what is where, 80
+
+EVALUATION:
+Parts 1, 2, and 4 are sound. Named fields make meaning explicit and let callers access by name
+rather than remembering positions. The proposed realistic error—treating the third position as
+lines added when it is actually second—directly demonstrates positional fragility. A documented,
+tightly local list can be acceptable, though it remains more brittle.
+
+Part 3 was explicitly unknown. A plain dataclass with integer annotations does not automatically
+enforce nonnegative counts; without added validation, `lines_added=-5` can be constructed. Isolate
+that behavior in the next prediction rather than expanding into a validation lecture.
+
+PRIMARY BLOCKER:
+Distinguishing representation/naming benefits from runtime invariant validation.
+
+SCAFFOLD RUNG:
+R6 design reasoning partial; descend to R1 one construction prediction
+
+RECOVERY STATUS:
+named-field and positional-error reasoning passed; validation remains open
+
+TRANSFER / NEXT RETRIEVAL:
+Show the actual `DiffSummary` declaration and construct it with `lines_added=-5`; predict accepted
+object versus error before running.
+
+---
+
+## EV-P2-ANNOTATION-149
+
+DATE: 2026-08-28
+PHASE: 2 (fundamentals review; learner limited quiz scope to completed Phases 0–2)
+TAG: type_annotation, runtime_validation, dataclass
+RESULT: partial
+
+PROMPT (verbatim):
+Predict without running:
+
+```python
+from dataclasses import dataclass
+
+
+@dataclass
+class DiffSummary:
+    files_changed: int
+    lines_added: int
+    lines_removed: int
+
+
+summary = DiffSummary(
+    files_changed=1,
+    lines_added=-5,
+    lines_removed=0,
+)
+```
+
+1. Does Python create the object, or raise an error?
+2. Does `lines_added: int` mean “must be an integer,” “must be nonnegative,” both, or neither at
+   runtime?
+3. Confidence: 0–100
+
+LEARNER'S FIRST COMMITTED ANSWER (verbatim):
+it creates an object , no it means it could be an integer for the shell to read, 80
+
+EVALUATION:
+Part 1 is correct: the plain dataclass object is created with `lines_added=-5`. Part 2 is partial.
+The shell is not involved. `: int` is a type annotation for humans and static/tooling checks;
+ordinary Python does not automatically enforce integer type or nonnegative range at runtime. Of
+the supplied choices, the runtime answer is neither.
+
+PRIMARY BLOCKER:
+Type annotations are being connected to the shell rather than understood as metadata for readers
+and tools, separate from runtime validation.
+
+SCAFFOLD RUNG:
+R1 partial; remain at R1 with one annotated field and a string value
+
+RECOVERY STATUS:
+in progress
+
+TRANSFER / NEXT RETRIEVAL:
+Create an `int`-annotated dataclass field with a string and predict whether plain Python accepts it.
+
+---
+
+## EV-P2-ANNOTATION-150
+
+DATE: 2026-08-28
+PHASE: 2 (fundamentals review; learner limited quiz scope to completed Phases 0–2)
+TAG: type_annotation, runtime_validation, dataclass
+RESULT: correct
+
+PROMPT (verbatim):
+Predict without running:
+
+```python
+from dataclasses import dataclass
+
+
+@dataclass
+class Counter:
+    amount: int
+
+
+counter = Counter(amount="five")
+```
+
+In ordinary Python, with no extra validation library:
+
+1. Is the object created or rejected?
+2. What value does `counter.amount` hold?
+3. Does `: int` automatically convert `"five"` into an integer?
+4. Confidence: 0–100
+
+LEARNER'S FIRST COMMITTED ANSWER (verbatim):
+created, "five" , no , 80
+
+EVALUATION:
+Correct at confidence 80. The object is created, the field holds the unchanged string `"five"`,
+and the annotation performs no automatic conversion.
+
+PRIMARY BLOCKER:
+none at R1
+
+SCAFFOLD RUNG:
+R1
+
+RECOVERY STATUS:
+isolated behavior passed; fresh same-rung near-transfer next
+
+TRANSFER / NEXT RETRIEVAL:
+Use a different wrong-type value, then climb to runtime invariant design.
+
+---
+
+## EV-P2-ANNOTATION-151
+
+DATE: 2026-08-28
+PHASE: 2 (fundamentals review; learner limited quiz scope to completed Phases 0–2)
+TAG: type_annotation, runtime_validation, dataclass
+RESULT: correct
+
+PROMPT (verbatim):
+```python
+from dataclasses import dataclass
+
+
+@dataclass
+class Counter:
+    amount: int
+
+
+counter = Counter(amount=[1, 2])
+
+print(counter.amount)
+```
+
+Predict without running:
+
+1. Is `counter` created or rejected?
+2. If created, what does `counter.amount` contain?
+3. What appears on screen?
+4. Confidence: 0–100.
+
+LEARNER'S FIRST COMMITTED ANSWER (verbatim):
+created&#x20;
+creates the list it contains [1, 2]
+the list&#x20;
+60
+
+EVALUATION:
+Correct at confidence 60. The object is created, the field holds `[1, 2]`, and printing the field
+displays the list. The phrase "creates the list" is accepted as referring to evaluating the list
+literal; no representation-formatting detail is graded.
+
+PRIMARY BLOCKER:
+none at R1
+
+SCAFFOLD RUNG:
+R1 near-transfer
+
+RECOVERY STATUS:
+same-rung near-transfer passed; climb to runtime-contract design
+
+TRANSFER / NEXT RETRIEVAL:
+State which candidate DiffSummary values should be accepted or rejected under a nonnegative-integer
+contract and what must be checked beyond annotations.
+
+---
+
+## EV-P2-VALIDATION-152
+
+DATE: 2026-08-28
+PHASE: 2 (fundamentals review; learner limited quiz scope to completed Phases 0–2)
+TAG: runtime_validation, type_invariant, range_invariant
+RESULT: correct
+
+PROMPT (verbatim):
+Suppose the contract says:
+
+> Every `DiffSummary` count must be an integer greater than or equal to zero.
+
+Evaluate each candidate separately:
+
+```text
+A. files_changed=1, lines_added=2,   lines_removed=0
+B. files_changed=1, lines_added=-2,  lines_removed=0
+C. files_changed=1, lines_added="2", lines_removed=0
+```
+
+For each candidate:
+
+1. Accept or reject?
+2. If rejected, which rule did it violate?
+
+Then state the two checks runtime validation must perform beyond the annotations. Confidence:
+0–100.
+
+LEARNER'S FIRST COMMITTED ANSWER (verbatim):
+a. accepted
+b. failed has a negative number
+c. failed has a string&#x20;
+100 
+
+EVALUATION:
+Correct at confidence 100. A satisfies both rules. B violates the nonnegative-range rule. C
+violates the integer-type rule. Although the two checks were not repeated as a separate final
+sentence, the item explanations explicitly identify both, so the answer is accepted without a
+formatting drill.
+
+PRIMARY BLOCKER:
+none
+
+SCAFFOLD RUNG:
+R4 design application
+
+RECOVERY STATUS:
+runtime type-versus-range validation distinction passed
+
+TRANSFER / NEXT RETRIEVAL:
+Rotate to Phase 2 `splitlines()` behavior and string immutability.
+
+---
+
+## EV-P2-SPLITLINES-153
+
+DATE: 2026-08-28
+PHASE: 2 (fundamentals review; learner limited quiz scope to completed Phases 0–2)
+TAG: splitlines, string_immutability, list_mutation
+RESULT: correct
+
+PROMPT (verbatim):
+Predict without running:
+
+```python
+text = "alpha beta\ngamma"
+lines = text.splitlines()
+lines.append("delta")
+```
+
+```mermaid
+flowchart LR
+    T[text string] --> S[splitlines]
+    S --> L[new lines list]
+    L --> A[append delta]
+```
+
+Answer conceptually; exact punctuation is not being graded:
+
+1. What type of object is passed into `splitlines()`?
+2. What items are in `lines` immediately after `splitlines()`?
+3. What items are in `lines` after `append("delta")`?
+4. Does `text` change? What does it still contain?
+5. Does `splitlines()` print anything by itself?
+6. Which operation mutates an existing object?
+7. Confidence: 0–100.
+
+LEARNER'S FIRST COMMITTED ANSWER (verbatim):
+text stays the same, lines = [alpha beta, gamma, delta] strings are passed into splitlines and on the \n it turns them into a lsit with each string in the list speerated by where the \n is, immediatly after lines is [aplpha beta, gamma], it does not print anything by itself, append only splitlines creates the list it does not mutate the strings 100
+
+EVALUATION:
+Fully correct at confidence 100. The learner identified the string input, newline boundary rather
+than space splitting, the intermediate and final list contents, no implicit printing, the original
+string remaining unchanged, `splitlines()` creating a new list, and `append()` as the sole
+mutation. Typos and representation punctuation are ignored per preference.
+
+PRIMARY BLOCKER:
+none
+
+SCAFFOLD RUNG:
+R6 composed transfer
+
+RECOVERY STATUS:
+the `splitlines` misconception family and its connection to string immutability are recovered at
+target level for this review
+
+TRANSFER / NEXT RETRIEVAL:
+Delayed retrieval later. Rotate to a loop accumulator bug using `= +1` versus adding to the old
+count.
+
+---
+
+## EV-P1-ACCUMULATOR-154
+
+DATE: 2026-08-28
+PHASE: 1 (fundamentals review; learner limited quiz scope to completed Phases 0–2)
+TAG: accumulator_update, assignment_vs_augmented_assignment
+RESULT: partial; correct fix supplied independently, mechanism remediation deferred at learner-requested session close
+
+PROMPT (verbatim):
+Got it—last question before dinner.
+
+Predict without running:
+
+```python
+labels = ["added", "context", "added", "added"]
+count = 0
+
+for label in labels:
+    if label == "added":
+        count = +1
+
+print(count)
+```
+
+```mermaid
+flowchart LR
+    S[count starts 0] --> A1[first added<br/>count = ?]
+    A1 --> C[context<br/>count = ?]
+    C --> A2[second added<br/>count = ?]
+    A2 --> A3[third added<br/>count = ?]
+    A3 --> O[printed result = ?]
+```
+
+Answer:
+
+1. Track `count` after each of the four loop iterations.
+2. What does the program print?
+3. What is the bug in `count = +1`?
+4. What should that line be if the goal is to count every `"added"` label?
+5. Confidence: 0–100.
+
+LEARNER'S FIRST COMMITTED ANSWER (verbatim):
+first loop&#x20;
+coutn = 1
+second loop
+count=1
+third loop
+count =2
+thrid look&#x20;
+count = 3
+it prints 3
+it needs a spce so count += 1
+80
+
+EVALUATION:
+Partial. The learner independently supplied the correct replacement line, `count += 1`, in the
+first committed answer. The four predicted post-iteration states and output were incorrect: the
+states are `1, 1, 1, 1`, and the program prints `1`.
+`count = +1` assigns the positive integer `1` each time the condition matches; it does not use the
+old count. The supplied fix is correct, but not because of spacing: `+=` is a distinct augmented-
+assignment operator whose right-hand `1` is added to the current value.
+
+PRIMARY BLOCKER:
+`= +1` is being read as an increment operation, and `+=` is being modeled as a spacing variant
+rather than a distinct operator.
+
+SCAFFOLD RUNG:
+R6 target failed; next session must descend to R0 operator recognition
+
+RECOVERY STATUS:
+correct fix independently produced; mechanism and trace not remediated. The learner explicitly
+designated this as the last question before dinner, so stop the quiz rather than issuing the
+mandatory simpler follow-up tonight.
+
+TRANSFER / NEXT RETRIEVAL:
+Next session: compare `x = +1` and `x += 1` as two isolated syntax forms, then use one sequential
+near-transfer before returning to a loop accumulator.

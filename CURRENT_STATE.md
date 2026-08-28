@@ -2336,3 +2336,357 @@ fresh case, reverse direction a step that SUCCEEDS silently, prints nothing, and
 
 Do not re-ask the CI question before the convention is stable. The independence idea cannot be
 tested through a convention the learner is still inverting.
+
+## QUIZ CONTINUATION — 2026-08-28
+
+The learner explicitly limited the quiz to fundamentals from completed Phases 0–2. Do not test
+Phase 3 material in this quiz and do not begin Phase 4.
+
+Evidence `EV-P1-EXIT-102`: cold retrieval of the shell convention was correct. The learner chose
+`0` as success at confidence 70 without running anything. The convention is now stable for this
+rung; next give one same-rung silent-success near-transfer before returning to the larger
+output-versus-status problem.
+
+Evidence `EV-P1-EXIT-103`: the silent-success values were both predicted correctly (`0`, nothing
+on screen), but the learner explicitly said the scenario was not understood. Do not mark the
+independence concept passed yet. Show a small two-channel diagram and require a teach-back. The
+learner requested pictures for harder questions; diagrams are welcome after commitment or when
+they do not expose the answer.
+
+Evidence `EV-P1-EXIT-104`: teach-back passed. The learner explained that a command can print
+nothing while its hidden status tells the shell it succeeded, confidence 70. The confidence tag
+needed one reminder. Next use the partially scaffolded reverse direction: a successful silent
+command that an output-only rule marks incorrectly.
+
+Evidence `EV-P1-EXIT-105`: verdicts correct at confidence 80—the output-only rule says FAIL while
+status `0` means PASS. A new heuristic surfaced: assuming silence means success. This is unsafe;
+screen silence still cannot determine status. Descend to one R1 problem where screen text and
+status conflict, asking which channel controls the shell's judgment.
+
+Evidence `EV-P1-EXIT-106`: R1 recovery correct at confidence 80. With screen text `Completed` but
+status `1`, the learner classified failure and said the status should be trusted over the text.
+Give one same-rung near-transfer with alarming text and status `0` before climbing.
+
+Evidence `EV-P1-EXIT-107`: opposite-direction R1 transfer passed at confidence 70. Status `0` was
+correctly treated as the shell/CI success verdict even though the output contained `ERROR`; the
+learner also appropriately said the text deserves investigation. Give one final fresh
+target-level two-command case, item by item, then rotate to another Phase 0–2 fundamental.
+
+Evidence `EV-P1-EXIT-108`: fresh target-level transfer passed at confidence 80. The learner
+evaluated both commands separately and correctly rejected the teammate's output-only verdict in
+both directions. `output_and_exit_status_are_independent` is remediated for this review. Retrieve
+later on a delayed new surface; rotate now to `print_vs_return`.
+
+Evidence `EV-P1-RETURN-109`: `print_vs_return` mechanism was correct at confidence 80. The learner
+identified printed `GO`, missing return as `None`, and appended `None`, and correctly said it is
+not equal to `"GO"`. The final printed Boolean was instead written as `exit code 1`, likely
+interference from the preceding topic. Descend to R1: print one list-equality expression with no
+function or shell context.
+
+Evidence `EV-P1-EQUALITY-110`: R1 recovery correct at confidence 80. `[None] == ["GO"]` was
+correctly predicted to print `False`, with no exit-status substitution. Give one same-rung
+near-transfer testing whether list equality compares contents in order.
+
+Evidence `EV-P1-EQUALITY-111`: wrong at confidence 80. The learner said lists with the same
+members in different orders compare equal and explicitly stated that `==` checks contents but not
+order. Primary blocker: list equality is being modeled as unordered membership. Simplify to one
+corresponding pair in plain language; do not repeat a whole-list problem yet.
+
+Evidence `EV-P1-EQUALITY-112`: isolated-pair recovery correct at confidence 100. The learner said
+`"red" == "blue"` is false and restated that list equality requires the same contents in the same
+order. Give one fresh single-pair near-transfer, then reintroduce a whole list.
+
+Evidence `EV-P1-EQUALITY-113`: fresh single-pair near-transfer correct at confidence 100.
+`"green" == "green"` was correctly identified as true because the strings are the same. Climb to
+a two-position whole-list comparison and require one answer per position before the overall result.
+
+Evidence `EV-P1-EQUALITY-114`: ordered list equality recovered at confidence 100. Both positions
+and the whole-list result were conceptually correct. Exact screen output was written lowercase
+`false` instead of Python's `False`; this is transcription/capitalization, not an equality-model
+failure. Isolate exact Boolean spelling at R0 before returning to `print_vs_return`.
+
+Evidence `EV-P1-BOOLEAN-115`: exact Boolean capitalization corrected at confidence 100. The
+learner stated that Python uses capital initial letters in `False` and `True`. Return now to a fresh
+target-level `print_vs_return` trace with the call value stored inside a list.
+
+Evidence `EV-P1-RETURN-116`: `print_vs_return` mechanism correct at confidence 100—the learner
+said `mark()` prints `saved`, has no explicit return, contributes `None`, and leaves `None` in the
+list. Exact final output omitted the list brackets, and an unrequested exit code was inserted.
+Descend to R1: print `[None]` directly with no function or shell context.
+
+Evidence `EV-P1-LIST-117`: R1 exact-output check wrong at confidence 30. `box = [None]; print(box)`
+was predicted as bare `None`, losing the list brackets. Primary blocker is container versus item,
+not `None` or return behavior. Descend to R0 and ask what object the assignment creates before
+doing any printing.
+
+The learner then corrected the output to `[None]` at confidence 80 and explicitly noted, "you
+hinted at it." Preserve this as an assisted correction, not an independent pass. Give a fresh
+one-item numeric list with no output hint.
+
+Evidence `EV-P1-LIST-118`: independent R1 recovery correct at confidence 100. `numbers = [7];
+print(numbers)` was predicted exactly as `[7]`, preserving the list brackets. Give one fresh
+same-rung list-output near-transfer, then rebuild toward the printing-function target.
+
+Evidence `EV-P1-LIST-119`: two-item list container and values were correct, but the first answer
+`[3,8]` omitted the default space. After a reminder that spacing would be evaluated, the learner
+self-corrected at confidence 100 and said a space belongs after the comma. Treat as partial and
+descend to R0 recognition between two exact spellings.
+
+Evidence `EV-P1-LIST-120`: R0 recognition correct at confidence 100. The learner selected the
+spaced list representation and explicitly requested no more nitpicking and a move to another
+Phase 0–2 topic. Honor this: stop formatting drills and only flag precision when it changes program
+meaning or is itself the target. Rotate to Phase 2 summary-model fundamentals, especially the
+still-open individual values from `EV-P2-MODEL-060`.
+
+Evidence `EV-P2-MODEL-121`: fresh Phase 2 summary values all correct at confidence 80:
+`files_changed=1`, `lines_added=2`, `lines_removed=1`. This closes the individual-value gap from
+`EV-P2-MODEL-060`. Explanation was partial: `cake` was correctly named context, but "everything
+else is metadata" grouped added, removed, and file-header lines incorrectly. This matches the
+known procedural grouping pattern. Isolate `-tea` and ask for its label and counter; do not
+re-teach the model.
+
+Evidence `EV-P2-MAP-122`: isolated mapping correct at confidence 100. `-tea` was labelled removed
+and mapped to `lines_removed`. Give one fresh same-rung added-line mapping before climbing back to
+per-item enumeration.
+
+Evidence `EV-P2-MAP-123`: added-line near-transfer correct at confidence 100. The learner
+explicitly said the questions had become too simple. Fade the scaffold now: stop one-line mapping
+questions and rotate to a harder composed Phase 0–2 trace on mutation versus new values.
+
+Evidence `EV-P2-MUTATION-124`: composed mutation trace paused for syntax-only remediation. The
+learner correctly said at confidence 100 that `word.upper()` does not change `word`, but explicitly
+has not learned `sorted(...)`. Do not evaluate the list portion or continue the larger trace yet.
+Explain only `sorted(list)` and give one R1 example tracking the original and returned list.
+
+Evidence `EV-P2-SORTED-125`: R1 `sorted(...)` syntax passed at confidence 100. The learner
+correctly kept `numbers` as `[2, 1]` and assigned `[1, 2]` to `ordered`, then asked about `.sort()`.
+Teach `.sort()` in isolation next: it mutates the list and its call value is `None`.
+
+Evidence `EV-P2-SORT-126`: partial at confidence 100. The learner correctly intended that
+`numbers.sort()` changes `numbers` into sorted order, but said `result` receives that same list.
+Primary blocker: conflating the mutated object with the method's call value. Ignore the extra
+comma as a harmless typo. Descend to R0 and ask only whether the assignment receives the list or
+`None`.
+
+Evidence `EV-P2-SORT-127`: R0 choice wrong at confidence 40 after `.sort()` returning `None` had
+already been taught. The learner chose the sorted list and remained unsure about assignment and
+later printing. Enter worked-example rescue: use neighboring `.append()` to draw mutation and
+return as separate paths, then require teach-back before any missing-step or fresh problem.
+
+Evidence `EV-P2-MUTATION-128`: worked-example teach-back failed at confidence 80. Despite the
+diagram explicitly separating mutation and return, the learner said `items` and `result` point to
+the same list and predicted printing `result` shows the list. Primary blocker is now assignment:
+the left-hand name is not being bound to the right-hand call value. Descend below method calls to
+R0 `result = None` before rebuilding.
+
+Evidence `EV-P1-NONE-129`: partial at confidence 80. The learner correctly predicted that
+`print(result)` displays `None`, but said `result` has no value. Clarify that `None` is a real
+Python value representing absence; the name exists and is bound to it. Stay at R0 and retrieve
+that distinction before rebuilding assignment and method return.
+
+Evidence `EV-P1-NONE-130`: R0 recovery correct at confidence 100. The learner stated that the name
+`result` exists and its value is `None`. Give one short assignment near-transfer, then rebuild
+toward the mutation/return target.
+
+Evidence `EV-P1-NONE-131`: bridge answer partial at confidence 100. `copy` correctly received
+`None`, but the learner called `None` a string. This is a meaningful type distinction, not
+formatting: unquoted `None` is the absence value; `"None"` is a string. Descend to R0 recognition.
+
+Evidence `EV-P1-ASSIGN-132`: teach-back correct at confidence 100. The learner's core model is that
+assignment binds the new name to the same value/object held by the right-hand name. Clarified that
+the shared object here is `None`, not the string `"None"`; mutable-list consequences differ from
+immutable strings/None. Resume worked-example rescue at step C: supply the changed list state and
+ask for the one missing return value from `append`.
+
+Evidence `EV-P1-MUTABILITY-133`: object/mutability transfer correct at confidence 100. The learner
+kept the old lowercase string through `copy`, rebound `word` to uppercase, and recognized that both
+names for the mutable list observe the appended item. Resume worked-example step C and isolate the
+return value of `append`.
+
+Evidence `EV-P2-APPEND-134`: worked-example step C passed at confidence 90. The learner correctly
+said `append` mutates `items` and assigns `None` to `returned`. Give the required fresh unaided
+step D using `.sort()`, tracking both the changed list and the assigned call value.
+
+Evidence `EV-P2-SORT-135`: fresh worked-example step D passed at confidence 80. The learner
+correctly said `.sort()` changes `numbers` into sorted order while assigning `None` to `returned`.
+The learner asked whether `.append()` and `.sort()` share this behavior because both are in
+Python's library. Explain the API-contract distinction: common mutating-list-method convention,
+not a universal library behavior. The original composed trace still needs a fresh target-level
+return later.
+
+Evidence `EV-P2-POP-136`: fresh counterexample correct at confidence 100. The learner tracked
+`pop()` mutating the list to `['a']` while returning `'b'`. This confirms mutation and return are
+separate API-contract choices. Return now to a fresh composed target using `.upper()`, `sorted()`,
+and `.sort()`.
+
+Evidence `EV-P2-MUTATION-137`: composed target partial at confidence 100. String values, sorted
+contents, separate list identities, and `.sort()` as the sole mutation were all correct. The only
+miss was saying `.sort()` assigns the sorted list rather than `None`; the micro recovery did not
+survive composition. Ignore missing list brackets per preference. Descend only the failed return
+edge to a fresh R1 problem, then climb with one added operation.
+
+After evaluation, the learner corrected `returned` to `None` at confidence 80. This is assisted,
+not independent. Proceed with the planned fresh isolated `.sort()` return check.
+
+Evidence `EV-P2-SORT-138`: fresh isolated `.sort()` recovery correct at confidence 100. The
+learner independently kept the mutation and `None` return separate. Climb exactly one rung by
+adding `sorted(...)` in the same short trace before returning to full composition.
+
+Evidence `EV-P2-SORT-139`: two-operation composition passed at confidence 100. The learner kept
+`scores` and `snapshot` as separate list objects with equal contents, identified `.sort()` as the
+mutation, and assigned `None` to `outcome`. Give one fresh full target by adding an immutable string
+operation.
+
+Evidence `EV-P2-MUTATION-140`: fresh full composition passed at confidence 100. String
+immutability, new-list creation, separate list identity, in-place mutation, and `.sort()` returning
+`None` all survived together. This completes the target-level recovery. Rotate to the owed Phase 1
+branch-precedence enumeration and require one line per input.
+
+Evidence `EV-P1-BRANCH-141`: partial at confidence 100. All reordered outputs were correct, but the
+learner grouped inputs 1–3 and omitted the original outputs, changed yes/no decisions, and
+explanation. This is the known procedural enumeration gap, not a precedence-model failure. Do not
+re-teach. Isolate `"PRO-ANNUAL-TEAM"` in the original function and ask for its first true branch.
+
+Evidence `EV-P1-BRANCH-142`: wrong at confidence 100. Even with one input and "original function
+only" stated twice, the learner answered about the reordered version. This is version selection /
+prompt reading, not precedence logic. Descend to the single Boolean
+`"PRO-ANNUAL-TEAM".startswith("PRO-ANNUAL")`.
+
+Evidence `EV-P1-PREFIX-143`: isolated prefix condition correct at confidence 100. The learner
+correctly said the string starts with `PRO-ANNUAL`. Give one fresh single-version bridge in a new
+domain to check first-match selection before returning to paired versions.
+
+Evidence `EV-P1-BRANCH-144`: fresh single-version bridge correct at confidence 100. The learner
+selected the specific `VIP-GOLD` branch, returned `gold`, and said later branches are skipped.
+Return to a fresh paired-version target with four inputs and enforce one complete line per input.
+
+Evidence `EV-P1-BRANCH-145`: paired-version target partial at confidence 90. The learner's
+aggregate conclusion was correct—Version B gives `t-code` for inputs 1–3, `BASIC` stays unchanged,
+and only items 1 and 2 change. But Version A results and four separate rows were omitted again.
+This is procedural enumeration, not branch logic. Isolate one complete A/B/change row.
+
+Evidence `EV-P1-BRANCH-146`: one complete comparison row passed at confidence 100. For
+`TEAM-ADMIN-EAST`, the learner explicitly supplied Version A `admin`, Version B `t-code`, and
+changed yes. Field order is not graded. Give one fresh same-rung row for `TEAM-MEMBER`.
+
+Evidence `EV-P1-BRANCH-147`: Version A branch selection, Version B `t-code`, and changed yes were
+correct at confidence 100. The learner explicitly asked that `team-` versus `team` be disregarded
+as a nitpick. Honor that preference: accept the row and do not issue a label-precision drill.
+Rotate to a different Phase 2 fundamental.
+
+Evidence `EV-P2-MODEL-148`: Phase 2 representation reasoning partial at confidence 80. Named-field
+clarity, positional mix-up risk, and a limited acceptable case for a documented list were all
+explained correctly. Automatic validation was explicitly unknown. Isolate the actual plain
+`DiffSummary` declaration with a negative value and ask whether construction succeeds; do not run
+before prediction.
+
+Evidence `EV-P2-ANNOTATION-149`: partial at confidence 80. The learner correctly predicted that a
+plain dataclass accepts `lines_added=-5`, but connected `: int` to the shell. Clarify that the shell
+is uninvolved; annotations guide humans and checking tools and do not automatically enforce type
+or range in ordinary Python. Give one R1 string-in-an-int-annotated-field prediction.
+
+Evidence `EV-P2-ANNOTATION-150`: R1 recovery correct at confidence 80. The learner predicted that
+plain Python creates the dataclass, stores `"five"` unchanged, and performs no conversion from the
+`int` annotation. Give one fresh same-rung wrong-type value, then climb to the runtime-validation
+design question.
+
+Evidence `EV-P2-ANNOTATION-151`: fresh wrong-type near-transfer correct at confidence 60. The
+learner predicted that a plain `int`-annotated dataclass accepts `[1, 2]`, stores it, and prints the
+list. Climb to plain-English runtime-contract design: classify candidate count sets as acceptable
+or rejectable and name the checks annotations do not perform.
+
+Evidence `EV-P2-VALIDATION-152`: runtime-contract design passed at confidence 100. The learner
+accepted the valid counts, rejected the negative count for range, and rejected the string for
+type. These explanations supply both required checks, so do not demand a redundant summary. Rotate
+to the `splitlines()` family and string immutability.
+
+Evidence `EV-P2-SPLITLINES-153`: full composed transfer passed at confidence 100. The learner
+correctly modeled string input, newline-only splitting, no implicit printing, a new returned list,
+unchanged source string, and `append()` as the mutation. The `splitlines` misconception family is
+recovered at target level for this review. Rotate to a harder loop-accumulator bug.
+
+---
+
+# SESSION CLOSE — 2026-08-28, fundamentals quiz before dinner
+
+## Scope
+
+The learner explicitly limited this quiz to completed Phases 0–2. Phase 3 was not tested, Phase 4
+was not started, and no product code was changed.
+
+## Quiz recording rule from the learner
+
+For future review/quiz sessions, append the verbatim questions and learner answers to
+`QUIZZES.md` as the session proceeds. Continue using `learning/LEARNING_LEDGER.md` for evaluation,
+misconceptions, confidence, and remediation chains.
+
+## Code verification
+
+At session start, all three suites were independently run and passed:
+
+```text
+python test_classify.py
+python test_summarize.py
+python test_session.py
+```
+
+## Strong recoveries this session
+
+```text
+output_vs_exit_status       output and status are independent; status controls shell/CI verdict
+print_vs_return             printing function with no return contributes None
+list_equality               compares contents in order
+DiffSummary values          files_changed / lines_added / lines_removed computed on fresh diff
+mutation_vs_return          append/sort mutate and return None; pop mutates and returns removed item
+immutable_vs_mutable        string rebinding versus shared-list mutation
+sorted_vs_sort              new list versus in-place mutation; full composed transfer passed
+splitlines                  string input, newline splitting, new list, no print, source unchanged
+annotations_vs_validation   annotations do not enforce type/range; runtime needs both checks
+```
+
+The learner requested that harmless formatting and label transcription not be graded. Continue to
+ignore punctuation/spacing unless it changes the concept or runtime value.
+
+## Still developing
+
+```text
+per_item_enumeration        aggregate branch conclusions are usually right, but requested A/B/change
+                            rows are repeatedly omitted. One complete row passed; the four-row target
+                            was not independently completed.
+
+sort_return_under_load      recovered through worked example and full composed transfer. Retrieve
+                            after a delay; do not drill immediately.
+
+confidence_tags             repeatedly omitted and supplied after reminder.
+```
+
+## New open blocker
+
+Evidence `EV-P1-ACCUMULATOR-154`, confidence 80:
+
+```text
+count = +1    was read as incrementing the old count
+count += 1    was described as a spacing correction
+```
+
+Actual loop states were `1, 1, 1, 1`, not `1, 1, 2, 3`. Remediation was deliberately deferred
+because the learner said this was the last question before dinner.
+
+Important correction: the learner independently supplied `count += 1` in the first answer. The
+fix itself is correct and unassisted. What remains open is why `+=` works, why it is not a spacing
+variant, and tracing the buggy `= +1` loop.
+
+NEXT SESSION MUST BEGIN HERE:
+
+```text
+R0  distinguish `x = +1` from `x += 1` as separate operators/forms
+R1  one sequential near-transfer
+R3  one small conditional accumulator
+R6  fresh loop accumulator target
+```
+
+Do not treat this wrong attempt as a phase failure.
+
+## Next implementation step
+
+None. The learner requested quiz-only work on Phases 0–2. Phase 4 remains out of scope.
