@@ -1625,3 +1625,430 @@ the doctring enforces nothing it is annotation
 **Final outcome:** correct after remediation, with terminology refinement. The docstring is
 documentation rather than a type annotation; neither documentation nor a plain annotation validates
 at runtime. The fresh R5 target is recovered. Phase 5 remains in progress.
+
+### BuildLens cross-module boundary application
+
+**Prompt:** trace `summarize_diff(42)`, locate the first failing operation and module, determine
+whether the classifier is reached, and explain the boundary contract.
+
+**Learner answer (verbatim):**
+
+```text
+it does not even get to the classify becsue it satrts with a splitlines() and you cannot split the lines for a integer, while it is documentation it still holds true for the function ittself, this is in summarizediff() 100
+```
+
+**Outcome:** correct at confidence 100. The integer fails at `diff_text.splitlines()` inside
+`summarize_diff()`/`summarize.py`, so iteration and `classify_diff_line()` are never reached. The
+documented contract states the boundary expectation but does not enforce it. `EV-P5-BOUNDARY-195`.
+
+### Different-surface boundary transfer
+
+The roster transfer was paused when the learner asked what `.strip()`, `.title()`, and `.split()`
+mean. Syntax-only help defined the three string methods and left the target unanswered.
+
+**Strip micro-answer (verbatim):**
+
+```text
+so clean is now "tea" 100
+```
+
+**Original-string follow-up (verbatim):**
+
+```text
+i would assume it does not change, " tea ",40
+```
+
+**Outcome:** the transformed result and non-mutation principle are correct. The displayed original
+shows one surrounding space instead of the literal's two; use one clear fresh example before moving
+to the other requested methods. `EV-P5-BOUNDARY-TRANSFER-196` remains open.
+
+**Fresh strip answer (verbatim):**
+
+```text
+text stays " mint " and clean is "mint", 100
+```
+
+**Outcome:** correct at confidence 100. `.strip()` is stable; continue with `.title()` only.
+
+**Title micro-answer (verbatim):**
+
+```text
+so name does not change and formatted = "Ada Lovelave", 80
+```
+
+**Outcome:** concept correct at confidence 80. Original-string preservation and title-casing are
+correct; `Lovelave` is a harmless typing slip for `Lovelace`. One fresh `.title()` check remains.
+
+**Fresh title answer (verbatim):**
+
+```text
+label green tea
+heading Green Tea, 100
+```
+
+**Outcome:** correct at confidence 100. `.title()` is stable; continue with `.split(",")` only.
+
+**Split micro-answer (verbatim):**
+
+```text
+text = "ada,lin"
+names = [ada, lin] 100
+```
+
+**Outcome:** conceptually correct at confidence 100. The content is right; exact Python
+representation needs quoted string elements (`["ada", "lin"]`), and the requested outer type was
+omitted. Complete the type distinction before a fresh split.
+
+**Type follow-up (verbatim):**
+
+```text
+fine ["ada","lin"] i was being lazy, 100
+```
+
+**Outcome:** accepted at confidence 100. The exact representation demonstrates a list containing
+strings. Treat the earlier omission as response compression, not a conceptual gap.
+
+**Fresh split answer (verbatim):**
+
+```text
+code = ["A", "B"] it is a list object now, 100
+```
+
+**Outcome:** correct at confidence 100. `codes` is a list of two strings; singular `code` is a
+harmless naming slip. Combine the two chained transformations next.
+
+**Chained-method answer (verbatim):**
+
+```text
+name does not change and normalized = first "ada lovelace" then = "Ada Lovelace" , 100
+```
+
+**Outcome:** correct at confidence 100. Both chained returns and original-string preservation are
+stable. Return to the unchanged roster boundary target.
+
+**Target-return answer (verbatim):**
+
+```text
+split fails first, it only can input strings attribute error, same issue with 42 it is the wrong objrct tyoe, nothing esle gets reassigned , 80\\
+```
+
+**Outcome:** strong partial at confidence 80. The first unsupported operation, exception category,
+wrong-object-type cause, BuildLens connection, and absence of downstream assignment are correct.
+The no-validation guarantee and shared contract principle need one explicit sentence.
+
+**Principle-completion answer (verbatim):**
+
+```text
+in: a string variable
+out: a lsit&#x20;
+there needs to be more added i am not sure hwat, 70
+```
+
+**Outcome:** incorrect/partial at confidence 70. Input/output shape is relevant but does not explain
+runtime enforcement or failure. Descend to one true/false enforcement statement.
+
+**R1 answer (verbatim):**
+
+```text
+false, 100
+```
+
+**Explanation follow-up (verbatim):**
+
+```text
+because a function in that function like split() that needs a specific variable type will throw an attribute error, the function is created with a certain input in mind to give a certain output, 80
+```
+
+**Outcome:** correct at confidence 80 after follow-up. An expected contract can be unenforced, while
+an incompatible value still fails at an unsupported operation. One fresh operation-level transfer
+remains.
+
+**Fresh operation transfer answer (verbatim):**
+
+```text
+i have no idea what happens and i do not know what the priciples even are, 20
+```
+
+**Outcome:** incorrect at confidence 20 because unfamiliar one-item tuple syntax contaminated the
+contract transfer. Paused the principle and switched to syntax-only tuple help.
+
+**Tuple-syntax answer (verbatim):**
+
+```text
+a tuple but what is that, a is a string , 40
+```
+
+**Outcome:** partial at confidence 40. Tuple and string element are recognized; the learner asks for
+the tuple concept and omits the count. Explained tuple as an ordered fixed collection without
+`.append()`, then kept the next exercise at representation-reading level.
+
+**Two-item tuple answer (verbatim):**
+
+```text
+so ican think about it like a tuple is a fixed list, so if i want to change something in a tuple i have to create a new tuple, it is a tuple that contains 2 integer objects
+```
+
+**Outcome:** correct; confidence omitted. The learner understands the ordered fixed-collection
+analogy and identifies both integer elements. Confirm the one-item syntax next.
+
+**One-item tuple answer (verbatim):**
+
+```text
+tuple, so a tuple is signified by the () and the comma after the first entry?
+```
+
+**Outcome:** partial; confidence omitted. Tuple identification is correct. Clarified that the comma,
+not parentheses alone, creates a one-item tuple. Direct comparison remains.
+
+**Direct-comparison responses (verbatim):**
+
+```text
+ok so just look for the comma
+```
+
+```text
+and no square brackets
+```
+
+**Outcome:** the learner identifies comma and square-bracket cues but does not state the requested
+types or confidence. Clarified list/string/tuple syntax and moved to one fresh three-way check.
+
+**Three-way identification (verbatim):**
+
+```text
+x = list&#x20;
+y string
+z tuple
+```
+
+**Confidence follow-up:** 100.
+
+**Outcome:** correct at confidence 100. Tuple representation is stable; return to the paused tuple
+operation.
+
+**Tuple append answer (verbatim):**
+
+```text
+the tuple gets replaced by a tuple with (a,b), 10
+```
+
+**Outcome:** incorrect at confidence 10. Tuples have no `.append()` method; the call raises
+`AttributeError` and does not construct or rebind a new tuple. Descend to method availability only.
+
+**Method-availability answer (verbatim):**
+
+```text
+you can only append lists
+```
+
+**Outcome:** correct; confidence omitted. Lists provide `.append()`; tuples do not. Contrast with
+explicit tuple reassignment next.
+
+**Confidence follow-up:** 100.
+
+**Explicit reassignment answer (verbatim):**
+
+```text
+it does succed you are changing the tuple that items is pointing at, 50
+```
+
+**Outcome:** correct success prediction with terminology refinement at confidence 50. Reassignment
+creates a new tuple and changes the name's binding; it does not change the original tuple. Verify
+with a second name next.
+
+**Original-preservation answer (verbatim):**
+
+```text
+original stasy the same and items = (a,b) 100
+```
+
+**Outcome:** correct at confidence 100. The original tuple is unchanged and `items` points to a new
+tuple. Missing quotes are harmless formatting here. Return to a fresh unsupported operation.
+
+**Side clarification:** the learner asked for the analogous explicit reassignment with lists.
+Explained that `items = ["a", "b"]` creates a new list and rebinds only `items`, while
+`items.append("b")` would mutate a shared list.
+
+**Fresh tuple-operation answer (verbatim):**
+
+```text
+attribute error 100
+```
+
+**Outcome:** correct error prediction at confidence 100. The unchanged final `point` binding remains
+to be stated.
+
+**State completion (verbatim):**
+
+```text
+point stays the same
+```
+
+**Outcome:** correct. Tuple operation and unchanged state are recovered; return to the shared
+contract principle.
+
+**Shared-principle answer (verbatim):**
+
+```text
+they are all attribute errors wher eyou are trying to input an object that cannot be inputted into the specific function, 100
+```
+
+**Outcome:** strong partial at confidence 100. The shared `AttributeError` mechanism is correct, but
+the distinction between explicit validation and incidental method failure remains unstated.
+
+**Validation-distinction answer (verbatim):**
+
+```text
+2, i know it is right but i do not have a reason, 90
+```
+
+**Outcome:** correct choice at confidence 90 with missing reasoning. Explained deliberate
+accept/reject checking versus an ordinary unsupported operation failing incidentally. One
+language-only reasoning check remains.
+
+**Reasoning micro-answer (verbatim):**
+
+```text
+A, you are making sure eerything works before you run the function
+```
+
+**Confidence follow-up:** 80.
+
+**Outcome:** correct with refinement. Explicit validation deliberately checks a boundary requirement
+and chooses rejection before main work; it does not guarantee every later operation succeeds. One
+different-surface transfer remains.
+
+**Different-surface answer (verbatim):**
+
+```text
+A would be the validation, the failure would be file too large and the incidental failure would be after running it the incident would be the attribute error, the difference is when you get the error before the function is called and after, 100
+```
+
+**Outcome:** partial at confidence 100. The validation/incidental labels are correct, but both occur
+after function entry. Descend to distinguish “before the call” from “before main work.”
+
+**Call-timing answer (verbatim):**
+
+```text
+it happens before the function is executed so called -> validation -> execution, 90
+```
+
+**Outcome:** incorrect at confidence 90. Validation code inside a function is part of function-body
+execution. Supplied the exact invoke → enter body → validate → reject/continue sequence; next ask one
+yes/no relationship.
+
+**Function-entry answer (verbatim):**
+
+```text
+this is my mental model: caller invokes function
+→ execution enters the function body
+→ validation code executes
+→ reject, or continue to main work
+```
+
+**Learner clarification (verbatim):**
+
+```text
+the wording is the only issue we are having
+```
+
+**Final outcome:** correct after syntax and terminology remediation. The learner now states the exact
+call-entry-validation-main-work order and distinguishes deliberate validation from incidental
+unsupported-operation failure. The roster transfer passes; confidence on the final wording was not
+restated (preceding timing attempt: 90).
+
+**Final confidence follow-up:** 80.
+
+**Learner wording request (verbatim):** `how should i word it`
+
+### Exact `summarize` ↔ `classify` interface
+
+**Learner first answer (verbatim):**
+
+```text
+summarize diff sends a string classify line sends a string back summarize diff counts the string and adds it to a class instance variable, it dosnt validate any it runs the function and we waitfor an eror, 100
+```
+
+**Outcome:** partial at confidence 100. String types and lack of explicit validation are correct.
+The answer omits one-line granularity and conflates the returned label, caller-local integer counters,
+and the later `DiffSummary` instance. Descend to local-versus-instance state. `EV-P5-INTERFACE-197`.
+
+**Local-state micro-answer (verbatim):**
+
+```text
+linesadded is a local variable, not sure about sytax, 40
+```
+
+**Outcome:** correct local-variable identification at confidence 40. Switched to syntax-only help:
+bare `lines_added` is local; dotted `self.lines_added` is an instance attribute.
+
+**Attribute-syntax answer (verbatim):**
+
+```text
+i see what you mean, self is the instance and local is total iwthout self
+```
+
+**Confidence follow-up:** 90.
+
+**Outcome:** correct at confidence 90. One fresh dotted-name check remains.
+
+**Fresh attribute answer (verbatim):**
+
+```text
+count is local session.count is instance
+```
+
+**Confidence follow-up:** 90.
+
+**Outcome:** correct at confidence 90. Local-versus-instance syntax is stable; reconnect the label
+to a local counter update.
+
+**Label/counter answer (verbatim):**
+
+```text
+no all local added is being counted but not stored other than in label, 100
+```
+
+**Outcome:** strong partial at confidence 100. Both names are correctly identified as local and the
+label storage is correct. Clarified that comparison triggers an integer increment; the string itself
+is not numerically counted. Exact types/final values remain.
+
+**Exact-state completion (verbatim):**
+
+```text
+label string , added
+lines added int, 1
+next question
+```
+
+**Outcome:** correct; prior confidence 100. One fresh opposite-path check remains.
+
+**Exact-state confidence follow-up:** 100.
+
+**Fresh opposite-path answer (verbatim):**
+
+```text
+so it is not counted and lines added stays at zero, no instance attribute, 100
+```
+
+**Outcome:** correct at confidence 100. Local label/counter reasoning is stable; return to the real
+module boundary.
+
+**Real-boundary return answer (verbatim):**
+
+```text
+it is inoutted as a string and then is ouptuted as a string added and then the count for lines added is then plus 1, the diffsummary instance is created when the retunrn for summmarize diff that line, no explicit runtime validation happens, 90
+```
+
+**Outcome:** strong partial at confidence 90. Boundary types, label, local update, construction time,
+and lack of validation are correct. Exact input and final `DiffSummary` fields remain.
+
+**Exact-representation completion (verbatim):**
+
+```text
+ok this is the last string of questions the library is closing and i have to go, so commit and push after this conecpt, "+tea = 2", diff summary would be (0,1,0), 90
+```
+
+**Final outcome:** correct after remediation at confidence 90. Exact input is `"+tea = 2"`; exact
+record is `DiffSummary(0, 1, 0)`. The learner now separates the returned label string, caller-local
+integer accumulator, and final dataclass instance. `EV-P5-INTERFACE-197` passes. Phase 5 remains open.

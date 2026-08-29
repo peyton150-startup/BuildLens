@@ -219,3 +219,32 @@ application:
 Then provide a different-surface transfer and continue auditing the types/values crossing existing
 module boundaries. Do not implement validation or type hints until the learner identifies a concrete
 contract ambiguity and proposes the intended behavior.
+
+## Phase 5 library-closing pause — 2026-08-29
+
+The Phase 5 boundary sequence continued and no quiz is open:
+
+```text
+EV-P5-BOUNDARY-195          summarize_diff(42) boundary trace       passed
+EV-P5-BOUNDARY-TRANSFER-196 roster/validation transfer              passed after remediation
+EV-P5-INTERFACE-197         summarize ↔ classify exact interface    passed after remediation
+```
+
+Important recovery evidence:
+
+- The learner now distinguishes a documented/assumed contract from explicit validation and from an
+  incidental `AttributeError` at an unsupported operation.
+- Preferred wording: caller invokes → body execution begins → validation runs → reject or continue
+  to main work. The learner stated that exact model; prior issues were partly terminology.
+- Tuple syntax was introduced only because a transfer used `("a",)`. The learner recovered comma
+  syntax, tuple immutability, missing `.append()`, and reassignment versus mutation. Retrieve later;
+  do not treat it as mastered.
+- The learner recovered the exact real interface: one line string enters `classify_diff_line`, a
+  label string returns, `summarize_diff` compares it and updates fresh local integer counters, then
+  constructs `DiffSummary` at the final return. No class instance exists during counter updates.
+
+Phase 5 is not complete and no product patch is justified. Resume with the existing
+`Session.record(diff_text)` and `Session.history()` contracts: exact input/output types, state
+effects, assumptions, and explicit validation. Then give a different-surface transfer and decide
+whether any concrete ambiguity earns a patch. Do not replay the completed classifier/summarizer
+chains.

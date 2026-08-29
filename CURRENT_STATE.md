@@ -187,6 +187,10 @@ Still uncertain or due for later retrieval:
 - keeping documented contracts, type annotations, explicit validation, and incidental runtime
   failures distinct under composed function/branch traces;
 - confidence calibration after incompatible-input predictions changed at confidence 90–100.
+- recently introduced tuple syntax/immutability; representation and unsupported `.append()` were
+  recovered but need later retrieval outside the remediation chain;
+- wording deliberate validation as code that runs after function entry but before protected main
+  work, rather than “before the function executes.”
 
 ## Last completed gates
 
@@ -200,6 +204,10 @@ Still uncertain or due for later retrieval:
 - Phase 4 unrelated decomposition transfer: complete (`EV-P4-TRANSFER-193`).
 - Phase 5 documented-contract versus runtime-enforcement recovery: fresh target passed after
   adaptive descent and rebuild (`EV-P5-CONTRACT-194`); broader boundary audit remains open.
+- Phase 5 `summarize_diff(42)` cross-module boundary and transfer: complete after syntax and
+  terminology remediation (`EV-P5-BOUNDARY-195`, `EV-P5-BOUNDARY-TRANSFER-196`).
+- Phase 5 exact `summarize.py` ↔ `classify.py` interface trace: complete after local/instance-state
+  remediation (`EV-P5-INTERFACE-197`).
 
 Do not mark these concepts permanently mastered after one review sequence.
 
@@ -226,7 +234,7 @@ inspect the contracts already expressed by classify.py, summarize.py, and sessio
 → identify one concrete contract ambiguity or explicitly conclude no patch is earned yet
 ```
 
-The `classify_diff_line(42)` remediation chain established:
+Completed Phase 5 evidence now establishes:
 
 ```text
 documented contract excludes the integer
@@ -234,12 +242,27 @@ documented contract excludes the integer
 → no explicit validation exists
 → integer lacks startswith
 → AttributeError stops execution before fallback else
+
+summarize_diff local line: str
+→ classify_diff_line
+→ label: str
+→ local integer accumulator
+→ final DiffSummary record
 ```
 
-Resume with a BuildLens cross-module application: predict `summarize_diff(42)`, identify which
-module/function first performs an unsupported operation, whether `classify_diff_line` is reached,
-and what the result says about the current boundary contract. Require confidence and then a
-different-surface transfer before deciding whether a contract patch is earned.
+Resume by auditing the existing `Session.record(diff_text)` and `Session.history()` interfaces:
+
+```text
+exact input value/type
+→ state mutation or non-mutation
+→ exact output value/type
+→ documented assumption
+→ explicit runtime validation, if any
+```
+
+Then use one different-surface transfer and ask the learner to identify a concrete contract
+ambiguity or explicitly conclude no Phase 5 patch is earned. Do not add type hints or validation
+before the learner proposes the intended contract behavior.
 
 Phase 4 confirmed that no restructure is earned. Do not revisit that decision or manufacture a
 package/file move during Phase 5 without new evidence.
@@ -251,11 +274,11 @@ If a Phase 5 contract patch becomes justified, first state the required pre-patc
 
 ```text
 phase                       Phase 5 contract audit in progress
-last knowledge gate         EV-P5-CONTRACT-194 fresh R5 target, correct after remediation
-next retrieval due          summarize_diff(42) cross-module boundary trace
+last knowledge gate         EV-P5-INTERFACE-197, correct after remediation at confidence 90
+next retrieval due          Session.record/history interface contract audit
 next architecture reset     complete; next by time or major transition
 next implementation step    none until the Phase 5 audit finds an earned contract change
-last published commit       e3a5838
+last published commit       d2d2652
 ```
 
 Files the learner should currently be able to teach:
