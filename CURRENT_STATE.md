@@ -8,7 +8,8 @@ Last updated: 2026-08-29
 
 ## Lifecycle
 
-**Current phase:** Phase 3 complete. Phase 4 has not started.
+**Current phase:** Phase 3 complete. Phase 4 intent/code-reading review may begin, but no refactor is
+currently justified or authorized.
 
 Phase 3 is complete in every required dimension:
 
@@ -21,15 +22,13 @@ learner explanation  complete — EV-P3-TEACH-185
 transfer variant     complete — EV-P3-TRANSFER-186
 ```
 
-Phase 4 implementation is paused for the overdue formal Phase 0–2 cumulative checkpoint.
+The formal Phase 0–2 cumulative checkpoint and pre-Phase-4 architecture reset are also complete.
 
 ## Exact code that exists
 
 ### `classify.py`
 
 `classify_diff_line(line)` accepts one unified-diff line and returns exactly one label.
-
-Branch order is intentionally most-specific first:
 
 ```text
 "diff --git"                              → file_header
@@ -39,29 +38,31 @@ leading "-"                               → removed
 otherwise                                 → context
 ```
 
-The input and outside state remain unchanged.
+The most-specific prefixes come first. The input and outside state remain unchanged.
 
 ### `summarize.py`
 
-`DiffSummary` is a dataclass with:
+`DiffSummary` is a dataclass with `files_changed`, `lines_added`, and `lines_removed`.
 
-```text
-files_changed
-lines_added
-lines_removed
-```
-
-`summarize_diff(diff_text)`:
+`summarize_diff(diff_text)` follows:
 
 ```text
 one complete diff string
 → splitlines()
-→ classify each line
+→ classify each line through classify_diff_line
 → increment three fresh local counters
 → return one DiffSummary
 ```
 
 Only `file_header`, `added`, and `removed` affect counters. Metadata and context do not.
+
+Dependency direction:
+
+```text
+summarize imports/calls classify
+summarize depends on classify
+classify is a dependency of summarize
+```
 
 ### `session.py`
 
@@ -82,13 +83,11 @@ Each construction runs `__init__`; `[]` creates a fresh list; `self.changes` att
 instance. `record` appends the exact passed object in order. `history` returns a shallow snapshot,
 not an alias.
 
-Known limitation: `changes` is public. A caller can still mutate real state directly with
+Known limitation: `changes` is public. A caller can mutate real state directly with
 `session.changes.append(...)`. Copying in `history()` protects only against mutation through the
 returned snapshot.
 
 ## Automated verification
-
-The repository has three directly executable suites:
 
 ```text
 python test_classify.py   — 8 test functions
@@ -96,26 +95,24 @@ python test_summarize.py  — 1 end-to-end summary test function
 python test_session.py    — 5 test functions
 ```
 
-All three passed locally and in the publishing clone before commit `2545047`. No product code has
-changed since that verification.
+All three passed locally and in the publishing clone before commit `e3a5838`. No product code has
+changed since.
 
-The load-bearing Session test is
-`test_mutating_the_history_does_not_touch_the_session`. Replacing the copy with an alias makes the
-test compare actual `["diff A", "diff B"]` with expected `["diff A"]` and fail.
+The load-bearing Session test is `test_mutating_the_history_does_not_touch_the_session`. Returning
+an alias changes the actual value to `["diff A", "diff B"]` and makes its expected `["diff A"]`
+assertion fail.
 
 ## Current execution paths
 
 ```text
-diff line
-→ classify_diff_line
-→ one label
+diff line → classify_diff_line → one label
 ```
 
 ```text
 complete diff string
 → split into lines
 → classify each line
-→ update local summary counters
+→ update local counters
 → DiffSummary
 ```
 
@@ -126,115 +123,106 @@ Session()
 → history() returns a separate snapshot
 ```
 
-## Current learning evidence
+## Current architecture decision
+
+Keep the repository's current flat module structure.
+
+Evidence:
+
+- each responsibility currently fits in one module;
+- no observed navigation, naming, boundary, or import problem exists;
+- all three suites pass;
+- creating `backend/`, `tests/`, or a package now would cause guaranteed path/import churn for a
+  speculative benefit.
+
+Accepted downside: waiting may require file moves and import changes later.
+
+Reversal condition: restructure when one responsibility genuinely needs several related modules and
+flat placement obscures ownership/naming, or when another concrete package/import requirement appears.
+
+Vocabulary:
+
+```text
+module          one Python file
+responsibility  the job/reason that module exists
+dependency      another module it uses
+boundary        what belongs inside/outside that responsibility
+package         a directory/namespace grouping related modules
+cohesion        how strongly code serves one responsibility
+```
+
+## Learning evidence snapshot
 
 Demonstrated through delayed or transferred retrieval, but not permanently mastered:
 
-- longest-prefix-first branch precedence;
-- output versus return values, including implicit `None`;
+- branch precedence and exact context-line classification;
+- output versus return values and per-call local state;
 - `.sort()` mutation/`None` versus `sorted()` allocation;
-- aliases versus copies and object identity;
-- list-literal allocation, including outer mixed-value lists;
-- shared dictionary mutation and fresh local counters;
+- aliases, copies, object identity, and outer-list allocation;
+- shared dictionary state versus local counters;
 - transitive observable effects through called functions;
-- per-instance state, copied snapshots, and the public-attribute limitation;
-- whole-program object counting after adaptive remediation.
-
-Known cold from delayed evidence:
-
-- branch precedence for unified-diff headers versus source additions/removals;
-- shell exit status `0` means success;
-- `Session.history()` must copy to prevent snapshot mutation from reaching session state.
+- triple-quoted physical newlines and `splitlines()`;
+- explicit dataclass return versus implicit `None`;
+- per-instance Session state, snapshots, tests, and public-attribute limitation;
+- evidence-first architecture timing, dependency direction, downside, and reversal conditions.
 
 Still uncertain or due for later retrieval:
 
 - retaining every object/allocation under heavy composition without a state freeze;
 - confidence calibration: several correct answers were underconfident and some misses were reported
   at confidence 100;
-- precise runtime-contract language: current code does not coerce or validate `diff_text` as a
-  string;
-- shallow-copy depth when mutable elements are eventually introduced.
+- current code does not coerce or validate `diff_text` as a string;
+- shallow-copy depth when mutable elements are introduced later.
 
 ## Last completed gates
 
-- Requested three-question Phase 0–2 super-hard review: complete after remediation.
 - Phase 3 state movie and alias/copy knowledge gate: complete.
 - `session.py` learner teach-back: complete (`EV-P3-TEACH-185`).
 - Unrelated `InspectionLog` snapshot transfer: complete (`EV-P3-TRANSFER-186`).
+- Formal foundation cumulative review: complete (`EV-CUM-FND-187` through `190`).
+- Pre-Phase-4 architecture reset: complete (`EV-CUM-FND-190`).
 
 Do not mark these concepts permanently mastered after one review sequence.
 
-## Cumulative-review and architecture counters
+## Cumulative-review counters
 
-The first foundation counter was triggered by Phase 2 completion. It has no valid reset record:
-earlier fundamentals questions were not recorded with exercise type `CUMULATIVE_RETRIEVAL`.
-Historical attempts must not be retroactively relabeled.
+The Phase 0–2 foundation counter was reset on 2026-08-29 after four formal cumulative questions
+passed with remediation where needed.
 
-Before Phase 4 code, complete four formal questions:
+Phase 3 now counts as 1/3 toward the next foundation checkpoint. The next foundation review triggers
+after Phase 5 before substantial Phase 6 work.
 
-```text
-Q1 DEBUG / TEST      classification precedence and summary consequence
-Q2 TRACE / EXPLAIN   return value, output, and per-call local state
-Q3 CONTRACT / APPLY  DiffSummary contract and boundary case
-Q4 ARCHITECTURE      current shape, split trigger, alternative, downside, reversal condition
-```
+The major/deep Phase 7–15 counter has not started.
 
-Question 4 doubles as the architecture reset before the Phase 4 decomposition transition. Reset
-only the foundation counter after all four pass. Phase 3 then counts as 1/3 toward the next
-foundation checkpoint covering Phases 3–5.
+## Open interaction and exact next step
 
-## Open interaction
+There is no open quiz question.
 
-**Cumulative checkpoint questions 1–3 passed. Question 4 is next.**
-
-Evidence `EV-CUM-FND-187`: at confidence 100, branch shadowing, longest-prefix-first repair, and test
-purpose were correct. The learner recovered the missed space-leading context line and supplied the
-faulty-code counts: added 2, removed 2, metadata 0, context 1.
-
-Evidence `EV-CUM-FND-188`: cumulative question 2 passed at confidence 90. The learner correctly
-traced fresh local lists across two calls, distinguished internal output from returned values, and
-gave the exact final output order.
-
-Immediate next prompt: cumulative question 3, applying the `DiffSummary` contract and empty-input
-boundary.
-
-Evidence `EV-CUM-FND-189`: question 3 initially paused because physical newlines in a triple-quoted
-string were thought absent without visible `\n`. The R0/R1 remediation passed at confidence 90:
-`"""red\nblue""".splitlines()` was correctly modeled as `["red", "blue"]`. Resume the unchanged
-two-file summary target; do not repeat the syntax explanation.
-
-Evidence `EV-CUM-FND-189`: question 3 passed after remediation. The learner recovered triple-quoted
-newline representation, computed `DiffSummary(2, 2, 1)`, identified exact contributing lines,
-explained metadata precedence and context exclusion, predicted the all-zero empty result, and stated
-no input/outside mutation. After briefly proposing `None` for the assertion, the learner recovered
-the explicit return as `DiffSummary(0, 0, 0)` at confidence 80.
-
-Immediate next prompt: cumulative question 4 of 4, an architecture defense that also serves as the
-pre-Phase-4 architecture reset. Do not repeat question 3.
-
-## Exact next step
+Begin Phase 4 as an intent/code-reading audit, not a file move:
 
 ```text
-ask cumulative question 4 of 4
-→ remediate only if needed
-→ reset foundation counter after it passes
-→ record/reset the foundation counter
-→ begin Phase 4 intent and architecture discussion
+trace one value across summarize.py → classify.py → summarize.py
+→ explain each module's responsibility and dependency direction
+→ identify an observed discomfort or explicitly conclude no refactor is earned
+→ only then decide whether Phase 4 has a code patch
 ```
 
-There is no authorized product-code patch yet. Phase 4 is decomposition by refactoring: the learner
-must first identify the concrete responsibility split and defend why the current single-module shape
-has become uncomfortable. Do not scaffold future frameworks or layers.
+The current evidence says no restructure is earned. Phase 4 may therefore confirm that the existing
+three-module decomposition already satisfies its architectural goal without changing files. Do not
+manufacture a refactor merely to create a commit.
+
+If a real code patch becomes justified, first state the required pre-patch block from `AGENTS.md` and
+run the implementation-adjacent prediction/transfer loop.
 
 ## Session-close fields
 
 ```text
-phase                       Phase 3 complete; Phase 4 not started
-last knowledge gate         EV-P3-TRANSFER-186, passed at confidence 100
-next retrieval due          cumulative checkpoint 4 of 4
-next architecture reset     question 4 itself
-next implementation step    none until the formal checkpoint passes
-last published commit       2545047
+phase                       Phase 3 complete; Phase 4 intent review next
+last knowledge gate         EV-CUM-FND-190, passed after remediation at confidence 90
+next retrieval due          Phase 4 cross-module value trace
+next architecture reset     complete; next by time or major transition
+next implementation step    none until the Phase 4 audit finds an earned refactor
+last published commit       e3a5838
 ```
 
 Files the learner should currently be able to teach:
@@ -248,6 +236,6 @@ Files the learner should currently be able to teach:
 
 Historical evidence lives in:
 
-- `learning/LEARNING_LEDGER.md` — exact formal prompts, committed answers, evaluation, remediation;
-- `QUIZZES.md` — readable quiz transcript;
+- `learning/LEARNING_LEDGER.md` — exact prompts, committed answers, evaluation, and remediation;
+- `QUIZZES.md` — readable transcript;
 - Git history — prior full versions of this snapshot and all published state.

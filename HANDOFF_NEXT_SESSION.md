@@ -150,3 +150,31 @@ Resume with cumulative question 4 of 4 only. It is the architecture defense and 
 required pre-Phase-4 architecture reset. After it passes, reset only the foundation counter, record
 Phase 3 as 1/3 toward the next foundation checkpoint, and begin Phase 4 intent discussion. Do not
 repeat question 3 or start product code first.
+
+## Session completion — cumulative checkpoint and Phase 4 handoff
+
+The four-question formal foundation cumulative checkpoint is complete. Question 4 passed after
+adaptive remediation at confidence 90. Reset only the Phase 0–2 foundation counter; Phase 3 now
+counts as 1/3 toward the next checkpoint after Phase 5. The pre-Phase-4 architecture reset is also
+complete.
+
+Current architecture decision: keep `classify.py`, `summarize.py`, `session.py`, and their tests in
+the existing flat structure. No observed responsibility currently requires multiple related modules.
+The accepted downside is later file moves and import churn. Reconsider packaging when one
+responsibility genuinely expands across several related modules or another concrete boundary/import
+problem appears.
+
+Start the next session with a brief Phase 4 code-reading audit, not a refactor or a repeated quiz.
+Ask the learner to trace `"+tea = 2"` through:
+
+```text
+summarize_diff input
+→ splitlines()
+→ classify_diff_line
+→ "added"
+→ lines_added increment
+→ returned DiffSummary
+```
+
+Then ask them to explain the responsibility of each module and confirm that `summarize.py` depends
+on `classify.py`. Record the formal Evidence Record before advancing. No quiz is currently open.

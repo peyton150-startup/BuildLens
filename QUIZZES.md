@@ -1336,3 +1336,38 @@ rebound, not mutated. Descend to one explicit-return micro-check.
 **Explicit-return recovery:** correctly stated `DiffSummary(0, 0, 0)` at confidence 80 and explained
 that the returned object is not `None`. This supplies the exact empty-boundary assertion. Question 3
 passes after remediation. Learner requested commit/push before moving locations.
+
+### Question 4 of 4 — architecture defense
+
+**Outcome:** partial at confidence 60. The learner proposed `backend/` and `tests/` folders to make
+future growth easier, but named no present blocker, evidence, downside, credible flat alternative, or
+reversal condition. Isolate current evidence versus speculative benefit before revising the defense.
+`EV-CUM-FND-190`.
+
+**Evidence isolation:** at confidence 40, the learner correctly admitted no current problem but used
+"eventually" instead of a concrete trigger. Next choose one specific event and resulting cost.
+
+**Reversal trigger:** chose at confidence 80 to restructure when one responsibility grows into
+several related files and flat naming becomes unclear. The learner used parent/child-class wording,
+then described the correct module-grouping problem through awkward numbered support filenames.
+Terminology refined to related modules/package namespace. Revised defense remains.
+
+**Revised-defense attempt:** partial at confidence 80. Correctly stated that no responsibility spans
+several modules today and that dependency alone does not justify packaging. Requested vocabulary and
+reversal/downside help. Supplied module, responsibility, dependency, boundary, package, and cohesion;
+clarified later moves/import churn as the real downside of waiting.
+
+**Second defense:** partial at confidence 80. Current one-module-per-responsibility shape and the
+several-modules trigger were correct. Dependency direction was reversed, phrasing conflated all
+responsibilities with one module, and later move/import churn was again omitted as a downside.
+
+**Dependency micro-check:** correct at confidence 100. Summarize imports/calls classify, so summarize
+depends on classify. Prior inversion treated as wording. Final integrated defense remains.
+
+**Final defense:** passed after remediation at confidence 90. Keep the flat structure because no
+present problem justifies churn; accept later moves/import changes as the downside; restructure when
+one responsibility genuinely needs several related modules.
+
+**Checkpoint result:** all four formal foundation cumulative questions passed. Foundation counter
+reset; Phase 3 is 1/3 toward the next foundation checkpoint. Architecture reset decision: leave the
+current structure flat until earned. `EV-CUM-FND-190`.
