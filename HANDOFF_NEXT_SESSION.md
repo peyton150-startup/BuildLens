@@ -54,7 +54,7 @@ Append every formal prompt and the learner's verbatim first committed answer to
 `learning/LEARNING_LEDGER.md`; also append the readable transcript to `QUIZZES.md` and update
 `CURRENT_STATE.md`. Follow the session-close and publishing rules in `CLAUDE.md`.
 
-Last published quiz commit before this handoff: `a444efa` on `main`. The ordinary workspace is not
+Last published quiz commit reported before this session: `6d4ff74` on `main`. The ordinary workspace is not
 the publishing clone; use the verified temporary-clone workflow documented in the existing project
 state when the learner asks to push.
 
@@ -65,3 +65,30 @@ partial and its short recovery passed. Question 2 (`EV-P1-COMPOSE-174`) failed b
 treated as non-mutating and list-returning under heavy composition. On return, give one short
 `.sort()` versus `sorted()` checkpoint and one alias near-transfer, then ask super-hard question 3
 of 3. Do not skip the recovery, and do not begin Phase 3 yet.
+
+## Latest pause — location change, 2026-08-29
+
+The `.sort()`/`sorted()` checkpoint and alias near-transfer both passed. Super-hard question 3
+(`EV-P1-COMPOSE-177`) was partial and entered remediation. The learner recovered routing, cumulative
+counters, the correct sorted ticket order, second-call labels, core returned state, and the principle
+that several names can point to one mutable object.
+
+The remaining primary blocker is whole-program list-object counting. The learner counted elements
+inside the returned outer list instead of counting the original input, local lists, and outer list
+as separate objects. A worked-example rescue was shown:
+
+```python
+base = [1]
+inner = []
+wrapper = [inner, None]
+```
+
+The learner left before explaining it. Resume with exactly one prompt:
+
+> In your own words, why is the count three rather than one or four?
+
+Then require the learner to complete one missing allocation step and solve a fresh micro-example
+before returning to the BuildLens first-call count. Do not reveal the BuildLens total first. After
+object counting recovers, finish the impurity inventory: passed-list mutation, shared counter
+mutation, and output through the called `route` function. Super-hard question 3 and its recovery are
+not complete; do not advance Phase 3.

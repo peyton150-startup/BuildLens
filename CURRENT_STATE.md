@@ -2824,3 +2824,150 @@ non-mutating operation returning a sorted list. This propagated through the fina
 count. The learner paused for lunch and requested a push. On return, mandatory remediation is one
 short `.sort()` versus `sorted()` checkpoint, then one near-transfer with an alias. Super-hard
 question 3 of 3 remains unasked; do not move to Phase 3 until it and any necessary recovery finish.
+
+Evidence `EV-P1-SORT-175`: at confidence 90, the learner correctly recovered that `.sort()` mutates
+the existing list and returns `None`, while `sorted()` returns a separate sorted list without
+mutating its input. The exact list contents and count of two list objects were omitted. Ask one
+compact completion check for only those details, then give the required alias near-transfer before
+super-hard question 3 of 3.
+
+The `EV-P1-SORT-175` completion check passed: the learner independently stated that `values` and
+`separate` both contain `[1, 2, 3]`, are different list objects, and that two list objects exist.
+The isolated recovery is complete. Next: one alias near-transfer, then super-hard question 3 of 3.
+
+Evidence `EV-P1-ALIAS-176`: the required alias near-transfer passed at confidence 100. The learner
+correctly traced `.sort()` mutation through a shared alias, its `None` return, the distinct list
+created by `sorted()`, and the total of two list objects. The super-hard question 2 remediation chain
+is complete. Next: super-hard question 3 of 3, with no state table; retrieve per-item branches,
+mutation/aliasing, return values, and purity in a fresh domain.
+
+Evidence `EV-P1-COMPOSE-177`: the learner committed a trace for super-hard question 3 of 3 but
+omitted the required confidence score. Evaluation and all correction are withheld until confidence
+is committed. Do not replace or rewrite the verbatim first answer.
+
+The confidence follow-up for `EV-P1-COMPOSE-177` was 50. Result: partial. The learner correctly
+traced the first call's three route results, fallback print/implicit `None`, cumulative shared
+counters, alias mutation, `.sort()` returning `None`, a separate snapshot, impurity, and two
+`unknown` prints. The primary blocker was exact mixed-case string sort order: lowercase-leading
+`mystery` was placed before uppercase-leading `P1...`, which corrupted the second-call order.
+Complete nested return values, final output, list-object count, full purity inventory, and shared
+principle were unfinished. Descend to one R1 mixed-case sort prediction, then near-transfer and a
+simplified fresh target completion. Do not reveal the full answer yet or advance Phase 3.
+
+Evidence `EV-P1-SORT-178`: the learner committed an intended ordering for the R1 mixed-case sort and
+explicitly said they were unsure how case affects it, but omitted confidence. Evaluation is pending
+the required 0–100 score. Do not penalize the harmless `banan` transcription.
+
+The `EV-P1-SORT-178` confidence follow-up was 80. The intended result
+`["Apple", "Banana", "mango"]` was correct; the harmless transcription typo was ignored. Mechanism
+remains uncertain: Python's default ordering is case-sensitive and uppercase-leading English words
+precede lowercase-leading words in this exercise. Ask one two-item case-only check before a
+same-prefix near-transfer.
+
+Evidence `EV-P1-SORT-179`: the learner committed an intended two-item ordering and identified
+uppercase as the reason, then asked whether `you = sorted(oil)` uses the same idea. Confidence is
+still required before evaluation and feedback. Ignore the harmless `banan` transcription.
+
+The `EV-P1-SORT-179` confidence follow-up was 60 and the check passed. The learner correctly placed
+uppercase-leading `Banana` before lowercase-leading `apple`. Clarified that `.sort()` and `sorted()`
+use the same default ordering, while `.sort()` mutates/returns `None` and `sorted()` creates a new
+list without changing its input. Next: one same-prefix `sorted()` near-transfer, then rebuild the
+unfinished target trace.
+
+Evidence `EV-P1-SORT-180`: the same-prefix near-transfer passed at confidence 100. The learner
+correctly preserved the input list, ordered the new list as `["place", "plan", "plate"]`, and counted
+two list objects. The explicit deciding letters `c`, `n`, `t` were omitted, but the learner requested
+to move on and the actual ordering was correct. Sorting remediation is complete; do not add another
+isolated sort drill. Return to the unfinished `EV-P1-COMPOSE-177` trace with the recovered ticket
+order supplied.
+
+`EV-P1-COMPOSE-177` completion continuation: the learner correctly gave final stats
+`{"escalated": 2, "unknown": 2}`, second-call labels `["escalated", "urgent", None]`, and the intended
+`second` nested value. Clarify identity: first-call `alias` refers to original `tickets`; second-call
+`alias` refers to the distinct list at `first[2]`. Still require only the remaining outer output,
+seven-list object count, complete impurity inventory, shared principle, and completion confidence.
+
+The `EV-P1-COMPOSE-177` completion confidence follow-up is 80. Do not retrace counters or sorting;
+ask only for final object/effect/principle accounting and concise outer-output confirmation.
+
+`EV-P1-COMPOSE-177` completion continuation 2: the learner asked what "five outer print results"
+means, counted two list objects, identified only original-list mutation as an impurity reason, and
+did not retrieve the earlier alias principle. Clarify that outer output means the five bottom-level
+prints, excluding `route`'s internal prints. Then ask only `print(tickets)`. Primary blocker is
+whole-program list identity/counting; after output clarification, rebuild allocations at R2 one
+statement/call at a time. Do not reveal all remaining answers together.
+
+Completion-continuation confidence: 30.
+
+Output recovery 1 passed at confidence 30: the learner correctly gave `print(tickets)` as shorthand
+`[p1+, p1-, mystery]`. Next ask only `print(same)` plus the identity reason.
+
+Output recovery 2 value passed at confidence 60: `same` displays the same sorted list. Ask only for
+the shared-object reason before continuing.
+
+Alias explanation passed at confidence 60: the learner independently stated that `same`, `tickets`,
+and the first call's `alias` all point to one list object. The shared identity/mutation principle is
+recovered. Next: count lists only through the end of the first call, explicitly separating aliases
+from allocation expressions.
+
+First-call object-count attempt: the learner correctly identified `alias = tickets` as non-allocating
+and identified `labels` and `snapshot` as separate lists. Confidence was omitted. After confidence,
+isolate whether `return [labels, status, snapshot]` creates another outer list.
+
+First-call object-count confidence: 70. Result partial because the outer list literal in
+`return [labels, status, snapshot]` was not counted. Ask only about that literal before recomputing
+the first-call total.
+
+Outer-list micro-check: the learner now recognizes that the return list literal creates a new outer
+list and reports nested-list representation as somewhat new. Confidence and exact elements remain.
+After this topic closes, the learner requested a verified commit/push and updated handoff before
+moving locations.
+
+Outer-list confidence: 70. The learner independently recovered that the return literal allocates a
+new outer list. Clarified its mixed contents: references to `labels` and `snapshot`, with `None` in
+the middle. Next ask first-call total from the four named objects, then transfer the three-new-lists
+per-call pattern to call two and close/publish.
+
+The learner correctly adopted the mixed-object outer-list terminology. First-call numeric list count
+and confidence remain; ask only for those two fields.
+
+First-call object-count follow-up at confidence 90: the learner correctly described the returned
+outer list's elements as two list references plus `None`, but substituted element count for total
+object count and omitted the original/outer lists. Repeated difficulty now permits one worked
+neighboring example. Require explanation of that example before returning to BuildLens.
+
+## SESSION HANDOFF — location change, 2026-08-29 (super-hard question 3 recovery)
+
+The learner requested an immediate commit/push and paused after seeing, but before explaining, this
+worked neighboring example:
+
+```python
+base = [1]
+inner = []
+wrapper = [inner, None]
+```
+
+The modeled count is three lists: `base`, `inner`, and `wrapper`. On return, do not lecture or reveal
+the BuildLens total. Ask exactly: "In your own words, why is the count three rather than one or
+four?" Then require one missing allocation step and a fresh independent micro-example before
+returning to the BuildLens first-call and whole-program counts.
+
+Current quiz status:
+
+- super-hard question 1 was partial; its recovery passed;
+- super-hard question 2 was partial/wrong; `.sort()`/`sorted()` recovery and alias transfer passed;
+- super-hard question 3 (`EV-P1-COMPOSE-177`) remains partial;
+- routing, counters, sorted state, second-call labels, alias principle, and core return values were
+  recovered;
+- exact whole-program list-object counting and the complete impurity inventory remain open;
+- no product code changed and Phase 3 may not advance yet.
+
+Concepts demonstrated this session include `.sort()` mutation/`None`, `sorted()` allocation,
+case-sensitive and same-prefix ordering, mutation visibility through aliases, cumulative dictionary
+counters, longest-prefix routing, and implicit `None`. Do not mark nested object counting mastered.
+
+Next retrieval due: the worked-example explanation above.
+Next architecture reset due: unchanged; this was a Phase 0–2 fundamentals quiz.
+Next implementation step: unchanged and blocked behind completion of the current learning gate.
+Files the learner should be able to teach remain the completed Phase 0–2 implementation files; the
+new uncertainty is nested list identity/allocation counting, not product behavior.

@@ -15105,3 +15105,645 @@ pending after lunch; super-hard question 3 has not been asked
 TRANSFER / NEXT RETRIEVAL:
 One short `.sort()`/`sorted()` state checkpoint, then a near-transfer containing one alias, then
 resume super-hard question 3 of 3.
+
+---
+
+## EV-P1-SORT-175
+
+DATE: 2026-08-29
+PHASE: 1 (fundamentals review; learner limited quiz scope to completed Phases 0–2)
+TAG: sort_vs_sorted, mutation, return_value, object_count, recovery
+RESULT: partial, central rule correct
+
+PROMPT (verbatim):
+Recovery checkpoint
+
+Do not run this code:
+
+```python
+values = [3, 1, 2]
+in_place = values.sort()
+separate = sorted(values)
+```
+
+Answer:
+
+1. What does `values` contain afterward?
+2. What value is assigned to `in_place`?
+3. What does `separate` contain?
+4. How many list objects exist?
+5. Confidence: 0–100.
+
+Commit to your prediction before I explain anything.
+
+LEARNER'S FIRST COMMITTED ANSWER (verbatim):
+the immidate was we have been doing the last 3 hard questions and i have completed the first and partially the second an you look for that
+
+CLARIFICATION:
+The learner first corrected the session context rather than answering. After the checkpoint was
+re-established as mandatory recovery between super-hard questions 2 and 3, the learner committed:
+
+LEARNER'S COMMITTED TECHNICAL ANSWER (verbatim):
+inplace is None the values are sorted sort() mutates the list and returns None, but sorted does not mutate the lsit it returns a new list that has the same contents but is sorted, 90
+
+EVALUATION:
+Partial with the central rule correct at confidence 90. The learner independently recovered that
+`.sort()` mutates the existing list and returns `None`, while `sorted()` leaves its input unchanged
+and returns a separate sorted list. The response did not explicitly state the concrete contents
+`[1, 2, 3]` for both list values or the count of two list objects.
+
+PRIMARY BLOCKER:
+No conceptual blocker is evident; exact final state and object count were omitted.
+
+SCAFFOLD RUNG:
+R1 recovery checkpoint
+
+RECOVERY STATUS:
+Core `.sort()` versus `sorted()` distinction recovered; one compact completion check remains before
+the required alias near-transfer.
+
+TRANSFER / NEXT RETRIEVAL:
+Ask only for the exact contents of `values` and `separate` and the number of list objects. Then give
+one near-transfer containing an alias before super-hard question 3 of 3.
+
+COMPLETION CHECK ANSWER (verbatim):
+2 list objects&#x20;
+vlaues is [1,2,3]
+sepreate is also [1,2,3] but not the smae list ias valuse
+
+COMPLETION CHECK EVALUATION:
+Correct. The learner explicitly identified two distinct list objects and gave the exact contents
+`[1, 2, 3]` for both. The isolated `.sort()` versus `sorted()` recovery is complete.
+
+UPDATED RECOVERY STATUS:
+Passed at R1; proceed to the required alias near-transfer.
+
+---
+
+## EV-P1-ALIAS-176
+
+DATE: 2026-08-29
+PHASE: 1 (fundamentals review; learner limited quiz scope to completed Phases 0–2)
+TAG: aliasing, sort, sorted, mutation, return_value, object_count, near_transfer
+RESULT: correct
+
+PROMPT (verbatim):
+Alias near-transfer
+
+Do not run this code:
+
+```python
+numbers = [4, 2, 3]
+alias = numbers
+status = alias.sort()
+copy = sorted(numbers)
+```
+
+Give:
+
+1. Exact contents of `numbers`
+2. Exact contents of `alias`
+3. Value of `status`
+4. Exact contents of `copy`
+5. Number of list objects
+6. Why sorting through `alias` affects `numbers`
+7. Confidence: 0–100
+
+LEARNER'S FIRST COMMITTED ANSWER (verbatim):
+number and alsia are = [2,3,4]
+status = none
+copy = [2,3,4]
+2 list objects
+they point tothe same list object for alias and nubmers 100
+
+EVALUATION:
+Fully correct at confidence 100. The learner traced the mutation through the alias, retained the
+`None` return from `.sort()`, recognized the separate list returned by `sorted()`, counted two list
+objects, and explained the shared-object mechanism.
+
+PRIMARY BLOCKER:
+none
+
+SCAFFOLD RUNG:
+R2 near-transfer
+
+RECOVERY STATUS:
+The `.sort()` versus `sorted()` remediation chain is complete through alias near-transfer.
+
+TRANSFER / NEXT RETRIEVAL:
+Ask super-hard question 3 of 3 without a state table. It should retrieve per-item branch tracing,
+mutation/aliasing, local versus external state, return values, and purity in a fresh domain.
+
+---
+
+## EV-P1-COMPOSE-177
+
+DATE: 2026-08-29
+PHASE: 1 (fundamentals review; learner limited quiz scope to completed Phases 0–2)
+TAG: branch_precedence, per_item_trace, implicit_none, aliasing, mutation, sort, sorted, external_state, purity, object_count, composition_tracking
+RESULT: pending confidence and evaluation
+
+PROMPT (verbatim):
+Super-hard question 3 of 3
+
+Do not run the code:
+
+```python
+def route(ticket):
+    if ticket.startswith("P1+"):
+        return "escalated"
+    elif ticket.startswith("P1"):
+        return "urgent"
+    elif ticket.startswith("OK"):
+        return "normal"
+
+    print("unknown")
+
+
+def summarize(tickets, counters):
+    alias = tickets
+    labels = []
+
+    for ticket in alias:
+        label = route(ticket)
+        labels.append(label)
+
+        if label == "escalated":
+            counters["escalated"] += 1
+        elif label == None:
+            counters["unknown"] += 1
+
+    status = alias.sort()
+    snapshot = sorted(alias)
+
+    return [labels, status, snapshot]
+
+
+tickets = ["P1+database", "mystery", "P1-cache"]
+same = tickets
+stats = {"escalated": 0, "unknown": 0}
+
+first = summarize(tickets, stats)
+second = summarize(first[2], stats)
+
+print(tickets)
+print(same)
+print(first)
+print(second)
+print(stats)
+```
+
+Give:
+
+1. For every ticket in each call, its label—in processing order.
+2. Final contents of `tickets` and `same`.
+3. Exact values of `first`, `second`, and `stats`.
+4. Every printed line, in order, including output produced inside `route`.
+5. Why each `status` is `None`.
+6. Whether `summarize` is pure, including every outside object or effect you inspected.
+7. Total number of list objects created during the whole program.
+8. The deep principle this shares with the alias recovery problem.
+9. Confidence: 0–100.
+
+LEARNER'S FIRST COMMITTED ANSWER (verbatim):
+it is impure, first starts with p1+ which is escalated it added plus 1 to the lookup value of the key escalated, on the next iteeration of the loop it will print unknown and then return None which addds plus 1 to the lookup value of key unknown, then it runs p1- which is reutnrs urgent whic hdoes not have a counter so it does nothing, at the end of the first for loop labaels = [escalalted, None, urgent], status is None and alias and tickets beomce [mystery,p1+databse, p1-cahce], snapshot becomes the same contents and order but not the same lsit obejct, then we move onto the second interation of the for loop, statrs with snapshot = [mystery, p1+databse,p1-cahce] , then we undstand that the counters are not zero because they are pointing at stats and the stats keys lookup values are not reset to zero before the loop they are outside the funcition, the loop prints unknonw and retunrns None, adding the unknown counter to 2, then we have returns escalated  which adds to the lookup value for key esacalted to 2 and then we have the last return which is urgent and there is no urgent counter, labels becomes [unknown,None,escalalted] status and snapshot are already sorted at this point so they do not change,&#x20;
+
+unknown
+unknown
+[mystery,p1+,p1-]
+[mystery,p1+,p1-]
+
+CONFIDENCE FOLLOW-UP:
+50
+
+EVALUATION:
+Partial at confidence 50. The learner correctly traced all three first-call route results, including
+the fallback print and implicit `None`; correctly updated both shared counters across calls;
+correctly retained `.sort()` returning `None`; recognized alias mutation and the separate snapshot;
+and identified impurity. The answer also correctly predicted two `unknown` prints.
+
+The primary error was the exact mixed-case string sort order. Python's default string comparison is
+case-sensitive, so the uppercase-leading `"P1..."` strings precede lowercase-leading `"mystery"`.
+The learner instead placed `mystery` first. That changed the second call's processing order and
+labels. The answer also omitted the complete nested values of `first` and `second`, the final
+`stats` display, the complete five outer `print` outputs, the list-object count, a complete purity
+inventory, and the requested shared principle. Treat those as unfinished composition work after the
+one primary ordering blocker is repaired, not as simultaneous remediation targets.
+
+PRIMARY BLOCKER:
+Exact case-sensitive ordering of strings under `.sort()`/`sorted()`.
+
+SCAFFOLD RUNG:
+R6 target partial; descend to R1 for one mixed-case string sort operation
+
+RECOVERY STATUS:
+pending; do not reveal the complete target answer
+
+TRANSFER / NEXT RETRIEVAL:
+Ask one three-element mixed-case `.sort()` prediction in an unrelated surface. If correct, give a
+fresh near-transfer that also distinguishes two same-prefix strings, then return to a simplified
+completion of the target trace before deciding whether the final gate passed.
+
+TARGET COMPLETION CONTINUATION 1 (verbatim):
+after the loop stats is {escalated : 2, unknown: 2}, i will not touch on counters now because i understand the pattern, it starts with p1+ so escallated is appended to labels, then p1- which reutnrs rugent and appends that to labels, then returns None and prints unknonw, at the end tickets same alias and tickets inside the function all point to the same list, snapshot points to a different list, second prints [[escalalted, urgent, None], None,[p1+,p1-,mystery]]
+
+TARGET COMPLETION CONTINUATION 1 EVALUATION:
+Correctly gives final stats as `{"escalated": 2, "unknown": 2}`, second-call labels as
+`["escalated", "urgent", None]`, and the intended complete `second` value. Harmless shorthand and
+spelling are not penalized. Identity clarification remains: the first call's `alias` points to
+original `tickets`, while the second call's `alias` points to the separate snapshot at `first[2]`.
+The outer printed lines, total list-object count, full impurity inventory, shared principle, and
+confidence remain unanswered.
+
+TARGET COMPLETION CONFIDENCE FOLLOW-UP (verbatim):
+80
+
+The completion confidence is now recorded. Final closeout items remain: object count, impurity
+inventory, shared principle, and concise confirmation of the outer output.
+
+TARGET COMPLETION CONTINUATION 2 (verbatim):
+1 what are you asking, 2. 2 list objects, it is impure because it sorts the lsit that tickets and same point to outside the function, 4. i do not even rememeber the alias recovery
+
+TARGET COMPLETION CONTINUATION 2 CONFIDENCE (verbatim):
+30
+
+TARGET COMPLETION CONTINUATION 2 EVALUATION:
+Partial/incorrect. The learner requested clarification of "five outer print results." The proposed
+two-list object count is incorrect under whole-program accounting. The impurity explanation
+correctly identifies mutation of the original list visible through `tickets` and `same`, but omits
+the passed `counters` dictionary and output produced through `route`; the second call also receives
+and sorts the separate list at `first[2]`. The shared alias principle was not retrieved.
+
+PRIMARY BLOCKER:
+Whole-program object identity/counting under composition. Handle the output-wording clarification
+first, then descend object counting to allocations one statement/call at a time.
+
+SCAFFOLD RUNG:
+R6 completion failed; R1 output identification, then R2 object-allocation sequence
+
+RECOVERY STATUS:
+pending; no attempt-count penalty and no phase advancement
+
+NEXT STEP:
+Explain that "outer" refers to the five bottom-level `print` statements, excluding the two prints
+inside `route`. Ask only what `print(tickets)` displays. Do not reveal the other four outputs.
+
+OUTPUT RECOVERY 1 PROMPT:
+At the very bottom, the first outer print is:
+
+```python
+print(tickets)
+```
+
+After both calls finish, exactly what list does this display?
+
+Confidence: 0–100.
+
+OUTPUT RECOVERY 1 ANSWER (verbatim):
+[p1+,p1-,mystery] , 30
+
+OUTPUT RECOVERY 1 EVALUATION:
+Correct at confidence 30. The shorthand corresponds to
+`["P1+database", "P1-cache", "mystery"]` and preserves the exact ordering. Next ask only
+`print(same)` and why it matches or differs.
+
+OUTPUT RECOVERY 2 PROMPT:
+Next bottom-level line:
+
+```python
+print(same)
+```
+
+What does it display, and why?
+
+Confidence: 0–100.
+
+OUTPUT RECOVERY 2 ANSWER (verbatim):
+[p1+,p1-,mystery] , 60
+
+OUTPUT RECOVERY 2 EVALUATION:
+The displayed value is correct at confidence 60. The required explanation was omitted. Ask only why
+`same` displays the sorted state; do not introduce another trace.
+
+ALIAS EXPLANATION FOLLOW-UP (verbatim):
+because they all point to the same list object same both tickets alias , 60
+
+ALIAS EXPLANATION EVALUATION:
+Correct at confidence 60. `tickets`, `same`, and the first call's `alias` are names for one shared
+list, so mutation through the local alias is visible through the outside names. This independently
+recovers the shared deep principle: count/trace objects separately from names that reference them.
+
+UPDATED RECOVERY STATUS:
+output identity and shared principle recovered; proceed to first-call-only list allocation counting
+
+FIRST-CALL OBJECT COUNT PROMPT:
+Count only through the end of the first `summarize(...)` call.
+
+The program begins with one list:
+
+```python
+tickets = ["P1+database", "mystery", "P1-cache"]
+```
+
+During the first call, these expressions create lists:
+
+```python
+labels = []
+snapshot = sorted(alias)
+return [labels, status, snapshot]
+```
+
+Does this assignment create another list?
+
+```python
+alias = tickets
+```
+
+How many list objects exist immediately after the first call? Name each one and give confidence
+from 0–100.
+
+FIRST-CALL OBJECT COUNT ANSWER (verbatim):
+no it does not create another list it points alias at tickets, labels, snapshot, are both list objects that point to something other than tickets or alias
+
+CONFIDENCE FOLLOW-UP:
+70
+
+EVALUATION:
+Partial at confidence 70. Correctly identifies that `alias = tickets` creates no list and that
+`labels` and `snapshot` are distinct list objects. The answer omits the new outer list created by
+the list literal in `return [labels, status, snapshot]` and therefore does not provide the total.
+
+PRIMARY BLOCKER:
+Nested list representation: a list literal creates an outer list even when its elements reference
+objects that already exist.
+
+SCAFFOLD RUNG:
+R1, one list-literal expression
+
+NEXT STEP:
+Ask only whether `result = [labels, status, snapshot]` creates a new list object and what it contains
+as references/values.
+
+OUTER-LIST MICRO-PROMPT:
+Focus on only this expression:
+
+```python
+result = [labels, status, snapshot]
+```
+
+Do the surrounding square brackets create a new outer list object, even though `labels` and
+`snapshot` already exist?
+
+What three values/references does that outer list contain?
+
+Confidence: 0–100.
+
+OUTER-LIST MICRO-ANSWER (verbatim):
+once we wrap this topic up i need to move locations so can you commit and push, ok you are correct result is another list object i did not name, and it is a list of lists whic his somewhat new, yes it creates another lsit object
+
+CONFIDENCE FOLLOW-UP:
+70
+
+EVALUATION:
+Partial/correct core at confidence 70. The learner independently recognizes that the brackets create
+a new outer list object. Precise content feedback: the outer list contains a reference to `labels`,
+the value `None`, and a reference to `snapshot`. It therefore contains two list references and one
+non-list value; "list of lists" is only partially accurate.
+
+PRIMARY BLOCKER:
+recovered; list literal allocation is now recognized
+
+SCAFFOLD RUNG:
+R1 passed with terminology correction
+
+NEXT STEP:
+Ask for the total immediately after the first call using the four candidate objects: original
+`tickets`, `labels`, `snapshot`, and the returned outer list. Then transfer the per-call allocation
+pattern once to the second call.
+
+FIRST-CALL TOTAL PROMPT:
+Immediately after the first call, count these list objects:
+
+```text
+original tickets list
+labels
+snapshot
+returned outer list
+```
+
+How many list objects exist at that point?
+
+Confidence: 0–100.
+
+FIRST-CALL TOTAL INITIAL RESPONSE (verbatim):
+ok fair it is a list containing multiple object types
+
+EVALUATION:
+The representation terminology is now correct, but the requested numeric total and confidence were
+not supplied. Ask only for those two fields.
+
+FIRST-CALL TOTAL FOLLOW-UPS (verbatim):
+90
+
+first returns 2 lists and a None object
+
+FOLLOW-UP EVALUATION:
+Confidence is interpreted as 90 after an explicit clarification question. The learner correctly
+describes the three elements inside the returned outer list—two list references and `None`—but still
+does not count the outer list itself or the original input list. The blocker is now precise:
+element count is being substituted for whole-program object count.
+
+PRIMARY BLOCKER:
+object count versus elements/references contained inside an object
+
+SCAFFOLD RUNG:
+repeated R1/R2 difficulty; use one worked neighboring example
+
+WORKED-EXAMPLE REQUIREMENT:
+Show `base = [1]`, `inner = []`, `wrapper = [inner, None]`. Explain that three lists exist: `base`,
+`inner`, and `wrapper`; `wrapper` referring to `inner` does not copy it. Require the learner to
+explain that count, then return to the BuildLens first-call count.
+
+SESSION REQUEST:
+After this topic is closed, commit and push the learning records using the verified publishing
+workflow, verify the remote hash, and update the handoff for a location change.
+
+---
+
+## EV-P1-SORT-178
+
+DATE: 2026-08-29
+PHASE: 1 (fundamentals review; learner limited quiz scope to completed Phases 0–2)
+TAG: string_sorting, case_sensitivity, one_operation, remediation
+RESULT: pending confidence and evaluation
+
+PROMPT (verbatim):
+One-concept recovery
+
+Do not run this:
+
+```python
+words = ["mango", "Apple", "Banana"]
+words.sort()
+```
+
+What is the exact final order of `words`?
+
+Briefly explain how you decided which string comes first, and give confidence from 0–100.
+
+LEARNER'S FIRST COMMITTED ANSWER (verbatim):
+Apple banan mango, it is sorted in alphabetical order, im not sure how the case of the word affects it
+
+CONFIDENCE FOLLOW-UP:
+80
+
+EVALUATION:
+Partial at confidence 80. The intended exact order was correct: `["Apple", "Banana", "mango"]`.
+The harmless `banan` transcription is not penalized. The explanation was incomplete because the
+learner explicitly did not know how case affects Python's default comparison.
+
+TARGETED FEEDBACK:
+Python's default string ordering is case-sensitive and compares characters from left to right. For
+the ordinary English letters in this exercise, uppercase letters sort before lowercase letters.
+
+PRIMARY BLOCKER:
+Mechanism of mixed-case default string comparison, not the predicted output.
+
+SCAFFOLD RUNG:
+R1, reduced to two items and one comparison
+
+RECOVERY STATUS:
+output correct; mechanism recovery pending
+
+TRANSFER / NEXT RETRIEVAL:
+Ask a two-item mixed-case sort and require the learner to state that the uppercase-leading string
+comes first under Python's case-sensitive default ordering.
+
+---
+
+## EV-P1-SORT-179
+
+DATE: 2026-08-29
+PHASE: 1 (fundamentals review; learner limited quiz scope to completed Phases 0–2)
+TAG: string_sorting, case_sensitivity, sort_vs_sorted, transfer, remediation
+RESULT: pending confidence and evaluation
+
+PROMPT (verbatim):
+Do not run this:
+
+```python
+words = ["apple", "Banana"]
+words.sort()
+```
+
+What is the exact final order, and why?
+
+Confidence: 0–100.
+
+LEARNER'S FIRST COMMITTED ANSWER (verbatim):
+banan apple, upper case, is this the same idea for you = sorted(oil)
+
+CONFIDENCE FOLLOW-UP:
+60
+
+LEARNER QUESTION:
+Whether `you = sorted(oil)` uses the same ordering idea.
+
+EVALUATION:
+Correct at confidence 60. The intended exact order is `["Banana", "apple"]`; the harmless `banan`
+transcription is not penalized. The learner correctly identified uppercase as the deciding feature.
+
+QUESTION RESPONSE:
+Yes. `you = sorted(oil)` uses the same default case-sensitive, left-to-right string ordering.
+However, `.sort()` mutates its list and returns `None`, while `sorted(oil)` leaves `oil` unchanged
+and assigns a newly created sorted list to `you`.
+
+PRIMARY BLOCKER:
+none on the two-item mechanism check
+
+SCAFFOLD RUNG:
+R1 passed
+
+RECOVERY STATUS:
+case-sensitive comparison recovered; proceed to same-prefix near-transfer using `sorted()`
+
+TRANSFER / NEXT RETRIEVAL:
+Use three lowercase strings sharing a prefix. Require exact order, the first differing characters,
+input mutation judgment, and list-object count.
+
+---
+
+## EV-P1-SORT-180
+
+DATE: 2026-08-29
+PHASE: 1 (fundamentals review; learner limited quiz scope to completed Phases 0–2)
+TAG: string_sorting, common_prefix, sorted, non_mutation, object_count, near_transfer
+RESULT: correct
+
+PROMPT (verbatim):
+Same-prefix near-transfer
+
+Do not run this:
+
+```python
+words = ["plate", "place", "plan"]
+ordered = sorted(words)
+```
+
+Give:
+
+1. Exact contents of `ordered`
+2. Exact contents of `words` afterward
+3. Which first differing letters determine the order
+4. Number of list objects
+5. Confidence: 0–100
+
+LEARNER'S FIRST COMMITTED ANSWER (verbatim):
+words does not change,
+orded is place plan plate i understand lets move on 2 list objects 100
+
+EVALUATION:
+Correct at confidence 100. `words` remains `["plate", "place", "plan"]`; `ordered` is
+`["place", "plan", "plate"]`; and two list objects exist. The learner omitted the explicit letters,
+which are `c`, `n`, and `t`, but requested to move on and demonstrated the ordering itself. Do not
+continue isolated sorting drills.
+
+PRIMARY BLOCKER:
+none
+
+SCAFFOLD RUNG:
+R2 near-transfer passed
+
+RECOVERY STATUS:
+mixed-case and same-prefix string ordering recovered sufficiently to rebuild the target composition
+
+TRANSFER / NEXT RETRIEVAL:
+Return directly to `EV-P1-COMPOSE-177`. Supply the now-established sorted ticket order and ask for
+the unfinished second-call labels, exact returned values, final stats, full output, purity inventory,
+list-object count, and shared principle.
+
+---
+
+## SESSION PAUSE — EV-P1-COMPOSE-177 REMEDIATION
+
+DATE: 2026-08-29
+
+WORKED EXAMPLE SHOWN:
+
+```python
+base = [1]
+inner = []
+wrapper = [inner, None]
+```
+
+The learner was shown that three list objects exist (`base`, `inner`, `wrapper`) and that the
+reference to `inner` inside `wrapper` does not copy it. The required learner explanation has not
+been attempted.
+
+SESSION PAUSE REQUEST (verbatim):
+ok i need to go so commit and push and we do this question when i get back
+
+PAUSE STATUS:
+Paused before the learner explains the worked example. On return, show the same three-line example
+and ask: "In your own words, why is the count three rather than one or four?" Do not reveal or ask
+the BuildLens count until that explanation is committed.

@@ -947,3 +947,205 @@ separate list, popped values, and report mutation were correct. The central miss
 propagated through the remaining state. `EV-P1-COMPOSE-174`.
 
 ---
+
+### Super-hard question 2 recovery — `.sort()` versus `sorted()`
+
+**Asked:** predict the final state after:
+
+```python
+values = [3, 1, 2]
+in_place = values.sort()
+separate = sorted(values)
+```
+
+Give `values`, `in_place`, `separate`, list-object count, and confidence.
+
+**Answered:**
+
+```text
+inplace is None the values are sorted sort() mutates the list and returns None, but sorted does not mutate the lsit it returns a new list that has the same contents but is sorted, 90
+```
+
+**Outcome:** central distinction correct at confidence 90. `.sort()` was correctly identified as
+mutating and `None`-returning; `sorted()` was correctly identified as returning a separate sorted
+list without mutating its input. Exact list contents and object count were omitted, so one compact
+completion check remains before the alias near-transfer. `EV-P1-SORT-175`.
+
+**Completion answer:**
+
+```text
+2 list objects&#x20;
+vlaues is [1,2,3]
+sepreate is also [1,2,3] but not the smae list ias valuse
+```
+
+**Completion outcome:** correct. Both lists contain `[1, 2, 3]`, but they are distinct objects.
+The isolated recovery is complete; proceed to the alias near-transfer.
+
+---
+
+### Super-hard question 2 recovery — alias near-transfer
+
+**Asked:** trace `numbers`, its alias, the return from sorting through the alias, a separate
+`sorted()` result, and list-object count.
+
+**Answered:**
+
+```text
+number and alsia are = [2,3,4]
+status = none
+copy = [2,3,4]
+2 list objects
+they point tothe same list object for alias and nubmers 100
+```
+
+**Outcome:** fully correct at confidence 100. Mutation through the alias, `.sort()` returning
+`None`, `sorted()` creating a distinct list, and the two-object count were all independently
+recovered. The remediation chain is complete. `EV-P1-ALIAS-176`.
+
+---
+
+## Super-hard question 3 of 3 — composed routing state
+
+**Asked:** trace two calls combining longest-prefix routing, implicit `None`, per-item counters,
+list alias mutation, `.sort()`/`sorted()`, output, purity, and object count. The exact prompt is
+preserved in `EV-P1-COMPOSE-177`.
+
+**Answered:** the learner supplied a committed trace covering both calls and part of the printed
+output. The exact verbatim answer is preserved in the Learning Ledger.
+
+**Confidence follow-up:** `50`
+
+**Outcome:** partial at confidence 50. The first call, implicit `None`, shared counters, alias
+mutation, `.sort()` return, separate snapshot, impurity judgment, and two internal prints were
+substantially correct. The primary blocker was mixed-case string sorting: the predicted ordering
+placed the lowercase-leading value before uppercase-leading values, which changed the second call.
+Several final structures, object count, purity inventory, and shared principle were unfinished.
+Mandatory remediation descends to one mixed-case sort operation before rebuilding.
+
+**Completion continuation:** after the sorting recovery, the learner correctly supplied final stats
+`{"escalated": 2, "unknown": 2}`, second-call labels `["escalated", "urgent", None]`, and the intended
+`second` value. Clarified that the second call's local alias points to `first[2]`, not original
+`tickets`. Outer output, object count, impurity inventory, shared principle, and completion confidence
+remain.
+
+**Completion confidence follow-up:** `80`. Final accounting/defense remains.
+
+**Second completion continuation:**
+
+```text
+1 what are you asking, 2. 2 list objects, it is impure because it sorts the lsit that tickets and same point to outside the function, 4. i do not even rememeber the alias recovery
+```
+
+**Outcome:** output wording needed clarification; two-list count was incorrect. The impurity answer
+correctly identified mutation visible through original aliases but omitted other effects. The shared
+principle was not retrieved. Descend to one bottom-level output, then rebuild allocations one step
+at a time rather than repeating the full closeout.
+
+**Confidence follow-up:** `30`.
+
+**Output recovery 1:** `print(tickets)` was answered as `[p1+,p1-,mystery]` at confidence 30.
+Correct shorthand for `["P1+database", "P1-cache", "mystery"]`.
+
+**Output recovery 2:** `print(same)` was correctly answered with the same shorthand at confidence
+60; the alias-identity explanation remains.
+
+**Alias explanation follow-up:** correctly explained at confidence 60 that `same`, `tickets`, and
+the first call's `alias` point to the same list. Shared object-versus-name principle recovered.
+
+**First-call object count:** the learner correctly said `alias = tickets` creates no list and named
+`labels` and `snapshot` as distinct lists. Total/count evaluation is pending confidence; the outer
+list made by the return expression still needs an explicit judgment.
+
+**Confidence follow-up:** `70`. Result partial: the outer list literal in the return value was
+omitted. Reduce to that one expression.
+
+**Outer-list micro-check:** the learner recognized that `[labels, status, snapshot]` creates another
+outer list and said nested lists are somewhat new. Exact element identification and confidence
+remain. The learner requested commit/push after the topic closes.
+
+**Confidence follow-up:** `70`. Core correct. Clarified that the outer list contains references to
+`labels` and `snapshot` plus `None`, so it is not exclusively a list of lists. Proceed to the total.
+
+**First-call total initial response:** learner correctly restated that the outer list contains
+multiple object types; numeric count and confidence remain.
+
+**First-call total follow-up:** confidence 90; answered that the return contains two lists and
+`None`. This correctly describes elements but does not count the original or outer list objects.
+Use a worked neighboring example to isolate object count versus element count.
+
+---
+
+### Super-hard question 3 recovery — mixed-case sorting
+
+**Asked:** predict the exact result of sorting `["mango", "Apple", "Banana"]` and explain how case
+affects the decision.
+
+**Answered:**
+
+```text
+Apple banan mango, it is sorted in alphabetical order, im not sure how the case of the word affects it
+```
+
+**Confidence follow-up:** `80`
+
+**Outcome:** intended output correct; reasoning incomplete. The result is
+`["Apple", "Banana", "mango"]`; the harmless spelling slip was ignored. The learner explicitly did
+not know the effect of case. Targeted feedback: Python's default ordering is case-sensitive and,
+for these ordinary English letters, uppercase-leading strings precede lowercase-leading strings.
+Next: a two-item case-only check. `EV-P1-SORT-178`.
+
+---
+
+### Mixed-case sorting completion check
+
+**Asked:** sort `["apple", "Banana"]`, give the exact order and reason, and provide confidence.
+
+**Answered:**
+
+```text
+banan apple, upper case, is this the same idea for you = sorted(oil)
+```
+
+**Confidence follow-up:** `60`
+
+**Outcome:** correct. The intended result is `["Banana", "apple"]`; uppercase was correctly named
+as the reason. `sorted(oil)` uses the same ordering rule but creates a new list and leaves `oil`
+unchanged, whereas `oil.sort()` mutates `oil` and returns `None`. Proceed to a same-prefix
+near-transfer. `EV-P1-SORT-179`.
+
+---
+
+### String-ordering near-transfer
+
+**Asked:** use `sorted()` on `["plate", "place", "plan"]`; give both lists, the deciding letters,
+object count, and confidence.
+
+**Answered:**
+
+```text
+words does not change,
+orded is place plan plate i understand lets move on 2 list objects 100
+```
+
+**Outcome:** correct at confidence 100. The input remains unchanged, the new list is
+`["place", "plan", "plate"]`, and two lists exist. The omitted deciding letters are `c`, `n`, and
+`t`; no further isolated sorting drill is needed. Return to question 3 composition. `EV-P1-SORT-180`.
+
+---
+
+### Paused worked-example rescue — location change
+
+After returning to question 3, the learner recovered the routing/counter state and shared-alias
+principle but confused elements inside the returned outer list with the number of list objects in
+the whole program. A neighboring worked example was shown:
+
+```python
+base = [1]
+inner = []
+wrapper = [inner, None]
+```
+
+Three lists were modeled: `base`, `inner`, and `wrapper`. The learner must still explain why the
+count is three rather than one or four. They requested an immediate commit/push before moving
+locations; resume with this exact explanation prompt. No BuildLens count answer was revealed.
