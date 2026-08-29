@@ -2971,3 +2971,115 @@ Next architecture reset due: unchanged; this was a Phase 0–2 fundamentals quiz
 Next implementation step: unchanged and blocked behind completion of the current learning gate.
 Files the learner should be able to teach remain the completed Phase 0–2 implementation files; the
 new uncertainty is nested list identity/allocation counting, not product behavior.
+
+## QUIZ RESUMED — 2026-08-29
+
+Evidence `EV-P1-OBJECT-181`: the learner correctly explained the worked neighboring example at
+confidence 90. They counted `base`, `inner`, and `wrapper` as three list objects and explained that
+`wrapper` remains its own list even though it contains a reference to `inner`; the reference does
+not create a fourth list. Worked-example rescue step 1 passed. Next: one missing allocation step,
+then one fresh independent micro-example before returning to the BuildLens first-call count.
+
+Evidence `EV-P1-OBJECT-182`: the learner correctly named the four lists after adding `bundle` and
+reported confidence 100. The missing-step portion of the worked-example rescue passed. The learner
+wants to continue implementation once the review is complete, but one fresh independent
+object-count micro-example and the unfinished BuildLens object/effect closeout remain mandatory.
+
+Evidence `EV-P1-OBJECT-183`: the fresh independent object-count transfer passed at confidence 100.
+The learner counted four unique lists, identified `same = items` as non-allocating, and explained
+that the outer packet stores references rather than copies. The worked-example rescue chain is now
+complete through independent transfer. Return to the `EV-P1-COMPOSE-177` whole-program count, then
+finish its impurity inventory.
+
+BuildLens target-count return: partial at confidence 100. The learner counted two `labels` and two
+`snapshot` lists but omitted the original ticket list and both returned outer lists. This is a
+composition-retention miss, not failure of the isolated allocation rule. Freeze the categories and
+ask only for four local lists + one original + two returned outer lists, then require a one-sentence
+reason before impurity closeout.
+
+Target-count reasoning follow-up: the learner now notices the outer object but attributes its
+creation to function output. Corrected mechanism: `return` itself does not allocate a list;
+evaluating the square-bracket list literal does. Descend to one syntax-only allocation contrast,
+then return to the total. Confidence was not requested in the preceding abbreviated prompt and
+remains needed on the micro-check.
+
+Evidence `EV-P1-OBJECT-184`: list-literal syntax transfer passed at confidence 100. The learner
+identified `existing = []` and `wrapped = [existing]` as the two allocation sites and explained the
+outer list containing the existing object. Alias non-allocation is already stable from prior
+evidence; do not prolong this micro-drill. Final review closeout requires only (1) whole-program list
+count and (2) full impurity inventory, with confidence.
+
+Target closeout: seven-list whole-program count passed at confidence 100. The learner also identified
+the changed ticket list (visible through `tickets` and `same`) and changed `stats` dictionary. The
+impurity inventory remains partial because output through called `route` was omitted. Ask only why a
+called function's `print("unknown")` is an observable effect of `summarize`; if independently
+explained, the final super-hard review gate can close.
+
+Transitive-effect attempt: the learner recalled that `unknown` prints but did not explain why
+calling `summarize` causes that effect and omitted confidence. They requested to move on; do not add
+another topic, but the required gate remains open. Ask one yes/no causal question with a because
+clause and confidence. If correct, close the review.
+
+Evidence `EV-P1-COMPOSE-177` final recovery: the learner correctly explained at confidence 100 that
+`summarize` inherits the observable terminal-output effect of the `route` function it invokes. The
+complete impurity inventory is now stable for this gate: mutation of the passed ticket list (visible
+through aliases), mutation of the passed `stats` dictionary, and terminal output through `route`.
+The whole-program count of seven lists also passed at target complexity after remediation.
+
+## THREE SUPER-HARD QUESTION REVIEW COMPLETE — 2026-08-29
+
+The learner completed the requested three final super-hard questions, including all mandatory
+recovery chains. Demonstrated by the end of the review:
+
+- `.sort()` mutates its list and returns `None`;
+- `sorted()` creates a distinct list without mutating its input;
+- mutation is visible through every alias to one object;
+- case-sensitive and same-prefix string ordering can be traced;
+- list literals allocate outer containers even when they contain existing object references;
+- whole-program object counts retain original, per-call local, snapshot, and returned outer lists;
+- dictionary counters persist when the same passed object is reused;
+- a caller inherits observable effects of functions it invokes;
+- purity requires inspecting passed mutable objects and transitive output, not only local variables.
+
+Do not mark these permanently mastered after this review. Delayed retrieval remains required.
+The learner explicitly requested the exact next BuildLens step and a verified commit/push before
+implementation resumes.
+
+## EXACT NEXT BUILDLENS STEP
+
+The stale top summary must not control the next action. Phase 2 implementation is complete. Phase 3
+`Session` implementation is also complete, with five tests green, the state-movie trace complete,
+and both halves of its knowledge gate passed. Phase 4 has not started.
+
+Two Phase 3 milestone requirements remain before any Phase 4 implementation:
+
+```text
+1. learner explanation — teach session.py in their own words
+2. transfer variant — solve the alias/copy ownership idea in a domain with no sessions
+```
+
+The immediate next interaction is the `session.py` teach-back. The learner should explain, without
+reciting labels mechanically:
+
+- what a new `Session` owns;
+- how `record(diff_text)` changes state and preserves order;
+- how `history()` creates and returns a snapshot rather than an alias;
+- why mutating the returned history cannot mutate `session.changes`;
+- the honest limitation that direct access to public `session.changes` can still mutate it;
+- which test proves the copy is load-bearing.
+
+After the teach-back passes, give one unrelated transfer with an owned mutable list, a returned copy,
+and an attempted mutation through the copy. Only after both items pass may Phase 3 be marked complete
+as a milestone and Phase 4 planning begin.
+
+Cumulative-review audit: this session was an extensive user-requested Phase 0–2 fundamentals review,
+but its exercises were not historically tagged `CUMULATIVE_RETRIEVAL`. Do not silently rewrite those
+records or reset a formal cumulative counter. Before substantial Phase 4 work, explicitly reconcile
+the counter status with `learning/LEARNING_RULES.md`; combine any due review with an already-required
+milestone rather than issuing redundant back-to-back quizzes.
+
+Next retrieval due: `session.py` teach-back now.
+Next architecture reset due: audit before substantial Phase 4 work; no counter was reset here.
+Next implementation step: none until the two Phase 3 milestone items pass.
+Files the learner should be able to teach next: `session.py` and the five behavioral tests in
+`test_session.py`.

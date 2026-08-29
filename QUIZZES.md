@@ -1149,3 +1149,104 @@ wrapper = [inner, None]
 Three lists were modeled: `base`, `inner`, and `wrapper`. The learner must still explain why the
 count is three rather than one or four. They requested an immediate commit/push before moving
 locations; resume with this exact explanation prompt. No BuildLens count answer was revealed.
+
+### Worked-example explanation resumed
+
+**Answered:**
+
+```text
+wrapper is a list object and so is base and inner, just because it contains lists does not mean it is not a list
+```
+
+**Confidence:** `90`
+
+**Outcome:** correct. The learner counted the three containers themselves and explained that a
+container remains a list when it contains another list reference. Next: one missing allocation step,
+then one fresh micro-example. `EV-P1-OBJECT-181`.
+
+### Worked-example missing step
+
+**Answered:**
+
+```text
+base inner wrapper and bundle, i understand the overarching idea lets move on, if this is the end i want to continue on with phase 2 implmentation as the review/quiz is complete
+```
+
+**Confidence:** `100`
+
+**Outcome:** correct: four named list objects. The learner requested implementation after the review
+closes. One fresh independent micro-example and the BuildLens target closeout still remain.
+`EV-P1-OBJECT-182`.
+
+### Fresh object-count transfer
+
+**Answered:**
+
+```text
+items, notes, packet, ordered are all the unique list objects same points to items list object, packet also points to multiple list objects that already exsit like notes and same -> items, 100
+```
+
+**Outcome:** fully correct at confidence 100. Four lists, alias assignment non-allocating, and nested
+references rather than copies were all independently explained. Return to the BuildLens target
+count. `EV-P1-OBJECT-183`.
+
+### BuildLens target object count return
+
+**Answered:**
+
+```text
+labels creates one per call so that has 2 at the end, same with snapshot, 100, what else do you want?
+```
+
+**Outcome:** partial at confidence 100. Correctly counted four local `labels`/`snapshot` lists but
+dropped the original input list and two outer return lists. Reduce to addition over those explicitly
+named categories.
+
+**Target-count reasoning follow-up:** learner recognized the omitted outer list but described the
+function as creating a list because it outputs one. Clarified that allocation comes from the `[...]`
+literal, not `return`: returning an existing list creates nothing new. Numeric total remains.
+
+### List-literal syntax transfer
+
+**Answered:**
+
+```text
+line 1 creates the first list&#x20;
+the second list is created by wrapped, becasue it is a new list that has a list object inside of it 100 lets move on are we complete
+```
+
+**Outcome:** correct at confidence 100. The learner identified both allocation sites and the nested
+reference mechanism. Do not prolong the micro-drill. Two target closeout answers remain.
+`EV-P1-OBJECT-184`.
+
+### Target closeout
+
+**Answered:**
+
+```text
+it changes tickets stats same, 7 lists at the end , 100
+```
+
+**Outcome:** partial at confidence 100. Seven lists is correct. The passed list and `stats` mutation
+were found; `tickets`/`same` are aliases for one list. Output through called `route` was omitted, so
+one transitive-side-effect explanation remains.
+
+**Transitive-effect answer:**
+
+```text
+i was going to say that but was not sure i know it prints unkown, we are moving on now
+```
+
+**Outcome:** incomplete. Output occurrence was recalled, but the causal explanation and confidence
+were omitted. Reduce to one yes/no mechanism question; no new topic afterward if correct.
+
+**Recovery answer:**
+
+```text
+because it prints unkown the fucntion is impure because it calls a function that changes the output, yes, 100 we are done here i want to see the next step in buildlens now, push and commit what we have so far
+```
+
+**Outcome:** correct at confidence 100. The learner explained that `summarize` inherits the terminal
+output effect of the `route` function it calls. Together with the recovered seven-list count and
+outside mutations, super-hard question 3 is complete after remediation. The requested three-question
+review is closed; do not mark the concepts permanently mastered.

@@ -15747,3 +15747,320 @@ PAUSE STATUS:
 Paused before the learner explains the worked example. On return, show the same three-line example
 and ask: "In your own words, why is the count three rather than one or four?" Do not reveal or ask
 the BuildLens count until that explanation is committed.
+
+---
+
+## EV-P1-OBJECT-181
+
+DATE: 2026-08-29
+PHASE: 1 (fundamentals review; learner limited quiz scope to completed Phases 0–2)
+TAG: object_count, nested_lists, references, worked_example_explanation
+RESULT: correct
+
+PROMPT (verbatim):
+Welcome back. We’re resuming at the unanswered worked-example explanation:
+
+```python
+base = [1]
+inner = []
+wrapper = [inner, None]
+```
+
+In your own words, why are there three list objects rather than one or four?
+
+Confidence: 0–100.
+
+LEARNER'S FIRST COMMITTED ANSWER (verbatim):
+wrapper is a list object and so is base and inner, just because it contains lists does not mean it is not a list
+
+CONFIDENCE FOLLOW-UP (verbatim):
+90
+
+EVALUATION:
+Correct at confidence 90. The learner counts `base`, `inner`, and `wrapper` as distinct container
+objects and explains that a list remains its own object when it contains a reference to another
+list. No fourth list is created by the reference stored inside `wrapper`.
+
+PRIMARY BLOCKER:
+none on the worked-example explanation
+
+SCAFFOLD RUNG:
+worked-example explanation passed
+
+RECOVERY STATUS:
+step 1 of the worked-example rescue passed; one missing allocation step and one fresh independent
+micro-example remain before returning to the BuildLens count
+
+TRANSFER / NEXT RETRIEVAL:
+Add exactly one assignment that creates a list containing `wrapper`; ask how many lists then exist
+and which expression creates the new one.
+
+---
+
+## EV-P1-OBJECT-182
+
+DATE: 2026-08-29
+PHASE: 1 (fundamentals review; learner limited quiz scope to completed Phases 0–2)
+TAG: object_count, nested_lists, references, missing_step
+RESULT: correct
+
+PROMPT (verbatim):
+Now add one line:
+
+```python
+base = [1]
+inner = []
+wrapper = [inner, None]
+bundle = [wrapper]
+```
+
+How many list objects now exist? Name them, and explain whether placing `wrapper` inside `bundle`
+copies `wrapper`.
+
+Confidence: 0–100.
+
+LEARNER'S FIRST COMMITTED ANSWER (verbatim):
+base inner wrapper and bundle, i understand the overarching idea lets move on, if this is the end i want to continue on with phase 2 implmentation as the review/quiz is complete
+
+CONFIDENCE FOLLOW-UP (verbatim):
+100
+
+EVALUATION:
+Correct at confidence 100. Naming `base`, `inner`, `wrapper`, and `bundle` establishes the count of
+four. The learner reports understanding the overarching reference-versus-copy idea and requests to
+move to implementation when the review is complete. Do not skip the required fresh independent
+micro-example or the unfinished BuildLens object/effect closeout.
+
+PRIMARY BLOCKER:
+none on the missing step
+
+SCAFFOLD RUNG:
+worked-example rescue step 2 passed
+
+RECOVERY STATUS:
+one fresh independent micro-example remains before returning to the target
+
+TRANSFER / NEXT RETRIEVAL:
+Use unrelated names with one alias assignment, two list literals including an outer mixed list, and
+one `sorted()` allocation. Require total count and identify the alias as non-allocating.
+
+---
+
+## EV-P1-OBJECT-183
+
+DATE: 2026-08-29
+PHASE: 1 (fundamentals review; learner limited quiz scope to completed Phases 0–2)
+TAG: object_count, aliases, nested_lists, sorted, independent_transfer
+RESULT: correct
+
+PROMPT (verbatim):
+Fresh independent transfer
+
+Do not run this code:
+
+```python
+items = [2, 1]
+same = items
+notes = []
+packet = [same, notes, None]
+ordered = sorted(items)
+```
+
+Answer:
+
+1. How many list objects exist?
+2. Which assignment creates no new list?
+3. Does `packet` contain copies of `items` and `notes`, or references to them?
+4. Confidence: 0–100.
+
+LEARNER'S FIRST COMMITTED ANSWER (verbatim):
+items, notes, packet, ordered are all the unique list objects same points to items list object, packet also points to multiple list objects that already exsit like notes and same -> items, 100
+
+EVALUATION:
+Fully correct at confidence 100. Four unique lists exist: `items`, `notes`, `packet`, and `ordered`.
+`same = items` creates no list, and `packet` stores references to the existing `items` and `notes`
+objects rather than copies.
+
+PRIMARY BLOCKER:
+none
+
+SCAFFOLD RUNG:
+fresh independent R2 transfer passed
+
+RECOVERY STATUS:
+worked-example rescue chain passed through independent transfer; return to BuildLens target count
+
+TRANSFER / NEXT RETRIEVAL:
+Ask for the whole-program count in `EV-P1-COMPOSE-177`: one original ticket list plus three new
+lists per `summarize` call (`labels`, `snapshot`, returned outer list), across two calls.
+
+TARGET COUNT RETURN PROMPT:
+Return to the original program.
+
+Before either call, one list exists: the original tickets list. Each `summarize(...)` call executes
+three list-creating expressions: `labels = []`, `snapshot = sorted(alias)`, and
+`return [labels, status, snapshot]`. There are two calls, and `alias = tickets` creates no list.
+
+The learner was asked for the whole-program list count, names grouped by original/first/second call,
+and confidence.
+
+TARGET COUNT RETURN ANSWER (verbatim):
+labels creates one per call so that has 2 at the end, same with snapshot, 100, what else do you want?
+
+EVALUATION:
+Partial at confidence 100. The learner correctly counts two `labels` lists and two `snapshot` lists
+but omits the original ticket list and both returned outer list objects, despite independently
+recognizing outer-list allocation in the micro-exercises.
+
+PRIMARY BLOCKER:
+composition tracking: previously understood allocation sites are dropped when totals span calls
+
+SCAFFOLD RUNG:
+target composition partial; reduce to addition over explicitly named categories
+
+RECOVERY STATUS:
+not yet stable at target complexity
+
+NEXT STEP:
+State that four local lists were counted and explicitly name the three omitted objects without
+giving the final arithmetic result. Ask only for `4 + 1 + 2` and a one-sentence reason.
+
+TARGET COUNT ADDITION PROMPT:
+The learner was shown two `labels` plus two `snapshot` lists (four), then asked to add one original
+ticket list and two returned outer lists, give the total, and explain why the outer lists count
+separately.
+
+TARGET COUNT ADDITION ANSWER (verbatim):
+ok i understand what you are saying i was not counting that so you are saying that the functions itself creaes a list when it ouptuts becasue ti outputs as list,
+
+EVALUATION:
+Partial. The learner now recognizes the omitted outer object, but attributes allocation to the
+function output/return mechanism rather than the list literal. Precise correction: `return labels`
+returns an existing list without allocating; `return [labels]` evaluates `[...]` to create a new
+outer list and then returns it. The numeric total and confidence remain unanswered.
+
+PRIMARY BLOCKER:
+list-literal allocation versus return semantics
+
+SCAFFOLD RUNG:
+R0/R1 syntax-only distinction
+
+NEXT STEP:
+Use `existing = []`, `same = existing`, `wrapped = [existing]`. Ask which line creates the second
+list and total list count. Then rebuild the original arithmetic.
+
+---
+
+## EV-P1-OBJECT-184
+
+DATE: 2026-08-29
+PHASE: 1 (fundamentals review; learner limited quiz scope to completed Phases 0–2)
+TAG: list_literal, alias_assignment, allocation, syntax_transfer
+RESULT: correct
+
+PROMPT (verbatim):
+Focus only on these lines:
+
+```python
+existing = []
+same = existing
+wrapped = [existing]
+```
+
+1. Which line creates the first list?
+2. Which line creates the second list?
+3. Which line creates no list?
+4. Total list objects?
+5. Confidence: 0–100.
+
+LEARNER'S FIRST COMMITTED ANSWER (verbatim):
+line 1 creates the first list&#x20;
+the second list is created by wrapped, becasue it is a new list that has a list object inside of it 100 lets move on are we complete
+
+EVALUATION:
+Correct at confidence 100. The learner identifies the list literal on line 1 and the outer literal
+assigned to `wrapped` as the two allocation sites. Although `same` and the numeric total were not
+restated explicitly, the answer distinguishes the two list-creating lines and earlier evidence
+already established that alias assignment is non-allocating. Do not prolong the micro-drill.
+
+PRIMARY BLOCKER:
+none on syntax transfer
+
+RECOVERY STATUS:
+list-literal versus return/alias mechanism recovered; return to final target closeout
+
+TRANSFER / NEXT RETRIEVAL:
+Ask only two final target answers: whole-program list count with arithmetic categories, and complete
+impurity inventory (passed list mutation, passed dictionary mutation, printed output through called
+function). Require confidence.
+
+TARGET CLOSEOUT PROMPT:
+The learner was asked to total two `labels`, two `snapshot`, two returned outer, and one original
+ticket list; name every outside object changed by `summarize`; name every observable output effect;
+and provide confidence.
+
+TARGET CLOSEOUT ANSWER (verbatim):
+it changes tickets stats same, 7 lists at the end , 100
+
+EVALUATION:
+Partial at confidence 100. The whole-program count of seven lists is correct and completes the
+object-count target. The learner correctly identifies mutation visible through `tickets`/`same` and
+mutation of `stats`, but `tickets` and `same` are two names for one changed list object. The answer
+omits output produced when the called `route` function prints `unknown`.
+
+PRIMARY BLOCKER:
+transitive side effects: an observable print inside a called function is still caused by calling the
+caller
+
+SCAFFOLD RUNG:
+object-count target passed; impurity closeout needs one R4 call-chain explanation
+
+RECOVERY STATUS:
+seven-list count recovered at target complexity; one final transitive-print explanation remains
+
+NEXT STEP:
+Ask why `route` printing during `summarize` makes `summarize` impure even though the `print` statement
+is not textually inside `summarize`.
+
+TRANSITIVE EFFECT PROMPT:
+`print("unknown")` is written inside `route`, not directly inside `summarize`.
+
+Why does that printed output still count as an observable side effect of calling `summarize`?
+
+Confidence: 0–100.
+
+TRANSITIVE EFFECT ANSWER (verbatim):
+i was going to say that but was not sure i know it prints unkown, we are moving on now
+
+EVALUATION:
+Incomplete. The learner recalls the printed output but does not explain the call-chain mechanism and
+does not provide confidence. The learner asks to move on, but the required gate cannot close without
+an independently committed causal explanation.
+
+PRIMARY BLOCKER:
+distinguishing knowledge that output occurs from explaining why the caller inherits the observable
+effect of a function it invokes
+
+SCAFFOLD RUNG:
+R1 yes/no causal mechanism
+
+NEXT STEP:
+Ask whether calling `summarize` can change terminal output because it invokes `route`; require "yes"
+or "no," one because-clause, and confidence. No additional quiz topic follows if correct.
+
+TRANSITIVE EFFECT RECOVERY ANSWER (verbatim):
+because it prints unkown the fucntion is impure because it calls a function that changes the output, yes, 100 we are done here i want to see the next step in buildlens now, push and commit what we have so far
+
+EVALUATION:
+Correct at confidence 100. The learner explicitly connects `summarize` invoking `route` to the
+terminal output caused by `route`, and recognizes that a caller inherits observable effects of the
+functions it invokes.
+
+RECOVERY STATUS:
+passed. Together with the target count of seven lists, passed-list mutation, and shared `stats`
+mutation, `EV-P1-COMPOSE-177` is complete after remediation.
+
+REVIEW STATUS:
+The requested three super-hard questions and required remediation are complete. This is evidence of
+successful retrieval and recovery, not permanent mastery. The learner requested the exact next
+BuildLens step plus a verified commit/push.

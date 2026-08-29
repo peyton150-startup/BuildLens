@@ -92,3 +92,36 @@ before returning to the BuildLens first-call count. Do not reveal the BuildLens 
 object counting recovers, finish the impurity inventory: passed-list mutation, shared counter
 mutation, and output through the called `route` function. Super-hard question 3 and its recovery are
 not complete; do not advance Phase 3.
+
+## Review completion update — 2026-08-29
+
+The location-change resume sequence is complete. The learner explained the worked example, passed a
+missing-step check, passed a fresh independent transfer, and recovered the BuildLens whole-program
+count of seven list objects. They also completed the impurity inventory: passed-list mutation,
+passed-dictionary mutation, and terminal output inherited through the called `route` function.
+
+All three requested super-hard questions and their remediation chains are now complete. Do not
+restart this review or mark its concepts permanently mastered. Before implementation, read the
+authoritative current phase/task and cumulative-review counters in `CURRENT_STATE.md` and
+`learning/LEARNING_RULES.md`, then present the learner with the exact next BuildLens step and its
+required knowledge gate.
+
+## Exact next BuildLens step
+
+Phase 2 implementation is already complete. Phase 3 `Session` code, five automated tests, state
+movie, and knowledge gate are complete, but its milestone still owes:
+
+```text
+learner explanation  — teach session.py in their own words
+transfer variant     — fresh alias/copy problem outside the session domain
+```
+
+Resume with the `session.py` teach-back, not Phase 2 implementation and not Phase 4 code. Require the
+learner to explain ownership, ordered mutation through `record`, snapshot creation through
+`list(self.changes)`, why the returned list cannot mutate the session, the remaining public-attribute
+limitation, and the leak test that proves copying matters. Then give one unrelated transfer. Only
+after both pass may Phase 4 planning begin.
+
+The just-completed fundamentals review was not historically tagged `CUMULATIVE_RETRIEVAL`. Do not
+retroactively rewrite its exercise types or silently reset a formal counter. Audit the counter before
+substantial Phase 4 work and combine any due review with the milestone where possible.
