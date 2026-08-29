@@ -125,3 +125,28 @@ after both pass may Phase 4 planning begin.
 The just-completed fundamentals review was not historically tagged `CUMULATIVE_RETRIEVAL`. Do not
 retroactively rewrite its exercise types or silently reset a formal counter. Audit the counter before
 substantial Phase 4 work and combine any due review with the milestone where possible.
+
+## Counter audit result
+
+Phase 3 is complete, including teach-back and unrelated transfer. The foundation counter remains due
+because no previous question was recorded with exercise type `CUMULATIVE_RETRIEVAL`; do not
+retroactively relabel attempts. Before Phase 4 code, run four formal questions: classification
+debug/test, return/output/local-state trace, summary contract/boundary apply, and an architecture
+defense. Use the fourth as the pre-Phase-4 architecture reset. Avoid alias/snapshot/purity repetition.
+Reset only the foundation counter after all four pass.
+
+## Latest pause — moving locations, cumulative checkpoint
+
+The concise replace-in-place `CURRENT_STATE.md` cleanup is complete. Formal cumulative questions 1–3
+are complete:
+
+```text
+Q1 classifier debug/test       passed after leading-space recovery
+Q2 return/output/local state   passed at confidence 90
+Q3 summary contract/boundary   passed after multiline/explicit-return remediation
+```
+
+Resume with cumulative question 4 of 4 only. It is the architecture defense and doubles as the
+required pre-Phase-4 architecture reset. After it passes, reset only the foundation counter, record
+Phase 3 as 1/3 toward the next foundation checkpoint, and begin Phase 4 intent discussion. Do not
+repeat question 3 or start product code first.

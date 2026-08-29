@@ -1250,3 +1250,89 @@ because it prints unkown the fucntion is impure because it calls a function that
 output effect of the `route` function it calls. Together with the recovered seven-list count and
 outside mutations, super-hard question 3 is complete after remediation. The requested three-question
 review is closed; do not mark the concepts permanently mastered.
+
+---
+
+## Phase 3 `session.py` teach-back
+
+**Answered:** the learner correctly explained per-instance changes, mutation through `record`,
+snapshot creation/return through `history`, and why mutating the snapshot cannot mutate the session,
+at confidence 100. Exact verbatim answer is preserved in `EV-P3-TEACH-185`.
+
+**Outcome:** strong partial. Test evidence was explicitly deferred until viewing the tests, and the
+public-attribute limitation was omitted. Clarified that `[]` allocation per `__init__` call—not the
+mere presence of `self`—creates distinct lists, and that `record` does no runtime string conversion.
+
+**Clarification resolved:** `__init__` runs automatically for each construction, `[]` creates the
+fresh object, and `self.changes` attaches it to that instance. A method named `potato` would not run
+automatically.
+
+**Leak-test explanation:** correctly explained at confidence 100 that mutating the first snapshot
+does not touch session state and a later `history()` call creates another unaffected snapshot.
+
+**Aliasing counterfactual:** correctly predicted `AssertionError` at confidence 80 because returning
+`self.changes` lets `history.append` mutate session state. Exact mismatch: actual
+`["diff A", "diff B"]`, expected `["diff A"]`.
+
+**Public limitation:** partial at confidence 100. Direct append was identified, but caller syntax is
+`session.changes.append("sneaky")`, not method-local `self`. Clarified that deleting a mutated
+snapshot is safe, while direct public-attribute mutation changes real state and appears in every
+later snapshot.
+
+**Caller syntax follow-up:** correctly distinguished caller-side `session.changes` from method-local
+`self.changes`. The public-mutation state trace remains unanswered.
+
+**Public-mutation values:** correctly gave old snapshot `["diff A"]` and new snapshot
+`["diff A", "sneaky"]` at confidence 100. Deletion explanation remains.
+
+**Deletion explanation:** accepted with refinement. Deleting a snapshot name cannot mutate the
+separate session-owned list; a later snapshot copies whatever real state currently contains.
+
+**Milestone:** `session.py` learner teach-back COMPLETE. One unrelated alias/copy transfer remains
+before Phase 3 closes.
+
+### Phase 3 unrelated transfer
+
+**Outcome:** fully correct at confidence 100. In an `InspectionLog` domain, the learner traced the
+owned list and two snapshots, counted three lists, explained snapshot isolation, identified direct
+public-attribute mutation, and connected the principle to `Session.history()`. Confirmed that `log`
+is the instance returned by `InspectionLog()`.
+
+**Milestone:** Phase 3 learner explanation and transfer variant are both COMPLETE.
+`EV-P3-TRANSFER-186`.
+
+---
+
+## Formal foundation cumulative checkpoint
+
+### Question 1 of 4 — classifier debug/test
+
+**Outcome:** passed after recovery at confidence 100. Lines 1–4, the shadowing bug, longest-prefix-first
+repair, and catching-test purpose were correct. The learner initially missed the leading space on
+line 5, then corrected it to context and supplied counts `2, 2, 0, 1`. Test transcription was waived.
+`EV-CUM-FND-187`.
+
+### Question 2 of 4 — return/output/local-state trace
+
+**Outcome:** fully correct at confidence 90. Both local-list traces, returns 2/1, two internal
+`ignored` prints, final `2 1`, and per-call local reset were correct. `EV-CUM-FND-188`.
+
+### Question 3 of 4 — summary contract/boundary
+
+**Initial response:** learner asked whether the triple-quoted diff lacks `\n` characters.
+
+**Syntax remediation:** correctly predicted `splitlines()` produces `["red", "blue"]` from a
+physically two-line triple-quoted string at confidence 90. Return to the unchanged target.
+`EV-CUM-FND-189`.
+
+**Target outcome:** strong partial at confidence 90. The learner identified the exact contributing
+lines, yielding `DiffSummary(2, 2, 1)`, explained metadata precedence/context exclusion, and predicted
+the all-zero empty result. Exact assertion syntax was unknown and side-effect judgment was omitted.
+
+**Completion attempt:** proposed `None` at confidence 70. Outside-state conclusion was correct, but
+the explicit dataclass return was replaced by `None`. Clarified that local integer counters are
+rebound, not mutated. Descend to one explicit-return micro-check.
+
+**Explicit-return recovery:** correctly stated `DiffSummary(0, 0, 0)` at confidence 80 and explained
+that the returned object is not `None`. This supplies the exact empty-boundary assertion. Question 3
+passes after remediation. Learner requested commit/push before moving locations.
