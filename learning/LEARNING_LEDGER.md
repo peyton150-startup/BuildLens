@@ -16665,6 +16665,484 @@ architecture defense pending remediation
 TRANSFER STATUS:
 pending
 
+R1 REMEDIATION PROMPT (verbatim):
+Micro-check:
+
+```python
+"tea".startswith("t")
+42.startswith("t")
+```
+
+For each expression:
+
+- Does the object provide the `.startswith()` operation?
+- Does Python produce `True`/`False`, or stop with an error?
+
+Confidence: 0–100.
+
+R1 REMEDIATION ANSWER (verbatim):
+the first would be true and the second would be an error or false not sure which, i have no idea for 1, 20
+
+R1 CONFIDENCE:
+20
+
+R1 EVALUATION:
+Partial. The string result is correct. The learner remains uncertain whether an absent integer
+method raises an error or behaves like a successful method call returning `False`, and cannot yet
+identify method availability.
+
+PRIMARY BLOCKER UPDATE:
+SYNTAX_READING — dot-method lookup versus a method's returned boolean value.
+
+REMEDIATION CHAIN UPDATE:
+target contract trace → R1 attempt partial → R0 dot-method syntax explanation → fresh R1 near-transfer
+
+SYNTAX-ONLY EXPLANATION PROVIDED:
+`object.method(...)` looks up the named method on that object's type and then calls it. Strings
+provide `.startswith()`, which can return `True` or `False`. Integers do not provide it, so lookup
+raises `AttributeError`; absence of an operation is not the same as the operation returning `False`.
+
+FRESH R1 NEAR-TRANSFER PROMPT (verbatim):
+Fresh micro-check:
+
+```python
+"sun".endswith("n")
+7.endswith("n")
+```
+
+For each expression, predict either:
+
+- `True`
+- `False`
+- `AttributeError`
+
+Briefly explain why. Confidence: 0–100.
+
+FRESH R1 NEAR-TRANSFER ANSWER (verbatim):
+false&#x20;
+attribute eroro, 100
+
+FRESH R1 EVALUATION:
+Partial at confidence 100. The learner correctly transfers missing-method behavior to the integer
+and predicts `AttributeError`. The string suffix predicate is evaluated incorrectly: `"sun"` ends
+with `"n"`, so the first expression is `True`, not `False`.
+
+PRIMARY BLOCKER UPDATE:
+STRING_SUFFIX_READING — method availability recovered; evaluating the final character remains.
+
+CALIBRATION NOTE:
+Incorrect suffix evaluation was reported at confidence 100.
+
+REMEDIATION CHAIN UPDATE:
+target contract trace → method lookup recovered → suffix evaluation missed → R0 final-character read
+
+LEARNER READING-SLIP CLARIFICATION (verbatim):
+i thought it said startswith()
+
+CLARIFICATION EVALUATION:
+The prior suffix miss is reclassified as a prompt-reading slip rather than evidence that suffix
+semantics are unknown. If the expression had been `"sun".startswith("n")`, the learner's `False`
+answer would have been correct. A careful-reading near-transfer remains required.
+
+CAREFUL-READING NEAR-TRANSFER PROMPT (verbatim):
+Careful-reading check:
+
+```python
+"map".startswith("m")
+"map".endswith("m")
+```
+
+Give both results and confidence: 0–100.
+
+CAREFUL-READING NEAR-TRANSFER ANSWER (verbatim):
+true
+false
+100, we move on
+
+NEAR-TRANSFER EVALUATION:
+Correct at confidence 100. The learner distinguishes the prefix and suffix operations accurately.
+Method lookup and predicate reading are stable at R1; climb to one branch before returning to the
+full contract target.
+
+REMEDIATION STATUS:
+R1 recovered; R3 branch application pending
+
+R3 BRANCH BRIDGE PROMPT (verbatim):
+Bridge trace:
+
+```python
+value = 42
+
+if value.startswith("+"):
+    label = "added"
+else:
+    label = "context"
+```
+
+Does Python reach the `else` branch? What happens, and is `label` ever assigned?
+
+Confidence: 0–100.
+
+R3 BRANCH BRIDGE ANSWER (verbatim):
+no, it has an attributre error, no label is never assigned
+
+R3 EVALUATION:
+Correct. Execution stops at the missing integer `.startswith()` method with `AttributeError`; the
+`else` branch is not reached and `label` is never assigned. Confidence was omitted.
+
+R3 CONFIDENCE FOLLOW-UP (verbatim):
+80
+
+REMEDIATION STATUS UPDATE:
+R3 recovered; return to fresh completion of the original R5 contract target.
+
+TARGET RETURN PROMPT (verbatim):
+Return to the Phase 5 target for:
+
+```python
+classify_diff_line(42)
+```
+
+State:
+
+1. Does the documented contract allow `42`?
+2. What actually happens at runtime?
+3. Does the docstring enforce anything?
+4. Is there any explicit input validation in the function?
+
+Confidence: 0–100.
+
+TARGET RETURN ANSWER (verbatim):
+the contract does not allow 42, during runtime it does nto throw any errors, nothing is enforced and there is no input validation for the function, 90
+
+TARGET RETURN EVALUATION:
+Partial at confidence 90. The learner correctly states that the contract excludes `42`, the
+docstring enforces nothing, and explicit validation is absent. The runtime prediction contradicts
+the recovered branch trace: the required string method still fails on an integer.
+
+PRIMARY BLOCKER UPDATE:
+BOUNDARY_CONCEPT — conflating absence of explicit validation with absence of runtime failure.
+
+CALIBRATION NOTE UPDATE:
+The incorrect runtime claim was reported at confidence 90 immediately after a correct equivalent
+branch trace at confidence 80.
+
+REMEDIATION CHAIN UPDATE:
+method availability recovered → branch application recovered → target composition lost distinction
+between validation and incidental operation failure → R1 unrelated operation
+
+R1 UNRELATED OPERATION PROMPT (verbatim):
+One-operation check:
+
+```python
+items = 10
+items.append("box")
+```
+
+There is no `isinstance()` check or other explicit validation.
+
+Does the second line succeed anyway, or can it raise an error? Explain why.
+
+Confidence: 0–100.
+
+R1 UNRELATED OPERATION ANSWER (verbatim):
+it would raise an error, items is a interger object and items would be looking for a list, my only thought would be it would create a list and append box onto it? 40
+
+R1 EVALUATION:
+Correct outcome with uncertain mechanism at confidence 40. The integer has no `.append` method, so
+lookup raises `AttributeError` despite the absence of explicit validation. Python does not search
+for or automatically create/convert a list.
+
+MECHANISM CLARIFICATION:
+`items` remains bound to integer `10`; method lookup occurs on that integer object. No implicit
+container allocation or conversion occurs.
+
+REMEDIATION STATUS UPDATE:
+Principle identified at R1; one fresh same-rung transfer remains before climbing.
+
+FRESH R1 TRANSFER PROMPT (verbatim):
+Fresh check:
+
+```python
+quantity = 7
+result = quantity.upper()
+```
+
+There is no explicit validation.
+
+What happens to the second line? Does Python automatically convert `7` to a string?
+
+Confidence: 0–100.
+
+FRESH R1 TRANSFER ANSWER (verbatim):
+it throws an error upper() does not convert 7 into a string, 80
+
+FRESH R1 EVALUATION:
+Correct at confidence 80. The learner predicts the unsupported method error and explicitly rejects
+automatic integer-to-string conversion.
+
+REMEDIATION STATUS UPDATE:
+R1 validation-versus-operation-failure principle recovered; climb to R2 sequential state.
+
+R2 SEQUENTIAL PROMPT (verbatim):
+Short sequential trace:
+
+```python
+value = 7
+candidate = value
+result = candidate.upper()
+```
+
+After each line, state what name was assigned—or where execution stops. Does either assignment change the integer into a string?
+
+Confidence: 0–100.
+
+R2 SEQUENTIAL ANSWER (verbatim):
+no, it satays an integer and throws the attribute error, 80
+
+R2 EVALUATION:
+Correct at confidence 80. `value` and `candidate` both refer to integer `7`; neither assignment
+converts it, and execution stops with `AttributeError` at `.upper()`. The response compresses the
+per-line names but preserves the required state and failure point.
+
+REMEDIATION STATUS UPDATE:
+R2 recovered; climb to R3 one-control-choice application.
+
+R3 CONTROL-CHOICE PROMPT (verbatim):
+Control-choice trace:
+
+```python
+value = 7
+
+if value > 0:
+    result = value.upper()
+else:
+    result = "empty"
+```
+
+Does the condition pass? What happens next? Is `result` assigned?
+
+Confidence: 0–100.
+
+R3 CONTROL-CHOICE ANSWER (verbatim):
+ok so startswith inside classify would throw an error because it would be checking an integer for a string value and attribute error, it does not pass attribute error does not even get to the else, result stays 7, what would happen if result was =7 but we ran the else statement??? 90
+
+R3 EVALUATION:
+Partial at confidence 90. The learner correctly recovers the original classifier's missing-method
+failure and correctly understands that an exception prevents reaching a later `else`. In the fresh
+snippet, they do not separately evaluate `value > 0`, conflate `value` with `result`, and treat
+`result` as already holding `7` even though only `value` was assigned.
+
+PRIMARY BLOCKER UPDATE:
+EXECUTION_ORDER / VARIABLE_BINDING — distinguish condition evaluation from body execution and
+distinguish the names `value` and `result`.
+
+CALIBRATION NOTE UPDATE:
+The conflated R3 trace was reported at confidence 90.
+
+REMEDIATION CHAIN UPDATE:
+R2 recovered → R3 conflated condition/body and names → learner-generated R2 reassignment question
+
+R2 REASSIGNMENT PROMPT (verbatim):
+Your question, reduced to assignment only:
+
+```python
+result = 7
+result = "empty"
+```
+
+What is the final value of `result`? Does the second assignment preserve `7`, or replace the name’s binding?
+
+Confidence: 0–100.
+
+R2 REASSIGNMENT ANSWER (verbatim):
+so it replaces the value so result goes from an integer object ot a string object, very interesting, 90
+
+R2 EVALUATION:
+Correct at confidence 90. The second assignment rebinds `result` from integer `7` to string
+`"empty"`; a Python name is not permanently restricted to the type of its earlier binding.
+
+REMEDIATION STATUS UPDATE:
+Reassignment recovered; one fresh same-rung transfer required before rebuilding R3.
+
+FRESH R2 REASSIGNMENT PROMPT (verbatim):
+Fresh reassignment check:
+
+```python
+status = "waiting"
+status = 3
+```
+
+What is the final value and type of `status`? What happened to the earlier binding?
+
+Confidence: 0–100.
+
+FRESH R2 REASSIGNMENT ANSWER (verbatim):
+status = 3 is the final value, the earlier binding is removed, 90
+
+FRESH R2 EVALUATION:
+Correct at confidence 90. `status` is finally bound to integer `3`; the name's earlier binding to
+`"waiting"` is replaced. Object-lifetime details are explicitly outside this micro-check.
+
+REMEDIATION STATUS UPDATE:
+R2 reassignment stable; climb again to R3 with no method call.
+
+R3 BRANCH REBUILD PROMPT (verbatim):
+Branch rebuild:
+
+```python
+value = 7
+
+if value > 0:
+    result = "positive"
+else:
+    result = "empty"
+```
+
+Does the condition pass? Which branch runs, and what is the final value of `result`?
+
+Confidence: 0–100.
+
+R3 BRANCH REBUILD ANSWER (verbatim):
+yes, the if runs and the final verson is "positive" 100
+
+R3 EVALUATION:
+Correct at confidence 100. The condition is true, the `if` body runs, `result` becomes
+`"positive"`, and the `else` is skipped.
+
+REMEDIATION STATUS UPDATE:
+R3 correct; one fresh opposite-path transfer remains before climbing.
+
+FRESH R3 OPPOSITE-PATH PROMPT (verbatim):
+Opposite-path check:
+
+```python
+value = -2
+
+if value > 0:
+    result = "positive"
+else:
+    result = "empty"
+```
+
+Which branch runs, and what is the final value of `result`?
+
+Confidence: 0–100.
+
+FRESH R3 ANSWER (verbatim):
+else, empty, 100
+
+FRESH R3 EVALUATION:
+Correct at confidence 100. The false condition selects the `else` and assigns `"empty"`.
+
+REMEDIATION STATUS UPDATE:
+R3 stable; climb to R4 one-function operation.
+
+R4 FUNCTION PROMPT (verbatim):
+One-function trace:
+
+```python
+def uppercase(value):
+    return value.upper()
+
+answer = uppercase(7)
+```
+
+Trace the argument into the function. What happens at `value.upper()`? Is `answer` assigned?
+
+Confidence: 0–100.
+
+R4 FUNCTION ANSWER (verbatim):
+7 is inputed into uppercase and thne throws an attribute error, 100
+
+R4 EVALUATION:
+Correct at confidence 100. The parameter receives integer `7`, `.upper()` raises
+`AttributeError`, the function does not return normally, and caller name `answer` is not assigned.
+The last consequence was implicit rather than stated but follows from the correct trace.
+
+REMEDIATION STATUS UPDATE:
+R4 correct; one valid-input same-rung transfer remains before returning to R5.
+
+FRESH R4 VALID-INPUT PROMPT (verbatim):
+Valid-input function check:
+
+```python
+def uppercase(value):
+    return value.upper()
+
+answer = uppercase("tea")
+```
+
+What does the function return, and what is assigned to `answer`?
+
+Confidence: 0–100.
+
+FRESH R4 ANSWER (verbatim):
+everything works, tea is inputted then it is returned as TEA and answer is assigned TEA, 90
+
+FRESH R4 EVALUATION:
+Correct at confidence 90. The valid string supports `.upper()`, the function returns `"TEA"`, and
+the caller assigns that returned string to `answer`.
+
+REMEDIATION STATUS UPDATE:
+R4 stable; return to a fresh R5 contract variant.
+
+FRESH R5 TARGET PROMPT (verbatim):
+Fresh target-level variant:
+
+```python
+def classify_tag(tag):
+    """Contract: tag must be a string."""
+    if tag.startswith("#"):
+        return "topic"
+    else:
+        return "plain"
+
+label = classify_tag(12)
+```
+
+State:
+
+1. Whether `12` satisfies the documented contract.
+2. Whether the docstring enforces the contract.
+3. What happens during execution.
+4. Whether the `else` runs.
+5. Whether `label` is assigned.
+
+Confidence: 0–100.
+
+FRESH R5 TARGET ANSWER (verbatim):
+can you commit and push i need to move locations, it does not follow the contract and it will fail when strts with is called, the esle never runs and label is not assigned, 100
+
+FRESH R5 EVALUATION:
+Strong partial at confidence 100. The learner correctly states that integer `12` violates the
+documented contract, `.startswith()` fails, `else` never runs, and caller name `label` is never
+assigned. Docstring enforcement was omitted while the learner requested an immediate location
+change and publish.
+
+DOCSTRING FOLLOW-UP ANSWER (verbatim):
+the doctring enforces nothing it is annotation
+
+DOCSTRING FOLLOW-UP EVALUATION:
+Correct enforcement judgment with terminology refinement. The docstring is documentation, not a
+type annotation. A type annotation would use syntax such as `tag: str`; neither a docstring nor a
+plain Python type annotation performs runtime validation by itself.
+
+FINAL R5 RESULT:
+correct after remediation at confidence 100
+
+RECOVERED PRINCIPLE:
+Absence of explicit validation does not guarantee successful execution. A documented or annotated
+contract communicates an expectation, while an incompatible object may still fail incidentally at
+the first unsupported operation.
+
+REMEDIATION STATUS:
+Fresh target-level variant recovered. Phase 5 remains in progress; continue the broader BuildLens
+module-boundary contract audit after the location change.
+
+TRANSFER STATUS:
+Fresh non-BuildLens tag-classifier target passed; BuildLens cross-module contract application is next.
+
 EVIDENCE-ISOLATION PROMPT:
 The learner was asked for one observable problem moving files solves today (or an explicit `none`)
 and one concrete future event that would justify import/path/navigation costs, plus confidence.
@@ -16843,3 +17321,334 @@ the next foundation checkpoint, triggered after Phase 5 before substantial Phase
 ARCHITECTURE RESET:
 Satisfied by `EV-CUM-FND-190`. Current decision is to keep the flat structure until an observed
 multi-module responsibility or concrete package/import requirement earns reorganization.
+
+---
+
+## EV-P4-READ-191
+
+DATE: 2026-08-29
+
+BUILD PHASE:
+Phase 4 — Decomposition by Refactoring
+
+IMPLEMENTATION TRIGGER:
+Brief pre-refactor code-reading audit across the existing `summarize.py` → `classify.py` dependency.
+No code patch is authorized or justified yet.
+
+ACADEMIC SOURCE:
+`MIT-6102-2026`
+
+DEEP SKILL:
+Trace one representative value across a caller/callee module boundary while preserving execution
+order, returned value, and caller-local state.
+
+EXERCISE TYPE:
+CODE_READING_TRACE
+
+SCAFFOLD RUNG:
+R5 — one function, one called function, and branch selection
+
+PROMPT (verbatim):
+Phase 4 code-reading audit:
+
+Trace this exact input by hand:
+
+```python
+summarize_diff("+tea = 2")
+```
+
+Follow it through `summarize_diff()` and `classify_diff_line()`. State:
+
+1. What `splitlines()` produces.
+2. What value is passed into `classify_diff_line()`.
+3. Which conditions are checked and which label is returned.
+4. How each counter changes.
+5. The exact final `DiffSummary`.
+
+Also give your confidence from 0–100. Commit your trace before running the code.
+
+LEARNER FIRST COMMITTED ANSWER (verbatim):
+it is a list of 1 string the values comes out as added the lines added counter goes up by 1 and then the exact final diffsuammry is fileschanged 0 linesadded 1 lines removed 0, 60
+
+CONFIDENCE:
+60
+
+HELP / TOOLS BEFORE COMMITMENT:
+None reported; learner was instructed to trace by hand before running code.
+
+EVALUATION:
+Correct at confidence 60. The learner tracked the one-element `splitlines()` result, the returned
+`"added"` label, the sole `lines_added` increment, and the exact final field values
+`DiffSummary(files_changed=0, lines_added=1, lines_removed=0)`. The response compressed the
+individual failed prefix checks rather than enumerating them, but the selected branch and full state
+effect were correct.
+
+RESULT:
+correct
+
+MISCONCEPTION:
+none observed
+
+CALIBRATION NOTE:
+The correct trace was reported at confidence 60; revisit calibration on later cross-module traces.
+
+TRANSFER STATUS:
+Pending the Phase 4 module-responsibility and dependency-direction explanation.
+
+---
+
+## EV-P4-ARCH-192
+
+DATE: 2026-08-29
+
+BUILD PHASE:
+Phase 4 — Decomposition by Refactoring
+
+IMPLEMENTATION TRIGGER:
+Determine whether the existing decomposition has clear responsibilities and dependency direction,
+and whether any observed discomfort earns a refactor.
+
+ACADEMIC SOURCE:
+`MIT-6102-2026`
+
+DEEP SKILL:
+Explain module responsibilities and coupling from behavior and calls, then distinguish present
+architectural evidence from speculative future convenience.
+
+EXERCISE TYPE:
+ARCHITECTURE_EXPLAIN
+
+PROMPT (verbatim):
+Now close the code and answer from memory:
+
+- What is the responsibility of `classify.py`?
+- What is the responsibility of `summarize.py`?
+- Which module depends on which, and what concrete code action creates that dependency?
+- Does this reveal any current discomfort that justifies restructuring, or is the existing split sufficient?
+
+Confidence: 0–100.
+
+LEARNER FIRST COMMITTED ANSWER (verbatim):
+classify takse a line of diff text and retuens what the line represented in terms of what it is, metadata added removed or context, summarize is responsible for looking at the whole diff and returnung how many files were changed and lines added and removed, summarize depends on classify as it calls a function that is in classify. no, we do not need to restructure i was thinking more along the lines of we do not need to do the work later but there is no archetectureal reason to do it now. 80
+
+CONFIDENCE:
+80
+
+HELP / TOOLS BEFORE COMMITMENT:
+The learner answered from memory after the cross-module value trace. No execution was requested.
+
+EVALUATION:
+Correct at confidence 80. `classify.py` owns single-line labeling; `summarize.py` owns whole-diff
+aggregation into file/add/remove counts. The learner correctly states that summarize depends on
+classify because it calls the classifier defined there. They also distinguish avoiding possible
+future work from present architectural evidence and conclude that no current discomfort earns a
+restructure.
+
+RESULT:
+correct
+
+MISCONCEPTION:
+none observed
+
+DESIGN DECISION:
+Keep the existing flat modules. No product patch is justified by the Phase 4 audit so far.
+
+TRANSFER STATUS:
+Pending one unrelated decomposition transfer before closing the Phase 4 gate.
+
+---
+
+## EV-P4-TRANSFER-193
+
+DATE: 2026-08-29
+
+BUILD PHASE:
+Phase 4 — Decomposition by Refactoring
+
+IMPLEMENTATION TRIGGER:
+Confirm that responsibility, dependency direction, and evidence-based refactoring timing transfer
+outside the diff domain before closing Phase 4 without a patch.
+
+ACADEMIC SOURCE:
+`MIT-6102-2026`
+
+DEEP SKILL:
+Transfer cohesion/coupling and refactoring-timing reasoning to an unrelated small program.
+
+EXERCISE TYPE:
+TRANSFER
+
+PROMPT (verbatim):
+Transfer problem:
+
+A parcel program has two files:
+
+```text
+classify_weight.py
+→ classify_weight(weight) labels one parcel as "standard" or "heavy"
+
+summarize_manifest.py
+→ imports classify_weight
+→ classifies every parcel in one manifest
+→ returns the counts of standard and heavy parcels
+```
+
+Each responsibility still fits comfortably in its current file. A teammate proposes creating a `shipping/` package with several new layers now because “we will probably need them later.”
+
+Explain:
+
+1. Each file’s responsibility.
+2. The dependency direction and why.
+3. Whether restructuring is justified now.
+4. One concrete future condition that would reverse your decision.
+5. The deep principle shared by this program and BuildLens.
+
+Confidence: 0–100.
+
+LEARNER FIRST COMMITTED ANSWER (verbatim):
+classify wieght tells you the overarching weight class for the object they are weighitng, then the summarize counts all of the objects and calls the classify to get the wight class the boject fits in, this is the same as build lens with 2 instead of 3 outputs, if the repsonisbilty called for 2 or more modules then you restructure
+
+CONFIDENCE:
+not supplied
+
+HELP / TOOLS BEFORE COMMITMENT:
+None reported.
+
+EVALUATION:
+Strong partial. The learner correctly maps one-parcel classification to manifest aggregation,
+implicitly establishes that summarize depends on classify because summarize calls it, recognizes
+the same structural relationship as BuildLens, and supplies a valid reversal trigger: one
+responsibility genuinely expanding across multiple modules. The present no-restructure decision and
+confidence were not stated explicitly.
+
+RESULT:
+partial
+
+MISCONCEPTION:
+none observed; completion detail omitted
+
+REMEDIATION CHAIN:
+target transfer → explicitly state present decision + confidence → close Phase 4 gate if correct
+
+TRANSFER STATUS:
+Concept transferred; concise completion pending.
+
+COMPLETION ANSWER (verbatim):
+you do not need to restructure now, 80
+
+FINAL CONFIDENCE:
+80
+
+FINAL EVALUATION:
+Correct at confidence 80. The learner explicitly states that no restructure is justified now. With
+the first answer, they have identified both responsibilities, the call-based dependency direction,
+the shared BuildLens structure, and a concrete reversal condition.
+
+FINAL RESULT:
+correct
+
+FINAL TRANSFER STATUS:
+passed
+
+---
+
+## PHASE 4 COMPLETION — 2026-08-29
+
+AUDIT EVIDENCE:
+
+```text
+EV-P4-READ-191      cross-module value trace                 passed
+EV-P4-ARCH-192      responsibilities/dependency/refactor     passed
+EV-P4-TRANSFER-193  unrelated decomposition transfer         passed after concise completion
+```
+
+PHASE DECISION:
+Phase 4 is complete without a product-code patch. The current flat decomposition already separates
+single-line classification, whole-diff aggregation, and session state. No observed responsibility,
+navigation, import, naming, or boundary problem earns further restructuring.
+
+ACCEPTED DOWNSIDE:
+Waiting may require file moves and import changes later.
+
+REVERSAL CONDITION:
+Restructure when one responsibility genuinely expands across several related modules and flat
+placement obscures ownership/naming, or another concrete boundary/import problem appears.
+
+CUMULATIVE COUNTER:
+Phases 3 and 4 now count as 2/3 toward the next foundation checkpoint. Phase 5 completion will
+trigger the review before substantial Phase 6 work.
+
+---
+
+## EV-P5-CONTRACT-194
+
+DATE: 2026-08-29
+
+BUILD PHASE:
+Phase 5 — Explicit Interfaces / Contracts
+
+IMPLEMENTATION TRIGGER:
+Audit the existing `classify_diff_line` boundary before deciding whether any contract patch is
+earned.
+
+ACADEMIC SOURCE:
+`MIT-6102-2026`; remediation also uses `PYTHON-STRINGS-INDEXING` for string-method behavior.
+
+DEEP SKILL:
+Distinguish a documented input contract from runtime enforcement, and distinguish a valid but
+unmatched input from an input that cannot perform the function's required operations.
+
+EXERCISE TYPE:
+CONTRACT_TRACE
+
+SCAFFOLD RUNG:
+Target R5; remediation descends to R1.
+
+PROMPT (verbatim):
+Phase 5 begins with a contract audit—no code change yet.
+
+Without running the code, compare these calls:
+
+```python
+classify_diff_line("+tea = 2")
+classify_diff_line(42)
+```
+
+For each call, state:
+
+1. What the function’s documented contract says about whether the input is allowed.
+2. What Python will actually do at runtime: return a value or raise an error.
+3. Whether the existing docstring enforces the contract.
+4. Where validation currently occurs, if anywhere.
+
+Confidence: 0–100.
+
+LEARNER FIRST COMMITTED ANSWER (verbatim):
+i am not sure, i assume the first line would come back as added and the second line would come back as context but i am nto sure, currently if it is not added or removed or metadata the nthe last option is context. 40
+
+CONFIDENCE:
+40
+
+HELP / TOOLS BEFORE COMMITMENT:
+None reported; prediction was requested without execution.
+
+EVALUATION:
+Partial at confidence 40. The valid string is correctly predicted as `"added"`. The integer is
+incorrectly predicted to reach the final `else` and return `"context"`; the answer does not yet
+separate documented allowance, runtime behavior, docstring enforcement, and validation location.
+
+PRIMARY BLOCKER:
+METHOD_AVAILABILITY / execution before branch fallback — treating `else` as a fallback for every
+Python object rather than only for inputs on which the preceding operations successfully execute.
+
+RESULT:
+partial; remediation open
+
+MISCONCEPTION:
+valid_unmatched_input_vs_wrong_runtime_type
+
+REMEDIATION CHAIN:
+target contract trace → R1 receiver/method operation → fresh near-transfer → return to target
+
+TRANSFER STATUS:
+pending

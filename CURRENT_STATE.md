@@ -8,8 +8,8 @@ Last updated: 2026-08-29
 
 ## Lifecycle
 
-**Current phase:** Phase 3 complete. Phase 4 intent/code-reading review may begin, but no refactor is
-currently justified or authorized.
+**Current phase:** Phase 5 contract audit in progress. No product-code change is currently justified
+or authorized.
 
 Phase 3 is complete in every required dimension:
 
@@ -23,6 +23,15 @@ transfer variant     complete — EV-P3-TRANSFER-186
 ```
 
 The formal Phase 0–2 cumulative checkpoint and pre-Phase-4 architecture reset are also complete.
+
+Phase 4 completed without a product patch:
+
+```text
+cross-module value trace                complete — EV-P4-READ-191
+module responsibility/dependency audit complete — EV-P4-ARCH-192
+unrelated decomposition transfer       complete — EV-P4-TRANSFER-193
+refactor decision                       keep existing flat modules
+```
 
 ## Exact code that exists
 
@@ -165,6 +174,8 @@ Demonstrated through delayed or transferred retrieval, but not permanently maste
 - explicit dataclass return versus implicit `None`;
 - per-instance Session state, snapshots, tests, and public-attribute limitation;
 - evidence-first architecture timing, dependency direction, downside, and reversal conditions.
+- cross-module tracing from caller to classifier and back to caller-local aggregation;
+- decomposition transfer outside the diff domain.
 
 Still uncertain or due for later retrieval:
 
@@ -173,6 +184,9 @@ Still uncertain or due for later retrieval:
   at confidence 100;
 - current code does not coerce or validate `diff_text` as a string;
 - shallow-copy depth when mutable elements are introduced later.
+- keeping documented contracts, type annotations, explicit validation, and incidental runtime
+  failures distinct under composed function/branch traces;
+- confidence calibration after incompatible-input predictions changed at confidence 90–100.
 
 ## Last completed gates
 
@@ -181,6 +195,11 @@ Still uncertain or due for later retrieval:
 - Unrelated `InspectionLog` snapshot transfer: complete (`EV-P3-TRANSFER-186`).
 - Formal foundation cumulative review: complete (`EV-CUM-FND-187` through `190`).
 - Pre-Phase-4 architecture reset: complete (`EV-CUM-FND-190`).
+- Phase 4 cross-module reading audit: complete (`EV-P4-READ-191`).
+- Phase 4 responsibility/dependency explanation: complete (`EV-P4-ARCH-192`).
+- Phase 4 unrelated decomposition transfer: complete (`EV-P4-TRANSFER-193`).
+- Phase 5 documented-contract versus runtime-enforcement recovery: fresh target passed after
+  adaptive descent and rebuild (`EV-P5-CONTRACT-194`); broader boundary audit remains open.
 
 Do not mark these concepts permanently mastered after one review sequence.
 
@@ -189,39 +208,53 @@ Do not mark these concepts permanently mastered after one review sequence.
 The Phase 0–2 foundation counter was reset on 2026-08-29 after four formal cumulative questions
 passed with remediation where needed.
 
-Phase 3 now counts as 1/3 toward the next foundation checkpoint. The next foundation review triggers
-after Phase 5 before substantial Phase 6 work.
+Phases 3 and 4 now count as 2/3 toward the next foundation checkpoint. The next foundation review
+triggers after Phase 5 before substantial Phase 6 work.
 
 The major/deep Phase 7–15 counter has not started.
 
 ## Open interaction and exact next step
 
-There is no open quiz question.
+There is no unanswered quiz question. Phase 5 remains open at the next contract-audit step.
 
-Begin Phase 4 as an intent/code-reading audit, not a file move:
+Continue Phase 5 as an intent/contract audit, not an automatic code patch:
 
 ```text
-trace one value across summarize.py → classify.py → summarize.py
-→ explain each module's responsibility and dependency direction
-→ identify an observed discomfort or explicitly conclude no refactor is earned
-→ only then decide whether Phase 4 has a code patch
+inspect the contracts already expressed by classify.py, summarize.py, and session.py
+→ identify what values/types cross each module boundary
+→ distinguish documentation/type hints from runtime validation
+→ identify one concrete contract ambiguity or explicitly conclude no patch is earned yet
 ```
 
-The current evidence says no restructure is earned. Phase 4 may therefore confirm that the existing
-three-module decomposition already satisfies its architectural goal without changing files. Do not
-manufacture a refactor merely to create a commit.
+The `classify_diff_line(42)` remediation chain established:
 
-If a real code patch becomes justified, first state the required pre-patch block from `AGENTS.md` and
-run the implementation-adjacent prediction/transfer loop.
+```text
+documented contract excludes the integer
+→ docstring does not enforce
+→ no explicit validation exists
+→ integer lacks startswith
+→ AttributeError stops execution before fallback else
+```
+
+Resume with a BuildLens cross-module application: predict `summarize_diff(42)`, identify which
+module/function first performs an unsupported operation, whether `classify_diff_line` is reached,
+and what the result says about the current boundary contract. Require confidence and then a
+different-surface transfer before deciding whether a contract patch is earned.
+
+Phase 4 confirmed that no restructure is earned. Do not revisit that decision or manufacture a
+package/file move during Phase 5 without new evidence.
+
+If a Phase 5 contract patch becomes justified, first state the required pre-patch block from
+`AGENTS.md` and run the implementation-adjacent prediction/transfer loop.
 
 ## Session-close fields
 
 ```text
-phase                       Phase 3 complete; Phase 4 intent review next
-last knowledge gate         EV-CUM-FND-190, passed after remediation at confidence 90
-next retrieval due          Phase 4 cross-module value trace
+phase                       Phase 5 contract audit in progress
+last knowledge gate         EV-P5-CONTRACT-194 fresh R5 target, correct after remediation
+next retrieval due          summarize_diff(42) cross-module boundary trace
 next architecture reset     complete; next by time or major transition
-next implementation step    none until the Phase 4 audit finds an earned refactor
+next implementation step    none until the Phase 5 audit finds an earned contract change
 last published commit       e3a5838
 ```
 

@@ -1371,3 +1371,257 @@ one responsibility genuinely needs several related modules.
 **Checkpoint result:** all four formal foundation cumulative questions passed. Foundation counter
 reset; Phase 3 is 1/3 toward the next foundation checkpoint. Architecture reset decision: leave the
 current structure flat until earned. `EV-CUM-FND-190`.
+
+---
+
+## Phase 4 code-reading audit
+
+### Cross-module value trace
+
+**Prompt:** trace `summarize_diff("+tea = 2")` through `splitlines()`,
+`classify_diff_line()`, counter updates, and the returned `DiffSummary`, with confidence.
+
+**Learner answer (verbatim):**
+
+```text
+it is a list of 1 string the values comes out as added the lines added counter goes up by 1 and then the exact final diffsuammry is fileschanged 0 linesadded 1 lines removed 0, 60
+```
+
+**Outcome:** correct at confidence 60. The learner tracked the single split line, `"added"` return,
+sole `lines_added` increment, and final values `DiffSummary(0, 1, 0)`. Individual failed prefix
+checks were compressed rather than enumerated, but branch selection and state effects were correct.
+`EV-P4-READ-191`.
+
+### Module responsibilities and dependency direction
+
+**Learner answer (verbatim):**
+
+```text
+classify takse a line of diff text and retuens what the line represented in terms of what it is, metadata added removed or context, summarize is responsible for looking at the whole diff and returnung how many files were changed and lines added and removed, summarize depends on classify as it calls a function that is in classify. no, we do not need to restructure i was thinking more along the lines of we do not need to do the work later but there is no archetectureal reason to do it now. 80
+```
+
+**Outcome:** correct at confidence 80. The learner identified single-line classification versus
+whole-diff aggregation, correctly read the dependency from summarize's classifier call, and
+concluded that speculative future convenience is not a current architectural reason to restructure.
+No product patch is earned. One unrelated decomposition transfer remains. `EV-P4-ARCH-192`.
+
+### Unrelated decomposition transfer
+
+**Prompt:** apply the same responsibility, dependency, restructuring-evidence, reversal-condition,
+and deep-principle reasoning to parcel weight classification and manifest aggregation.
+
+**Learner first answer (verbatim):**
+
+```text
+classify wieght tells you the overarching weight class for the object they are weighitng, then the summarize counts all of the objects and calls the classify to get the wight class the boject fits in, this is the same as build lens with 2 instead of 3 outputs, if the repsonisbilty called for 2 or more modules then you restructure
+```
+
+**Outcome:** strong partial. Responsibilities, call-based dependency direction, structural transfer,
+and a valid multi-module-responsibility reversal trigger are present. The explicit present decision
+and confidence remain to be supplied. `EV-P4-TRANSFER-193`.
+
+**Completion answer (verbatim):**
+
+```text
+you do not need to restructure now, 80
+```
+
+**Final outcome:** correct at confidence 80. The present no-restructure decision is explicit; the
+full answer supplies responsibilities, dependency direction, shared principle, and reversal
+condition. Phase 4 is complete without a product-code patch.
+
+---
+
+## Phase 5 contract audit
+
+### Documented contract versus runtime behavior
+
+**Prompt:** compare `classify_diff_line("+tea = 2")` with `classify_diff_line(42)` and identify
+documented allowance, actual runtime behavior, docstring enforcement, and validation location.
+
+**Learner first answer (verbatim):**
+
+```text
+i am not sure, i assume the first line would come back as added and the second line would come back as context but i am nto sure, currently if it is not added or removed or metadata the nthe last option is context. 40
+```
+
+**Outcome:** partial at confidence 40. The valid string classification is correct. The integer is
+incorrectly treated as reaching the final `else`. Descend to one receiver/method operation before
+returning to the unchanged contract problem. `EV-P5-CONTRACT-194`.
+
+**R1 method-operation answer (verbatim):**
+
+```text
+the first would be true and the second would be an error or false not sure which, i have no idea for 1, 20
+```
+
+**Outcome:** partial at confidence 20. The string result is correct; the learner cannot yet separate
+an absent method from a method returning `False`. Switched to syntax-only help: dot syntax looks up
+the named method on the receiver; missing lookup raises `AttributeError`. Next use a fresh method
+name at the same one-operation level.
+
+**Fresh near-transfer answer (verbatim):**
+
+```text
+false&#x20;
+attribute eroro, 100
+```
+
+**Outcome:** partial at confidence 100. Missing-method behavior transfers correctly to the integer.
+The learner incorrectly evaluates `"sun".endswith("n")` as false; clarified that `endswith` compares
+the suffix and that `"sun"` ends in `"n"`. Descend to reading one final character before another
+suffix-method check.
+
+**Learner clarification (verbatim):**
+
+```text
+i thought it said startswith()
+```
+
+The miss is treated as a prompt-reading slip: `"sun".startswith("n")` would indeed be false.
+
+**Careful-reading answer (verbatim):**
+
+```text
+true
+false
+100, we move on
+```
+
+**Outcome:** correct at confidence 100. Prefix/suffix evaluation and method availability are stable
+at the one-operation level. Use one branch bridge, then return to the original contract target.
+
+**Branch bridge answer (verbatim):**
+
+```text
+no, it has an attributre error, no label is never assigned
+```
+
+**Outcome:** correct; confidence omitted. Python stops at the missing method, never reaches `else`,
+and never assigns `label`. Return to the original contract target.
+
+**Bridge confidence follow-up:** 80.
+
+**Target-return answer (verbatim):**
+
+```text
+the contract does not allow 42, during runtime it does nto throw any errors, nothing is enforced and there is no input validation for the function, 90
+```
+
+**Outcome:** partial at confidence 90. Contract allowance, docstring non-enforcement, and lack of
+explicit validation are correct. The no-error claim contradicts the recovered branch trace. Isolate
+the distinction between explicit validation and an ordinary operation failing on an incompatible
+object.
+
+**Unrelated one-operation answer (verbatim):**
+
+```text
+it would raise an error, items is a interger object and items would be looking for a list, my only thought would be it would create a list and append box onto it? 40
+```
+
+**Outcome:** correct error prediction with uncertain mechanism at confidence 40. Clarified that
+Python looks for `.append` on the integer itself and neither searches for nor automatically creates
+a list. One fresh same-level transfer remains.
+
+**Fresh R1 transfer answer (verbatim):**
+
+```text
+it throws an error upper() does not convert 7 into a string, 80
+```
+
+**Outcome:** correct at confidence 80. An unsupported method can fail without explicit validation,
+and Python performs no automatic integer-to-string conversion. Climb to a short sequential trace.
+
+**R2 sequential answer (verbatim):**
+
+```text
+no, it satays an integer and throws the attribute error, 80
+```
+
+**Outcome:** correct at confidence 80. Both names retain integer `7`; execution stops at `.upper()`.
+Climb to one control choice.
+
+**R3 control-choice answer (verbatim):**
+
+```text
+ok so startswith inside classify would throw an error because it would be checking an integer for a string value and attribute error, it does not pass attribute error does not even get to the else, result stays 7, what would happen if result was =7 but we ran the else statement??? 90
+```
+
+**Outcome:** partial at confidence 90. The original classifier behavior is now correctly recovered,
+but the new snippet's condition and body are conflated, and `value` is mistaken for `result`.
+Descend to the learner's own reassignment question before rebuilding the branch.
+
+**R2 reassignment answer (verbatim):**
+
+```text
+so it replaces the value so result goes from an integer object ot a string object, very interesting, 90
+```
+
+**Outcome:** correct at confidence 90. The second assignment rebinds the name from an integer to a
+string. One fresh reassignment transfer remains before rebuilding the branch.
+
+**Fresh R2 answer (verbatim):**
+
+```text
+status = 3 is the final value, the earlier binding is removed, 90
+```
+
+**Outcome:** correct at confidence 90. The name finishes bound to integer `3`; the earlier binding
+is replaced. Rebuild one branch without a method call.
+
+**R3 branch-rebuild answer (verbatim):**
+
+```text
+yes, the if runs and the final verson is "positive" 100
+```
+
+**Outcome:** correct at confidence 100. The true branch assigns `"positive"`; one fresh opposite
+path remains before adding a method call.
+
+**Fresh R3 answer (verbatim):**
+
+```text
+else, empty, 100
+```
+
+**Outcome:** correct at confidence 100. The false path assigns `"empty"`. Climb to one function
+without a branch.
+
+**R4 function answer (verbatim):**
+
+```text
+7 is inputed into uppercase and thne throws an attribute error, 100
+```
+
+**Outcome:** correct at confidence 100. The integer enters the function, method lookup fails, the
+function does not return normally, and `answer` remains unassigned. One valid-input function
+transfer remains.
+
+**Fresh R4 valid-input answer (verbatim):**
+
+```text
+everything works, tea is inputted then it is returned as TEA and answer is assigned TEA, 90
+```
+
+**Outcome:** correct at confidence 90. The function returns `"TEA"` and the caller assigns it.
+Return to a fresh target-level contract variant.
+
+**Fresh R5 target answer (verbatim):**
+
+```text
+can you commit and push i need to move locations, it does not follow the contract and it will fail when strts with is called, the esle never runs and label is not assigned, 100
+```
+
+**Outcome:** strong partial at confidence 100. Contract violation, unsupported operation, skipped
+`else`, and unassigned caller name are correct. Docstring enforcement was omitted while the learner
+requested a location change and publish.
+
+**Docstring follow-up (verbatim):**
+
+```text
+the doctring enforces nothing it is annotation
+```
+
+**Final outcome:** correct after remediation, with terminology refinement. The docstring is
+documentation rather than a type annotation; neither documentation nor a plain annotation validates
+at runtime. The fresh R5 target is recovered. Phase 5 remains in progress.

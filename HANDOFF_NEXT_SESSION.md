@@ -178,3 +178,44 @@ summarize_diff input
 
 Then ask them to explain the responsibility of each module and confirm that `summarize.py` depends
 on `classify.py`. Record the formal Evidence Record before advancing. No quiz is currently open.
+
+## Phase 4 completion update — 2026-08-29
+
+The Phase 4 audit and transfer are complete:
+
+```text
+EV-P4-READ-191      cross-module value trace                 passed at confidence 60
+EV-P4-ARCH-192      responsibilities/dependency/refactor     passed at confidence 80
+EV-P4-TRANSFER-193  unrelated decomposition transfer         passed at confidence 80
+```
+
+Decision: keep the existing flat modules. The learner correctly explained that `summarize.py`
+depends on `classify.py`, transferred the decomposition to a parcel-manifest domain, and concluded
+that possible future work is not present architectural evidence. No product-code patch was earned.
+
+Do not repeat Phase 4 or restructure the project. `CURRENT_STATE.md` is authoritative. Begin Phase 5
+with an intent/contract audit. Phases 3 and 4 count as 2/3 toward the next foundation checkpoint;
+Phase 5 completion triggers that review before substantial Phase 6 work.
+
+## Phase 5 location-change pause — 2026-08-29
+
+Phase 5 began with `EV-P5-CONTRACT-194`, comparing a documented string contract with runtime
+behavior for an integer. The learner initially predicted fallback `"context"`, then completed the
+full adaptive chain through method lookup, prefix/suffix reading, assignment/rebinding, branch
+execution, function call/return, and validation-versus-operation-failure.
+
+The fresh R5 `classify_tag(12)` target passed at confidence 100 after one omitted-item follow-up. The
+learner correctly stated that the docstring enforces nothing; refine their word “annotation” because
+a docstring is documentation, while `tag: str` would be a type annotation. Neither validates by
+itself in ordinary Python.
+
+Phase 5 is not complete and no product patch is justified. Resume with one BuildLens cross-module
+application:
+
+> Without running it, trace `summarize_diff(42)`. Which operation fails first, in which function and
+> module? Is `classify_diff_line` ever called? What does this reveal about the boundary contract?
+> Confidence: 0–100.
+
+Then provide a different-surface transfer and continue auditing the types/values crossing existing
+module boundaries. Do not implement validation or type hints until the learner identifies a concrete
+contract ambiguity and proposes the intended behavior.
