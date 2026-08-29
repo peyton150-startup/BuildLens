@@ -14879,3 +14879,229 @@ purity distinction recovered with direct contrast; delayed fresh transfer remain
 TRANSFER / NEXT RETRIEVAL:
 Delayed new-domain purity judgment with more than one external object; require a complete
 side-effect scan.
+
+---
+
+## EV-P1-COMPOSE-172
+
+DATE: 2026-08-29
+PHASE: 1 (fundamentals review; learner limited quiz scope to completed Phases 0–2)
+TAG: composition_tracking, dictionary_values, implicit_none, purity, object_count
+RESULT: partial
+
+PROMPT (verbatim):
+Super-hard question 1 of 3. Do not run the code:
+
+```python
+def choose(name):
+    if name.startswith("pro-annual"):
+        return "gold"
+    elif name.startswith("pro"):
+        return "product"
+    else:
+        print("unknown")
+
+
+def inspect(names):
+    counts = {"gold": 0, "product": 0, "other": 0}
+    alias = counts
+    results = []
+
+    for name in names:
+        result = choose(name)
+        results.append(result)
+
+        if result == "gold":
+            counts["gold"] += 1
+        elif result == "product":
+            alias["product"] += 1
+        else:
+            counts["other"] += 1
+
+    ordered = sorted([
+        counts["gold"],
+        counts["product"],
+        counts["other"],
+    ])
+
+    results.append(ordered.pop())
+    return results
+
+
+first = inspect(["pro-basic", "team", "pro-annual-plus"])
+second = inspect(["team", "pro-annual"])
+
+print(first)
+print(second)
+```
+
+Trace the entire program and answer:
+
+1. What is printed while `first` is being calculated?
+2. What does `first` contain?
+3. What is printed while `second` is being calculated?
+4. What does `second` contain?
+5. What do the final two `print` calls display?
+6. Does the second call inherit any state from the first? Explain why.
+7. Is `inspect` pure or impure? Explain by checking all effects—not only its input.
+8. How many separate `counts` dictionaries are created during the entire program?
+
+Include confidence from 0–100.
+
+LEARNER'S FIRST COMMITTED ANSWER (verbatim):
+inspect sets the counts to zero before the loop then alias = counts so they point at the same list object, results is an empy list, when we start the for loop we call the first entry in first which is pro basic, that returns product and then results gets product appended to the list, it then adds the key of product to add one for the lookup value, it then runs team which prints unknown and returns None when we go back to the inspect it adds None to the results list and then adds to the key other plus one on the lookup vaue, finnaly pro annual plus which returns gold and then gold is added to results and then the key gold gets the lookup value added 1 that is the endo f the for loop so ordered is a list of the keys for gold then product then other, not sure why this was done but then it removes or pops other as a key from ordered and appends it to results, then returns results so first is [product, other, gold, counts[other]], then we call second all of the lists get empltied and we go again, team prints unknown and then returns None then it adds to the key other plus on on the lookup value, the pro annual which returns gold which is appended to results so reuslts now equals [None, gold], the count for key gold's lookup value is added 1 and then we sort ordered, orded is then [gold,product,other]<- keys, we then pop the counts other key and append it to results so results is [other, gold, counts[other]], then re return results,
+unknown
+unknown
+product other gold 1
+other gold 1
+90
+it is pure, the inputs are the reults and it changes nothing outside the function
+6 are created for counts because alias and counts point to the same dictionary and 3 dictinary is created everytime inspect is called
+
+EVALUATION:
+Partial at confidence 90. The learner correctly traced prefix precedence, both `unknown` side
+effects, implicit `None`, per-call local reset, shared dictionary mutation through `alias`, and the
+first call's three count values. Four composed details were missed: `ordered` contains looked-up
+numbers rather than keys; `results` retains `None`; `inspect` is impure because calling `choose`
+prints observable output; and exactly two `counts` dictionaries are created, one per call.
+
+PRIMARY BLOCKER:
+Composition tracking loses the distinction between dictionary keys, looked-up values, names, and
+new objects when several familiar operations are combined.
+
+SCAFFOLD RUNG:
+R6 target partial; isolate the smallest value/object-count bridge before returning to Q2
+
+RECOVERY STATUS:
+target incomplete; one short required checkpoint next
+
+TRANSFER / NEXT RETRIEVAL:
+Ask what a list of dictionary lookups contains and how many objects a function-local dictionary
+literal creates across two calls. Then resume super-hard question 2 of 3.
+
+---
+
+## EV-P1-COMPOSE-173
+
+DATE: 2026-08-29
+PHASE: 1 (fundamentals review; learner limited quiz scope to completed Phases 0–2)
+TAG: dictionary_lookup, function_local_objects, list_values, object_count
+RESULT: correct
+
+PROMPT (verbatim):
+
+```python
+def collect():
+    scores = {"red": 2, "blue": 1}
+    picked = [scores["red"], scores["blue"]]
+    return picked
+
+first = collect()
+second = collect()
+```
+
+What are `first` and `second`, and across both calls, how many dictionaries and lists are created?
+Include confidence.
+
+LEARNER'S FIRST COMMITTED ANSWER (verbatim):
+for :def collect():
+   scores = {"red": 2, "blue": 1}
+   picked = [scores["red"], scores["blue"]]
+   return picked
+
+first = collect()
+second = collect()
+
+picked takes the values i know that now, first and second are both [2,1] and 2 ditionareis and lists are created 60
+
+EVALUATION:
+Correct at confidence 60. Each lookup contributes a numeric value, both returns equal `[2, 1]`,
+and the two calls create two dictionaries plus two lists. The confidence underrates a fully correct
+answer.
+
+PRIMARY BLOCKER:
+none on the isolated bridge
+
+SCAFFOLD RUNG:
+R1 recovery
+
+RECOVERY STATUS:
+value-versus-key and per-call object count recovered; resume target complexity
+
+TRANSFER / NEXT RETRIEVAL:
+Super-hard question 2 of 3 with nested aliasing and mutator return values.
+
+---
+
+## EV-P1-COMPOSE-174
+
+DATE: 2026-08-29
+PHASE: 1 (fundamentals review; learner limited quiz scope to completed Phases 0–2)
+TAG: sort_vs_sorted, mutation, aliasing, nested_lists, purity, composition_tracking
+RESULT: wrong
+
+PROMPT (verbatim):
+Super-hard question 2 of 3. Do not run the code:
+
+```python
+def reorganize(items, report):
+    alias = items
+    ordered = sorted(items)
+    removed = ordered.pop()
+
+    report["removed"] += 1
+
+    status = alias.sort()
+    alias.append(removed)
+
+    return [ordered, status]
+
+
+numbers = [4, 1, 3]
+same = numbers
+stats = {"removed": 0}
+
+first = reorganize(numbers, stats)
+second = reorganize(first[0], stats)
+
+print(numbers)
+print(same)
+print(first)
+print(second)
+print(stats)
+```
+
+The learner was asked to trace both calls; give the final contents and five printed values; explain
+why `status` is `None`; judge purity; count list objects; and provide confidence from 0–100.
+
+LEARNER'S FIRST COMMITTED ANSWER (verbatim):
+it is impure, make sure to push after this problem i am getting lunch, alias items and number and asme are all pointing to the same list, we start with ordered which is not pooint the the same list but is now sorted with [1,3,4] then removed = 4 becaue we pop it and ordered now is just 1 and 3 then we add to the key removed look up value plus 1 then we run sort on alias which sorts returns a sorted list for alias without changing alias so status does not point to the same list as alisa we then append back in the 4 that was removed and return ordered which is the items sorted without 4 and status which is alias sorted with the 4 appended back in, numbers prints [4,1,3] same with same fisrt prints [[1,3],[1,3,4]
+then we move onto second starts with the list [1,3] and stats whiuch is now 1, now ordered is [1,3] and we pop 3 so now only 1 remains in ordede, we add plus one to the lookuop value of key removed and then status = [1,3,4,4] i did not trace the alias correctly it appends what ou removed but we remove the value from orded not from alias so alisa has the original [4,1,3] with an added [4,3], it returns ordede which is now [1] and stats whcih is removed,
+
+CONFIDENCE FOLLOW-UP (verbatim):
+60
+
+EVALUATION:
+Incorrect overall at confidence 60. The learner correctly identified impurity, the initial aliases, the separate list
+created by `sorted`, both popped values, and the shared report count. The primary error was reversing
+the established `.sort()` rule: `.sort()` mutates `alias` and returns `None`; it does not create or
+return a sorted list. That error propagated into both calls and prevented a complete final state and
+object count.
+
+Correct final state for later comparison: `numbers` and `same` are `[1, 3, 4, 4]`; `first` is
+`[[1, 3, 3], None]`; `second` is `[[1], None]`; `stats` is `{"removed": 2}`; five list objects
+exist. Do not present all of this as a new lecture on resumption—recover `.sort()` first.
+
+PRIMARY BLOCKER:
+Under high composition, `.sort()` was changed from an in-place mutator returning `None` into a
+non-mutating operation returning a list.
+
+SCAFFOLD RUNG:
+R6 target failed; next problem must isolate `.sort()` versus `sorted()` before rebuilding
+
+RECOVERY STATUS:
+pending after lunch; super-hard question 3 has not been asked
+
+TRANSFER / NEXT RETRIEVAL:
+One short `.sort()`/`sorted()` state checkpoint, then a near-transfer containing one alias, then
+resume super-hard question 3 of 3.

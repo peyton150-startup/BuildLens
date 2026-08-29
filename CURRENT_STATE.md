@@ -2801,3 +2801,26 @@ per-item enumeration     aggregate branch answer remains easier than complete ro
 
 Next session should not restart syntax drills cold. Begin with one moderately composed state movie,
 then fade the table if correct.
+
+## QUIZ CONTINUED — 2026-08-29
+
+The learner requested exactly three final super-hard Phase 0–2 questions before returning to the
+Phase 3 milestone. Super-hard question 1 (`EV-P1-COMPOSE-172`) was partial at confidence 90.
+Longest-prefix control flow, printed `unknown`, implicit `None`, alias mutation, and per-call local
+reset were traced well. Under full composition, the learner changed looked-up numeric values back
+into dictionary keys, dropped `None` from the final lists, judged the caller pure despite its called
+function printing, and overcounted function-local dictionaries. Per the mandatory remediation rule,
+give one short value/object-count checkpoint, then resume super-hard question 2 rather than opening
+a long drill.
+
+Evidence `EV-P1-COMPOSE-173`: the required short checkpoint passed at confidence 60. The learner
+correctly stated that dictionary lookups supply values, both calls return `[2, 1]`, and two calls
+create two dictionaries plus two lists. Resume full complexity with super-hard question 2 of 3.
+
+Evidence `EV-P1-COMPOSE-174`: super-hard question 2 was wrong at confidence 60. The
+learner correctly identified impurity, aliases, `sorted()` producing a separate list, both popped
+values, and shared report mutation. Under composition, `.sort()` was incorrectly treated as a
+non-mutating operation returning a sorted list. This propagated through the final states and object
+count. The learner paused for lunch and requested a push. On return, mandatory remediation is one
+short `.sort()` versus `sorted()` checkpoint, then one near-transfer with an alias. Super-hard
+question 3 of 3 remains unasked; do not move to Phase 3 until it and any necessary recovery finish.

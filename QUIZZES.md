@@ -883,3 +883,67 @@ becasue it changes the counter outside the function, the count is created inside
 **Outcome:** correct at confidence 90. `EV-P1-PURITY-171`.
 
 ---
+
+## Super-hard question 1 of 3 — composed state trace
+
+**Asked:** trace two calls combining longest-prefix precedence, implicit `None`, dictionary alias
+mutation, sorting looked-up counts, `pop()`, output, purity, and object count. The exact prompt is
+preserved in `EV-P1-COMPOSE-172`.
+
+**Answered:**
+
+```text
+inspect sets the counts to zero before the loop then alias = counts so they point at the same list object, results is an empy list, when we start the for loop we call the first entry in first which is pro basic, that returns product and then results gets product appended to the list, it then adds the key of product to add one for the lookup value, it then runs team which prints unknown and returns None when we go back to the inspect it adds None to the results list and then adds to the key other plus one on the lookup vaue, finnaly pro annual plus which returns gold and then gold is added to results and then the key gold gets the lookup value added 1 that is the endo f the for loop so ordered is a list of the keys for gold then product then other, not sure why this was done but then it removes or pops other as a key from ordered and appends it to results, then returns results so first is [product, other, gold, counts[other]], then we call second all of the lists get empltied and we go again, team prints unknown and then returns None then it adds to the key other plus on on the lookup value, the pro annual which returns gold which is appended to results so reuslts now equals [None, gold], the count for key gold's lookup value is added 1 and then we sort ordered, orded is then [gold,product,other]<- keys, we then pop the counts other key and append it to results so results is [other, gold, counts[other]], then re return results,
+unknown
+unknown
+product other gold 1
+other gold 1
+90
+it is pure, the inputs are the reults and it changes nothing outside the function
+6 are created for counts because alias and counts point to the same dictionary and 3 dictinary is created everytime inspect is called
+```
+
+**Outcome:** partial at confidence 90. Control flow, `unknown`, implicit `None`, alias mutation, and
+fresh per-call state were largely understood. The remaining misses were values versus keys in
+`ordered`, retaining `None` in `results`, transitive print side effects when judging purity, and one
+new dictionary per call (two total). `EV-P1-COMPOSE-172`.
+
+---
+
+### Super-hard question 1 recovery checkpoint
+
+**Asked:** determine the returned values and number of dictionaries/lists created by two calls to a
+function that constructs one local dictionary and one list of looked-up values.
+
+**Answered:**
+
+```text
+picked takes the values i know that now, first and second are both [2,1] and 2 ditionareis and lists are created 60
+```
+
+**Outcome:** fully correct at confidence 60: two dictionaries, two lists, and two equal returned
+values `[2, 1]`. `EV-P1-COMPOSE-173`.
+
+---
+
+## Super-hard question 2 of 3 — nested mutation and return values
+
+**Asked:** trace two calls combining `sorted()`, `.sort()`, `pop()`, `append()`, nested aliases,
+shared dictionary mutation, purity, output, and object count. The full prompt is preserved in
+`EV-P1-COMPOSE-174`.
+
+**Answered:**
+
+```text
+it is impure, make sure to push after this problem i am getting lunch, alias items and number and asme are all pointing to the same list, we start with ordered which is not pooint the the same list but is now sorted with [1,3,4] then removed = 4 becaue we pop it and ordered now is just 1 and 3 then we add to the key removed look up value plus 1 then we run sort on alias which sorts returns a sorted list for alias without changing alias so status does not point to the same list as alisa we then append back in the 4 that was removed and return ordered which is the items sorted without 4 and status which is alias sorted with the 4 appended back in, numbers prints [4,1,3] same with same fisrt prints [[1,3],[1,3,4]
+then we move onto second starts with the list [1,3] and stats whiuch is now 1, now ordered is [1,3] and we pop 3 so now only 1 remains in ordede, we add plus one to the lookuop value of key removed and then status = [1,3,4,4] i did not trace the alias correctly it appends what ou removed but we remove the value from orded not from alias so alisa has the original [4,1,3] with an added [4,3], it returns ordede which is now [1] and stats whcih is removed,
+```
+
+**Confidence follow-up:** `60`
+
+**Outcome:** incorrect at confidence 60. Impurity, initial aliases, `sorted()` creating a
+separate list, popped values, and report mutation were correct. The central miss was treating
+`.sort()` as non-mutating and list-returning rather than in-place and `None`-returning. This
+propagated through the remaining state. `EV-P1-COMPOSE-174`.
+
+---
