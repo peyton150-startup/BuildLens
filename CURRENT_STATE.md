@@ -208,6 +208,10 @@ Still uncertain or due for later retrieval:
   terminology remediation (`EV-P5-BOUNDARY-195`, `EV-P5-BOUNDARY-TRANSFER-196`).
 - Phase 5 exact `summarize.py` ↔ `classify.py` interface trace: complete after local/instance-state
   remediation (`EV-P5-INTERFACE-197`).
+- Phase 5 `Session.record` / `Session.history` contract audit: first target attempt recorded
+  (`EV-P5-SESSION-CONTRACT-198`); the R2 snapshot-source micro-example passed at confidence 100
+  (`EV-P5-SESSION-SNAPSHOT-199`), and the intervening-state-mutation near-transfer passed at
+  confidence 100 (`EV-P5-SESSION-NEAR-TRANSFER-200`). Return-value/type recovery remains open.
 
 Do not mark these concepts permanently mastered after one review sequence.
 
@@ -223,7 +227,10 @@ The major/deep Phase 7–15 counter has not started.
 
 ## Open interaction and exact next step
 
-There is no unanswered quiz question. Phase 5 remains open at the next contract-audit step.
+Phase 5 remains open in adaptive remediation for the `Session.record` / `Session.history` contract
+audit. The learner identified a concrete candidate ambiguity—`record` documents diff text while the
+current runtime path appears to accept an integer—but no product patch is authorized until the
+full contract trace and different-surface transfer are complete.
 
 Continue Phase 5 as an intent/contract audit, not an automatic code patch:
 
@@ -250,7 +257,8 @@ summarize_diff local line: str
 → final DiffSummary record
 ```
 
-Resume by auditing the existing `Session.record(diff_text)` and `Session.history()` interfaces:
+Resume by rebuilding the existing `Session.record(diff_text)` and `Session.history()` audit from a
+one-concept snapshot trace:
 
 ```text
 exact input value/type
@@ -260,9 +268,13 @@ exact input value/type
 → explicit runtime validation, if any
 ```
 
-Then use one different-surface transfer and ask the learner to identify a concrete contract
-ambiguity or explicitly conclude no Phase 5 patch is earned. Do not add type hints or validation
-before the learner proposes the intended contract behavior.
+The first target attempt correctly distinguished separate list objects, predicted instance mutation
+from both `"diff A"` and `42`, and proposed validation. It also attributed the locally appended
+snapshot element to a later fresh history result and omitted exact method return values/types and
+the explicit-validation audit. The reduced snapshot-source trace and its near-transfer with an
+intervening real state mutation were then correct at confidence 100. On resume, return to a fresh
+target-level audit and finish with one different-surface transfer. Do not add type hints or
+validation before the learner completes that sequence and defends intended behavior.
 
 Phase 4 confirmed that no restructure is earned. Do not revisit that decision or manufacture a
 package/file move during Phase 5 without new evidence.
@@ -274,11 +286,11 @@ If a Phase 5 contract patch becomes justified, first state the required pre-patc
 
 ```text
 phase                       Phase 5 contract audit in progress
-last knowledge gate         EV-P5-INTERFACE-197, correct after remediation at confidence 90
-next retrieval due          Session.record/history interface contract audit
+last knowledge gate         EV-P5-SESSION-NEAR-TRANSFER-200, correct at confidence 100
+next retrieval due          fresh full Session.record/history contract audit
 next architecture reset     complete; next by time or major transition
 next implementation step    none until the Phase 5 audit finds an earned contract change
-last published commit       d2d2652
+last published commit       Phase 5 pause-state commit on current Git main
 ```
 
 Files the learner should currently be able to teach:

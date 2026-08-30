@@ -18894,3 +18894,287 @@ target contract trace → R1 receiver/method operation → fresh near-transfer �
 
 TRANSFER STATUS:
 pending
+
+---
+
+## EV-P5-SESSION-CONTRACT-198
+
+DATE: 2026-08-30
+
+BUILD PHASE:
+Phase 5 — Explicit Interfaces / Contracts
+
+IMPLEMENTATION TRIGGER:
+Audit the existing `Session.record(diff_text)` and `Session.history()` interfaces before deciding
+whether any contract patch is earned. No product-code change is authorized yet.
+
+ACADEMIC SOURCE:
+`MIT-6102-2026`; `PY-TYPING`
+
+DEEP SKILL:
+Specify exact boundary values and types while separating instance mutation, snapshot allocation,
+documented assumptions, incidental runtime acceptance, and explicit validation.
+
+EXERCISE TYPE:
+CONTRACT_TRACE
+
+SCAFFOLD RUNG:
+Target R5; remediation descends to R2.
+
+PROMPT (verbatim):
+Phase 5 contract audit — no code change yet.
+
+Academic objective: specify an interface contract while separating documented assumptions from actual runtime enforcement. Smallest prerequisite: distinguish mutation, return value, and runtime validation.
+
+Without running the code, trace:
+
+```python
+session = Session()
+
+result_a = session.record("diff A")
+history_a = session.history()
+history_a.append("local only")
+history_b = session.history()
+
+result_b = session.record(42)
+history_c = session.history()
+```
+
+Commit your prediction for:
+
+1. `Session.record(diff_text)`
+
+   - Documented allowed input type/value
+   - Actual runtime input accepted for `"diff A"` and `42`
+   - Exact state change after each call
+   - Exact return value and return type
+   - Any explicit runtime validation actually performed
+
+2. `Session.history()`
+
+   - Exact input
+   - Exact returned value and type for `history_a`, `history_b`, and `history_c`
+   - Whether it mutates session state
+   - Whether `history_a` is the same list object as `session.changes`
+   - What assumption it makes about stored elements
+   - Any explicit runtime validation actually performed
+
+3. State the exact final value of `session.changes`.
+
+4. Name any concrete contract ambiguity you see—or explicitly say that none is established yet.
+
+Include your confidence from 0–100. After you commit, I’ll evaluate it and give the different-surface transfer.
+
+LEARNER FIRST COMMITTED ANSWER (verbatim):
+so result a = calls record and that appends diff a to the session instance list then hisortyt a points to a new list that has the same contents as the session instance list but they do not point to the same place, then they append local only on hiosory a whic h makes it [diffa, local only], history b is then given a new list with those content sinti but it does not point to the same place, then 42 is added to the session isntace which becomes [diff a , 42] then history c gets a copy of that list that points to a copy and not the session instace, i can see wh ywe need a validatio here, so 42 is not added as diff text for later classifying, i would say that we need to add contracts to record so no one adds in ints, 80
+
+CONFIDENCE:
+80
+
+HELP / TOOLS BEFORE COMMITMENT:
+None reported; learner was instructed to predict without running the code.
+
+EVALUATION:
+Partial at confidence 80. The learner correctly predicts that `record` mutates the instance list,
+that the integer is accepted into current state, that `history()` allocates a distinct outer list,
+and that mutating `history_a` changes that snapshot. The response then says `history_b` receives
+"those contents," attributing the local-only snapshot mutation to the later fresh history result;
+this conflicts with the otherwise correct separate-object model. Exact method return values/types,
+documented assumptions, and explicit-validation findings were not supplied.
+
+CONCRETE CONTRACT AMBIGUITY PROPOSED:
+The documented diff-text expectation and predicted runtime acceptance of `42` may disagree; the
+learner proposes validation so non-string values do not enter Session state. Preserve this proposal
+for evaluation after the full trace and transfer. It does not yet authorize a patch.
+
+PRIMARY BLOCKER:
+SNAPSHOT_SOURCE_OF_TRUTH — retaining that a later `history()` call copies current instance state,
+not a previously returned and independently mutated snapshot.
+
+RESULT:
+partial; remediation open
+
+MISCONCEPTION:
+fresh_snapshot_mistakenly_inherits_prior_snapshot_mutation
+
+REMEDIATION CHAIN:
+target contract trace → R2 one-concept snapshot trace → near-transfer → fresh target contract audit
+→ different-surface transfer
+
+TRANSFER STATUS:
+pending
+
+---
+
+## EV-P5-SESSION-SNAPSHOT-199
+
+DATE: 2026-08-30
+
+BUILD PHASE:
+Phase 5 — Explicit Interfaces / Contracts
+
+IMPLEMENTATION TRIGGER:
+Adaptive remediation for the snapshot-source blocker in `EV-P5-SESSION-CONTRACT-198`.
+
+ACADEMIC SOURCE:
+`MIT-6102-2026`
+
+DEEP SKILL:
+Track instance state and independently allocated snapshot state without transferring a mutation
+from one object to another.
+
+EXERCISE TYPE:
+TRACE_REMEDIATION
+
+SCAFFOLD RUNG:
+R2 — sequential state changes with one active concept.
+
+PROMPT (verbatim):
+Your validation concern is concrete, but the gate is partial: the snapshot prediction conflicts with the separate-list model, and the return values/types were omitted.
+
+Let’s isolate only the snapshot concept:
+
+```python
+session = Session()
+session.record("A")
+
+first = session.history()
+first.append("B")
+
+second = session.history()
+```
+
+Without running it, give the exact final value of:
+
+```text
+session.changes =
+first =
+second =
+```
+
+Then answer: when `second` is created, does `list(self.changes)` copy from `session.changes` or from `first`?
+
+Confidence: 0–100.
+
+LEARNER FIRST COMMITTED ANSWER (verbatim):
+[a]
+[a,b]
+[a]
+100
+
+CONFIDENCE:
+100
+
+HELP / TOOLS BEFORE COMMITMENT:
+None reported; learner predicted without running the code.
+
+EVALUATION:
+Correct at confidence 100. The learner keeps instance state `[a]`, the independently mutated first
+snapshot `[a, b]`, and the later fresh snapshot `[a]` separate. The ordered answers also establish
+that the later snapshot copies current instance state rather than the earlier snapshot.
+
+RESULT:
+correct
+
+PRIMARY BLOCKER:
+none on this micro-example
+
+REMEDIATION STATUS:
+micro-prerequisite recovered once; near-transfer required before returning to target complexity
+
+PARENT EVIDENCE ID:
+EV-P5-SESSION-CONTRACT-198
+
+TRANSFER STATUS:
+pending near-transfer
+
+---
+
+## EV-P5-SESSION-NEAR-TRANSFER-200
+
+DATE: 2026-08-30
+
+BUILD PHASE:
+Phase 5 — Explicit Interfaces / Contracts
+
+IMPLEMENTATION TRIGGER:
+Near-transfer after the R2 snapshot-source recovery in `EV-P5-SESSION-SNAPSHOT-199`.
+
+ACADEMIC SOURCE:
+`MIT-6102-2026`
+
+DEEP SKILL:
+Keep a previously returned snapshot independent while real instance state changes afterward, then
+derive a later snapshot from the updated instance state.
+
+EXERCISE TYPE:
+TRACE_NEAR_TRANSFER
+
+SCAFFOLD RUNG:
+R3 — sequential state with two independent mutation targets.
+
+PROMPT (verbatim):
+Near-transfer—one added state change, less scaffolding:
+
+```python
+session = Session()
+session.record("A")
+
+first = session.history()
+session.record("B")
+first.append("X")
+
+second = session.history()
+```
+
+Give the exact final values of:
+
+```text
+session.changes =
+first =
+second =
+```
+
+Also state which operations mutate real session state and which mutate only a snapshot.
+
+Confidence: 0–100.
+
+LEARNER FIRST COMMITTED ANSWER (verbatim):
+[a,b]
+[a,x]
+[a,b]
+100
+i think that is all i can do for now can you push adn pause
+
+CONFIDENCE:
+100
+
+HELP / TOOLS BEFORE COMMITMENT:
+None reported; learner predicted without running the code.
+
+EVALUATION:
+Correct at confidence 100. The learner keeps real instance state `[a, b]`, the earlier independently
+mutated snapshot `[a, x]`, and the later fresh snapshot `[a, b]` distinct. By assigning `B` only to
+the instance value and `X` only to `first`, the answer also correctly locates both mutation targets.
+
+RESULT:
+correct
+
+PRIMARY BLOCKER:
+none observed
+
+REMEDIATION STATUS:
+snapshot-source blocker recovered through micro-example and near-transfer; return to a fresh full
+contract audit on resume
+
+PARENT EVIDENCE ID:
+EV-P5-SESSION-SNAPSHOT-199
+
+TRANSFER STATUS:
+near-transfer complete; different-surface transfer remains pending
+
+SESSION PAUSE:
+Learner requested push and pause. Phase 5 remains open. No product patch, type hint, validation, or
+contract decision has been made. Resume with exact `record` return value/type, `history` input and
+output type, documented assumptions, actual explicit validation, then the different-surface
+transfer and contract decision.
