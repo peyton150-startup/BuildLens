@@ -25597,3 +25597,339 @@ Cross-cutting findings from this review:
 ```
 
 Do not mark any of these concepts permanently mastered on the strength of this review alone.
+
+---
+
+## EV-P6-CLI-SPEC-267
+
+DATE: 2026-08-31
+
+BUILD PHASE:
+Phase 6 — first complete vertical slice (CLI), specification before any code
+
+ACADEMIC SOURCE:
+`CMU-15213-SYSTEMS` (process entry/exit boundary); `MIT-6006-OCW`
+
+DEEP SKILL:
+Specify a program's contract at the process boundary: what it consumes, what it guarantees on
+screen, what exit status it leaves, and how it fails — before implementing any of it.
+
+EXERCISE TYPE:
+SPECIFICATION
+
+SCAFFOLD RUNG:
+R6 target, descending to recognition on two fields.
+
+PROMPT (verbatim):
+Phase 6 specification — the CLI contract, for `python cli.py analyze changes.diff`.
+
+```
+What the command reads as input =
+What it writes to the screen on success =
+What its exit status should be on success =
+What should happen if the named file does not exist =
+What its exit status should be in that case =
+Which existing module should do the counting =
+Confidence =
+```
+
+LEARNER FIRST COMMITTED ANSWER (verbatim):
+. exit code 0 for success, if the named file does not exsts then it would throw an error and communicate that, summarize should do the counting, 80
+
+CONFIDENCE:
+80
+
+EVALUATION:
+Three of six answered, all correct: exit `0` on success, a readable error on a missing file, and
+`summarize.py` as the counting module — correctly declining to put counting in the CLI. The failure
+status was supplied as `1` on the follow-up.
+
+Three fields blocked, and the block was genuine rather than careless: the learner had not previously
+built or used a CLI, and asked directly "so what is a cli" and "what does analyze do". Both were
+answered as definitional help, not as exercise answers.
+
+CONCEPTS TAUGHT DIRECTLY (not assessed):
+
+```text
+CLI as a typed interface; program name versus arguments; gh auth login as the same shape
+analyze is an action name we define; arbitrary when chosen, authoritative when run
+```
+
+REMEDIATION CHAIN (verbatim answers in order):
+
+1. CLI recognition check:
+   LEARNER: `. i have used gh auth login to login to the gh cli as we l as the vercel sadbox to test
+   code in an envirnment where they can actually execute the code, git is the prgram and the
+   argument is status, 100`
+   Correct; the learner supplied real examples and split program from argument correctly.
+
+2. Filename-versus-contents isolation:
+   LEARNER: `no, 12, i would have to go get it, so it is a filename , 90`
+   All correct, and the learner named the concept itself.
+
+3. Input field, recognition rung after the syntax detour:
+   LEARNER: `. B, 90`
+   Correct: the command consumes the TEXT INSIDE the named file, not the filename string.
+
+RESULT:
+specification COMPLETE, assembled entirely from learner answers
+
+AGREED CONTRACT:
+
+```text
+input            the text inside the named file, read with open
+success output   three labelled counts, one per line
+success status   0
+missing file     a readable error message
+failure status   1
+counting         summarize.py, unchanged
+```
+
+PRIMARY BLOCKER:
+none remaining; CLI concept was absent rather than forgotten
+
+TRANSFER STATUS:
+pending — the Phase 6 gate requires tracing one value end to end after implementation
+
+---
+
+## EV-P6-FILEREAD-SYNTAX-268
+
+DATE: 2026-08-31
+
+BUILD PHASE:
+Phase 6 — syntax-only help triggered during CLI specification
+
+ACADEMIC SOURCE:
+`PY-IO-BASICS`
+
+DEEP SKILL:
+Read `with open(...) as handle:` / `handle.read()` as ordinary control flow producing one string,
+and know that a missing file raises `FileNotFoundError` at `open`.
+
+EXERCISE TYPE:
+SYNTAX_ONLY_HELP
+
+SCAFFOLD RUNG:
+R0, learner-confirmed as never previously written.
+
+TRIGGERING EXCHANGE (verbatim):
+Prompt: `Have you written Python that reads a file's contents before, yes or no =`
+LEARNER: `. no, 90`
+
+SEQUENCE AND LEARNER FIRST COMMITTED ANSWERS (verbatim, in order):
+
+1. R0 read of `with open("notes.txt") as handle: text = handle.read()` over a two-line file:
+   LEARNER: `. it makes it one string with "hello\nworld" and prints that the length is 12, 90`
+   The one-string model and the newline-as-a-character model are both correct. The length was
+   internally inconsistent with the string the learner themselves wrote.
+
+2. Length pinned, trailing newline excluded by stipulation:
+   LEARNER: `. the length is 11 i was counting the \n as one`
+   Correct. Noted for the learner that real files commonly do carry a trailing newline, so `12`
+   would be right for a typical file — the instinct was not baseless.
+
+3. Fresh same-form read including a missing file:
+   First response contained only `90` with all four fields blank; a four-option "which part is
+   unclear" prompt was offered, and the learner answered the original fields instead:
+   LEARNER: `. the value of a is abc, it does print got a and then throws an error when it gets to
+   mussing.txt because it has nothing to read, it does nto priont got b, 90`
+   All four correct. Refinement given: the error is raised by `open` itself, before any read, and
+   is named `FileNotFoundError`.
+
+EVALUATION:
+File-reading syntax is readable on both the success and missing-file paths. The `raise` model from
+Phase 5 transferred without prompting — the learner predicted that execution stops and the later
+print does not run.
+
+RESULT:
+syntax closed at R0
+
+PRIMARY BLOCKER:
+none
+
+TRANSFER STATUS:
+to be exercised in the Phase 6 implementation, where the missing-file path becomes exit status 1
+
+---
+
+## EV-P6-ARGV-SYNTAX-269
+
+DATE: 2026-08-31
+
+BUILD PHASE:
+Phase 6 — process entry boundary, prerequisite syntax
+
+ACADEMIC SOURCE:
+`CMU-15213-SYSTEMS`; `PY-SYS-ARGV`
+
+DEEP SKILL:
+Read `sys.argv` as an ordinary list of strings produced by the shell splitting the typed line, and
+predict `IndexError` when a required argument is absent.
+
+EXERCISE TYPE:
+ADJACENT_LEARNING
+
+SCAFFOLD RUNG:
+R1, taught directly after the learner asked what `sys.argv` stands for and does.
+
+SEQUENCE AND LEARNER FIRST COMMITTED ANSWERS (verbatim, in order):
+
+1. Indexing read, invoked as `python cli.py analyze changes.diff`:
+   LEARNER: `. action is analyze , path is changes.diff, it holds cli.py, there is no command to
+   tell the cli module/ summerize module what do to or what the user ewants. 90`
+   First three correct. Field four described the situation correctly but not the mechanism.
+
+2. Mechanism narrowing for the bare `python cli.py` line:
+   LEARNER: `.['cli.py', 'analyze', 'changes.diff'], 3,  it throws an error, 90`
+   Incorrect: the previous invocation's `argv` was carried into a line where only `cli.py` was
+   typed. This is the same scenario carry-over recorded at `EV-CUM-FND-264B` and
+   `EV-CUM-FND-264G`, and it was named as such when re-presenting.
+
+3. Same question with the typed line restated as the whole input:
+   LEARNER: `. just [cli.py] , 1 , there is nothing there, 80`
+   All three correct.
+
+4. Naming, volunteered unprompted a turn later:
+   LEARNER: `it throws an index error`
+   Correct: `IndexError`.
+
+EVALUATION:
+`sys.argv` is read correctly as a plain list: program name at index 0, typed words after it, all
+strings. The absent-argument case is predicted correctly and named.
+
+The carry-over habit remains the live procedural risk and recurs whenever a second scenario reuses
+the first one's vocabulary. It cleared immediately, again, once the input was restated in full.
+
+RESULT:
+passed at R1
+
+PRIMARY BLOCKER:
+none conceptual; SCENARIO_CARRYOVER recurred and cleared
+
+---
+
+## EV-P6-CLI-IMPLEMENTATION-270
+
+DATE: 2026-08-31
+
+BUILD PHASE:
+Phase 6 — first complete vertical slice, implementation patch
+
+EXERCISE TYPE:
+IMPLEMENTATION
+
+DESIGN DECISIONS MADE BY THE LEARNER BEFORE ANY CODE (verbatim):
+`. i think it would be in cli so that summarzie does not need to change a whole lot or at all it
+would just have one long string be inputted from cli.py similar to classfiy diff line and how
+summarize calls that we would import summarize and cli would go from there, it should catch it and
+print a message which could also ask the user to input the filename again in case they soelled it
+wrong, the catch it and print a message gives the readable message. 90`
+
+CONFIDENCE:
+90
+
+EVALUATION OF THE DESIGN ANSWER:
+Correct on all three fields, and the justification for placing file reading in `cli.py` was the
+dependency-direction argument from cumulative question 5 applied unprompted: `cli.py` imports
+`summarize`, so the arrow points that way and `summarize.py` needs no change.
+
+The learner additionally proposed re-prompting for a mistyped filename. Challenged per the design
+rubric rather than corrected:
+
+Prompt: `What happens to the re-prompting version when run from a script with nobody at the keyboard =`
+LEARNER: `. it would never exxit`
+
+Correct, and it is the decisive argument: a CLI must always terminate with a verdict a script can
+read. Re-prompting was dropped by the learner's own reasoning, not by instruction.
+
+PATCH AS BUILT:
+`cli.py` — `read_diff`, `format_summary`, `main(argv) -> int`, and an `if __name__` entry point that
+passes `main`'s return value to `sys.exit`. Failure paths return `1` and print to stderr:
+wrong argument count, unknown action, and `FileNotFoundError`. Success prints three labelled counts
+and returns `0`.
+
+`test_cli.py` — seven tests: file reading, formatting, success path, missing file, unknown action,
+too few arguments, too many arguments.
+
+`classify.py`, `summarize.py`, and `session.py` were not modified.
+
+VERIFICATION:
+
+```text
+python test_classify.py   -> test passed
+python test_summarize.py  -> test passed
+python test_session.py    -> test passed
+python test_cli.py        -> test passed
+python cli.py analyze demo.diff  -> three counts, exit status 0
+python cli.py analyze nope.diff  -> no such file: nope.diff, exit status 1
+```
+
+---
+
+## EV-P6-CLI-TRACE-271
+
+DATE: 2026-08-31
+
+BUILD PHASE:
+Phase 6 — post-patch milestone trace
+
+ACADEMIC SOURCE:
+`CMU-15213-SYSTEMS`; `MIT-6006-OCW`
+
+DEEP SKILL:
+Follow one value across the whole runtime path — typed line, argv, file read, domain call,
+formatting, stdout, exit status — naming each function and representation.
+
+EXERCISE TYPE:
+KNOWLEDGE_GATE
+
+SCAFFOLD RUNG:
+R6, the Phase 6 gate as written in the plan.
+
+PROMPT (verbatim):
+Post-patch trace — follow one value. `changes.diff` exists and contains a diff with 17 added lines.
+The user types `python cli.py analyze changes.diff`.
+
+```
+Value of sys.argv =
+Value of path =
+What read_diff hands back, described in one phrase =
+Which function turns that into counts =
+Which function turns the counts into text =
+The exact line the user sees for added lines =
+The exit status the shell receives =
+Confidence =
+```
+
+LEARNER FIRST COMMITTED ANSWER (verbatim):
+. so it starts by asking if sys.argv is size 3 and if it is not 3 then it returns exitcode 1, after that is check to see if analyze was the command iuses, if it is we contineu, if not exit code 1 and a unkown action message, then we try to readdiff whic hsi path, so path gets read in from open and returns as difftext, if there is nothing there then exit code 1, summary is a summzrize instance class object, it runs summarize diff using the read in text format and then it formats the sumamry and prints it , 90
+
+CONFIDENCE:
+90
+
+EVALUATION:
+The full control flow was traced correctly and unaided, including both failure exits and their
+ordering: argument count, then unknown action, then the missing file, then the success path through
+`summarize_diff` and `format_summary` to stdout. The learner described the guard sequence without
+reading it back from the file.
+
+Specific values were omitted, the recurring wide-prompt omission pattern. On the narrowed request:
+
+LEARNER: `. [cli.py, anaylze, changes.diff], it is the file that is read in so changes.diff, lines added: 3, exit code 0, 90`
+
+`sys.argv`, `path`, and exit status `0` correct. The added-lines line was given as `3`, not matching
+the stipulated 17; on one further narrowing the learner supplied `lines added 17`, correct.
+
+RESULT:
+passed; Phase 6 trace requirement satisfied
+
+PRIMARY BLOCKER:
+none; field omission under wide prompts persists as a procedural pattern
+
+REMEDIATION STATUS:
+none required
+
+TRANSFER STATUS:
+outstanding — the Phase 6 milestone still owes a learner explanation and a transfer variant
+(the same end-to-end and cost analysis applied to a different small CLI)

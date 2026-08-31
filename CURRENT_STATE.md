@@ -439,9 +439,38 @@ The major/deep Phase 7–15 counter has not started.
 Phase 5 is complete and the cumulative foundation review is complete with the counter reset. There
 is no blocking gate outstanding.
 
-Next step is Phase 6 SPECIFICATION and intent work - not automatic CLI implementation. Before any
-Phase 6 patch, read that phase's `### Adjacent learning triggered here` section and state the
-pre-patch block required by `CLAUDE.md`.
+Phase 6 has BEGUN. The specification was written by the learner (`EV-P6-CLI-SPEC-267`) and the
+first patch is implemented and verified (`EV-P6-CLI-IMPLEMENTATION-270`), with the milestone trace
+passed (`EV-P6-CLI-TRACE-271`).
+
+Agreed CLI contract, assembled from the learner's own answers:
+
+```text
+input            the text inside the named file, read with open
+success output   three labelled counts, one per line
+success status   0
+missing file     a readable error on stderr
+failure status   1
+counting         summarize.py, unchanged
+```
+
+`cli.py` now exists with `read_diff`, `format_summary`, `main(argv) -> int`, and an `if __name__`
+entry point handing `main`'s return value to `sys.exit`. `test_cli.py` has seven tests.
+`classify.py`, `summarize.py`, and `session.py` were not modified.
+
+Syntax closed this phase: `with open(...) as handle` / `.read()` and `FileNotFoundError`
+(`EV-P6-FILEREAD-SYNTAX-268`); `sys.argv` indexing and `IndexError` (`EV-P6-ARGV-SYNTAX-269`).
+Both were genuinely new — the learner had never read a file in Python nor built a CLI before.
+
+STILL OWED BEFORE PHASE 6 CAN CLOSE:
+
+```text
+learner explanation   teach cli.py aloud in their own words
+transfer variant      same end-to-end and cost analysis on a different small CLI
+file=sys.stderr       why errors use a separate channel from results
+if __name__           why the entry-point line exists and how it keeps main testable
+argparse patch        deliberately deferred as a SECOND patch; not yet started
+```
 
 Standing instructions carried out of the review:
 
@@ -539,15 +568,17 @@ THE CUMULATIVE FOUNDATION REVIEW IS COMPLETE. All five questions passed.
 
 ```text
 phase                       Phase 5 complete; cumulative foundation review in progress
-last knowledge gate         EV-CUM-FND-266A, cumulative review COMPLETE, all five passed
+last knowledge gate         EV-P6-CLI-TRACE-271, Phase 6 post-patch trace passed
 next retrieval due          none blocking; next foundation checkpoint after Phase 8
 next architecture reset     complete; next by time or major transition
-next implementation step    Phase 6 specification and intent work; no code before the pre-patch gate
+next implementation step    Phase 6 second patch: argparse plus bad-input handling, after the owed explanation and transfer
 last published commit       current handoff — feat: enforce Session string contract
 ```
 
 Files the learner should currently be able to teach:
 
+- `cli.py` (owed: the teach-aloud explanation)
+- `test_cli.py`
 - `classify.py`
 - `summarize.py`
 - `session.py`
