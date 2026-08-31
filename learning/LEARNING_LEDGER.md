@@ -26085,3 +26085,120 @@ none
 
 TRANSFER STATUS:
 delayed retrieval of output_and_exit_status_are_independent SATISFIED on a new surface
+
+---
+
+## EV-P6-CLI-EXPLANATION-274
+
+DATE: 2026-08-31
+
+BUILD PHASE:
+Phase 6 — milestone learner explanation (teach-aloud)
+
+ACADEMIC SOURCE:
+`DESIGN_REVIEW_RUBRIC`; `CMU-15213-SYSTEMS`
+
+DEEP SKILL:
+Explain one's own module without reading it back: purpose, boundary, return contract, failure
+modes, and the evidence that the boundary held.
+
+EXERCISE TYPE:
+KNOWLEDGE_GATE
+
+SCAFFOLD RUNG:
+R6, closed book, descending on two fields.
+
+PROMPT (verbatim):
+Teach-aloud — cli.py
+
+```
+What cli.py is for, in one or two sentences =
+Why the counting is not in cli.py =
+What main returns and why it returns instead of exiting =
+The three ways main can fail, and what the user gets in each =
+Why history proves the module boundary held: what changed in summarize.py when you added a CLI =
+Confidence =
+```
+
+LEARNER FIRST COMMITTED ANSWER (verbatim):
+. cli.py is for using the summarize in the command line it reads in the file you specifiy and runs summarize to get files changed lines added and lines remvoed, the counting is in another file that cli imports and give the inouts to summerize to have simmerize do the counting, i still do not know how to differentioate which file is being used as main or imported, in this case cli imports summarize and runs it so my assumtion would be that __name__ is cli, if the file is empty it could fail if, nothing in summarize changed when we added a cli, 90
+
+CONFIDENCE:
+90
+
+EVALUATION:
+Fields 1, 2, and 5 correct and unaided. The purpose is stated as the command-line surface over
+existing counting; the boundary rationale is correct; and the decisive evidence is named — nothing
+in `summarize.py` changed when the CLI was added.
+
+Field 3 drifted into `__name__`, which had passed minutes earlier at `EV-P6-ENTRYPOINT-272` but was
+self-reported as still shaky. A durable rule was supplied rather than re-derived: the file typed
+after `python` is `"__main__"`; every file it imports carries its own module name; only one file per
+run is ever `"__main__"`.
+
+Field 4 named two of three failure paths on first commit.
+
+REMEDIATION (verbatim answers in order):
+
+1. Third failure path, the argument-count guard:
+   LEARNER: `. if the user type in python cli.py and nothing else, then the argv is != 3 and throws
+   an error, 90`
+   Correct example. Refinement: it does not raise; it prints usage and returns 1, which is the
+   point of placing the check first.
+
+2. What the guard prevents:
+   LEARNER: `index error, 90, nothing is there`
+   Correct, retrieved for the second time today on a new surface.
+
+3. Why `main` returns rather than exiting, framed through `test_missing_arguments_fail`:
+   LEARNER: `. it ends the run right there the assert never gets evaluated, 90`
+   Correct: `sys.exit` inside `main` would kill the test process before any assertion ran. The
+   return-value design keeps the verdict testable and confines process death to one line.
+
+Preceding the remediation the learner asked for the code to be shown rather than described; it was
+supplied in full, per the prompt-design rule adopted after `EV-CUM-FND-264E`.
+
+RESULT:
+passed; Phase 6 learner-explanation requirement SATISFIED
+
+PRIMARY BLOCKER:
+none conceptual. `__name__` needed a restated rule within minutes of passing, so schedule one
+delayed retrieval on a fresh surface before Phase 6 closes.
+
+REMEDIATION STATUS:
+complete
+
+TRANSFER STATUS:
+Phase 6 still owes the transfer variant — the same end-to-end and cost analysis on a different
+small CLI.
+
+---
+
+SESSION PAUSE — 2026-08-31, PHASE 6 IN PROGRESS:
+
+Learner said: `ok can we do the teach alound one more time tomorrow, that is where we start tomrrow,
+record that commit and push`
+
+The `cli.py` teach-aloud passed today (`EV-P6-CLI-EXPLANATION-274`) but the learner has asked to
+REPEAT it cold at the start of the next session. Honour this: it is a learner-initiated delayed
+retrieval, and it is exactly the right instinct given that `__name__` needed its rule restated
+minutes after passing.
+
+Exact resume sequence:
+
+```text
+1. START HERE. Re-run the cli.py teach-aloud cold, before anything else.
+2. Do not show cli.py first. Ask for the explanation from memory; supply the code only if the
+   learner asks, as they did today.
+3. Same five fields: purpose, why counting is elsewhere, what main returns and why it returns
+   rather than exits, the three failure paths, and what changed in summarize.py.
+4. Assistance must fade: today the third failure path and the return-versus-exit rationale needed
+   remediation. Expect them unaided this time; do not re-supply the __name__ rule unless asked.
+5. Record it as a fresh Evidence Record, not as an edit to EV-P6-CLI-EXPLANATION-274.
+6. Then the __name__ delayed retrieval on a fresh surface.
+7. Then the Phase 6 transfer variant: same end-to-end and cost analysis on a different small CLI.
+8. Only then the second Phase 6 patch, argparse plus bad-input handling, with a pre-patch block.
+```
+
+State at pause: four suites green; `cli.py` and `test_cli.py` published; Phase 6 owes the transfer
+variant and the argparse patch.

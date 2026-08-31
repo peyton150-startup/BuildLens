@@ -465,10 +465,26 @@ Both were genuinely new — the learner had never read a file in Python nor buil
 STILL OWED BEFORE PHASE 6 CAN CLOSE:
 
 ```text
-learner explanation   teach cli.py aloud in their own words
 transfer variant      same end-to-end and cost analysis on a different small CLI
 argparse patch        deliberately deferred as a SECOND patch; not yet started
+delayed retrieval     __name__ on a fresh surface, see below
 ```
+
+NEXT SESSION STARTS HERE: the learner asked to repeat the `cli.py` teach-aloud cold, as the first
+activity of the next session, before the transfer variant or any code. Do not show `cli.py` first;
+ask for the explanation from memory and supply the code only if the learner asks. Assistance must
+fade — the third failure path and the return-versus-exit rationale needed remediation today and
+should come unaided this time. Record it as a fresh Evidence Record.
+
+The learner explanation is DONE (`EV-P6-CLI-EXPLANATION-274`). Purpose, boundary rationale, the
+return-value design, all three failure paths, and the decisive boundary evidence — `summarize.py`
+did not change when the CLI was added — were all given, with remediation only on the third failure
+path and the return-versus-exit rationale.
+
+Watch item: `__name__` needed its rule restated within minutes of passing at
+`EV-P6-ENTRYPOINT-272`, self-reported by the learner as still shaky. The rule now held is: the file
+typed after `python` is `"__main__"`; imported files carry their own module names; only one file per
+run is ever `"__main__"`. Schedule one delayed retrieval on a fresh surface before Phase 6 closes.
 
 Both remaining syntax pieces are now closed. `if __name__ == "__main__"` passed
 (`EV-P6-ENTRYPOINT-272`): the learner can state that `__name__` is `"cli"` during tests, that the
@@ -575,16 +591,16 @@ THE CUMULATIVE FOUNDATION REVIEW IS COMPLETE. All five questions passed.
 
 ```text
 phase                       Phase 5 complete; cumulative foundation review in progress
-last knowledge gate         EV-P6-STDERR-273, both cli.py syntax pieces closed
-next retrieval due          none blocking; next foundation checkpoint after Phase 8
+last knowledge gate         EV-P6-CLI-EXPLANATION-274, teach-aloud passed
+next retrieval due          __name__ on a fresh surface; foundation checkpoint after Phase 8
 next architecture reset     complete; next by time or major transition
-next implementation step    Phase 6 second patch: argparse plus bad-input handling, after the owed explanation and transfer
+next implementation step    repeat cli.py teach-aloud first; then transfer variant; then argparse patch
 last published commit       current handoff — feat: enforce Session string contract
 ```
 
 Files the learner should currently be able to teach:
 
-- `cli.py` (owed: the teach-aloud explanation)
+- `cli.py`
 - `test_cli.py`
 - `classify.py`
 - `summarize.py`
