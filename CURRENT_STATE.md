@@ -8,8 +8,8 @@ Last updated: 2026-08-29
 
 ## Lifecycle
 
-**Current phase:** Phase 5 contract audit in progress. No product-code change is currently justified
-or authorized.
+**Current phase:** Phase 5 complete. The mandatory cumulative foundation review is now due before
+substantial Phase 6 work; no Phase 6 product implementation is authorized yet.
 
 Phase 3 is complete in every required dimension:
 
@@ -31,6 +31,16 @@ cross-module value trace                complete — EV-P4-READ-191
 module responsibility/dependency audit complete — EV-P4-ARCH-192
 unrelated decomposition transfer       complete — EV-P4-TRANSFER-193
 refactor decision                       keep existing flat modules
+```
+
+Phase 5 is complete in every required dimension:
+
+```text
+implementation       complete — EV-P5-SESSION-IMPLEMENTATION-248
+automated tests      complete — EV-P5-COMPLETE-259
+learner trace        complete — EV-P5-SESSION-POSTPATCH-TRACE-249
+learner explanation  complete — EV-P5-ANNOTATION-VALIDATION-250
+transfer variant     complete — EV-P5-RETRY-TRANSFER-COMPLETE-258
 ```
 
 ## Exact code that exists
@@ -78,38 +88,42 @@ classify is a dependency of summarize
 ```python
 class Session:
     def __init__(self):
-        self.changes = []
+        self._changes: list[str] = []
 
-    def record(self, diff_text):
-        self.changes.append(diff_text)
+    def record(self, diff_text: str) -> None:
+        if not isinstance(diff_text, str):
+            raise TypeError("must be a string")
 
-    def history(self):
-        history_list = list(self.changes)
+        self._changes.append(diff_text)
+
+    def history(self) -> list[str]:
+        history_list = list(self._changes)
         return history_list
 ```
 
-Each construction runs `__init__`; `[]` creates a fresh list; `self.changes` attaches it to that
-instance. `record` appends the exact passed object in order. `history` returns a shallow snapshot,
-not an alias.
-
-Known limitation: `changes` is public. A caller can mutate real state directly with
-`session.changes.append(...)`. Copying in `history()` protects only against mutation through the
-returned snapshot.
+Each construction creates a fresh internal `_changes` list. Supported writes go through `record`,
+which declares `str`, explicitly validates at runtime, and raises `TypeError("must be a string")`
+before mutation for a non-string. Valid strings append in order and the method returns `None`.
+`history` declares and returns a fresh `list[str]` snapshot without rescanning elements. The
+string-only guarantee is deliberately scoped to supported API paths, not arbitrary Python
+introspection of `_changes`.
 
 ## Automated verification
 
 ```text
 python test_classify.py   — 8 test functions
 python test_summarize.py  — 1 end-to-end summary test function
-python test_session.py    — 5 test functions
+python test_session.py    — 7 test functions
 ```
 
-All three passed locally and in the publishing clone before commit `e3a5838`. No product code has
-changed since.
+All three passed locally after the Phase 5 Session contract patch on 2026-08-31.
 
-The load-bearing Session test is `test_mutating_the_history_does_not_touch_the_session`. Returning
-an alias changes the actual value to `["diff A", "diff B"]` and makes its expected `["diff A"]`
-assertion fail.
+Load-bearing Session tests include:
+
+- `test_mutating_the_history_does_not_touch_the_session` for snapshot identity;
+- `test_mutable_storage_is_not_public` for removal of the supported public mutation bypass;
+- `test_rejecting_non_string_input_preserves_history` for exact error behavior and
+  rejection-before-mutation.
 
 ## Current execution paths
 
@@ -342,6 +356,71 @@ Still uncertain or due for later retrieval:
 - The next rejection-before-list-mutation trace was presented but not answered because the learner
   needed to relocate. Resume with the exact preserved `items = ["A"]`, `value = 7` prompt; do not
   reveal its answer or implement the Session patch first.
+- The resumed rejection-before-mutation trace passed at confidence 100
+  (`EV-P5-REJECTION-STATE-239`): the learner explained that `TypeError` is raised before `append`,
+  so the existing list remains unchanged. One different-surface near-transfer is next before
+  rebuilding to the Session `record(7)` prediction.
+- The learner immediately recognized the job-queue near-transfer as the same control-flow structure
+  under different names (`EV-P5-REJECTION-TRANSFER-240`). Do not require a redundant field table;
+  ask for the shared deep principle, then return to the Session prediction.
+- The shared rejection-before-mutation principle passed at confidence 100
+  (`EV-P5-REJECTION-PRINCIPLE-241`): validation stops execution before append, preserving prior
+  state. Return now to the exact Session `record(7)` pre-implementation prediction.
+- The restored Session rejection prediction was strong partial at confidence 100
+  (`EV-P5-SESSION-REJECTION-242`): `TypeError`, no normal return, unchanged `["diff A"]` state, and
+  rejection-before-append causality were correct. Correct “record never executes” to “record enters
+  and raises before mutation,” supply the snapshot returned by a later handled-error history call,
+  and choose an exact stable message before implementation.
+- The concise completion was partial at confidence 80 (`EV-P5-SESSION-REJECTION-COMPLETION-243`):
+  method entry/raise and fixed message `"must be a string"` were correct, but `None` was incorrectly
+  transferred from `record` to a later `history()` call. Descend to one direct `list(...)` result,
+  then a tiny snapshot method, before returning to Session.
+- The direct-copy micro-check produced the correct conceptual question
+  (`EV-P5-HISTORY-COPY-MICRO-244`): a later list operation returns a copy of the state that existed
+  before rejection. Clarify that rejection preserves state while the later call creates the copy;
+  exact value/type/identity terminology is next.
+- The copied snapshot type and distinct identity passed at confidence 100
+  (`EV-P5-HISTORY-COPY-IDENTITY-245`); only the exact contents `["diff A"]` were omitted. Request
+  that one value, then return directly to Session history after rejection.
+- The exact copied-list value was recovered at confidence 100 (`EV-P5-HISTORY-COPY-EXACT-246`):
+  `["diff A"]`, with distinct identity from stored. Return now to the single Session history field.
+- The returned Session history field passed at confidence 100 (`EV-P5-SESSION-HISTORY-247`): after
+  invalid input is rejected before mutation, `history()` returns a distinct `list` with exact value
+  `["diff A"]`. The pre-implementation rejection/state gate is complete; the approved focused
+  Session patch may begin.
+- The implemented Session valid-write/rejected-write/snapshot path passed at confidence 100
+  (`EV-P5-SESSION-POSTPATCH-TRACE-249`): exact return/error behavior, unchanged internal state,
+  mutated snapshot, fresh history, and distinct identity were traced correctly. Require the concise
+  annotation-versus-runtime-validation explanation next, followed by a fresh transfer.
+- The annotation-versus-runtime-validation explanation passed at confidence 100
+  (`EV-P5-ANNOTATION-VALIDATION-250`): annotations communicate but do not enforce here; the
+  `isinstance` branch raises, and without it an integer would append. One fresh different-surface
+  transfer remains before Phase 5 completion can be evaluated.
+- The RetryPolicy transfer was unreadable (`EV-P5-RETRY-TRANSFER-251`) because the complete class
+  introduced unfamiliar syntax at once. Syntax-only help is active at R0 for the annotated instance
+  collection line `self._limits: list[int] = []`; do not solve the transfer yet.
+- The annotated instance-list concept was read correctly at confidence 80
+  (`EV-P5-INSTANCE-LIST-SYNTAX-252`): instance ownership, intended element type, and empty-list
+  allocation were identified. Refine `_limits` as the attribute name, then use one fresh same-form
+  line before rebuilding the transfer.
+- The fresh `_labels: list[str] = []` read passed at confidence 90
+  (`EV-P5-INSTANCE-LIST-FRESH-253`): attribute, element intent, actual list allocation, and absent
+  runtime enforcement were all correct. Isolate the `-> list[int]` return annotation next.
+- The return-arrow read was partial (`EV-P5-RETURN-ANNOTATION-254`): lack of automatic runtime
+  enforcement was recognized, but the annotation was called functionally meaningless. Require the
+  narrower distinction: it communicates/supports tooling but does not automatically enforce.
+- The communication role was supplied (`EV-P5-RETURN-ANNOTATION-COMMUNICATION-255`), but the
+  automatic-enforcement field was omitted. Ask one yes/no wrong-return counterexample.
+- The wrong-return counterexample passed at confidence 90 (`EV-P5-RETURN-ANNOTATION-FRESH-256`):
+  ordinary Python returns `"oops"` despite `-> list[int]`. Return-annotation syntax is recovered;
+  rebuild RetryPolicy one method contract at a time before the full transfer trace.
+- The RetryPolicy method-contract rebuild passed at confidence 90 (`EV-P5-RETRY-METHODS-257`):
+  initialization, integer intent, runtime validation, and copied return were correct. Use `_limits`
+  for the internal attribute and `limits()` for the public method. Resume the original composed trace.
+- The resumed RetryPolicy transfer passed at confidence 100
+  (`EV-P5-RETRY-TRANSFER-COMPLETE-258`): exact valid/rejected behavior, unchanged internal state,
+  snapshot mutation isolation, absent annotation enforcement, and the shared Session principles were
+  all correct. The learner identified the obstacle as syntax rather than the underlying model.
 
 Do not mark these concepts permanently mastered after one review sequence.
 
@@ -351,89 +430,58 @@ The Phase 0–2 foundation counter was reset on 2026-08-29 after four formal cum
 passed with remediation where needed.
 
 Phases 3 and 4 now count as 2/3 toward the next foundation checkpoint. The next foundation review
-triggers after Phase 5 before substantial Phase 6 work.
+triggered after Phase 5. Phases 3, 4, and 5 now count as 3/3; the cumulative foundation review is
+due now and must complete before substantial Phase 6 work. Reset this counter only after that review
+passes.
 
 The major/deep Phase 7–15 counter has not started.
 
 ## Open interaction and exact next step
 
-Phase 5 contract audit and different-surface transfer are complete after remediation. The concrete
-ambiguity is established: the module intends diff-text strings, while `record` currently accepts any
-Python object and public mutable `changes` bypasses the method boundary. The learner approved a
-supported-path string-only invariant. A product patch is justified but has not been authorized or
-written.
-
-Do not repeat the completed Session audit, implicit-return remediation, or TemperatureLog transfer.
-If implementation is authorized, first run the required pre-patch prediction for invalid input,
-error type, unchanged state after rejection, internal storage, and snapshot behavior.
-
-The learner requested another pause while adaptive exception remediation was in progress. Resume at
-the exact unanswered `items = ["A"]`, `value = 7` rejection-before-mutation trace preserved in the
-Learning Ledger. Do not repeat the completed contract audit or completed raise-syntax work, and do
-not write product code before the learner rebuilds to and passes the Session rejection prediction.
-
-Continue Phase 5 as an intent/contract audit, not an automatic code patch:
+Phase 5 is complete. Do not add more product code automatically. Start the required cumulative
+foundation review covering Phases 3–5, with approximately 4–7 questions and adaptive remediation.
+Prioritize:
 
 ```text
-inspect the contracts already expressed by classify.py, summarize.py, and session.py
-→ identify what values/types cross each module boundary
-→ distinguish documentation/type hints from runtime validation
-→ identify one concrete contract ambiguity or explicitly conclude no patch is earned yet
+state identity and snapshots
+cross-module dependency/value flow
+contracts: annotation versus runtime validation
+rejection-before-mutation
+evidence-based architecture timing
 ```
 
-Completed Phase 5 evidence now establishes:
+Record every cumulative answer with exercise type `CUMULATIVE_RETRIEVAL`. Adapt down after an
+incorrect answer and do not begin Phase 6 until the review is complete and the counter is reset.
 
-```text
-documented contract excludes the integer
-→ docstring does not enforce
-→ no explicit validation exists
-→ integer lacks startswith
-→ AttributeError stops execution before fallback else
+Cumulative progress: question 1 passed (`EV-CUM-FND-260`) at confidence 90. Next: cross-module
+caller/callee value flow.
 
-summarize_diff local line: str
-→ classify_diff_line
-→ label: str
-→ local integer accumulator
-→ final DiffSummary record
-```
+Cumulative question 2 was partial at confidence 90 (`EV-CUM-FND-261`): dependency direction and
+final count were correct, but the middle call/returned labels were omitted and the classifier was
+incorrectly said to mutate the caller-local accumulator. Descend to one call plus one caller branch;
+do not advance the cumulative review until direct mutation versus returned-data influence recovers.
 
-Resume by rebuilding the existing `Session.record(diff_text)` and `Session.history()` audit from a
-one-concept snapshot trace:
+The omitted original return sequence was repaired in `EV-CUM-FND-261A` as urgent/normal/urgent.
+The direct-mutation blocker remains open; continue the reduced one-call trace.
 
-```text
-exact input value/type
-→ state mutation or non-mutation
-→ exact output value/type
-→ documented assumption
-→ explicit runtime validation, if any
-```
+The reduced trace wording was initially interpreted as a same-named-local misconception
+(`EV-CUM-FND-261B`), but the learner clarified that they knew such direct access was impossible
+(`EV-CUM-FND-261C`). Do not run the basic scope descent. Require one precise sentence describing the
+actual return → caller branch → caller-local mutation chain, then restore/close question 2.
 
-The first target attempt correctly distinguished separate list objects, predicted instance mutation
-from both `"diff A"` and `42`, and proposed validation. It also attributed the locally appended
-snapshot element to a later fresh history result and omitted exact method return values/types and
-the explicit-validation audit. The reduced snapshot-source trace and its near-transfer with an
-intervening real state mutation were then correct at confidence 100. A fresh target attempt
-preserved that model but left the `record` result between `None` and an unspecified "empty" value,
-then committed only to "empty" without naming a Python value or type. Descend to one R1
-implicit-return check, use a near-transfer, return to the target audit, and finish with one
-different-surface transfer. Do not add type hints or validation before the learner completes that
-sequence and defends intended behavior.
-
-Phase 4 confirmed that no restructure is earned. Do not revisit that decision or manufacture a
-package/file move during Phase 5 without new evidence.
-
-If a Phase 5 contract patch becomes justified, first state the required pre-patch block from
-`AGENTS.md` and run the implementation-adjacent prediction/transfer loop.
+The reduced causal distinction was recovered at confidence 100 (`EV-CUM-FND-261D`): the callee
+returns data, the caller reads it, and the callee does not directly mutate caller-local state. The
+required fresh target-level R6 return remains open. The learner paused to relocate; resume there.
 
 ## Session-close fields
 
 ```text
-phase                       Phase 5 contract audit in progress
-last knowledge gate         EV-P5-SESSION-CONTRACT-232, approved at confidence 90
-next retrieval due          pre-implementation invalid-input/error/state prediction
+phase                       Phase 5 complete; cumulative foundation review in progress
+last knowledge gate         EV-CUM-FND-261D, reduced remediation passed at confidence 100
+next retrieval due          fresh target-level return for cumulative question 2
 next architecture reset     complete; next by time or major transition
-next implementation step    run prediction gate, then implement approved Session string-invariant patch
-last published commit       Phase 5 pre-implementation handoff commit on current Git main
+next implementation step    none until cumulative review passes; then specify Phase 6
+last published commit       current handoff — feat: enforce Session string contract
 ```
 
 Files the learner should currently be able to teach:
