@@ -212,6 +212,31 @@ Still uncertain or due for later retrieval:
   (`EV-P5-SESSION-CONTRACT-198`); the R2 snapshot-source micro-example passed at confidence 100
   (`EV-P5-SESSION-SNAPSHOT-199`), and the intervening-state-mutation near-transfer passed at
   confidence 100 (`EV-P5-SESSION-NEAR-TRANSFER-200`). Return-value/type recovery remains open.
+- The fresh full Session audit remained partial (`EV-P5-SESSION-CONTRACT-201`): instance mutation
+  and snapshot identity were correct, while implicit return, exact types, assumptions, and validation
+  remain open.
+- The first exact implicit-return choice was `""` and was incorrect (`EV-P5-RETURN-202`). Remediation
+  descended to R0; after a second incorrect guess of `[]`, explicit `return []` syntax was traced
+  correctly at confidence 90 (`EV-P5-RETURN-SYNTAX-203`). A fresh no-return function is next.
+- The fresh no-return function was described as a blank at confidence 20
+  (`EV-P5-IMPLICIT-RETURN-204`). After repeated difficulty, worked-example rescue is active:
+  `None` / `NoneType` has been modeled and must now be explained, partially completed, and retrieved
+  in a fresh example.
+- The learner explained the worked example correctly at confidence 90
+  (`EV-P5-IMPLICIT-EXPLAIN-205`), distinguishing `None` from string/list values. One missing-step
+  completion is next before fresh unaided retrieval.
+- The missing-step mutation example was completed correctly at confidence 90
+  (`EV-P5-IMPLICIT-PARTIAL-206`): the learner supplied `None` and `NoneType`. Fresh unaided
+  retrieval is next.
+- Fresh unaided retrieval with list mutation passed at confidence 100
+  (`EV-P5-IMPLICIT-FRESH-207`): mutation and implicit `None` / `NoneType` were separated correctly.
+  Near-transfer to `Session.record` is next.
+- The `Session.record("diff Z")` near-transfer produced the correct state, `None`, and `NoneType` at
+  confidence 90 (`EV-P5-RECORD-RETURN-208`); the requested causal explanation was omitted and needs
+  one concise completion.
+- The causal explanation was completed correctly at confidence 90 (`EV-P5-RECORD-EXPLAIN-209`),
+  closing implicit-return remediation. The learner additionally called `record` more secure because
+  it uses `self`; method encapsulation versus actual validation/access control is now isolated.
 
 Do not mark these concepts permanently mastered after one review sequence.
 
@@ -231,6 +256,10 @@ Phase 5 remains open in adaptive remediation for the `Session.record` / `Session
 audit. The learner identified a concrete candidate ambiguity—`record` documents diff text while the
 current runtime path appears to accept an integer—but no product patch is authorized until the
 full contract trace and different-surface transfer are complete.
+
+The session is paused for lunch after `EV-P5-RECORD-EXPLAIN-209`. Resume with one exact runtime
+comparison between `session.record(7)` and `session.changes.append(7)` to test whether the method
+currently supplies validation or access control. Do not repeat the implicit-return remediation.
 
 Continue Phase 5 as an intent/contract audit, not an automatic code patch:
 
@@ -272,9 +301,12 @@ The first target attempt correctly distinguished separate list objects, predicte
 from both `"diff A"` and `42`, and proposed validation. It also attributed the locally appended
 snapshot element to a later fresh history result and omitted exact method return values/types and
 the explicit-validation audit. The reduced snapshot-source trace and its near-transfer with an
-intervening real state mutation were then correct at confidence 100. On resume, return to a fresh
-target-level audit and finish with one different-surface transfer. Do not add type hints or
-validation before the learner completes that sequence and defends intended behavior.
+intervening real state mutation were then correct at confidence 100. A fresh target attempt
+preserved that model but left the `record` result between `None` and an unspecified "empty" value,
+then committed only to "empty" without naming a Python value or type. Descend to one R1
+implicit-return check, use a near-transfer, return to the target audit, and finish with one
+different-surface transfer. Do not add type hints or validation before the learner completes that
+sequence and defends intended behavior.
 
 Phase 4 confirmed that no restructure is earned. Do not revisit that decision or manufacture a
 package/file move during Phase 5 without new evidence.
@@ -286,11 +318,11 @@ If a Phase 5 contract patch becomes justified, first state the required pre-patc
 
 ```text
 phase                       Phase 5 contract audit in progress
-last knowledge gate         EV-P5-SESSION-NEAR-TRANSFER-200, correct at confidence 100
-next retrieval due          fresh full Session.record/history contract audit
+last knowledge gate         EV-P5-RECORD-EXPLAIN-209, return explanation correct at confidence 90
+next retrieval due          record method versus public-list append validation comparison
 next architecture reset     complete; next by time or major transition
 next implementation step    none until the Phase 5 audit finds an earned contract change
-last published commit       Phase 5 pause-state commit on current Git main
+last published commit       Phase 5 lunch-pause commit on current Git main
 ```
 
 Files the learner should currently be able to teach:

@@ -19178,3 +19178,754 @@ Learner requested push and pause. Phase 5 remains open. No product patch, type h
 contract decision has been made. Resume with exact `record` return value/type, `history` input and
 output type, documented assumptions, actual explicit validation, then the different-surface
 transfer and contract decision.
+
+---
+
+## EV-P5-SESSION-CONTRACT-201
+
+DATE: 2026-08-31
+
+BUILD PHASE:
+Phase 5 — Explicit Interfaces / Contracts
+
+IMPLEMENTATION TRIGGER:
+Fresh target-level return to the `Session.record(diff_text)` / `Session.history()` audit after the
+snapshot-source remediation chain.
+
+ACADEMIC SOURCE:
+`MIT-6102-2026`; `PY-TYPING`
+
+DEEP SKILL:
+State exact interface values and types while distinguishing mutation, implicit return, documented
+assumptions, and explicit runtime validation.
+
+EXERCISE TYPE:
+CONTRACT_TRACE
+
+SCAFFOLD RUNG:
+R5 target; remediation descends to R1.
+
+PROMPT (verbatim):
+Welcome back. We resume Phase 5 with the fresh full contract audit—no code change yet.
+
+Without running it:
+
+```python
+session = Session()
+
+record_result_1 = session.record("diff C")
+record_result_2 = session.record(7)
+history_result = session.history()
+```
+
+State exactly:
+
+- Values and types of `record_result_1` and `record_result_2`
+- Final value and type of `session.changes`
+- Value and type of `history_result`
+- Documented input assumption for `record`
+- Whether `record` actually validates that assumption
+- Input required by `history`
+- Whether `history` validates stored elements
+- Whether the proposed integer-validation ambiguity still exists
+
+Confidence: 0–100.
+
+LEARNER FIRST COMMITTED ANSWER (verbatim):
+session instance created, then diff c is appended to that instace, then 7 is appended to that sintance and history is pointed at a copy not the same list as the instance, instnace and hisresult have the same contents but they are 2 different list objects,  record results are both None or empy i am not sure, 70
+
+FOLLOW-UP COMMITMENT (verbatim):
+i am leaning towards empty
+
+CONFIDENCE:
+70
+
+HELP / TOOLS BEFORE COMMITMENT:
+None reported; learner predicted without running the code.
+
+EVALUATION:
+Partial at confidence 70. The learner correctly traces construction, both instance mutations, equal
+list contents, and distinct list identities for instance state and the history snapshot. The answer
+does not commit to an exact Python value and type for the `record` result: the follow-up chooses
+"empty" but does not distinguish an empty string, empty list, another empty container, or `None`.
+Exact types, documented assumptions, explicit-validation findings, and the ambiguity decision were
+not supplied.
+
+PRIMARY BLOCKER:
+IMPLICIT_RETURN_VALUE — distinguishing Python's result for a function that reaches its end without
+`return` from empty strings or empty containers.
+
+RESULT:
+partial; remediation open
+
+MISCONCEPTION:
+none_value_conflated_with_unspecified_empty_value
+
+REMEDIATION CHAIN:
+fresh target partial → R1 implicit-return check → near-transfer with mutation → restored target
+contract audit → different-surface transfer
+
+TRANSFER STATUS:
+pending
+---
+
+## EV-P5-RETURN-202
+
+DATE: 2026-08-31
+
+BUILD PHASE:
+Phase 5 — Explicit Interfaces / Contracts
+
+IMPLEMENTATION TRIGGER:
+Remediate the implicit-return blocker from `EV-P5-SESSION-CONTRACT-201`.
+
+ACADEMIC SOURCE:
+`PY-CONTROLFLOW-FUNCTIONS`; `MIT-6102-2026`
+
+DEEP SKILL:
+Distinguish an explicitly returned empty string from the result of reaching a function's end without
+an executed `return` statement.
+
+EXERCISE TYPE:
+SYNTAX_REMEDIATION
+
+SCAFFOLD RUNG:
+R1 attempted; descend to R0 after the incorrect exact choice.
+
+INITIAL MICRO-PROMPT (verbatim):
+Micro-check—only the return concept:
+
+```python
+box = []
+
+def store(value):
+    box.append(value)
+
+result = store("A")
+```
+
+Without running it:
+
+```text
+box =
+result =
+type of result =
+```
+
+What exact line inside `store` determines the call’s result? If there is no such line, say that explicitly.
+
+Confidence: 0–100.
+
+LEARNER RESPONSE (verbatim):
+so can you tell me what the record would have returned becasue that is the only grey area,
+
+SCAFFOLDED EXACT-CHOICE PROMPT (verbatim):
+Yes—that is the only unresolved part. But “empty” could mean several different Python values, so commit to one exact choice first:
+
+```text
+None
+""
+[]
+"A"
+an error
+```
+
+Which does `record(...)` return? Then I’ll immediately confirm or correct it.
+
+LEARNER FIRST EXACT COMMITMENT (verbatim):
+""
+
+CONFIDENCE:
+not supplied
+
+HELP / TOOLS BEFORE COMMITMENT:
+Five explicit candidate values were supplied after the learner requested the answer; no execution
+or answer key was provided.
+
+EVALUATION:
+Incorrect. `""` is an exact empty-string value, but the function body contains no executed
+`return ""` statement. The exact result remains withheld while remediation descends to the syntax
+prerequisite.
+
+PRIMARY BLOCKER:
+RETURN_SYNTAX — treating mutation with no `return` as if it explicitly returned an empty string.
+
+RESULT:
+incorrect; remediation open
+
+MISCONCEPTION:
+no_return_assumed_to_return_empty_string
+
+REMEDIATION CHAIN:
+R1 implicit-return miss → R0 explicit `return ""` syntax → R1 fresh no-return function →
+near-transfer with mutation → restored Session contract audit
+
+TRANSFER STATUS:
+pending
+
+SECOND EXACT GUESS (verbatim):
+my second guess would be []
+
+SECOND-GUESS EVALUATION:
+Incorrect. An empty list would require an executed `return []`; the target function has no such
+statement. Remediation remained at R0 explicit-return syntax.
+
+---
+
+## EV-P5-RETURN-SYNTAX-203
+
+DATE: 2026-08-31
+
+BUILD PHASE:
+Phase 5 — Explicit Interfaces / Contracts
+
+IMPLEMENTATION TRIGGER:
+R0 syntax remediation after two incorrect implicit-return guesses in `EV-P5-RETURN-202`.
+
+ACADEMIC SOURCE:
+`PY-CONTROLFLOW-FUNCTIONS`
+
+DEEP SKILL:
+Read an executed `return` statement as the source of a function call's value.
+
+EXERCISE TYPE:
+SYNTAX_REMEDIATION
+
+SCAFFOLD RUNG:
+R0 — read one explicit return form.
+
+PROMPT (verbatim):
+`[]` is also incorrect. That value would require an executed statement such as `return []`.
+
+Syntax-only check:
+
+```python
+def give_empty_list():
+    return []
+
+result = give_empty_list()
+```
+
+What are the exact value and type of `result`, and which line causes that result?
+
+Confidence: 0–100.
+
+LEARNER FIRST COMMITTED ANSWER (verbatim):
+result would return [] becasue that is what giveemptylistreturns , 90
+
+CONFIDENCE:
+90
+
+HELP / TOOLS BEFORE COMMITMENT:
+The prompt explicitly contrasted the prior guess with `return []`; no execution was used.
+
+EVALUATION:
+Correct at confidence 90. The call evaluates to the empty list `[]`, of type `list`, because the
+executed `return []` statement supplies that exact value. The type was implicit rather than named,
+but the representation and causal return line were correct.
+
+RESULT:
+correct
+
+PRIMARY BLOCKER:
+none on explicit-return syntax
+
+REMEDIATION STATUS:
+R0 recovered once; climb to a fresh R1 no-return function
+
+PARENT EVIDENCE ID:
+EV-P5-RETURN-202
+
+TRANSFER STATUS:
+pending
+
+---
+
+## EV-P5-IMPLICIT-RETURN-204
+
+DATE: 2026-08-31
+
+BUILD PHASE:
+Phase 5 — Explicit Interfaces / Contracts
+
+IMPLEMENTATION TRIGGER:
+Fresh R1 no-return retrieval after explicit-return syntax recovery in
+`EV-P5-RETURN-SYNTAX-203`.
+
+ACADEMIC SOURCE:
+`PY-CONTROLFLOW-FUNCTIONS`; `CMU-WORKED-EXAMPLES`
+
+DEEP SKILL:
+Represent the exact value and type produced when execution reaches the end of a Python function
+without an executed `return` statement.
+
+EXERCISE TYPE:
+IMPLICIT_RETURN_REMEDIATION
+
+SCAFFOLD RUNG:
+R1 attempted; worked-example rescue activated after repeated difficulty.
+
+PROMPT (verbatim):
+Now the fresh no-return case:
+
+```python
+def do_nothing():
+    pass
+
+result = do_nothing()
+```
+
+There is no `return` statement.
+
+Give the exact:
+
+```text
+result =
+type of result =
+```
+
+Confidence: 0–100.
+
+LEARNER FIRST COMMITTED ANSWER (verbatim):
+it returns nothing: liek a blank, 20
+
+CONFIDENCE:
+20
+
+HELP / TOOLS BEFORE COMMITMENT:
+The prompt explicitly stated that no `return` statement exists. No execution was used.
+
+EVALUATION:
+Incorrect at confidence 20. Python does not use an untyped blank value. When execution reaches the
+end of a function without an executed `return`, the call evaluates to the specific value `None`,
+whose type is `NoneType`. `None` is distinct from `""` and `[]`.
+
+PRIMARY BLOCKER:
+NONE_REPRESENTATION — “returns nothing” is understood informally but not yet represented as the
+specific Python value `None` and type `NoneType`.
+
+WORKED-EXAMPLE RESCUE:
+
+```python
+def pause():
+    pass
+
+outcome = pause()
+```
+
+Solved trace: `pause()` reaches the end without `return`; Python therefore makes the call's value
+`None`; assignment binds `outcome` to `None`; `type(outcome)` is `NoneType`.
+
+REQUIRED RECOVERY SEQUENCE:
+learner explains the solved steps → learner completes one missing step → learner solves a fresh
+no-return example unaided
+
+RESULT:
+incorrect; worked-example rescue open
+
+MISCONCEPTION:
+implicit_none_described_as_untyped_blank
+
+REMEDIATION CHAIN:
+fresh R1 miss → solved neighboring example → explain steps → partial example → fresh R1 →
+near-transfer with mutation → restored Session contract audit
+
+TRANSFER STATUS:
+pending
+---
+
+## EV-P5-IMPLICIT-EXPLAIN-205
+
+DATE: 2026-08-31
+
+BUILD PHASE:
+Phase 5 — Explicit Interfaces / Contracts
+
+IMPLEMENTATION TRIGGER:
+Learner explanation step of the worked-example rescue opened in `EV-P5-IMPLICIT-RETURN-204`.
+
+ACADEMIC SOURCE:
+`PY-CONTROLFLOW-FUNCTIONS`; `CMU-WORKED-EXAMPLES`
+
+DEEP SKILL:
+Explain why implicit `None` is distinct from an empty string or empty list.
+
+EXERCISE TYPE:
+WORKED_EXAMPLE_EXPLAIN
+
+SCAFFOLD RUNG:
+R1 with the solved trace visible.
+
+PROMPT (verbatim):
+The exact answer is:
+
+```text
+result = None
+type of result = NoneType
+```
+
+`None` is Python’s specific value for “no value was explicitly returned.” It is not a blank, `""`, or `[]`.
+
+Solved neighboring example:
+
+```python
+def pause():
+    pass
+
+outcome = pause()
+```
+
+Trace:
+
+```text
+pause() reaches the end without return
+→ the call’s value is None
+→ outcome is assigned None
+→ type(outcome) is NoneType
+```
+
+Now explain those steps back in your own words. Why is `outcome` `None` rather than `""` or `[]`?
+
+LEARNER FIRST COMMITTED ANSWER (verbatim):
+it is None becaue it is a none type if you had "" or [] it would be a list or string and that is something,90
+
+CONFIDENCE:
+90
+
+HELP / TOOLS BEFORE COMMITMENT:
+The full solved trace and exact value/type were provided as the worked-example rescue.
+
+EVALUATION:
+Correct at confidence 90. The learner distinguishes `None` from an empty string and empty list,
+correctly recognizing the latter as actual string/list values. Causal wording needs refinement:
+reaching the end without an executed `return` produces `None`; `NoneType` is then the type of that
+value, rather than the type causing the value.
+
+RESULT:
+correct with wording refinement
+
+PRIMARY BLOCKER:
+none; causal direction refined
+
+REMEDIATION STATUS:
+worked example explained; one missing-step completion required next
+
+PARENT EVIDENCE ID:
+EV-P5-IMPLICIT-RETURN-204
+
+TRANSFER STATUS:
+pending
+
+---
+
+## EV-P5-IMPLICIT-PARTIAL-206
+
+DATE: 2026-08-31
+
+BUILD PHASE:
+Phase 5 — Explicit Interfaces / Contracts
+
+IMPLEMENTATION TRIGGER:
+Missing-step completion in the worked-example rescue after `EV-P5-IMPLICIT-EXPLAIN-205`.
+
+ACADEMIC SOURCE:
+`PY-CONTROLFLOW-FUNCTIONS`; `CMU-WORKED-EXAMPLES`
+
+DEEP SKILL:
+Supply the implicit return value and type while a separate list mutation is already given.
+
+EXERCISE TYPE:
+WORKED_EXAMPLE_PARTIAL
+
+SCAFFOLD RUNG:
+R1 — one missing result/type step.
+
+PROMPT (verbatim):
+Complete only the missing result:
+
+```python
+items = []
+
+def save(item):
+    items.append(item)
+
+result = save("A")
+```
+
+Given:
+
+```text
+items = ["A"]
+```
+
+Fill in:
+
+```text
+result =
+type of result =
+```
+
+State the reason in one sentence. Confidence: 0–100.
+
+LEARNER FIRST COMMITTED ANSWER (verbatim):
+result = None, 90
+Nonetype
+
+CONFIDENCE:
+90
+
+HELP / TOOLS BEFORE COMMITMENT:
+The mutated list value was supplied, and the preceding worked example exposed the implicit-return
+rule.
+
+EVALUATION:
+Correct at confidence 90. The learner supplies exact value `None` and type `NoneType`. The requested
+reason was omitted, but the value/type retrieval is the single missing step targeted by this stage.
+
+RESULT:
+correct
+
+PRIMARY BLOCKER:
+none observed
+
+REMEDIATION STATUS:
+missing-step completion passed; fresh unaided example required next
+
+PARENT EVIDENCE ID:
+EV-P5-IMPLICIT-EXPLAIN-205
+
+TRANSFER STATUS:
+pending
+
+---
+
+## EV-P5-IMPLICIT-FRESH-207
+
+DATE: 2026-08-31
+
+BUILD PHASE:
+Phase 5 — Explicit Interfaces / Contracts
+
+IMPLEMENTATION TRIGGER:
+Fresh unaided retrieval after the worked-example explanation and missing-step completion.
+
+ACADEMIC SOURCE:
+`PY-CONTROLFLOW-FUNCTIONS`; `CMU-WORKED-EXAMPLES`
+
+DEEP SKILL:
+Independently separate a mutation side effect from a function call's implicit `None` result.
+
+EXERCISE TYPE:
+IMPLICIT_RETURN_FRESH_RETRIEVAL
+
+SCAFFOLD RUNG:
+R2 — one function call with one mutation and implicit return.
+
+PROMPT (verbatim):
+Fresh example—solve unaided:
+
+```python
+events = []
+
+def log_event(event):
+    events.append(event)
+
+receipt = log_event("started")
+```
+
+Give the exact final:
+
+```text
+events =
+receipt =
+type of receipt =
+```
+
+Then explain in one sentence why the mutation and return value differ.
+
+Confidence: 0–100.
+
+LEARNER FIRST COMMITTED ANSWER (verbatim):
+events = [started]
+recipt= None
+None type , 100
+
+CONFIDENCE:
+100
+
+HELP / TOOLS BEFORE COMMITMENT:
+No answer fields were prefilled. The implicit-return rule had been modeled and practiced in the
+preceding remediation chain.
+
+EVALUATION:
+Correct at confidence 100. Interpreting `started` as the string element `"started"`, the learner
+correctly gives mutated state `["started"]`, call result `None`, and type `NoneType`. The requested
+causal sentence was omitted, but the values themselves demonstrate separation of mutation from
+return; the causal rule was stated correctly in the preceding explanation stage.
+
+RESULT:
+correct
+
+PRIMARY BLOCKER:
+none observed
+
+REMEDIATION STATUS:
+fresh independent retrieval passed; near-transfer to `Session.record` required next
+
+PARENT EVIDENCE ID:
+EV-P5-IMPLICIT-PARTIAL-206
+
+TRANSFER STATUS:
+pending near-transfer
+
+---
+
+## EV-P5-RECORD-RETURN-208
+
+DATE: 2026-08-31
+
+BUILD PHASE:
+Phase 5 — Explicit Interfaces / Contracts
+
+IMPLEMENTATION TRIGGER:
+Near-transfer the recovered implicit-return model back to BuildLens `Session.record`.
+
+ACADEMIC SOURCE:
+`PY-CONTROLFLOW-FUNCTIONS`; `MIT-6102-2026`
+
+DEEP SKILL:
+Separate `Session.record`'s instance-state mutation from its implicit call result.
+
+EXERCISE TYPE:
+BUILDLENS_NEAR_TRANSFER
+
+SCAFFOLD RUNG:
+R3 — one object method call, one mutation, and implicit return.
+
+PROMPT (verbatim):
+Near-transfer back to BuildLens:
+
+```python
+session = Session()
+record_result = session.record("diff Z")
+```
+
+Give the exact:
+
+```text
+session.changes =
+record_result =
+type of record_result =
+```
+
+Then state:
+
+- Which line inside `record` mutates state?
+- Why doesn’t that mutation become the return value?
+
+Confidence: 0–100.
+
+LEARNER FIRST COMMITTED ANSWER (verbatim):
+[diff Z]
+None
+Nonetype, 90
+
+CONFIDENCE:
+90
+
+HELP / TOOLS BEFORE COMMITMENT:
+No answer fields were prefilled. The generic implicit-return remediation chain had just passed.
+
+EVALUATION:
+Strong partial at confidence 90. The learner correctly gives instance state `["diff Z"]`, call
+result `None`, and type `NoneType`. The two requested causal points were omitted: the mutation line
+and why mutation does not define the call's return value.
+
+RESULT:
+partial; concise completion open
+
+PRIMARY BLOCKER:
+none conceptual established; explanation fields omitted
+
+REMEDIATION STATUS:
+values/types recovered at target boundary; require one-sentence causal completion
+
+PARENT EVIDENCE ID:
+EV-P5-IMPLICIT-FRESH-207
+
+TRANSFER STATUS:
+near-transfer pending concise completion
+
+---
+
+## EV-P5-RECORD-EXPLAIN-209
+
+DATE: 2026-08-31
+
+BUILD PHASE:
+Phase 5 — Explicit Interfaces / Contracts
+
+IMPLEMENTATION TRIGGER:
+Concise causal completion for the `Session.record` near-transfer in
+`EV-P5-RECORD-RETURN-208`.
+
+ACADEMIC SOURCE:
+`PY-CONTROLFLOW-FUNCTIONS`; `MIT-6102-2026`
+
+DEEP SKILL:
+Explain why an instance-state mutation and a method call's return value are independent behaviors.
+
+EXERCISE TYPE:
+BUILDLENS_EXPLAIN
+
+SCAFFOLD RUNG:
+R3 concise completion.
+
+PROMPT (verbatim):
+Complete this one sentence:
+
+> `self.changes.append(diff_text)` ________, while `record(...)` evaluates to `None` because ________.
+
+No confidence update needed unless yours changed.
+
+LEARNER FIRST COMMITTED ANSWER (verbatim):
+appends difftext to the end of slef changes while returning None, it has no return statment, the big difference is that when we do record it is a more secure verson of just doing append becauet it only runs on self, but you can append any list. 90
+
+CONFIDENCE:
+90
+
+HELP / TOOLS BEFORE COMMITMENT:
+A sentence frame named the mutation expression and the `None` result; the learner supplied their
+relationship and an additional security claim.
+
+EVALUATION:
+The required explanation is correct at confidence 90: `self.changes.append(diff_text)` mutates the
+instance-owned list, while the method evaluates to `None` because it has no executed `return`.
+The added statement that `record` is “more secure” merely because it operates through `self` is not
+supported by current code. `changes` is public, and the method currently contains no type check or
+other validation. Isolate this claim before the restored contract audit.
+
+RESULT:
+return explanation correct; new validation/access-control claim requires audit
+
+PRIMARY BLOCKER:
+ENCAPSULATION_VS_ENFORCEMENT — assuming a method boundary or use of `self` itself supplies security
+or validation.
+
+REMEDIATION STATUS:
+implicit-return chain recovered through fresh and BuildLens near-transfer; compare method call with
+direct public-list append next
+
+PARENT EVIDENCE ID:
+EV-P5-RECORD-RETURN-208
+
+TRANSFER STATUS:
+implicit-return near-transfer complete; contract enforcement audit remains open
+
+SESSION PAUSE — 2026-08-31:
+Learner said: `ok that is lunch can you commit and push and then pause`
+
+No product code, validation, type hint, or contract decision was made. Resume with a prediction of
+the exact runtime result and final state for `session.record(7)` versus
+`session.changes.append(7)`. Then restore the full `Session.record` / `Session.history` contract
+audit and finish the required different-surface transfer before proposing any product patch.
