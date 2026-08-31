@@ -429,18 +429,30 @@ Do not mark these concepts permanently mastered after one review sequence.
 The Phase 0–2 foundation counter was reset on 2026-08-29 after four formal cumulative questions
 passed with remediation where needed.
 
-Phases 3 and 4 now count as 2/3 toward the next foundation checkpoint. The next foundation review
-triggered after Phase 5. Phases 3, 4, and 5 now count as 3/3; the cumulative foundation review is
-due now and must complete before substantial Phase 6 work. Reset this counter only after that review
-passes.
+The Phase 3-5 foundation counter reached 3/3, the review ran on 2026-08-31, all five questions
+passed, and the counter is now RESET as of 2026-08-31. It stands at 0/3; Phase 6 will count as 1/3.
 
 The major/deep Phase 7–15 counter has not started.
 
 ## Open interaction and exact next step
 
-Phase 5 is complete. Do not add more product code automatically. Start the required cumulative
-foundation review covering Phases 3–5, with approximately 4–7 questions and adaptive remediation.
-Prioritize:
+Phase 5 is complete and the cumulative foundation review is complete with the counter reset. There
+is no blocking gate outstanding.
+
+Next step is Phase 6 SPECIFICATION and intent work - not automatic CLI implementation. Before any
+Phase 6 patch, read that phase's `### Adjacent learning triggered here` section and state the
+pre-patch block required by `CLAUDE.md`.
+
+Standing instructions carried out of the review:
+
+```text
+state code in full when asking for a verdict on it; never describe an edit only in prose
+narrow the prompt rather than lowering the rung when reflective fields get dropped
+do not re-target callee-return-versus-caller-mutation; the learner asked, and it passed at target
+watch the source-file versus in-memory-data terminology collision when specifying persistence
+```
+
+The completed review covered:
 
 ```text
 state identity and snapshots
@@ -450,8 +462,8 @@ rejection-before-mutation
 evidence-based architecture timing
 ```
 
-Record every cumulative answer with exercise type `CUMULATIVE_RETRIEVAL`. Adapt down after an
-incorrect answer and do not begin Phase 6 until the review is complete and the counter is reset.
+All five answers were recorded with exercise type `CUMULATIVE_RETRIEVAL`. See the review summary
+block at the end of `learning/LEARNING_LEDGER.md` for the cross-cutting findings.
 
 Cumulative progress: question 1 passed (`EV-CUM-FND-260`) at confidence 90. Next: cross-module
 caller/callee value flow.
@@ -514,18 +526,23 @@ files) and a concrete deferral downside (nothing recorded in a `Session` survive
 Three fields are blocked and have no prior evidence record — reuse cost, the evidence that would
 justify persistence, and the reversal condition. Treat these as not-yet-taught, not forgotten.
 
-Resume at the file-copying micro-check with only the classify-alone and Session fields, then build
-reuse cost, justifying evidence, and reversal condition one at a time. Do not re-ask the deferral
-downside. Reset the foundation counter only after question 5 passes.
+Cumulative question 5 CLOSED (`EV-CUM-FND-266A`). All five fields satisfied, ending with an unaided
+reversal condition stated as retrofit cost: had `Session` already had many callers, deferring
+persistence would have been the wrong call. Two conceptual repairs held afterward - being imported
+by a module is not a dependency on it, and a reversal condition is about the cost of changing later
+rather than a restatement of the need. One terminology collision surfaced and was resolved: "file"
+as source code versus a `Session`'s in-memory data; watch for it when persistence is specified.
+
+THE CUMULATIVE FOUNDATION REVIEW IS COMPLETE. All five questions passed.
 
 ## Session-close fields
 
 ```text
 phase                       Phase 5 complete; cumulative foundation review in progress
-last knowledge gate         EV-CUM-FND-265, cumulative question 4 passed; Q5 open and paused
-next retrieval due          cumulative question 5 resume, file-copying rung, remaining two fields
+last knowledge gate         EV-CUM-FND-266A, cumulative review COMPLETE, all five passed
+next retrieval due          none blocking; next foundation checkpoint after Phase 8
 next architecture reset     complete; next by time or major transition
-next implementation step    none until cumulative review passes; then specify Phase 6
+next implementation step    Phase 6 specification and intent work; no code before the pre-patch gate
 last published commit       current handoff — feat: enforce Session string contract
 ```
 

@@ -25440,3 +25440,160 @@ Exact resume sequence:
 5. when question 5 passes, the review is complete: reset ONLY the Phase 3-5 foundation counter
 6. do not begin Phase 6 implementation before that reset
 ```
+
+---
+
+## EV-CUM-FND-266A
+
+DATE: 2026-08-31
+
+BUILD PHASE:
+Cumulative foundation review after Phase 5 — Question 5 resumed and closed
+
+ACADEMIC SOURCE:
+`SE-ARCH-EVIDENCE`; `DESIGN_REVIEW_RUBRIC`
+
+DEEP SKILL:
+Justify architecture timing from real code: dependency direction, reuse cost, justifying evidence,
+and a reversal condition expressed as cost of change rather than as restated need.
+
+EXERCISE TYPE:
+CUMULATIVE_RETRIEVAL
+
+SCAFFOLD RUNG:
+Resumed at the file-copying rung, climbed to unaided generation.
+
+SEQUENCE AND LEARNER FIRST COMMITTED ANSWERS (verbatim, in order):
+
+1. Remaining file-copying fields:
+   LEARNER: `. classify but i thought you would jsut need to import, session, 60`
+   Both correct: `classify.py` alone and `session.py` alone. The aside about importing is right —
+   the import is how it is used, but the file must be present.
+
+2. Reuse cost under a hypothetical `from session import Session` inside `summarize.py`:
+   LEARNER: `. summarize and classify, yes as long as you import it , no you need the dependedcies, summarize, 90`
+   Two of four correct. `classify_diff_line` still stands alone; `summarize.py` is the module that
+   got harder to reuse. Incorrect: `session.py` was said to need dependencies, and the copy list
+   omitted it.
+
+3. Direction micro-check:
+   LEARNER: `. no, no, yes, 100`
+   All correct. Being imported BY a module creates no dependency; only importing does.
+
+4. Climb back:
+   LEARNER: `. classify and sesion, you have other files it depends on so you have to copy over 3 files to use 1 of them, 90`
+   Correct, with the cost stated concretely: three files to use one.
+
+5. Persistence-trigger recognition, options A-E:
+   LEARNER: `. A, tell me about B, C,  E
+   D is not real, there is no archetctural reason for persistent memory to be here now , 40`
+   A, C, E correctly identified as evidence; D correctly rejected — a plan listing a future layer
+   is not evidence. B deferred to a question.
+
+6. B decided, after the term "file" was split into source files versus a Session's in-memory data
+   — the learner had conflated the two:
+   LEARNER: `. no, so it is not evidence yeah that was a little confusing but i understand now 90`
+   Correct. Project size does not affect whether a Session's data survives process exit.
+
+7. Unaided generation of the justifying condition:
+   LEARNER: `. i would need to have a need for the session to be saved past the runtime of the module,`
+   Correct and in the learner's own words.
+
+8. First reversal-condition attempt:
+   LEARNER: `. if we needed to save the sessions for some reason but we do not yet. 80`
+   Rejected as circular — it restates the trigger from step 7 rather than naming a condition that
+   would have made the deferral itself wrong.
+
+9. Reversal recognition, options A-D:
+   LEARNER: `. A
+   the irrelevant ones are the B,c,d, 80`
+   A correct. C incorrectly dismissed.
+
+10. C narrowed to caller count and edit cost:
+    LEARNER: `. one
+    ohhh i see so C is needed because once 30 modules call it you need to save the data so that you don't have to remake the data everytime you run the module
+    i see what you are saying i would like to build it in one class
+    yes
+    80`
+    Verdicts correct; the stated reason was still a need-trigger rather than a cost of change.
+
+11. Reason pinned:
+    LEARNER: `. you have to change a lot more modules 100`
+    Correct.
+
+12. Unaided target-level reversal condition:
+    LEARNER: `. if session was called by 4 or 5 other modules at that pooint persistence should be added, 90`
+    Correct. The condition is stated as accumulated retrofit cost: had `Session` already had many
+    callers when it was written, deferring would have been the wrong call, because the change would
+    then touch every caller instead of one class.
+
+EVALUATION:
+All five fields of question 5 are now satisfied across the original attempt and this remediation:
+import direction, reuse cost, justifying evidence, deferral downside, and reversal condition.
+
+Two conceptual repairs were needed and both held afterward:
+
+```text
+dependency direction   being imported by X is not a dependency on X
+cost versus need       a reversal condition is about the cost of changing later,
+                       not a restatement of the need itself
+```
+
+One terminology collision surfaced and was resolved: "file" as source code versus a Session's
+in-memory data. Worth watching when persistence is actually specified in Phase 6.
+
+RESULT:
+passed; cumulative question 5 CLOSED; cumulative foundation review COMPLETE
+
+PRIMARY BLOCKER:
+none remaining
+
+REMEDIATION STATUS:
+complete
+
+PARENT EVIDENCE ID:
+EV-CUM-FND-266
+
+TRANSFER STATUS:
+complete within question 5
+
+---
+
+## CUMULATIVE FOUNDATION REVIEW — COMPLETE, 2026-08-31
+
+Covering Phases 3, 4, and 5. Five questions, all passed:
+
+```text
+EV-CUM-FND-260    state identity and snapshots                       passed
+EV-CUM-FND-262    cross-module dependency and value flow             passed
+EV-CUM-FND-263A   annotation versus runtime validation               passed
+EV-CUM-FND-265    tests as executable contracts                      passed
+EV-CUM-FND-266A   architecture timing and dependency direction       passed
+```
+
+Counter action: the Phase 3-5 foundation counter is RESET as of 2026-08-31. The major/deep Phase
+7-15 counter has still not started.
+
+Cross-cutting findings from this review:
+
+```text
+1  The recurring failure mode is procedural, not conceptual: carrying a previous scenario's
+   outcome into a new one, and inserting hypothetical calls into the code under discussion.
+   Both clear immediately when the full code is restated with nothing omitted.
+
+2  Prompt-design rule adopted: state code in full when asking for a verdict on it. Two apparent
+   learner errors this session traced to omitted or prose-described code.
+
+3  Field omission under wide multi-field prompts is live. Traced/computed fields get answered;
+   reflective fields get dropped. Narrowing the prompt recovers them without lowering the rung.
+
+4  Confidence remains systematically under-rated on correct answers; the one low tag (10) was
+   an accurate self-report of a genuine block.
+
+5  print_vs_return improved materially: `None` was produced as a FIRST answer, not self-corrected.
+
+6  New syntax closed this session: `try` / `except <Type>` / `pass`, on both the raising and
+   non-raising paths.
+```
+
+Do not mark any of these concepts permanently mastered on the strength of this review alone.
