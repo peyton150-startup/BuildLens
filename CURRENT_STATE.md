@@ -237,6 +237,87 @@ Still uncertain or due for later retrieval:
 - The causal explanation was completed correctly at confidence 90 (`EV-P5-RECORD-EXPLAIN-209`),
   closing implicit-return remediation. The learner additionally called `record` more secure because
   it uses `self`; method encapsulation versus actual validation/access control is now isolated.
+- The method-versus-direct-append comparison passed at confidence 100
+  (`EV-P5-ENFORCEMENT-210`): both paths accept `7` and reach `[7]`; neither validates today, while
+  `record` remains a possible future validation boundary.
+- The restored full Session audit was partial at confidence 80 (`EV-P5-SESSION-CONTRACT-211`):
+  implicit returns and snapshot identity were correct, but exact types, runtime acceptance,
+  mutation/validation details, and whether a documented contract exists without enforcement were
+  omitted or ambiguous.
+- The contract-versus-validation clarification remained contradictory at confidence 100
+  (`EV-P5-CONTRACT-EXISTENCE-212`): no runtime validation and possible contract-without-validation
+  were recognized, but the quoted documented string contract was denied. Remediation descends to
+  one generic contract sentence.
+- The generic documented-contract sentence was recognized correctly at confidence 80
+  (`EV-P5-CONTRACT-GENERIC-213`): intended integer input and lack of implied validation were
+  separated. Near-transfer back to Session is next.
+- Session near-transfer passed at confidence 100 (`EV-P5-CONTRACT-SESSION-214`): documented string
+  elements, absent runtime validation, accepted integer storage, and the resulting concrete contract
+  mismatch were all identified.
+- The full contract synthesis was partial at confidence 90 (`EV-P5-SESSION-SYNTHESIS-215`): mutation,
+  returns, list contents, identity, and absent validation were mostly correct. Exact `NoneType`,
+  arbitrary-object acceptance, no caller-supplied `history` input, non-mutation by `history`, and
+  “stored-element assumption” remain incomplete. The learner also exposed that `record` lacks a
+  method-specific docstring/type annotation while the module contract implies string elements.
+- The generic stored-element-assumption micro-check passed at confidence 90
+  (`EV-P5-ASSUMPTION-216`): expected temperature-number elements were separated from absent history
+  validation. Apply the term back to Session next.
+- The concise Session field repair remained partial at confidence 90
+  (`EV-P5-SESSION-FIELDS-217`). Correct: `history` non-mutation, list return, and no validation.
+  Still conflated: method-specific versus module-level documentation, examples versus arbitrary
+  runtime acceptance, return value versus type, implicit `self` versus caller-supplied input, and
+  copy behavior versus stored-element assumption. Remediation splits these field families.
+- Documentation scope was recovered at confidence 70 (`EV-P5-DOC-SCOPE-218`): `record` has no
+  method-specific declared input type, while the module contract intends a list whose elements are
+  diff-text strings.
+- Return value versus type was recovered at confidence 100 (`EV-P5-RETURN-TYPE-219`): `None` is the
+  value and `NoneType` is its type.
+- Caller-input versus implicit-`self` audit was partial at confidence 90 (`EV-P5-CALL-INPUT-220`):
+  automatic `self` binding was recognized, but “arguments explicitly written inside parentheses”
+  was unreadable. Syntax-only R0 remediation is active.
+- The first syntax micro-check correctly counted explicit argument `5` as one, but denied that the
+  receiver `box` is automatically bound to `self` (`EV-P5-CALL-SYNTAX-221`, confidence 60). Continue
+  with one receiver/parameter binding map.
+- The receiver/parameter binding map passed at confidence 90 (`EV-P5-CALL-BINDING-222`): `self` was
+  bound to `box`, `amount` to `5`, with one explicit caller argument. One fresh zero-argument method
+  call remains before returning to `history()`.
+- The fresh zero-explicit-argument method call passed at confidence 90 (`EV-P5-CALL-FRESH-223`):
+  `self` bound to `log` and the caller supplied zero arguments. Apply this result to
+  `session.history()` without further syntax remediation.
+- Runtime acceptance was generalized correctly in `EV-P5-RUNTIME-ACCEPTANCE-224`: `record` accepts
+  any Python object because it only forwards the value to `list.append` and performs no validation.
+  Confidence was supplied afterward as 90.
+- The faded integrated teach-back was strong but incomplete at confidence 90
+  (`EV-P5-SESSION-TEACHBACK-225`): intended strings, arbitrary-object acceptance, snapshot protection,
+  and public-state risk were correct. Exact `record` return and `history` input/output were omitted,
+  while “all functions need validation” remains an untested design conclusion.
+- The two-sentence completion was behaviorally correct at confidence 90
+  (`EV-P5-SESSION-COMPLETION-226`): `record` mutation/`None`/`NoneType`, zero explicit history
+  arguments, and copied-list identity were recovered. Only the exact built-in type name needs
+  correction from `listtype` to `list`.
+- The exact history sentence was corrected (`EV-P5-SESSION-EXACT-227`): zero explicit arguments,
+  return type `list`, and a copied/different list object. The Session target audit is complete after
+  remediation; the required different-surface transfer remains.
+- The TemperatureLog different-surface transfer was strong partial at confidence 90
+  (`EV-P5-TEMPERATURE-TRANSFER-228`): final state/snapshot values, arbitrary-object acceptance,
+  absent validation, float-contract mismatch, and shared Session principle were correct. Add return
+  values/types, declaration scope, snapshot validation/protection, and validation placement remain.
+- Transfer completion remained partial at confidence 90 (`EV-P5-TEMPERATURE-COMPLETION-229`):
+  `None` values, float intent, absent snapshot validation, and an add-only validation proposal were
+  supplied. `NoneType`, absent method-specific declaration, exact copy protection, and the public
+  direct-mutation bypass remain. Challenge the add-only proposal adversarially.
+- The adversarial public-mutation challenge passed at confidence 90
+  (`EV-P5-TEMPERATURE-BYPASS-230`): invalid state bypasses add validation, snapshot returns it, and
+  add-only validation cannot guarantee a class-wide float invariant. The learner independently
+  proposed per-element snapshot checking, exposing prevention-at-write versus detection-at-read.
+- The learner selected a class-wide supported-path string invariant at confidence 90
+  (`EV-P5-SESSION-DECISION-231`): prevent non-string Session state so `history` need not rescan.
+  The answer mistakenly said `record` would not validate; correction is required because `record`
+  must enforce the chosen write boundary.
+- The corrected contract was approved at confidence 90 (`EV-P5-SESSION-CONTRACT-232`): supported
+  writes go through `record`, which validates strings; mutable storage becomes internal; `history()`
+  returns a copy without rescanning. The guarantee is limited to supported API paths. A product patch
+  is now justified but has not been authorized or written.
 
 Do not mark these concepts permanently mastered after one review sequence.
 
@@ -252,14 +333,19 @@ The major/deep Phase 7–15 counter has not started.
 
 ## Open interaction and exact next step
 
-Phase 5 remains open in adaptive remediation for the `Session.record` / `Session.history` contract
-audit. The learner identified a concrete candidate ambiguity—`record` documents diff text while the
-current runtime path appears to accept an integer—but no product patch is authorized until the
-full contract trace and different-surface transfer are complete.
+Phase 5 contract audit and different-surface transfer are complete after remediation. The concrete
+ambiguity is established: the module intends diff-text strings, while `record` currently accepts any
+Python object and public mutable `changes` bypasses the method boundary. The learner approved a
+supported-path string-only invariant. A product patch is justified but has not been authorized or
+written.
 
-The session is paused for lunch after `EV-P5-RECORD-EXPLAIN-209`. Resume with one exact runtime
-comparison between `session.record(7)` and `session.changes.append(7)` to test whether the method
-currently supplies validation or access control. Do not repeat the implicit-return remediation.
+Do not repeat the completed Session audit, implicit-return remediation, or TemperatureLog transfer.
+If implementation is authorized, first run the required pre-patch prediction for invalid input,
+error type, unchanged state after rejection, internal storage, and snapshot behavior.
+
+The learner requested a pre-implementation pause and authorized continuing in a new session. Resume
+at that prediction gate; do not repeat the completed contract audit or transfer, and do not write
+product code before the learner commits the predicted rejection behavior.
 
 Continue Phase 5 as an intent/contract audit, not an automatic code patch:
 
@@ -318,11 +404,11 @@ If a Phase 5 contract patch becomes justified, first state the required pre-patc
 
 ```text
 phase                       Phase 5 contract audit in progress
-last knowledge gate         EV-P5-RECORD-EXPLAIN-209, return explanation correct at confidence 90
-next retrieval due          record method versus public-list append validation comparison
+last knowledge gate         EV-P5-SESSION-CONTRACT-232, approved at confidence 90
+next retrieval due          pre-implementation invalid-input/error/state prediction
 next architecture reset     complete; next by time or major transition
-next implementation step    none until the Phase 5 audit finds an earned contract change
-last published commit       Phase 5 lunch-pause commit on current Git main
+next implementation step    run prediction gate, then implement approved Session string-invariant patch
+last published commit       Phase 5 pre-implementation handoff commit on current Git main
 ```
 
 Files the learner should currently be able to teach:
