@@ -467,10 +467,17 @@ STILL OWED BEFORE PHASE 6 CAN CLOSE:
 ```text
 learner explanation   teach cli.py aloud in their own words
 transfer variant      same end-to-end and cost analysis on a different small CLI
-file=sys.stderr       why errors use a separate channel from results
-if __name__           why the entry-point line exists and how it keeps main testable
 argparse patch        deliberately deferred as a SECOND patch; not yet started
 ```
+
+Both remaining syntax pieces are now closed. `if __name__ == "__main__"` passed
+(`EV-P6-ENTRYPOINT-272`): the learner can state that `__name__` is `"cli"` during tests, that the
+guard is therefore false, and that deleting it would kill the suite at its own import line.
+Import-executes-the-whole-file and loose-`sys.exit`-kills-the-process were both new and are now
+held. `file=sys.stderr` passed (`EV-P6-STDERR-273`), and this satisfies the delayed retrieval owed
+against `EV-P1-EXIT-108` on a new surface: the learner traced that a redirected run captures only
+stdout, that the missing-file path writes nothing there, and that the exit status carries the
+verdict independently.
 
 Standing instructions carried out of the review:
 
@@ -568,7 +575,7 @@ THE CUMULATIVE FOUNDATION REVIEW IS COMPLETE. All five questions passed.
 
 ```text
 phase                       Phase 5 complete; cumulative foundation review in progress
-last knowledge gate         EV-P6-CLI-TRACE-271, Phase 6 post-patch trace passed
+last knowledge gate         EV-P6-STDERR-273, both cli.py syntax pieces closed
 next retrieval due          none blocking; next foundation checkpoint after Phase 8
 next architecture reset     complete; next by time or major transition
 next implementation step    Phase 6 second patch: argparse plus bad-input handling, after the owed explanation and transfer

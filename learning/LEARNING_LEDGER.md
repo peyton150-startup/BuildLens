@@ -25933,3 +25933,155 @@ none required
 TRANSFER STATUS:
 outstanding — the Phase 6 milestone still owes a learner explanation and a transfer variant
 (the same end-to-end and cost analysis applied to a different small CLI)
+
+---
+
+## EV-P6-ENTRYPOINT-272
+
+DATE: 2026-08-31
+
+BUILD PHASE:
+Phase 6 — the `if __name__ == "__main__"` entry-point guard
+
+ACADEMIC SOURCE:
+`PY-MODULES-EXECUTION`; `CMU-15213-SYSTEMS`
+
+DEEP SKILL:
+Distinguish running a module from importing one; know that import executes the entire file top to
+bottom, and that a loose `sys.exit` terminates the importing process.
+
+EXERCISE TYPE:
+ADJACENT_LEARNING
+
+SCAFFOLD RUNG:
+R6 descending to R1, then reassembly on the real file.
+
+SEQUENCE AND LEARNER FIRST COMMITTED ANSWERS (verbatim, in order):
+
+1. First prediction, `greet.py` with a loose `print` and `sys.exit(0)`:
+   LEARNER: `. yes, yes it calls greeet then greet returns the hello ana and then use green prints
+   that, idk, 20`
+   Field 1 correct. Field 2 incorrect — the importing program does not survive the loose
+   `sys.exit`. Confidence 20 accurately signalled the block.
+
+2. Learner question, unprompted: `when you import tiny dose it run the module up until the fucntion
+   you called?`
+   Answered directly: import runs the WHOLE file; a `def` line creates the function without calling
+   it; loose statements execute at import time.
+
+3. `tiny.py` with no `sys.exit`:
+   LEARNER: `. yes loaded is printed before imporitng done, loaded then greet then imporintg done
+   then ana`
+   Ordering correct; the `def` line was incorrectly listed as producing output.
+
+4. Narrowed to whether `def` prints:
+   LEARNER: `. ok was just naming the order, loaded imporintg done then print greet ana`
+   Correct: `loaded`, `importing done`, `hello ana`.
+
+5. `sys.exit` restored, scope question:
+   LEARNER: `it exits the file after printing loaded`
+   Ambiguous between file and process; re-asked with the distinction made explicit.
+
+6. Scope pinned:
+   LEARNER: `. no it stops everything in the system which includes both modules, no it is never
+   prointed, 90`
+   Correct: the whole process ends, importer included.
+
+7. Applied to the real `cli.py` / `test_cli.py` pair:
+   LEARNER: `. __main__ , yes, no, it would exit when cli.py is done executing. 90`
+   Incorrect on `__name__` during import; internally inconsistent with the following fields.
+
+8. Re-presented against the two-row table:
+   LEARNER: `. so the name would be cli since it is being imported by testcli, so if it was running
+   in cli then it would be __main__, then it does not, 90`
+   All correct, both directions stated by the learner.
+
+9. Consequence of deleting the guard:
+   LEARNER: `.it would exit, 90`
+   Correct: the suite dies at its own import line, before any test runs.
+
+EVALUATION:
+The guard is now understood mechanically rather than as boilerplate: during tests `__name__` is
+`"cli"`, the condition is false, `sys.exit` never runs, and `main` is callable as an ordinary
+function returning `0` or `1` — which is exactly what the seven tests assert on.
+
+RESULT:
+passed
+
+PRIMARY BLOCKER:
+none remaining
+
+---
+
+## EV-P6-STDERR-273
+
+DATE: 2026-08-31
+
+BUILD PHASE:
+Phase 6 — stdout versus stderr as separate channels
+
+ACADEMIC SOURCE:
+`CMU-15213-SYSTEMS`
+
+DEEP SKILL:
+Treat a process's answer and its diagnostics as separate channels, and predict what redirection
+captures.
+
+EXERCISE TYPE:
+ADJACENT_LEARNING
+
+SCAFFOLD RUNG:
+R6 descending to a guard trace.
+
+PROMPT (verbatim):
+Predict — two runs, one redirect. `changes.diff` exists with 17 added lines; `nope.diff` does not.
+
+```
+Run A:   python cli.py analyze changes.diff > out.txt
+Run B:   python cli.py analyze nope.diff > out.txt
+```
+
+```
+Run A — what ends up inside out.txt =
+Run B — what ends up inside out.txt =
+Run B — what appears on the screen =
+Run B — the exit status =
+Confidence =
+```
+
+LEARNER FIRST COMMITTED ANSWER (verbatim):
+. the counts the answer, no such file, no such file, exit 1, 60
+
+CONFIDENCE:
+60
+
+EVALUATION:
+Run A correct, the screen output for Run B correct, and exit status `1` correct. Run B's file
+contents were incorrect — the error text was expected in `out.txt` despite travelling on stderr.
+
+REMEDIATION (verbatim answers in order):
+
+1. Channel identification:
+   LEARNER: `. stderr, no, the answer with zeros, 90`
+   The first two fields correct — the message travels on stderr and `>` does not capture it. The
+   third still assumed a summary was produced.
+
+2. Guard trace through `main` on the missing-file path:
+   LEARNER: `. no , so nothing would be changed in out.txt`
+   Correct: `summarize_diff` never runs, the stdout `print` never runs, so no counts are written.
+   Refinement supplied: `>` truncates the file before the program starts, so `out.txt` ends up
+   existing and empty rather than untouched.
+
+EVALUATION OF REMEDIATION:
+The three-channel independence is now concrete in the learner's own program — file contents, screen
+text, and exit status carrying three different things. This is the delayed retrieval owed against
+`EV-P1-EXIT-108` and it landed on a genuinely new surface.
+
+RESULT:
+passed
+
+PRIMARY BLOCKER:
+none
+
+TRANSFER STATUS:
+delayed retrieval of output_and_exit_status_are_independent SATISFIED on a new surface
