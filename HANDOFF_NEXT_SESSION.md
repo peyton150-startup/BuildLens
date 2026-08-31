@@ -1,250 +1,185 @@
-# HANDOFF — Continue the Fundamentals Quiz
+# BuildLens Handoff — Continue the Post-Phase-5 Cumulative Review
 
-Read `CLAUDE.md`, `CURRENT_STATE.md`, and the end of `QUIZZES.md` before continuing.
-`CURRENT_STATE.md` is authoritative; this is only a quick starting point.
+Use this handoff to continue with Claude Opus. `CURRENT_STATE.md` is authoritative if anything here
+conflicts with it.
 
-## Scope
+## Required reading and behavior
 
-Continue quizzing the learner only on completed **Phases 0, 1, and 2**. Focus on Python and
-BuildLens fundamentals. Do not quiz Phase 3, begin Phase 4, or change product code.
+Follow `AGENTS.md`. Before implementation, read its required project documents in the stated order.
+For the immediate teaching interaction, read the latest Phase 5 and cumulative-review evidence at
+the end of `learning/LEARNING_LEDGER.md`.
 
-Ask one question at a time. Require a confidence score from 0–100, let the learner commit before
-revealing the answer, and adapt down only when a genuine conceptual gap appears. Do not penalize
-spelling, missing spaces in displayed lists, capitalization typos, or other harmless formatting.
-The learner has explicitly asked for harder questions and less nitpicking.
+Do not reveal an exercise answer before the learner commits. Record every formal prompt and the
+learner's exact first answer. After an incorrect answer, descend to the smallest blocker, recover it,
+use near-transfer, and return to a fresh target-level problem.
 
-For harder questions, use a small ASCII picture or state diagram when it materially helps, especially
-for aliases and mutation. Do not let the picture reveal the answer before the learner predicts it.
+## Authoritative lifecycle state
 
-## Current understanding
+Phase 5 — Explicit Interfaces / Contracts is complete:
 
-The learner is strong on:
+```text
+implementation         EV-P5-SESSION-IMPLEMENTATION-248
+automated verification EV-P5-COMPLETE-259
+learner trace          EV-P5-SESSION-POSTPATCH-TRACE-249
+learner explanation    EV-P5-ANNOTATION-VALIDATION-250
+transfer variant       EV-P5-RETRY-TRANSFER-COMPLETE-258
+```
 
-- output versus return values, including implicit `None`;
-- exit status versus terminal output;
-- list mutation, `.sort()` versus `sorted()`, and mutator return values;
-- longest-prefix-first branch precedence;
-- diff-line classification and summary accumulators;
-- local accumulator reset across separate function calls;
-- dictionary key/value lookup and shared mutation through aliases.
+The foundation counter reached 3/3 from Phases 3, 4, and 5. The mandatory cumulative foundation
+review is in progress. Do not begin substantial Phase 6 work until the review passes and that
+counter is explicitly reset.
 
-Recent recovery: the learner correctly traced two updates through three names pointing to one shared
-dictionary. They also correctly explained that mutating an external counter makes a function impure,
-while using a fresh local counter can be pure.
+## Product code that now exists
 
-## Resume here
-
-Begin with one moderately difficult, unfamiliar **state-tracing problem** that combines two or three
-already-learned ideas. Ask for the state after each line and the final returned/printed value. A good
-target combines aliasing, dictionary or list mutation, a local variable, and a return value without
-introducing new syntax.
-
-If correct, remove the table or diagram on the next problem. Later, retrieve purity in a different
-domain and require the learner to inspect every object a function can change—not only its explicit
-input. Per-item branch enumeration is also still worth testing: require one answer per input rather
-than accepting a group-level answer.
-
-The learner has said that adding one extra state-changing step can make them lose track even when
-each individual rule is understood. Treat that as a composition-tracking issue. Freeze state line by
-line, then fade that support after success instead of restarting basic syntax drills.
-
-## Recording and close
-
-Append every formal prompt and the learner's verbatim first committed answer to
-`learning/LEARNING_LEDGER.md`; also append the readable transcript to `QUIZZES.md` and update
-`CURRENT_STATE.md`. Follow the session-close and publishing rules in `CLAUDE.md`.
-
-Last published quiz commit reported before this session: `6d4ff74` on `main`. The ordinary workspace is not
-the publishing clone; use the verified temporary-clone workflow documented in the existing project
-state when the learner asks to push.
-
-## Latest pause — lunch, 2026-08-29
-
-The learner requested three final super-hard questions before finishing Phase 3. Question 1 was
-partial and its short recovery passed. Question 2 (`EV-P1-COMPOSE-174`) failed because `.sort()` was
-treated as non-mutating and list-returning under heavy composition. On return, give one short
-`.sort()` versus `sorted()` checkpoint and one alias near-transfer, then ask super-hard question 3
-of 3. Do not skip the recovery, and do not begin Phase 3 yet.
-
-## Latest pause — location change, 2026-08-29
-
-The `.sort()`/`sorted()` checkpoint and alias near-transfer both passed. Super-hard question 3
-(`EV-P1-COMPOSE-177`) was partial and entered remediation. The learner recovered routing, cumulative
-counters, the correct sorted ticket order, second-call labels, core returned state, and the principle
-that several names can point to one mutable object.
-
-The remaining primary blocker is whole-program list-object counting. The learner counted elements
-inside the returned outer list instead of counting the original input, local lists, and outer list
-as separate objects. A worked-example rescue was shown:
+`session.py` enforces the approved supported-path invariant:
 
 ```python
-base = [1]
-inner = []
-wrapper = [inner, None]
+class Session:
+    def __init__(self):
+        self._changes: list[str] = []
+
+    def record(self, diff_text: str) -> None:
+        if not isinstance(diff_text, str):
+            raise TypeError("must be a string")
+
+        self._changes.append(diff_text)
+
+    def history(self) -> list[str]:
+        history_list = list(self._changes)
+        return history_list
 ```
 
-The learner left before explaining it. Resume with exactly one prompt:
+Contract boundary:
 
-> In your own words, why is the count three rather than one or four?
+- annotations communicate but do not automatically validate in ordinary Python;
+- `record` performs runtime validation before mutation;
+- rejected writes leave `_changes` unchanged;
+- supported mutable access is internal;
+- `history()` returns a new copied list;
+- the guarantee is scoped to supported API paths, not arbitrary Python introspection.
 
-Then require the learner to complete one missing allocation step and solve a fresh micro-example
-before returning to the BuildLens first-call count. Do not reveal the BuildLens total first. After
-object counting recovers, finish the impurity inventory: passed-list mutation, shared counter
-mutation, and output through the called `route` function. Super-hard question 3 and its recovery are
-not complete; do not advance Phase 3.
-
-## Review completion update — 2026-08-29
-
-The location-change resume sequence is complete. The learner explained the worked example, passed a
-missing-step check, passed a fresh independent transfer, and recovered the BuildLens whole-program
-count of seven list objects. They also completed the impurity inventory: passed-list mutation,
-passed-dictionary mutation, and terminal output inherited through the called `route` function.
-
-All three requested super-hard questions and their remediation chains are now complete. Do not
-restart this review or mark its concepts permanently mastered. Before implementation, read the
-authoritative current phase/task and cumulative-review counters in `CURRENT_STATE.md` and
-`learning/LEARNING_RULES.md`, then present the learner with the exact next BuildLens step and its
-required knowledge gate.
-
-## Exact next BuildLens step
-
-Phase 2 implementation is already complete. Phase 3 `Session` code, five automated tests, state
-movie, and knowledge gate are complete, but its milestone still owes:
+`test_session.py` has seven tests, including non-string rejection/unchanged history, internal storage,
+and snapshot mutation isolation. The last fresh verification passed:
 
 ```text
-learner explanation  — teach session.py in their own words
-transfer variant     — fresh alias/copy problem outside the session domain
+python test_session.py   → test passed
+python test_classify.py  → test passed
+python test_summarize.py → test passed
 ```
 
-Resume with the `session.py` teach-back, not Phase 2 implementation and not Phase 4 code. Require the
-learner to explain ownership, ordered mutation through `record`, snapshot creation through
-`list(self.changes)`, why the returned list cannot mutate the session, the remaining public-attribute
-limitation, and the leak test that proves copying matters. Then give one unrelated transfer. Only
-after both pass may Phase 4 planning begin.
-
-The just-completed fundamentals review was not historically tagged `CUMULATIVE_RETRIEVAL`. Do not
-retroactively rewrite its exercise types or silently reset a formal counter. Audit the counter before
-substantial Phase 4 work and combine any due review with the milestone where possible.
-
-## Counter audit result
-
-Phase 3 is complete, including teach-back and unrelated transfer. The foundation counter remains due
-because no previous question was recorded with exercise type `CUMULATIVE_RETRIEVAL`; do not
-retroactively relabel attempts. Before Phase 4 code, run four formal questions: classification
-debug/test, return/output/local-state trace, summary contract/boundary apply, and an architecture
-defense. Use the fourth as the pre-Phase-4 architecture reset. Avoid alias/snapshot/purity repetition.
-Reset only the foundation counter after all four pass.
-
-## Latest pause — moving locations, cumulative checkpoint
-
-The concise replace-in-place `CURRENT_STATE.md` cleanup is complete. Formal cumulative questions 1–3
-are complete:
+Published commit, verified on `origin/main`:
 
 ```text
-Q1 classifier debug/test       passed after leading-space recovery
-Q2 return/output/local state   passed at confidence 90
-Q3 summary contract/boundary   passed after multiline/explicit-return remediation
+fc9eb20 — feat: enforce Session string contract
 ```
 
-Resume with cumulative question 4 of 4 only. It is the architecture defense and doubles as the
-required pre-Phase-4 architecture reset. After it passes, reset only the foundation counter, record
-Phase 3 as 1/3 toward the next foundation checkpoint, and begin Phase 4 intent discussion. Do not
-repeat question 3 or start product code first.
+The ordinary local checkout may still be behind and dirty because publishing used a verified
+temporary clone. Preserve local/user changes; do not reset or overwrite them merely to match the
+remote.
 
-## Session completion — cumulative checkpoint and Phase 4 handoff
+## Cumulative review progress
 
-The four-question formal foundation cumulative checkpoint is complete. Question 4 passed after
-adaptive remediation at confidence 90. Reset only the Phase 0–2 foundation counter; Phase 3 now
-counts as 1/3 toward the next checkpoint after Phase 5. The pre-Phase-4 architecture reset is also
-complete.
-
-Current architecture decision: keep `classify.py`, `summarize.py`, `session.py`, and their tests in
-the existing flat structure. No observed responsibility currently requires multiple related modules.
-The accepted downside is later file moves and import churn. Reconsider packaging when one
-responsibility genuinely expands across several related modules or another concrete boundary/import
-problem appears.
-
-Start the next session with a brief Phase 4 code-reading audit, not a refactor or a repeated quiz.
-Ask the learner to trace `"+tea = 2"` through:
+Question 1 — state identity and snapshots:
 
 ```text
-summarize_diff input
-→ splitlines()
-→ classify_diff_line
-→ "added"
-→ lines_added increment
-→ returned DiffSummary
+EV-CUM-FND-260 — passed at confidence 90
 ```
 
-Then ask them to explain the responsibility of each module and confirm that `summarize.py` depends
-on `classify.py`. Record the formal Evidence Record before advancing. No quiz is currently open.
-
-## Phase 4 completion update — 2026-08-29
-
-The Phase 4 audit and transfer are complete:
+Question 2 — cross-module dependency/value flow:
 
 ```text
-EV-P4-READ-191      cross-module value trace                 passed at confidence 60
-EV-P4-ARCH-192      responsibilities/dependency/refactor     passed at confidence 80
-EV-P4-TRANSFER-193  unrelated decomposition transfer         passed at confidence 80
+EV-CUM-FND-261  — original inbox/priority target was partial
+EV-CUM-FND-261A — exact returned labels repaired: urgent, normal, urgent
+EV-CUM-FND-261C — learner clarified that impossible direct access was only hypothetical
+EV-CUM-FND-261D — reduced returned-data/caller-mutation chain passed at confidence 100
 ```
 
-Decision: keep the existing flat modules. The learner correctly explained that `summarize.py`
-depends on `classify.py`, transferred the decomposition to a parcel-manifest domain, and concluded
-that possible future work is not present architectural evidence. No product-code patch was earned.
+The learner understands the reduced principle: a callee returns data; the caller reads it and owns
+its later local mutation. The adaptive protocol still requires a fresh target-level R6 return before
+question 2 can close.
 
-Do not repeat Phase 4 or restructure the project. `CURRENT_STATE.md` is authoritative. Begin Phase 5
-with an intent/contract audit. Phases 3 and 4 count as 2/3 toward the next foundation checkpoint;
-Phase 5 completion triggers that review before substantial Phase 6 work.
+Do not repeat the `choose` / `count_one` micro-example. Do not infer a same-name-local misconception;
+the learner explicitly clarified that they know such direct access is impossible.
 
-## Phase 5 location-change pause — 2026-08-29
+## Exact unanswered resume prompt
 
-Phase 5 began with `EV-P5-CONTRACT-194`, comparing a documented string contract with runtime
-behavior for an integer. The learner initially predicted fallback `"context"`, then completed the
-full adaptive chain through method lookup, prefix/suffix reading, assignment/rebinding, branch
-execution, function call/return, and validation-versus-operation-failure.
+Present this prompt without revealing its answer:
 
-The fresh R5 `classify_tag(12)` target passed at confidence 100 after one omitted-item follow-up. The
-learner correctly stated that the docstring enforces nothing; refine their word “annotation” because
-a docstring is documentation, while `tag: str` would be a type annotation. Neither validates by
-itself in ordinary Python.
+```python
+# grading.py
+def grade_score(score):
+    if score >= 80:
+        return "pass"
 
-Phase 5 is not complete and no product patch is justified. Resume with one BuildLens cross-module
-application:
+    return "review"
+```
 
-> Without running it, trace `summarize_diff(42)`. Which operation fails first, in which function and
-> module? Is `classify_diff_line` ever called? What does this reveal about the boundary contract?
-> Confidence: 0–100.
+```python
+# dashboard.py
+from grading import grade_score
 
-Then provide a different-surface transfer and continue auditing the types/values crossing existing
-module boundaries. Do not implement validation or type hints until the learner identifies a concrete
-contract ambiguity and proposes the intended behavior.
 
-## Phase 5 library-closing pause — 2026-08-29
+def count_reviews(scores):
+    review_count = 0
 
-The Phase 5 boundary sequence continued and no quiz is open:
+    for score in scores:
+        outcome = grade_score(score)
+
+        if outcome == "review":
+            review_count += 1
+
+    return review_count
+```
+
+Call:
+
+```python
+result = count_reviews([92, 73, 80, 61])
+```
+
+Ask:
 
 ```text
-EV-P5-BOUNDARY-195          summarize_diff(42) boundary trace       passed
-EV-P5-BOUNDARY-TRANSFER-196 roster/validation transfer              passed after remediation
-EV-P5-INTERFACE-197         summarize ↔ classify exact interface    passed after remediation
+Which module depends on which? =
+Arguments passed into grade_score, in order =
+Values returned by grade_score, in order =
+Final review_count =
+Final result =
+Which function directly mutates review_count? =
+How does grade_score influence the result without mutating review_count? =
+Confidence =
 ```
 
-Important recovery evidence:
+If this fresh target passes, record it as `CUMULATIVE_RETRIEVAL`, close question 2, and continue the
+review one question at a time. If it fails, remediate only the newly observed blocker.
 
-- The learner now distinguishes a documented/assumed contract from explicit validation and from an
-  incidental `AttributeError` at an unsupported operation.
-- Preferred wording: caller invokes → body execution begins → validation runs → reject or continue
-  to main work. The learner stated that exact model; prior issues were partly terminology.
-- Tuple syntax was introduced only because a transfer used `("a",)`. The learner recovered comma
-  syntax, tuple immutability, missing `.append()`, and reassignment versus mutation. Retrieve later;
-  do not treat it as mastered.
-- The learner recovered the exact real interface: one line string enters `classify_diff_line`, a
-  label string returns, `summarize_diff` compares it and updates fresh local integer counters, then
-  constructs `DiffSummary` at the final return. No class instance exists during counter updates.
+## Remaining review coverage
 
-Phase 5 is not complete and no product patch is justified. Resume with the existing
-`Session.record(diff_text)` and `Session.history()` contracts: exact input/output types, state
-effects, assumptions, and explicit validation. Then give a different-surface transfer and decide
-whether any concrete ambiguity earns a patch. Do not replay the completed classifier/summarizer
-chains.
+Aim for approximately five cumulative questions. After question 2, cover the remaining Phase 3–5
+priorities with fresh surfaces:
+
+1. annotation versus runtime validation plus rejection-before-mutation;
+2. tests as executable contracts—name which realistic mutation a test catches;
+3. evidence-based architecture timing/dependency direction, including a downside and reversal
+   condition.
+
+Avoid repeating completed Session and RetryPolicy traces unless remediation genuinely requires a
+smaller neighboring example. Syntax-only help remains mandatory: if the learner cannot read a form,
+stop the surrounding problem, isolate one syntax form, and rebuild gradually.
+
+## Completion boundary
+
+When all cumulative questions pass:
+
+1. record every Evidence Record;
+2. update `CURRENT_STATE.md` replace-in-place;
+3. reset only the foundation counter that reached 3/3;
+4. do not mark concepts permanently mastered from this review alone;
+5. begin Phase 6 specification/intent work—not automatic CLI implementation;
+6. obey the Phase 6 adjacent-learning and pre-patch gates before code changes.
+
+## Working-tree safety
+
+There are pre-existing local modifications and untracked project/tool files. Preserve them. Do not
+stage broad paths or use destructive Git commands. If the learner asks to publish, use the existing
+verified temporary-clone workflow and copy only intended files.
