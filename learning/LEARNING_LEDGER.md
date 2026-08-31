@@ -21814,3 +21814,555 @@ Exact resume sequence:
 9. require trace, explanation, and fresh transfer before Phase 5 completion
 10. trigger the foundation cumulative review after Phase 5 before substantial Phase 6 work
 ```
+
+---
+
+## EV-P5-REJECTION-233
+
+DATE: 2026-08-31
+
+BUILD PHASE:
+Phase 5 — Explicit Interfaces / Contracts
+
+IMPLEMENTATION TRIGGER:
+Required pre-patch prediction for the approved supported-path Session string invariant.
+
+ACADEMIC SOURCE:
+`PY-CONTROLFLOW-FUNCTIONS`; `PY-ERRORS-EXCEPTIONS`
+
+DEEP SKILL:
+Distinguish exception type, exception message, process exit behavior, control-flow interruption, and
+the object state left behind when validation rejects input before mutation.
+
+EXERCISE TYPE:
+PRE_IMPLEMENTATION_PREDICTION
+
+SCAFFOLD RUNG:
+R5 — method call, rejection branch, state, and later statements.
+
+PROMPT (verbatim):
+Before running or implementing anything, predict this sequence:
+
+```python
+session = Session()
+session.record("diff A")
+
+before = session.history()
+session.record(7)       # rejected
+after = session.history()
+
+after.append("diff B")
+final = session.history()
+```
+
+Commit to:
+
+```text
+Exact exception type =
+Exact stable error message =
+before =
+Internal state immediately after rejection =
+after =
+final =
+What valid record(...) returns =
+What history() returns/protects =
+Confidence (0–100) =
+```
+
+LEARNER FIRST COMMITTED ANSWER (verbatim):
+strings
+typeerror
+
+[diff A]
+exit code 1
+never runs
+never runs
+40
+
+CONFIDENCE:
+40 (interpreted from the final line)
+
+HELP / TOOLS BEFORE COMMITMENT:
+The approved supported-path contract and exact requested fields were supplied. No product code was
+run or changed.
+
+EVALUATION:
+Partial. The learner identified `TypeError`, the pre-rejection snapshot `["diff A"]`, and that an
+uncaught exception prevents subsequent statements from running. The response conflated or left
+ambiguous the exception message, process exit status, internal Session state after rejection,
+method return behavior, and snapshot contract.
+
+RESULT:
+partial; adaptive descent required before implementation
+
+PRIMARY BLOCKER:
+EXCEPTION_VS_PROCESS_AND_STATE — separating the raised exception object and interrupted statements
+from the process exit status and from object state that already exists after rejection.
+
+REMEDIATION STATUS:
+descend to one R3 validation branch with the exception caught, then near-transfer back to Session
+
+PARENT EVIDENCE ID:
+EV-P5-SESSION-CONTRACT-232
+
+TRANSFER STATUS:
+pre-implementation target not yet passed
+
+---
+
+## EV-P5-EXCEPTION-MICRO-234
+
+DATE: 2026-08-31
+
+BUILD PHASE:
+Phase 5 — Explicit Interfaces / Contracts
+
+IMPLEMENTATION TRIGGER:
+Adaptive descent after `EV-P5-REJECTION-233` conflated exception behavior, process exit, and state.
+
+ACADEMIC SOURCE:
+`PY-ERRORS-EXCEPTIONS`
+
+DEEP SKILL:
+Trace a validation rejection while distinguishing the caught exception from later program state.
+
+EXERCISE TYPE:
+REMEDIATION_TRACE
+
+SCAFFOLD RUNG:
+R3 — one validation branch inside `try` / `except`.
+
+PROMPT (verbatim):
+Let’s reduce this to one caught-exception trace:
+
+```python
+items = ["A"]
+
+try:
+    value = 7
+
+    if not isinstance(value, str):
+        raise TypeError("value must be a string")
+
+    items.append(value)
+
+except TypeError as error:
+    caught_type = type(error).__name__
+    caught_message = str(error)
+
+after = list(items)
+```
+
+Without running it, predict:
+
+```text
+caught_type =
+caught_message =
+Does items.append(value) run? =
+after =
+Does execution reach after = list(items)? =
+Confidence (0–100) =
+```
+
+LEARNER FIRST COMMITTED ANSWER (verbatim):
+i have no idea what i am looking at
+
+CONFIDENCE:
+not supplied
+
+HELP / TOOLS BEFORE COMMITMENT:
+The exercise reduced the original Session target to one generic list, one validation branch, and a
+caught exception, but still introduced several unfamiliar syntax forms together.
+
+EVALUATION:
+Unreadable syntax rather than an incorrect trace. Per syntax-only help mode, stop solving the
+surrounding problem and isolate one `raise TypeError(...)` form.
+
+RESULT:
+syntax blocker identified; no target-level evaluation
+
+PRIMARY BLOCKER:
+EXCEPTION_SYNTAX — the combined `try`, `raise`, `except`, exception binding, and introspection syntax
+cannot yet be read as executable steps.
+
+REMEDIATION STATUS:
+descend to R0 `raise TypeError("...")`; rebuild one syntax form at a time
+
+PARENT EVIDENCE ID:
+EV-P5-REJECTION-233
+
+TRANSFER STATUS:
+pending
+
+---
+
+## EV-P5-RAISE-SYNTAX-235
+
+DATE: 2026-08-31
+
+BUILD PHASE:
+Phase 5 — Explicit Interfaces / Contracts
+
+IMPLEMENTATION TRIGGER:
+Syntax-only R0 remediation after the combined caught-exception trace was unreadable.
+
+ACADEMIC SOURCE:
+`PY-ERRORS-EXCEPTIONS`
+
+DEEP SKILL:
+Read `raise ErrorType("message")` as actively signaling a programmer-selected exception type with
+the supplied message, rather than as checking for an error.
+
+EXERCISE TYPE:
+SYNTAX_REMEDIATION
+
+SCAFFOLD RUNG:
+R0 — one exception-raising syntax form.
+
+PROMPT (verbatim):
+No problem. Ignore everything from the previous example.
+
+Read this single line:
+
+```python
+raise TypeError("wrong kind of value")
+```
+
+It means:
+
+- `raise` — stop normal execution and signal an error.
+- `TypeError` — the kind of error.
+- `"wrong kind of value"` — the error’s message.
+
+Now read this new line:
+
+```python
+raise TypeError("age must be a number")
+```
+
+Fill in only:
+
+```text
+Error kind =
+Error message =
+```
+
+LEARNER FIRST COMMITTED ANSWER (verbatim):
+ok so it pauses execution raises the error or does it check for an error, how ould you know it was actually a type error, the type is typeerror and the message is wrong kind of value, 90
+
+CONFIDENCE:
+90
+
+HELP / TOOLS BEFORE COMMITMENT:
+The meaning of each token in a neighboring `raise TypeError(...)` line was modeled before the fresh
+one-line prompt.
+
+EVALUATION:
+Partial at confidence 90. The learner correctly identified `TypeError` and asked the exact remaining
+causal question: whether `raise` detects an error or actively signals one, and how the type is known.
+The supplied message came from the modeled line rather than the fresh line, whose message was
+`"age must be a number"`.
+
+RESULT:
+partial; one fresh R0 variant required
+
+PRIMARY BLOCKER:
+RAISE_VS_CHECK — distinguish a preceding condition that decides whether execution reaches the line
+from `raise`, which constructs/signals the explicitly named exception.
+
+REMEDIATION STATUS:
+explain only the raise/check distinction, then require a fresh one-line type/message read
+
+PARENT EVIDENCE ID:
+EV-P5-EXCEPTION-MICRO-234
+
+TRANSFER STATUS:
+pending
+
+---
+
+## EV-P5-RAISE-CONCEPT-236
+
+DATE: 2026-08-31
+
+BUILD PHASE:
+Phase 5 — Explicit Interfaces / Contracts
+
+IMPLEMENTATION TRIGGER:
+Fresh conceptual application after the R0 raise/check distinction in `EV-P5-RAISE-SYNTAX-235`.
+
+ACADEMIC SOURCE:
+`PY-ERRORS-EXCEPTIONS`; `PY-CONTROLFLOW-FUNCTIONS`
+
+DEEP SKILL:
+Connect a type-validation condition to an explicitly raised exception without treating `raise` as
+the checking operation.
+
+EXERCISE TYPE:
+SYNTAX_REMEDIATION
+
+SCAFFOLD RUNG:
+R1 — one condition concept followed by one raise operation.
+
+PROMPT (verbatim):
+`raise` does not check for an error. It actively creates/signals the error named in the code.
+
+```python
+raise TypeError("wrong kind of value")
+```
+
+We know it is a `TypeError` because the programmer explicitly wrote `TypeError`. Python does not
+independently determine that here. Later, an `if` condition can decide whether this line should run.
+
+Fresh one-line check:
+
+```python
+raise ValueError("count cannot be negative")
+```
+
+```text
+Does `raise` check or signal? =
+Error kind =
+Error message =
+```
+
+LEARNER FIRST COMMITTED ANSWER (verbatim):
+so if name is type non string&#x20;
+raise typeerror("it needs to be a string")&#x20;
+is that the basic concept
+90
+
+CONFIDENCE:
+90
+
+HELP / TOOLS BEFORE COMMITMENT:
+The distinction between checking and signaling was explained, followed by one fresh one-line raise
+form.
+
+EVALUATION:
+Conceptually correct at confidence 90. The learner independently composed the intended rule: check
+whether a value is not a string, then raise `TypeError` with a string-requirement message. Exact
+Python condition syntax and capitalization were not yet required and remain the next R1 step.
+
+RESULT:
+concept recovered; exact condition syntax and branch trace next
+
+PRIMARY BLOCKER:
+none conceptually; exact `isinstance`/`not` syntax is new
+
+REMEDIATION STATUS:
+advance one rung to a two-line condition-plus-raise trace
+
+PARENT EVIDENCE ID:
+EV-P5-RAISE-SYNTAX-235
+
+TRANSFER STATUS:
+pending fresh branch trace
+
+---
+
+## EV-P5-RAISE-BRANCH-237
+
+DATE: 2026-08-31
+
+BUILD PHASE:
+Phase 5 — Explicit Interfaces / Contracts
+
+IMPLEMENTATION TRIGGER:
+R1 branch trace after conceptual recovery in `EV-P5-RAISE-CONCEPT-236`.
+
+ACADEMIC SOURCE:
+`PY-ERRORS-EXCEPTIONS`; `PY-CONTROLFLOW-FUNCTIONS`
+
+DEEP SKILL:
+Evaluate a runtime type predicate, reverse it with `not`, and determine whether execution reaches an
+explicit `raise` statement.
+
+EXERCISE TYPE:
+SYNTAX_REMEDIATION
+
+SCAFFOLD RUNG:
+R1 — one type check and one conditional raise.
+
+PROMPT (verbatim):
+Yes, exactly. The valid Python spelling is:
+
+```python
+if not isinstance(name, str):
+    raise TypeError("name must be a string")
+```
+
+- `isinstance(name, str)` asks: “Is `name` a string?”
+- `not` reverses the answer.
+- If `name` is not a string, the indented `raise` runs.
+- Capitalization matters: `TypeError`, not `typeerror`.
+
+Now trace only this:
+
+```python
+name = 7
+
+if not isinstance(name, str):
+    raise TypeError("name must be a string")
+```
+
+```text
+Is name a string? =
+Does the raise line run? =
+Error kind =
+Error message =
+Confidence =
+```
+
+LEARNER FIRST COMMITTED ANSWER (verbatim):
+&#x20;no
+yes
+TypeError
+name must be a string
+100
+
+CONFIDENCE:
+100
+
+HELP / TOOLS BEFORE COMMITMENT:
+The `isinstance`, `not`, indentation, and exception capitalization syntax was explained immediately
+before the trace.
+
+EVALUATION:
+Correct at confidence 100. The learner identified that integer `7` is not a string, the negated
+condition is true, the raise line executes, and the exact exception type/message are `TypeError`
+and `name must be a string`.
+
+RESULT:
+correct
+
+PRIMARY BLOCKER:
+none observed at this rung
+
+REMEDIATION STATUS:
+one fresh opposite-branch trace with hints removed, then add state
+
+PARENT EVIDENCE ID:
+EV-P5-RAISE-CONCEPT-236
+
+TRANSFER STATUS:
+pending
+
+---
+
+## EV-P5-RAISE-OPPOSITE-238
+
+DATE: 2026-08-31
+
+BUILD PHASE:
+Phase 5 — Explicit Interfaces / Contracts
+
+IMPLEMENTATION TRIGGER:
+Fresh opposite-branch trace after `EV-P5-RAISE-BRANCH-237`.
+
+ACADEMIC SOURCE:
+`PY-ERRORS-EXCEPTIONS`; `PY-CONTROLFLOW-FUNCTIONS`
+
+DEEP SKILL:
+Recognize that valid input makes a negated validation condition false, skips the raise, and permits
+normal execution to continue.
+
+EXERCISE TYPE:
+SYNTAX_REMEDIATION
+
+SCAFFOLD RUNG:
+R2 — one branch followed by one assignment.
+
+PROMPT (verbatim):
+Fresh opposite branch:
+
+```python
+name = "Maya"
+
+if not isinstance(name, str):
+    raise TypeError("name must be a string")
+
+result = "accepted"
+```
+
+Without running it:
+
+```text
+Does the raise line run? =
+Does execution reach the result assignment? =
+result =
+Confidence =
+```
+
+LEARNER FIRST COMMITTED ANSWER (verbatim):
+no
+yes
+accpeted
+100\\
+
+CONFIDENCE:
+100
+
+HELP / TOOLS BEFORE COMMITMENT:
+Hints were removed after the prior successful invalid-input branch.
+
+EVALUATION:
+Correct at confidence 100. The string input makes the negated condition false, the raise is skipped,
+and the result assignment executes with value `"accepted"`. The spelling slip does not change the
+trace.
+
+RESULT:
+correct
+
+PRIMARY BLOCKER:
+none observed
+
+REMEDIATION STATUS:
+advance one rung to rejection before a list mutation
+
+PARENT EVIDENCE ID:
+EV-P5-RAISE-BRANCH-237
+
+TRANSFER STATUS:
+opposite branch passed; state trace next
+
+---
+
+SESSION PAUSE — 2026-08-31, DURING EXCEPTION REMEDIATION:
+
+Learner said: `can you commit and push and pasue i need to move locations`
+
+No product code has changed. The learner recovered the distinction between checking a condition and
+actively raising an explicitly named exception. Invalid-input and valid-input branch traces passed
+at confidence 100. The next R3 state trace was presented but not answered.
+
+Exact unanswered resume prompt:
+
+```python
+items = ["A"]
+value = 7
+
+if not isinstance(value, str):
+    raise TypeError("value must be a string")
+
+items.append(value)
+```
+
+At the exact moment the error is raised:
+
+```text
+Does items.append(value) run? =
+What is items? =
+Why? =
+Confidence =
+```
+
+Resume sequence:
+
+```text
+1. ask the unanswered state trace exactly as preserved above
+2. record the learner's first committed answer
+3. if correct, use one near-transfer with rejection before mutation
+4. rebuild to the Session record(7) pre-implementation prediction
+5. do not implement until exact error behavior and unchanged state are independently recovered
+```

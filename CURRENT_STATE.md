@@ -318,6 +318,30 @@ Still uncertain or due for later retrieval:
   writes go through `record`, which validates strings; mutable storage becomes internal; `history()`
   returns a copy without rescanning. The guarantee is limited to supported API paths. A product patch
   is now justified but has not been authorized or written.
+- The required pre-patch rejection prediction was partial at confidence 40
+  (`EV-P5-REJECTION-233`): `TypeError`, the pre-rejection `["diff A"]` snapshot, and uncaught
+  exception control-flow interruption were recognized, but exception message, process exit status,
+  post-rejection object state, return behavior, and snapshot contract were conflated or omitted.
+  Adaptive remediation descends to one caught-exception validation branch before implementation.
+- The caught-exception micro-trace was unreadable (`EV-P5-EXCEPTION-MICRO-234`) because it introduced
+  `try`, `raise`, `except`, exception binding, and inspection syntax together. Syntax-only help is
+  active at R0: read one `raise TypeError("...")` form before rebuilding control flow.
+- The first R0 raise-syntax read was partial at confidence 90 (`EV-P5-RAISE-SYNTAX-235`): the
+  learner identified `TypeError` but copied the modeled message instead of the fresh message and
+  asked whether `raise` checks or signals. Clarify that a condition checks while `raise` actively
+  signals the explicitly named exception, then use one fresh R0 line.
+- The raise/check concept was recovered at confidence 90 (`EV-P5-RAISE-CONCEPT-236`): the learner
+  independently proposed checking for a non-string and then raising `TypeError` with a requirement
+  message. Exact `isinstance`/`not` syntax and one branch trace are next.
+- The first exact condition-plus-raise trace passed at confidence 100 (`EV-P5-RAISE-BRANCH-237`):
+  integer `7` made the negated string check true and produced the exact `TypeError` and message.
+  One fresh opposite-branch trace with hints removed is next before adding state.
+- The fresh valid-input opposite branch passed at confidence 100 (`EV-P5-RAISE-OPPOSITE-238`): the
+  raise was skipped and the later assignment executed. Advance one rung to rejection before a list
+  mutation.
+- The next rejection-before-list-mutation trace was presented but not answered because the learner
+  needed to relocate. Resume with the exact preserved `items = ["A"]`, `value = 7` prompt; do not
+  reveal its answer or implement the Session patch first.
 
 Do not mark these concepts permanently mastered after one review sequence.
 
@@ -343,9 +367,10 @@ Do not repeat the completed Session audit, implicit-return remediation, or Tempe
 If implementation is authorized, first run the required pre-patch prediction for invalid input,
 error type, unchanged state after rejection, internal storage, and snapshot behavior.
 
-The learner requested a pre-implementation pause and authorized continuing in a new session. Resume
-at that prediction gate; do not repeat the completed contract audit or transfer, and do not write
-product code before the learner commits the predicted rejection behavior.
+The learner requested another pause while adaptive exception remediation was in progress. Resume at
+the exact unanswered `items = ["A"]`, `value = 7` rejection-before-mutation trace preserved in the
+Learning Ledger. Do not repeat the completed contract audit or completed raise-syntax work, and do
+not write product code before the learner rebuilds to and passes the Session rejection prediction.
 
 Continue Phase 5 as an intent/contract audit, not an automatic code patch:
 
