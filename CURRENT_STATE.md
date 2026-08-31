@@ -473,12 +473,57 @@ The reduced causal distinction was recovered at confidence 100 (`EV-CUM-FND-261D
 returns data, the caller reads it, and the callee does not directly mutate caller-local state. The
 required fresh target-level R6 return remains open. The learner paused to relocate; resume there.
 
+The fresh target-level R6 return passed at confidence 90 (`EV-CUM-FND-262`, grading/dashboard
+surface): dependency direction, per-item arguments, per-item returned labels including the `80`
+boundary, final accumulator, final result, and caller-owned mutation were all correct. Cumulative
+question 2 is CLOSED. Do not re-target the callee-return-versus-caller-mutation distinction as a
+primary objective; the learner has asked that it not be re-asked and it has now passed at target
+level. Next: cumulative question 3 — annotation versus runtime validation plus
+rejection-before-mutation, on a fresh non-Session, non-RetryPolicy surface.
+
+Cumulative question 3 was strong partial then closed (`EV-CUM-FND-263`, `EV-CUM-FND-263A`,
+TagBoard surface). Rejection-before-mutation, snapshot identity, and annotation-communicates-only
+were correct unprompted; three fields were omitted, including the value `add` evaluates to. On the
+narrowed completion prompt all three passed at confidence 90, with `None` produced as a FIRST
+answer rather than self-corrected — an improvement over `EV-P1-RETURN-100`. The live fragility is
+now field omission under wide multi-field prompts, not the return-versus-side-effect concept.
+Cumulative question 4 (tests as executable contracts) required an extended remediation chain
+(`EV-CUM-FND-264` through `EV-CUM-FND-265`) and then CLOSED on the fresh `Roster` surface. Recovered
+in the process:
+
+```text
+a green suite does not establish contract satisfaction
+an uncaught regression can be generated unaided (case-sensitive duplicate check)
+except ValueError does not catch TypeError
+an assertion that ignores the message does not protect the message
+```
+
+Two blockers were procedural, not conceptual, and recur across records: carrying a PREVIOUS
+scenario's outcome into a new one, and inserting a hypothetical call into the code under discussion.
+Both cleared whenever the full code was restated with no omissions. Prompt-design rule adopted: show
+code in full when asking for a verdict on it; do not describe candidate edits in prose.
+
+`try` / `except` / `pass` required syntax-only help at R0 (`EV-CUM-FND-265-SYNTAX`) and is now read
+correctly on both the raising and non-raising paths. The blocker there was reading past a `raise`
+line inside a `try`, not exception semantics.
+
+Cumulative question 5 (architecture timing and dependency direction) is OPEN and paused
+mid-remediation (`EV-CUM-FND-266`). Two fields passed: the import direction
+(`summarize.py` imports `classify`; `session.py` imports nothing of ours, verified against the
+files) and a concrete deferral downside (nothing recorded in a `Session` survives the process).
+Three fields are blocked and have no prior evidence record — reuse cost, the evidence that would
+justify persistence, and the reversal condition. Treat these as not-yet-taught, not forgotten.
+
+Resume at the file-copying micro-check with only the classify-alone and Session fields, then build
+reuse cost, justifying evidence, and reversal condition one at a time. Do not re-ask the deferral
+downside. Reset the foundation counter only after question 5 passes.
+
 ## Session-close fields
 
 ```text
 phase                       Phase 5 complete; cumulative foundation review in progress
-last knowledge gate         EV-CUM-FND-261D, reduced remediation passed at confidence 100
-next retrieval due          fresh target-level return for cumulative question 2
+last knowledge gate         EV-CUM-FND-265, cumulative question 4 passed; Q5 open and paused
+next retrieval due          cumulative question 5 resume, file-copying rung, remaining two fields
 next architecture reset     complete; next by time or major transition
 next implementation step    none until cumulative review passes; then specify Phase 6
 last published commit       current handoff — feat: enforce Session string contract

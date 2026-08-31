@@ -24345,3 +24345,1098 @@ Exact resume sequence:
 5. if incorrect, adapt down from the newly observed blocker
 6. do not begin Phase 6 until the cumulative review passes and the 3/3 counter resets
 ```
+
+---
+
+## EV-CUM-FND-262
+
+DATE: 2026-08-31
+
+BUILD PHASE:
+Cumulative foundation review after Phase 5 — Question 2, fresh target-level return
+
+ACADEMIC SOURCE:
+`PY-CONTROLFLOW-FUNCTIONS`; `MIT-6102-2026`
+
+DEEP SKILL:
+Trace values across a caller/callee boundary and distinguish a callee's returned value from
+caller-local mutation performed by the caller.
+
+EXERCISE TYPE:
+CUMULATIVE_RETRIEVAL
+
+SCAFFOLD RUNG:
+R6 — loop, cross-module function call, branch, and caller-local accumulator; hints removed.
+
+PROMPT (verbatim):
+Cumulative question 2 — fresh target-level return (R6), cross-module dependency and value flow
+
+```
+# grading.py
+def grade_score(score):
+    if score >= 80:
+        return "pass"
+
+    return "review"
+```
+
+```
+# dashboard.py
+from grading import grade_score
+
+
+def count_reviews(scores):
+    review_count = 0
+
+    for score in scores:
+        outcome = grade_score(score)
+
+        if outcome == "review":
+            review_count += 1
+
+    return review_count
+```
+
+Call:
+
+```
+result = count_reviews([92, 73, 80, 61])
+```
+
+Fill in every field:
+
+```
+Which module depends on which? =
+Arguments passed into grade_score, in order =
+Values returned by grade_score, in order =
+Final review_count =
+Final result =
+Which function directly mutates review_count? =
+How does grade_score influence the result without mutating review_count? =
+Confidence =
+```
+
+Answer the two "in order" fields item by item, one entry per input value.
+
+LEARNER FIRST COMMITTED ANSWER (verbatim):
+. ok so 92 goes through and returns pass and then that is not review so we move on 73 returns reivew and then that gets added to the count then we do 80 which returns pass so then nothing else happnes so then we move to 61 which returns reviwe which then adds 1 to the count so it returns 2 on the review_count and dashboard is dependent on grading.py, result = 2 , score returns a string whic h it read by count and then is put into a count but that is not directly mutating the count(do not ask about this again i will have you skip the question altogether), 90
+
+CONFIDENCE:
+90
+
+EVALUATION:
+All fields correct. Arguments enumerated per item as `92`, `73`, `80`, `61`; returns enumerated per
+item as `pass`, `review`, `pass`, `review`, including the `80` boundary where `>=` yields `pass`.
+Final `review_count` = 2 and `result` = 2. Dependency direction correct: `dashboard.py` depends on
+`grading.py`. Mutation ownership correct and unprompted: `grade_score` returns a string that the
+caller reads, and the caller's own branch performs the increment; `grade_score` does not directly
+mutate `review_count`.
+
+The prior per-item enumeration habit did not recur: the learner traced each input separately rather
+than answering at the group level. Confidence 90 on a fully correct trace continues the established
+under-rating pattern; not raised with the learner.
+
+RESULT:
+passed; cumulative question 2 CLOSED
+
+PRIMARY BLOCKER:
+none
+
+REMEDIATION STATUS:
+none required
+
+PARENT EVIDENCE ID:
+EV-CUM-FND-261
+
+TRANSFER STATUS:
+complete — fresh target-level return satisfied after remediation chain 261A–261D
+
+LEARNER INSTRUCTION RECORDED:
+The learner asked not to be asked the callee-versus-caller-mutation distinction again. It has now
+passed at target level; do not re-target it as a primary objective.
+
+---
+
+## EV-CUM-FND-263
+
+DATE: 2026-08-31
+
+BUILD PHASE:
+Cumulative foundation review after Phase 5 — Question 3
+
+ACADEMIC SOURCE:
+`PY-CONTRACTS-VALIDATION`; `MIT-6102-2026`
+
+DEEP SKILL:
+Distinguish communicated contract (annotation) from enforced contract (runtime validation), and
+trace rejection-before-mutation plus snapshot identity across a call sequence.
+
+EXERCISE TYPE:
+CUMULATIVE_RETRIEVAL
+
+SCAFFOLD RUNG:
+R6 — class, annotated methods, runtime guard, rejected write, copied snapshot; hints removed;
+fresh non-Session, non-RetryPolicy surface.
+
+PROMPT (verbatim):
+Cumulative question 3 — annotation versus runtime validation, and rejection before mutation
+
+```
+# board.py
+class TagBoard:
+    def __init__(self):
+        self._tags: list[str] = []
+
+    def add(self, tag: str) -> None:
+        if not isinstance(tag, str):
+            raise TypeError("tag must be a string")
+
+        self._tags.append(tag)
+
+    def tags(self) -> list[str]:
+        return list(self._tags)
+```
+
+Call sequence, run in order:
+
+```
+board = TagBoard()
+board.add("bug")
+board.add(5)
+snapshot = board.tags()
+snapshot.append("leaked")
+```
+
+Assume the `board.add(5)` line is wrapped so the program keeps running after it.
+
+Fill in every field:
+
+```
+What board.add("bug") returns =
+What happens on board.add(5), exactly =
+Value of board._tags immediately after the add(5) line =
+Value of snapshot at the moment it is created =
+Value of snapshot after its append =
+Value of board._tags at the very end =
+Which line enforces the string rule at runtime =
+What the tag: str annotation does at runtime if the isinstance check were deleted =
+Confidence =
+```
+
+Answer each field separately rather than describing the run as a whole.
+
+LEARNER FIRST COMMITTED ANSWER (verbatim):
+. when we add bug it appends bug to the board instance list, when it calls board add 5 it raises the TypeError and should end execution there and it never gets appended to board, but if we keep going, snapshot = [bug] and then appends to equal [bug,leaked] but to be clear this is not the list that board points to. 90 the tag would do nothing it is there for communication only
+
+CONFIDENCE:
+90
+
+EVALUATION:
+Strong partial. Correct: `add("bug")` appends to the instance list; `add(5)` raises `TypeError`
+before any append; `snapshot` is `["bug"]` at creation and `["bug", "leaked"]` after its own append;
+snapshot identity is distinct from the list the board holds — volunteered unprompted; the annotation
+communicates only and enforces nothing at runtime.
+
+Three fields omitted rather than answered incorrectly:
+
+```text
+1  the RETURN VALUE of add("bug")            described the side effect, not what the call evaluates to
+2  the exact value of board._tags after add(5) and at the end
+3  which line performs the runtime enforcement
+```
+
+Omission 1 is the recurring `print_vs_return` pattern: side effect reported in place of the returned
+value, previously seen at `EV-P1-RETURN-100` and `EV-P3-LEAK-095-CLOSE`. This is an omission under a
+multi-field prompt, not a stated misconception, so remediation is a narrow field request rather than
+a concept descent.
+
+RESULT:
+partial; question 3 remains open pending the three omitted fields
+
+PRIMARY BLOCKER:
+RETURN_VALUE_VS_SIDE_EFFECT reported as an omission under multi-field load
+
+REMEDIATION STATUS:
+request the three omitted fields directly at the same rung; do not re-teach rejection-before-mutation
+or snapshot identity, both of which passed
+
+---
+
+## EV-CUM-FND-263A
+
+DATE: 2026-08-31
+
+BUILD PHASE:
+Cumulative foundation review after Phase 5 — Question 3 completion
+
+ACADEMIC SOURCE:
+`PY-CONTRACTS-VALIDATION`; `MIT-6102-2026`
+
+DEEP SKILL:
+Report the value a call evaluates to, distinct from its side effect; name the exact enforcing line.
+
+EXERCISE TYPE:
+CUMULATIVE_RETRIEVAL
+
+SCAFFOLD RUNG:
+R6 — same rung as parent; only the omitted fields requested, no scaffolding added.
+
+PROMPT (verbatim):
+Cumulative question 3, completion — three unanswered fields
+
+```
+board = TagBoard()
+board.add("bug")
+board.add(5)
+snapshot = board.tags()
+snapshot.append("leaked")
+```
+
+Fill in every field:
+
+```
+The value the expression board.add("bug") evaluates to =
+Exact value of board._tags at the very end, written as a list =
+The exact line of TagBoard that enforces the string rule at runtime =
+Confidence =
+```
+
+For the first field: not what it does to the list — what you would get if you wrote
+`x = board.add("bug")` and then looked at `x`.
+
+LEARNER FIRST COMMITTED ANSWER (verbatim):
+. board.add returns None, [bug], if nto statment is the line that validates for a string , 90
+
+CONFIDENCE:
+90
+
+EVALUATION:
+All three correct. `add` evaluates to `None`; `board._tags` is `["bug"]` at the end, the rejected
+write having left it unchanged; the `if not isinstance(tag, str)` guard is the runtime enforcement.
+
+Significant: `None` was produced as the FIRST committed answer, unaided and without self-correction.
+At `EV-P1-RETURN-100` and `EV-P3-LEAK-095-CLOSE` the first instinct was the side effect and the
+correct value arrived only on reversal. Under a narrowed single-field prompt the retrieval is now
+direct. The remaining fragility is field omission under multi-field load, not the concept.
+
+RESULT:
+passed; cumulative question 3 CLOSED
+
+PRIMARY BLOCKER:
+none
+
+REMEDIATION STATUS:
+none required; keep watching for omitted fields on wide multi-field prompts
+
+PARENT EVIDENCE ID:
+EV-CUM-FND-263
+
+TRANSFER STATUS:
+complete within question 3
+
+---
+
+## EV-CUM-FND-264
+
+DATE: 2026-08-31
+
+BUILD PHASE:
+Cumulative foundation review after Phase 5 — Question 4
+
+ACADEMIC SOURCE:
+`PY-TESTING-CONTRACTS`; `MIT-6102-2026`
+
+DEEP SKILL:
+Read a test as an executable contract: trace the failure a regression produces, name the guarantee
+the test protects, and name a realistic break the test does NOT cover.
+
+EXERCISE TYPE:
+CUMULATIVE_RETRIEVAL
+
+SCAFFOLD RUNG:
+R6 — class, test, injected regression, aliasing versus copying, plus coverage-limit reasoning.
+
+PROMPT (verbatim):
+Cumulative question 4 — tests as executable contracts
+
+TagBoard as defined in question 3, with `test_snapshot_is_isolated` asserting
+`board.tags() == ["bug"]` after `snapshot.append("leaked")`, and `tags` edited to
+`return self._tags`.
+
+Fill in every field:
+
+```
+Value of snapshot at the moment it is created, after the edit =
+Value of board._tags just before the assert runs, after the edit =
+Left side of the assert comparison, after the edit =
+Does test_snapshot_is_isolated pass or fail after the edit =
+The one behavior guarantee this test exists to protect =
+One realistic wrong edit to add that this test would NOT catch =
+Confidence =
+```
+
+The last field asks for a genuine break the suite would let through, not a break it catches.
+
+LEARNER FIRST COMMITTED ANSWER (verbatim):
+. the developer would be doing everyone dirty, if you append that it will mutate the list for the self instance and then the source of truth is not incorrect, so they all ppint to the same list now so when you append snapshot it also appends board, at the end it is an assertion error because board is now [bug,leaked] same as snapshot, 90
+
+CONFIDENCE:
+90
+
+EVALUATION:
+Correct on every traced field. The edit returns the stored list itself, so `snapshot` and
+`board._tags` are the same object; appending through the snapshot mutates the board's state;
+`board.tags()` therefore evaluates to `["bug", "leaked"]` and the assertion fails with an
+`AssertionError`. Aliasing-versus-copying was retrieved unaided on a regression the learner had not
+previously seen injected.
+
+Two fields omitted:
+
+```text
+1  the guarantee the test exists to protect, stated as a guarantee
+2  a realistic wrong edit the test would NOT catch
+```
+
+Field 2 is the objective of the question — coverage limits — and was not attempted. The omission
+pattern from `EV-CUM-FND-263` recurred on a wide multi-field prompt: traced/computed fields are
+answered, reflective fields are dropped. Remediate by narrowing the prompt, not by lowering the
+conceptual rung.
+
+RESULT:
+partial; question 4 remains open pending the guarantee and the uncaught-break fields
+
+PRIMARY BLOCKER:
+REFLECTIVE_FIELDS_DROPPED_UNDER_MULTI_FIELD_LOAD; coverage-limit reasoning unevaluated
+
+REMEDIATION STATUS:
+request the two omitted fields alone at the same rung
+
+---
+
+## EV-CUM-FND-264A
+
+DATE: 2026-08-31
+
+BUILD PHASE:
+Cumulative foundation review after Phase 5 — Question 4 completion attempt
+
+EXERCISE TYPE:
+CUMULATIVE_RETRIEVAL
+
+SCAFFOLD RUNG:
+R6 — narrowed to the two omitted reflective fields, rung unchanged.
+
+PROMPT (verbatim):
+Cumulative question 4, completion — two unanswered fields
+
+```
+The guarantee this test protects, stated as one sentence about TagBoard's behavior =
+One realistic wrong edit to the add method that this test would still pass despite =
+Confidence =
+```
+
+For the second field: change `add` in some way a real developer plausibly might, such that `add` is
+now broken but this exact test still reports success. Name the edit concretely.
+
+LEARNER FIRST COMMITTED ANSWER (verbatim):
+. this will protect aginst an unauthorized append but as the list gets bigger and bigger this will be harder to test for/find the error, i am not sure, 90
+
+CONFIDENCE:
+90
+
+EVALUATION:
+Field 1 partial: "protects against an unauthorized append" is directionally right but states the
+attack rather than the guarantee — it does not say that the returned snapshot is a copy whose
+mutation cannot reach stored state.
+
+Field 2 not answered; the learner explicitly said "i am not sure". This is a genuine block on
+coverage-limit reasoning — generating an uncaught regression requires reasoning about what the test
+never exercises, which is a different move from tracing what it does exercise. No prior evidence
+record covers this skill; it is new, not forgotten.
+
+RESULT:
+blocked; descend one rung
+
+PRIMARY BLOCKER:
+CANNOT_GENERATE_UNCAUGHT_REGRESSION — recognition not yet available, so generation is premature
+
+REMEDIATION STATUS:
+descend from generation to judgment: supply one concrete candidate edit and require a line-by-line
+verdict on whether this exact test still passes; climb back to generation afterward
+
+PARENT EVIDENCE ID:
+EV-CUM-FND-264
+
+---
+
+## EV-CUM-FND-264B
+
+DATE: 2026-08-31
+
+BUILD PHASE:
+Cumulative foundation review after Phase 5 — Question 4 remediation, judgment rung
+
+EXERCISE TYPE:
+CUMULATIVE_RETRIEVAL
+
+SCAFFOLD RUNG:
+R5 — judge a supplied candidate edit (guard deleted from `add`, `tags` restored to copying form)
+against an unchanged test.
+
+PROMPT (verbatim):
+Question 4 remediation — judge one specific edit. `add` becomes `self._tags.append(tag)` with the
+`isinstance` guard deleted; `tags` is the correct copying form; the test is unchanged.
+
+```
+Every argument this test passes to add =
+Does any line of this test pass a non-string to add =
+Does the deleted guard change anything that this test executes =
+Pass or fail after the edit =
+Is add still correct after the edit =
+Confidence =
+```
+
+LEARNER FIRST COMMITTED ANSWER (verbatim):
+. yes, no but it could get awasy with it until the assertion error, yes now we do not run a check for strings unti lthe assertion error, pass after edit but before the assert, no because now the append goes through but the assertion still throws so we have to manually delete the unwanted entry instead of it being cauht beforehand, 90
+
+CONFIDENCE:
+90
+
+EVALUATION:
+Incorrect. The learner carried the FAILING outcome of the previous scenario (the aliasing edit to
+`tags`, `EV-CUM-FND-264`) into this scenario, where `tags` is correct and only the guard is deleted.
+The answer repeatedly asserts an assertion error occurs.
+
+Field-level:
+
+```text
+1  arguments enumerated       not answered as an enumeration; "yes" given to a "which" field
+2  non-string passed          "no" is correct, then contradicted by "until the assertion error"
+3  guard affects execution    incorrect; states the check now happens at the assert
+4  pass or fail               self-contradictory: "pass after edit but before the assert"
+5  add still correct          verdict "no" is right, but the stated reason is the false assertion error
+```
+
+The verdict on field 5 cannot be credited: it rests on the same false failure. The underlying
+confusion is scenario carry-over plus a belief that an `assert` performs type checking.
+
+RESULT:
+incorrect; descend one further rung
+
+PRIMARY BLOCKER:
+SCENARIO_CARRYOVER — outcome of a prior edit applied to a new edit; assert treated as a type check
+
+REMEDIATION STATUS:
+isolate the assert alone: one two-line comparison, no guards, no edits, no test vocabulary; then
+rebuild to the guard question
+
+PARENT EVIDENCE ID:
+EV-CUM-FND-264A
+
+---
+
+## EV-CUM-FND-264C
+
+DATE: 2026-08-31
+
+BUILD PHASE:
+Cumulative foundation review after Phase 5 — Question 4 remediation, assert isolation
+
+EXERCISE TYPE:
+CUMULATIVE_RETRIEVAL
+
+SCAFFOLD RUNG:
+R2 — bare `assert left == right` on two literal lists; no class, no test, no guard.
+
+PROMPT (verbatim):
+Micro-check — what an assert compares
+
+```
+left = ["bug"]
+right = ["bug"]
+
+assert left == right
+```
+
+```
+Does this assert raise anything, yes or no =
+What the == is comparing here =
+Now suppose left is ["bug"] and right is ["bug", "leaked"] — does the assert raise =
+Confidence =
+```
+
+LEARNER FIRST COMMITTED ANSWER (verbatim):
+no, the contents and the position of each of the contents, yes it should, 60
+
+CONFIDENCE:
+60
+
+EVALUATION:
+All three correct, unaided. Equal contents raise nothing; `==` on lists compares contents in order
+— the learner volunteered ordering without being asked; unequal contents raise. Confirms the assert
+model itself was never the defect: the failure at `EV-CUM-FND-264B` was scenario carry-over.
+Confidence 60 on a fully correct answer is the lowest of the session and continues the under-rating
+pattern.
+
+RESULT:
+passed at the reduced rung
+
+PRIMARY BLOCKER:
+none at R2
+
+PARENT EVIDENCE ID:
+EV-CUM-FND-264B
+
+---
+
+## EV-CUM-FND-264D
+
+DATE: 2026-08-31
+
+BUILD PHASE:
+Cumulative foundation review after Phase 5 — Question 4 remediation, near-transfer
+
+EXERCISE TYPE:
+CUMULATIVE_RETRIEVAL
+
+SCAFFOLD RUNG:
+R4 — same assert, values now produced by guard-deleted `add` and copying `tags`.
+
+PROMPT (verbatim):
+`add` has no guard; `tags` returns `list(self._tags)`.
+
+```
+board = TagBoard()
+board.add("bug")
+
+snapshot = board.tags()
+snapshot.append("leaked")
+
+assert board.tags() == ["bug"]
+```
+
+```
+Value of board._tags after board.add("bug") =
+Value of board._tags after snapshot.append("leaked") =
+Left side of the == at the assert =
+Right side of the == at the assert =
+Does this assert raise, yes or no =
+Confidence =
+```
+
+LEARNER FIRST COMMITTED ANSWER (verbatim):
+["bug"], ["bug"], ["bug"], ["bug"], no, 90
+
+CONFIDENCE:
+90
+
+EVALUATION:
+All five correct. Stored state is `["bug"]` throughout because the snapshot is a copy; both sides of
+the `==` are `["bug"]`; the assert does not raise. Scenario carry-over is cleared — the learner held
+this edit separate from the aliasing edit and produced the opposite, correct outcome.
+
+RESULT:
+passed; climb back to the target-level judgment and generation fields
+
+PRIMARY BLOCKER:
+none
+
+PARENT EVIDENCE ID:
+EV-CUM-FND-264B
+
+TRANSFER STATUS:
+near-transfer complete
+
+---
+
+## EV-CUM-FND-264E
+
+DATE: 2026-08-31
+
+BUILD PHASE:
+Cumulative foundation review after Phase 5 — Question 4 restored target
+
+EXERCISE TYPE:
+CUMULATIVE_RETRIEVAL
+
+SCAFFOLD RUNG:
+R6 — target-level judgment plus the guarantee statement, hints removed.
+
+PROMPT (verbatim):
+Question 4 restored — the guard-deleted edit, judged. `add` shown as
+`self._tags.append(tag)`; `test_snapshot_is_isolated` shown unchanged; `tags` NOT restated.
+
+```
+Does test_snapshot_is_isolated pass after this edit =
+Is add still correct after this edit =
+The one sentence explaining how both of those answers can be true at once =
+The guarantee this test protects, stated as one sentence about TagBoard's behavior =
+Confidence =
+```
+
+LEARNER FIRST COMMITTED ANSWER (verbatim):
+. no, yes, it still appends any pythoin object in add so it will run but then when we go to execute is isolated we run into the assert when we re appending the same list as self, this test protects against appneding too many objects to the self list, 70
+
+CONFIDENCE:
+70
+
+EVALUATION:
+Incorrect, and a regression against `EV-CUM-FND-264D`, where the learner traced this exact edit
+correctly and concluded the assert does not raise. Here fields 1 and 2 are both inverted and the
+aliasing language ("appending the same list as self") returns even though `tags` is the copying
+form.
+
+Instructional cause identified: the restored prompt showed only the edited `add` and the test and
+did NOT restate `tags`, so the aliased version from `EV-CUM-FND-264` was plausibly still assumed in
+effect. The scenario was ambiguous in the prompt, not merely misread. Field 4 also states the
+guarantee as a quantity concern ("too many objects") rather than as isolation of the returned
+snapshot.
+
+RESULT:
+incorrect; re-present with complete unambiguous state rather than descending the concept
+
+PRIMARY BLOCKER:
+SCENARIO_STATE_AMBIGUITY — which version of `tags` is in effect was not pinned by the prompt
+
+REMEDIATION STATUS:
+restate the entire class verbatim, require the learner to name which line performs the copy before
+judging, then re-ask the two verdicts and the guarantee
+
+PARENT EVIDENCE ID:
+EV-CUM-FND-264A
+
+---
+
+## EV-CUM-FND-264F
+
+DATE: 2026-08-31
+
+BUILD PHASE:
+Cumulative foundation review after Phase 5 — Question 4, unambiguous restatement
+
+EXERCISE TYPE:
+CUMULATIVE_RETRIEVAL
+
+SCAFFOLD RUNG:
+R6 — complete class restated verbatim; copy-line identification added before the verdicts.
+
+PROMPT (verbatim):
+Question 4 restored — complete class, nothing omitted. Full `TagBoard` shown with
+`add` = `self._tags.append(tag)` and `tags` = `return list(self._tags)`; test unchanged.
+
+```
+Which line of this class makes a copy =
+Can appending to snapshot reach board._tags in this version =
+Does test_snapshot_is_isolated pass after this edit =
+Is add still correct after this edit =
+One sentence explaining how both of those last two answers hold at once =
+Confidence =
+```
+
+LEARNER FIRST COMMITTED ANSWER (verbatim):
+. self._tags: list[str] = []
+no
+yes
+yes
+becasue you are adding back in the copy list so snapshot gets a copy that is not the same pointed to as self 
+90
+
+CONFIDENCE:
+90
+
+EVALUATION:
+Three of five correct. Scenario carry-over is resolved: with the class fully stated, the learner
+correctly answered that the snapshot cannot reach stored state and that the test PASSES — the
+inversion at `EV-CUM-FND-264E` was caused by the omitted `tags` body, confirming the instructional
+cause recorded there rather than a conceptual defect.
+
+Two misses:
+
+```text
+1  copy line located as `self._tags: list[str] = []` in __init__, not `return list(self._tags)`
+   in tags. The field-5 sentence nonetheless describes the copy correctly, so the mechanism is
+   held while the line attribution is wrong.
+2  "Is add still correct" answered yes. The edit deleted the runtime guard, so add no longer
+   honors the contract it previously enforced. Answering yes collapses the target distinction:
+   a passing test does not establish that the code is correct.
+```
+
+Miss 2 is the objective of question 4 and remains unrecovered.
+
+RESULT:
+partial; descend to the coverage-gap distinction alone
+
+PRIMARY BLOCKER:
+PASSING_TEST_TREATED_AS_PROOF_OF_CORRECTNESS
+
+REMEDIATION STATUS:
+isolate one behavior the guard used to reject and ask what the edited class now does with it, then
+ask whether the test exercises that input at all
+
+PARENT EVIDENCE ID:
+EV-CUM-FND-264E
+
+---
+
+## EV-CUM-FND-264G
+
+DATE: 2026-08-31
+
+BUILD PHASE:
+Cumulative foundation review after Phase 5 — Question 4 remediation chain, coverage gap
+
+EXERCISE TYPE:
+CUMULATIVE_RETRIEVAL
+
+SCAFFOLD RUNG:
+Descending chain R6 -> R2 -> R1, then reassembly.
+
+PROMPTS AND LEARNER FIRST COMMITTED ANSWERS (verbatim, in order):
+
+1. Copy-line repair, unprompted by a new question:
+   LEARNER: `eturn list(self._tags) this line`
+   Repairs the `EV-CUM-FND-264F` misattribution to `__init__`. Correct line.
+
+2. Micro-check, `board.add(5)` under original versus edited `add`, four fields:
+   LEARNER: `. ok but if oyu added 5 then the assertion would still throw because then it becomes [bug,5], 90`
+   Partial. `["bug", 5]` under the edited `add` is correct. The learner again inserted the call
+   INTO `test_snapshot_is_isolated`, which the prompt had placed outside it.
+
+3. Reading check — every value the test passes to `add`:
+   LEARNER: `. just bug is passed to add, if you mean what i can append with add if you remove the if not statment then any pythin object othersie just a string object, non of them are number 90`
+   Correct: only `"bug"`; zero numbers.
+
+4. Reassembly — does the test detect the deleted guard; is the edited `add` correct:
+   LEARNER: `. no
+   if you add 5 then add will pass but i am talking about is isolated becasue that will throw an assertion error, becasue we do not have a vaidator for add yet, 100`
+   Field 1 correct: the test does not detect the deletion. Field 3 substantially correct: there is
+   no validator. Field 2 again displaced by the inserted-call hypothetical.
+
+5. Single-concept contract check — does the edited `add` reject a non-string; does it satisfy the
+   stated contract:
+   LEARNER: `no, no, 100`
+   Both correct.
+
+EVALUATION:
+The coverage-gap distinction is now assembled from the learner's own established facts: the edited
+`add` appends anything; the test passes only `"bug"`; the test therefore passes; the edited `add`
+nevertheless violates its contract.
+
+The persistent obstacle across this chain was NOT the concept but a habit of importing a
+hypothetical call into the test under discussion. The hypothetical the learner kept raising is
+itself true — inserting `board.add(5)` before the assert would make it fail — but it answers a
+different scenario than the one posed. Once the contract was measured directly against the edited
+method with no test in the frame, both verdicts were immediate and correct at confidence 100.
+
+RESULT:
+blocker recovered at the reduced rung; fresh target-level return still required to close question 4
+
+PRIMARY BLOCKER:
+HYPOTHETICAL_INSERTED_INTO_THE_SCENARIO_UNDER_TEST — scope of the presented code not held fixed
+
+REMEDIATION STATUS:
+recovered; require a fresh R6 surface with an explicit "as written" instruction, including the
+originally blocked generation field
+
+PARENT EVIDENCE ID:
+EV-CUM-FND-264F
+
+---
+
+## EV-CUM-FND-265-SYNTAX
+
+DATE: 2026-08-31
+
+BUILD PHASE:
+Cumulative foundation review after Phase 5 — syntax-only help invoked during Question 4 fresh target
+
+ACADEMIC SOURCE:
+`PY-EXCEPTIONS-CONTROLFLOW`
+
+DEEP SKILL:
+Read `try` / `except <ExceptionType>` / `pass` as control flow: which statements run, which are
+skipped, and where execution resumes.
+
+EXERCISE TYPE:
+SYNTAX_ONLY_HELP
+
+SCAFFOLD RUNG:
+R0 chain, learner-requested. The Roster target was suspended before any of its fields were answered.
+
+SEQUENCE AND LEARNER FIRST COMMITTED ANSWERS (verbatim, in order):
+
+1. Learner request: `. isolate that syntax please` — syntax-only mode entered; Roster problem
+   suspended per `CLAUDE.md`.
+
+2. Learner reading-back question: `so if we run a and there is an error then it runs b instead and
+   if b has an error then we stop execution altogther and throw the error?`
+   Substantially correct; narrowed to type matching — `B` runs only for the named exception type.
+
+3. Learner follow-up: `so if it is not the error we expect then execution stops?`
+   Correct for that block; clarified that the error propagates outward and stops the program only
+   if nothing further out handles it.
+
+4. First R0 prediction attempt:
+   LEARNER: `. i have no idea what any of this means, it will print start then we try to print a
+   there is no error so we print b since there is no value error we do not pint c and then print
+   done, 10`
+   Incorrect. The `raise ValueError("boom")` line inside the `try` was read past entirely
+   ("there is no error"). Blocker is the raise line, not `try`/`except`. Confidence 10, the
+   session's lowest, correctly signalled the block.
+
+5. Descent to three lines with no `try`:
+   LEARNER: `. so a is printed then boom is printed and then we move to print c and then print
+   done70`
+   Incorrect, and carried `C`/`done` in from the previous snippet, which contained neither.
+
+6. Two-field isolation of the raise line alone:
+   LEARNER: `i would assume yes` / `it stops right there,` / `90`
+   Second field correct: execution stops at the raise. First field corrected directly — the
+   message appears only as part of an error report, and not at all when caught.
+
+7. Rebuilt R0 prediction:
+   LEARNER: `. start
+   c
+   done
+   90`
+   `B` correctly excluded and `C` correctly included; `A` omitted.
+
+8. Narrowed to the line before the raise:
+   LEARNER: `. so then it is
+   start
+   a
+   c
+   done
+   100`
+   Correct and complete.
+
+EVALUATION:
+The `try` / `except` form is now readable: statements before the raise execute, the raise ends the
+`try` block, a matching `except` body runs, and execution resumes after the block. The recurring
+obstacle across this chain was carry-over of a previous snippet's content into a new one, the same
+habit recorded at `EV-CUM-FND-264B` and `EV-CUM-FND-264G`, not a defect in exception semantics.
+
+RESULT:
+syntax recovered at R0
+
+PRIMARY BLOCKER:
+recovered: RAISE_LINE_READ_PAST inside a `try`
+
+REMEDIATION STATUS:
+one fresh same-form read on the no-exception path, then restore the Roster target unchanged
+
+PARENT EVIDENCE ID:
+EV-CUM-FND-264
+
+---
+
+## EV-CUM-FND-265
+
+DATE: 2026-08-31
+
+BUILD PHASE:
+Cumulative foundation review after Phase 5 — Question 4 fresh target and closure
+
+ACADEMIC SOURCE:
+`PY-TESTING-CONTRACTS`; `MIT-6102-2026`
+
+DEEP SKILL:
+Read a test as an executable contract on a fresh surface: trace it, judge whether a regression is
+caught, recognize that a green suite does not establish contract satisfaction, and name uncaught
+breaks.
+
+EXERCISE TYPE:
+CUMULATIVE_RETRIEVAL
+
+SCAFFOLD RUNG:
+R6 — fresh `Roster` surface with two guards, a `try`/`except` test, deletion judgment, plus
+generation and recognition of uncaught regressions.
+
+PROMPT (verbatim):
+Fresh target for question 4 — Roster. Full `roster.py` with `sign_up` enforcing `isinstance` and a
+duplicate check, `names()` returning `list(self._names)`, and `test_duplicate_is_rejected` using
+`try` / `except ValueError` / `pass` then asserting `roster.names() == ["ana"]`.
+
+```
+Value of roster._names when the test finishes =
+Does test_duplicate_is_rejected pass as written =
+Now delete the isinstance guard from sign_up. Does the test still pass =
+Is sign_up still correct after that deletion =
+One realistic wrong edit to sign_up that this test WOULD catch =
+One realistic wrong edit to sign_up that this test would NOT catch =
+Confidence =
+```
+
+LEARNER FIRST COMMITTED ANSWER (verbatim):
+. it will pass, [ana], it passes the first time we sign ana up but the second time it throws the value error whic his expected, no the test will be an assertion error because nothing will catch the duplicate so it will add adn then the assertion error will throw, yes sign up is still correct, it catches if you put a number in to sign up, it does not check upper cases so i could put ANA and that would pass, 90
+
+CONFIDENCE:
+90
+
+EVALUATION:
+Mixed, with the previously blocked skill now present.
+
+Correct on first commit: final state `["ana"]`; the test passes as written, with the correct
+mechanism — the first sign-up succeeds, the second raises `ValueError`, which the `except` catches.
+
+Field 6 — the generation field that was blocked at `EV-CUM-FND-264A` — was answered unaided with a
+genuine uncaught gap: `sign_up` is case-sensitive, so `"ANA"` is accepted as distinct from `"ana"`
+and no test covers it. This is the skill the whole remediation chain targeted.
+
+Fields 3 and 4 were wrong because the learner read the deletion as removing BOTH guards
+(self-diagnosed immediately afterward: "i thought you were removing both guards"). Field 5 named a
+behavior rather than an edit.
+
+REMEDIATION AND RECOVERY (verbatim answers in order):
+
+1. Which-guard narrowing, duplicate check shown still present:
+   LEARNER: `. yes, i thought you were removing both guards, still throws the value error, yes still passes, 90`
+   All three correct.
+
+2. Restored target fields:
+   LEARNER: `. no it still will fail the contract becasue i ccan put any python object init, no usre, 70`
+   Field 1 correct and is the objective of question 4: with the type guard gone the suite is green
+   while `sign_up` violates its contract. Field 2 blocked.
+
+3. Recognition rung, three fully written candidate edits judged against the unchanged test — the
+   learner asked for the edits to be shown as code rather than described in prose, and the prompt
+   was reissued that way:
+   LEARNER: `fail, fail it is expecting a valueerror, pass, 80`
+   All three correct. Deleting the duplicate check fails; raising `TypeError` instead of
+   `ValueError` fails because `except ValueError` does not match it; changing only the message
+   passes because no assertion inspects the message.
+
+RESULT:
+passed; cumulative question 4 CLOSED
+
+PRIMARY BLOCKER:
+none remaining; earlier blockers PASSING_TEST_TREATED_AS_PROOF_OF_CORRECTNESS and
+CANNOT_GENERATE_UNCAUGHT_REGRESSION both recovered
+
+REMEDIATION STATUS:
+complete
+
+PARENT EVIDENCE ID:
+EV-CUM-FND-264
+
+TRANSFER STATUS:
+complete — fresh surface, both catch directions, generation and recognition
+
+NOTE ON PROMPT DESIGN:
+Two failures in this question traced to prompt ambiguity rather than learner error: omitting the
+`tags` body at `EV-CUM-FND-264E`, and describing candidate edits in prose here. State code in full
+when asking for a verdict on it.
+
+---
+
+## EV-CUM-FND-266
+
+DATE: 2026-08-31
+
+BUILD PHASE:
+Cumulative foundation review after Phase 5 — Question 5, opened and paused
+
+ACADEMIC SOURCE:
+`SE-ARCH-EVIDENCE`; `DESIGN_REVIEW_RUBRIC`
+
+DEEP SKILL:
+Justify architecture timing from actual code and constraints: dependency direction, reuse cost, the
+evidence that would justify adding a layer, a real downside of deferral, and a reversal condition.
+
+EXERCISE TYPE:
+CUMULATIVE_RETRIEVAL
+
+SCAFFOLD RUNG:
+R6 — oral-defense form over the real repository.
+
+PROMPT (verbatim):
+Cumulative question 5 — architecture timing and dependency direction, over the actual three modules
+with no database, HTTP API, UI, or persistence.
+
+```
+Which of these three modules imports which =
+Which module would be hardest to reuse if summarize.py imported session.py =
+Name one concrete thing that would have to become true before adding persistence is justified =
+State one real downside of having deferred persistence this long =
+Under what specific condition would deferring it have been the wrong call =
+Confidence =
+```
+
+LEARNER FIRST COMMITTED ANSWER (verbatim):
+. summarize dpeends/imports on classify
+no idea
+idk
+we cannot track the instance sessions we have already created we are clean slate everytime
+idk
+80
+
+CONFIDENCE:
+80
+
+EVALUATION:
+Two of five answered, both correct.
+
+Import direction correct and verified against the files during the session: `summarize.py` contains
+`from classify import classify_diff_line`; `session.py` and `classify.py` import nothing of ours.
+
+The deferral downside is correct and concrete rather than generic: nothing recorded in a `Session`
+survives the process, so every run starts from a clean slate. This is the actual consequence of the
+current design, not a textbook statement.
+
+Three fields blocked: reuse cost under a hypothetical dependency, the evidence that would justify
+persistence, and the reversal condition. Architecture-justification vocabulary is the least
+practiced material in the review; treat these as not-yet-taught rather than forgotten.
+
+REMEDIATION ATTEMPTED:
+Descended to a file-copying micro-check with no architecture vocabulary:
+
+```
+To use summarize_diff there, which of our files must you copy =
+To use classify_diff_line alone there, which of our files must you copy =
+To use Session there, which of our files must you copy =
+```
+
+LEARNER FIRST COMMITTED ANSWER (verbatim):
+. summarize adn classify tracel together session can be alone for now, i am not sure, i am not sure, i am not sure, can we pcik this up after i eat dinner, commit and push , 20, and pasue
+
+CONFIDENCE:
+20
+
+EVALUATION OF REMEDIATION:
+Partially correct before the pause. `summarize.py` and `classify.py` travel together and `Session`
+stands alone — both correct. The learner then declined the remaining fields and requested a pause.
+
+RESULT:
+question 5 OPEN and paused mid-remediation; no answer revealed
+
+PRIMARY BLOCKER:
+ARCHITECTURE_JUSTIFICATION_VOCABULARY_NOT_YET_BUILT — reuse cost, justifying evidence, and reversal
+condition have no prior evidence record
+
+REMEDIATION STATUS:
+resume at the file-copying rung with the second and third fields only, then build reuse cost, then
+evidence and reversal condition one at a time; the fourth field of the target is already answered
+and should not be re-asked
+
+PARENT EVIDENCE ID:
+none
+
+---
+
+SESSION PAUSE — 2026-08-31, CUMULATIVE REVIEW IN PROGRESS:
+
+Learner said: `can we pcik this up after i eat dinner, commit and push , 20, and pasue`
+
+Questions 2, 3, and 4 CLOSED this session. Question 5 is open and paused mid-remediation.
+
+Exact resume sequence:
+
+```text
+1. do not reveal any question 5 answer; two of its five fields are already answered correctly
+2. resume at the file-copying micro-check, asking ONLY the classify-alone and Session fields
+3. build reuse cost from the copying answer, then the justifying-evidence field, then the
+   reversal condition, one at a time
+4. do not re-ask the deferral downside; it passed
+5. when question 5 passes, the review is complete: reset ONLY the Phase 3-5 foundation counter
+6. do not begin Phase 6 implementation before that reset
+```
