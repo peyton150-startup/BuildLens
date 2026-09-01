@@ -869,13 +869,138 @@ SESSION STOP — 2026-09-01: the learner is moving locations and requested commi
 follow-up. Next session starts with the Phase 6 transfer variant: end-to-end path and rough cost
 analysis on a different small CLI. Do not begin argparse until that transfer passes.
 
+The Phase 6 transfer began on an unrelated alert-log CLI (`EV-P6-CLI-TRANSFER-277`). The learner's
+end-to-end trace passed at confidence 90: guards, file read, split line strings, branch decisions,
+two increments, and returned success status were correct. Refine exact stdout from `Alters: 2` to
+`Alerts: 2`; stderr is empty. Boundary rationale, explicit remaining representations, and rough
+growth were omitted. Ask only those fields; do not restart the trace.
+
+The learner clarified `Alters` was fast typing; treat stdout as conceptually passed. On narrowed
+completion, responsibility boundary and linear growth passed at confidence 90. Representation
+fields remain open: types were not named, two answers carried Git-diff/files-changed language into
+the alert-log surface, and formatted output was not represented as a string. Ask exact type plus
+value/shape for argv, full log text, split lines, integer count, and output string only.
+
+The exact representation completion passed at confidence 90 with spelling refinements. `argv` is
+`list[str]`; full file text is one newline-containing `str`; `splitlines()` yields `list[str]`;
+count is integer `2`. Correct the facilitator prompt: `print("Alerts:", alert_count)` receives a
+string and integer as two arguments, which the learner recognized, rather than one formatted
+string. The first Phase 6 transfer is closed. Run one shorter second transfer and ask what deep
+principle both variants share before argparse.
+
+The second `checks_cli.py` transfer trace passed at confidence 90: guard behavior, `argv[1:]`
+excluding the script name, four result strings, two increments, stdout `Failures: 2`, empty stderr,
+and returned success `0` were correct. Representations, 10x growth, responsibility boundary, and
+the principle shared with `alert_cli.py` were omitted. Ask only those analytical fields.
+
+The narrowed second-transfer analysis passed representation values, sliced result list, integer
+count, boundary ownership, and shared principle at confidence 90. Two exact fields remain: name
+argv as `list[str]`, and state roughly 10x work/linear growth for 10x arguments. Ask only those.
+
+The final two transfer fields passed: argv is `list[str]`, and 10x arguments produce roughly 10x
+counting work (`O(n)`). `EV-P6-CLI-TRANSFER-277` is CLOSED. The two transfer surfaces shared the
+principle that main owns the external CLI/process boundary while a separate deterministic function
+owns domain counting; representations and status remain explicit. The deferred argparse patch is
+now eligible, but its success representation and bad-input behavior must be predicted first.
+
+The first argparse success-path prediction was not attempted (`EV-P6-ARGPARSE-SYNTAX-278`): the
+learner said they did not know what was happening. Activate syntax-only help. Reduce from action +
+path to one positional name/token/attribute: parser creation, `add_argument("color")`,
+`parse_args(["blue"])`, and `args.color`. Do not return to BuildLens or bad-input behavior until a
+fresh one-argument parse is independently readable.
+
+On the fresh one-argument prompt, the learner asked what “parse” means. Descend to R0 vocabulary:
+parsing interprets raw input according to rules and produces a structured representation. In the
+micro-example, raw `"fast"` plus registered name `mode` becomes `mode = "fast"`; nothing is run or
+mutated. Require a one-sentence restatement before returning to `parse_args` syntax.
+
+The parse-vocabulary micro-check was partial at confidence 60. The learner compared the registered
+name to a key/label but omitted the raw token from the named result and generalized to arbitrary
+Python objects. Keep default tokens as strings; narrow to one fill-in `speed = "slow"` before
+returning to the one-argument parser.
+
+The fill-in passed: parsed result `speed = "slow"`. Parse vocabulary and one name=value binding
+are recovered. Return to the one-argument `add_argument("mode")` / `parse_args(["fast"])` syntax.
+
+The learner spontaneously transferred `action = "analyze"` correctly. On the two-argument
+completion, `path` was called `diff_text`. Correct the boundary: argparse binds the second raw token
+to filename string `"changes.diff"`; file contents do not exist until later `read_diff`. Isolate
+that binding once, then complete the script-filename and Namespace fields.
+
+The learner clarified they meant actual BuildLens, then correctly mapped action to `"analyze"` but
+reversed the remaining roles at confidence 90: called the filename `diff_text` and file contents
+`args.path`. Exact flow is filename token → `args.path` → `read_diff(args.path)` → `diff_text`.
+Require one matching check before continuing argparse.
+
+The filename/content matching check passed at confidence 90: filename maps to `args.path`, loaded
+content maps to `diff_text`. The boundary is recovered. Return to the original successful argparse
+fields: `args.action`, `args.path`, omission of script filename from the explicit parse list, and
+the parsed object-with-named-attributes representation.
+
+The original successful parse passed action/path values and omitted script filename at confidence
+90. The learner called `args` a “list object with named attributes.” Correct representation:
+`parse_args` consumes `list[str]` and returns a new `argparse.Namespace` object; use `.action` and
+`.path`, not list indexing. Isolate that input/output distinction before bad-input behavior.
+
+On the next representation attempt, the learner supplied `(action = analyze, path = xhengesdiff)`.
+The two named fields are understood, but the `Namespace(...)` container, string quotes, and
+`.action`/`.path` retrieval syntax were omitted. Reduce to one field before returning to both.
+
+The one-field reduction correctly mapped `mode` to `"slow"` at confidence 60, but attribute
+retrieval was unknown. Isolate `object.attribute` syntax next; do not introduce parser failures yet.
+
+The fresh `settings = Namespace(speed="fast")` check passed at confidence 90 with
+`settings.speed`. Attribute access is recovered; climb to a fresh two-field representation next.
+
+On the fresh two-field surface, `parsed.command` and `parsed.filename` both passed at confidence 90,
+as did the intended field/value mapping. The exact parsed-object representation still omitted the
+`Namespace(...)` wrapper and string quotes. Require only that line before parser failure behavior.
+
+The learner then changed the retrieval to `parser.command`, revealing a variable-role confusion:
+`parser` stores parsing rules, while `parsed` is the returned `Namespace` that stores parsed values.
+Reduce to choosing which object contains one result value.
+
+The next answer, `parser.filename`, repeated the same confusion, which the learner explicitly
+recognized. Temporarily rename the objects to `rules` and `result`; check retrieval from `result`
+before restoring `parser`/`args` naming.
+
+With `rules` and `result`, the learner correctly retrieved `result.color` at confidence 90. Restore
+the conventional `parser` and `args` names in a one-field near-transfer next.
+
+The conventional-name near-transfer passed at confidence 100: `args.format` retrieves `"json"`.
+Return to a fresh two-field target-level representation; parser failure behavior remains deferred.
+
+The fresh two-field target passed the object roles and both retrievals at confidence 100. The learner
+wrote `args = (task=scan, source = buildlog)`, so only exact notation remains: include
+`Namespace(...)`, quote strings, and preserve the filename dot. Use one supplied syntax frame.
+
+The next answer correctly added `Namespace(...)` at confidence 100 but still wrote the text values
+without quotes and removed the filename dot. Isolate a single Python string literal before rebuilding
+the full representation.
+
+The learner clarified that quotes/spelling were fast-typing shorthand and that the values are known
+to be strings. Stop grading transcription noise. The success representation passes: input is
+`list[str]`, output is a `Namespace`, and values are read with `args.<field>`.
+
+The first missing-positional argparse prediction was `no idea`. Default parser failure behavior is
+new: use one minimal worked example before a near-transfer. Do not patch product code yet.
+
+The first near-transfer recovered exit code 2 at confidence 20 but described the output as “prints
+parser.” Clarify that the parser generates usage/error text; isolate stderr and the raised
+`SystemExit` control effect next.
+
+The narrowed retrieval passed: argparse generates usage/error text on stderr and raises
+`SystemExit(2)` for the missing positional argument. `EV-P6-ARGPARSE-SYNTAX-278` is CLOSED after
+adaptive remediation. Before the product patch, resolve whether BuildLens adopts argparse's status 2
+or preserves the current status-1 user-error contract.
+
 ```text
 phase                       Phase 6 in progress; first CLI patch complete
-last knowledge gate         EV-P6-ENTRYPOINT-276, delayed retrieval closed after remediation
-next retrieval due          Phase 6 transfer variant on a different small CLI
+last knowledge gate         EV-P6-ARGPARSE-SYNTAX-278, closed after adaptive remediation
+next retrieval due          delayed argparse parser-versus-Namespace retrieval on a fresh surface
 next architecture reset     complete; next by time or major transition
-next implementation step    Phase 6 transfer variant; then argparse patch
-last published commit       docs: record Phase 6 teaching and retrieval state
+next implementation step    choose status-1 vs argparse status-2 policy; then implement argparse patch
+last published commit       ac86e67 — docs: record Phase 6 teaching and retrieval state
 ```
 
 Files the learner should currently be able to teach:
