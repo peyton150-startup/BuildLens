@@ -746,15 +746,136 @@ graded. Resume with a newly presented full teach-aloud from memory. The remediat
 `FileNotFoundError`, stdout/stderr routing, and all three CLI failure contracts. Indentation is a
 learner-requested working assumption, not newly verified mastery.
 
-## Session-close fields
+After returning, the learner attempted the fresh full teach-aloud at confidence 90. Purpose,
+counting responsibility, unsupported-command path, missing-file path, and unchanged-`summarize.py`
+evidence passed. The attempt incorrectly said success returns the three summary values, described
+return as stopping a block, and said the wrong-count path gives a copy of argv. All failures were
+also described as not necessarily showing a message. Descend first to printed values versus
+returned status, then rebuild return-versus-exit and the usage path before another target attempt.
+
+The reduced printed-output versus return trace passed three of four fields at confidence 90: exact
+printed counts, stored result `0`, and counts-not-returned were correct. The learner described only
+the control-flow effect of `return 0`; add the semantic meaning that status `0` communicates success
+to the caller. Ask only that meaning on a fresh surface.
+
+On the fresh status-meaning check, returned-versus-printed separation and possible conversion to
+process exit status were correct at confidence 90, but the meaning “0 = success” was omitted.
+Supply the one convention `0` success / nonzero failure, then require a no-output classification.
+
+The no-output classification passed `0` as success and `3` as failure at confidence 90, closing
+the status convention. The learner did not know the immediate recipient: a normal return goes to
+the Python caller and may be stored by its assignment; the shell is involved only if an outer
+boundary later invokes `sys.exit`. Require one normal-call assignment check.
+
+The normal-call recipient check passed at confidence 60: the module-level assignment calls
+`finish()`, stores returned `0`, and does not involve the shell. Refine the wording from
+“`status = finish` is the caller” to the assignment statement being the caller and `finish()` being
+the call expression. Next: rebuild why callable CLI `main` returns for testability.
+
+After requesting more code, the learner saw complete `cli.py` and `test_cli.py`. The unsupported-
+action branch and returned `1` were correct at confidence 90, and internal `sys.exit` was correctly
+recognized as hostile to normal assertion evaluation. The learner incorrectly predicted that the
+test call later reaches the outer `sys.exit` line and that an assertion error occurs. Isolate one
+normal return into a passing assertion, without entry-point code; keep the separate `__name__`
+retrieval deferred until the teach-aloud closes.
+
+In the isolated assertion trace, the learner correctly said the test passes but then predicted a
+`sys.exit` call that is absent from the displayed program. The blocker is carrying prior-surface
+code into the current snippet. Descend to a presence-only check for `sys.exit`, then rebuild exact
+current-program execution before returning to the CLI rationale.
+
+The learner clarified that the prior `sys.exit` statement referred to the full `cli.py` question,
+not the reduced snippet. On the narrowed test context, the learner correctly stated at confidence
+100 that `test_cli.py` is the executed main file, imported `cli` has `__name__ == "cli"`, and the
+entry-point `sys.exit` line is therefore not called. The test-call/assertion and outer-exit
+separation are recovered. Ask for one concise independent design rationale next.
+
+The concise return-versus-exit rationale passed at confidence 90. The learner explained that tests
+must receive and assert guard results without terminating, while a real shell execution still gets
+the status through the guarded outer `sys.exit`. This rationale is recovered. Next: retrieve only
+the wrong-argument-count message, stream, return, and prevented work; then repeat the full target.
+
+The wrong-argument-count contract passed at confidence 90: usage to stderr, returned `1`, and
+action validation/file access prevented. All isolated blockers from the resumed target attempt are
+now rebuilt. Next: one fresh full `cli.py` teach-aloud with assistance removed. Only after it passes
+may the session continue to the separate `__name__` retrieval and Phase 6 transfer variant.
+
+Fresh target attempt 27 was a strong partial at confidence 100. Correct: success prints the counts;
+all three failure messages go to stderr; returning keeps guard results testable. Omitted: purpose,
+counting responsibility, success status/meaning, trigger-to-message/return pairings, and unchanged-
+`summarize.py` boundary evidence. Do not re-ask correct fields or lower the rung; issue one compact
+narrowed completion prompt for only these omissions.
+
+The narrowed target completion passed purpose, responsibility separation, all three failure
+triggers/statuses, and unchanged-`summarize.py` boundary evidence at confidence 90. The learner
+again said success returns the three counts rather than printing them and returning success status
+`0`. This is a repeated target-level relapse after isolated success. Use worked-example rescue:
+one solved neighboring example, learner explains the steps, learner completes one missing step,
+then a fresh unaided example before returning to the target.
+
+On the first worked-example explanation attempt, the learner correctly repaired the BuildLens
+contract—prints three counts, returns `0`—but did not explain the neighboring `backup()` steps.
+Narrow to the exact print line, exact return line, caller-stored value, and confidence. Do not move
+to the partial example until those are supplied.
+
+The worked `backup()` example was then explained correctly at confidence 90 after the code was
+re-shown: exact print line, return line, stored `0`, and printed-not-returned distinction all passed.
+The learner attributes the target error to lazy/imprecise wording rather than the mental model.
+Because that wording changes the contract and recurred, continue the required rescue sequence with
+one missing-step example and one fresh unaided example before returning to the target.
+
+The missing-step rescue example passed all fields at confidence 100: return `0`, stdout warning
+count, stored `0`, and count printed rather than returned. One fresh unaided non-BuildLens example
+remains before returning to the target teach-aloud.
+
+The fresh unaided `ship()` transfer passed at confidence 100: domain count printed, status `0`
+returned/stored, and success meaning all correct. The worked-example rescue sequence is complete.
+Return to one fresh target-level BuildLens success-contract prompt; do not re-ask already-passed
+failure paths, testability rationale, purpose, or boundary evidence.
+
+The fresh BuildLens target success contract passed four fields at confidence 90: three counts
+printed, `main` returns `0`, `0` means success, and counts are printed rather than returned. The
+outer-shell field was generic (“success or failure status”); narrow only to the exact successful
+status `0`. If supplied, close the resumed full teach-aloud using the already-passed fields.
+
+The exact shell-status completion passed: `0` success, `1` failure. The learner-requested resumed
+`cli.py` teach-aloud is CLOSED through the adaptive remediation chain under
+`EV-P6-CLI-EXPLANATION-275`. This was not a cold single-attempt pass; it required return/status,
+stream, failure-path, and worked-example remediation. Next in the recorded order: delayed
+`__name__` retrieval on a fresh non-BuildLens surface, then Phase 6 transfer, then argparse.
+
+SESSION STOP — 2026-09-01: the delayed fresh-surface `__name__` retrieval failed at confidence 100
+(`EV-P6-ENTRYPOINT-276`). For `python forecast.py`, the learner reversed the roles, assigning
+`forecast` to the executed file and `"__main__"` to imported `formatter`, predicted formatter's
+guard would run, and reversed the import direction. The correct model was supplied after the
+attempt. The learner had explicitly designated this as the last question before moving locations,
+so do not issue the mandatory simpler follow-up now. Next session must start at R0/R1: identify the
+filename typed after `python`, assign `"__main__"` only to that file, then add one imported module
+and guard consequence. Do not start the Phase 6 transfer or argparse patch.
+
+The learner chose to complete a follow-up before leaving. The reduced `python dashboard.py` surface
+passed at confidence 100: dashboard received `"__main__"` and imported colors received `"colors"`.
+Require one fresh same-rung executed/imported distinction before adding the guard consequence.
+
+The fresh `python worker.py` / imported `log_tools.py` same-rung transfer also passed at confidence
+100. Refine the imported name to exact string `"log_tools"`. The executed/imported distinction is
+recovered on two reduced surfaces. Add one imported-module guard consequence next.
+
+The imported-module guard consequence then passed at confidence 100. The learner correctly stated
+that worker alone has `"__main__"`, imported log_tools has `"log_tools"`, and log_tools' guarded
+print does not run. `EV-P6-ENTRYPOINT-276` is CLOSED after remediation, not as a first-attempt pass.
+
+SESSION STOP — 2026-09-01: the learner is moving locations and requested commit/push after this
+follow-up. Next session starts with the Phase 6 transfer variant: end-to-end path and rough cost
+analysis on a different small CLI. Do not begin argparse until that transfer passes.
 
 ```text
 phase                       Phase 6 in progress; first CLI patch complete
-last knowledge gate         EV-P6-CLI-EXPLANATION-275 remediation rebuilt; fresh teach-aloud owed
-next retrieval due          full cli.py teach-aloud, then __name__ on a fresh surface
+last knowledge gate         EV-P6-ENTRYPOINT-276, delayed retrieval closed after remediation
+next retrieval due          Phase 6 transfer variant on a different small CLI
 next architecture reset     complete; next by time or major transition
-next implementation step    full teach-aloud; then __name__, transfer variant, argparse patch
-last published commit       docs: record Phase 6 remediation pause
+next implementation step    Phase 6 transfer variant; then argparse patch
+last published commit       docs: record Phase 6 teaching and retrieval state
 ```
 
 Files the learner should currently be able to teach:
