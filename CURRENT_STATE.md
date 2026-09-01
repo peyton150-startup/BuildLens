@@ -587,15 +587,174 @@ as source code versus a `Session`'s in-memory data; watch for it when persistenc
 
 THE CUMULATIVE FOUNDATION REVIEW IS COMPLETE. All five questions passed.
 
+The learner-requested cold `cli.py` teach-aloud was attempted on 2026-09-01
+(`EV-P6-CLI-EXPLANATION-275`). Purpose, module responsibility, the `0`/`1` return shape, and the
+fact that `summarize.py` did not change were retrieved unaided. The gate remains open: the answer
+conflated a missing input file with `ImportError`, collapsed the argument-count cases into one
+duplicated path, omitted the command-selection path, and described return as selectively stopping
+`cli.py` rather than ending one call and returning a value to its caller. Per adaptive remediation,
+descend to one isolated file-open failure, complete a near-transfer, then rebuild the failure paths
+and return-versus-exit rationale before repeating the full teach-aloud. Do not start the separate
+`__name__` retrieval, Phase 6 transfer, or argparse patch yet.
+
+First R1 remediation attempt: the learner correctly identified `open("missing.diff")` as filesystem
+access rather than importing, but did not know the exception name at confidence 60. The single rule
+`open(...)` on a missing path raises `FileNotFoundError` was supplied. Next: a fresh R1 file-open
+near-transfer with no hint.
+
+The fresh R1 near-transfer then passed at confidence 90: `FileNotFoundError` was named and the
+learner correctly said the read does not execute. Refine the wording to say that `open(...)` fails
+before the variable is bound. Next, climb to a caught-failure trace with stderr, a returned status,
+and skipped downstream work.
+
+The caught-failure trace was partial at confidence 90. Return value `1` and skipped downstream
+analysis were correct, but stdout/stderr were reversed, the caught exception was treated as if it
+were automatically printed, and `return` was again described as stopping a module. Descend to one
+R2 return-scope trace before rebuilding stream routing and the CLI failure path.
+
+The reduced R2 return trace passed at confidence 80. The learner correctly predicted `inside` then
+`outside 1`, stated that return stops only `choose`, and used the later module-level print as
+evidence that the caller continues. At the learner's request, explain that the call transfers
+control into the callee and return transfers a value and control back to the waiting caller. Next:
+one less-prompted near-transfer before returning to process exit and the CLI failure path.
+
+The less-prompted return-scope near-transfer passed independently at confidence 90: exact output,
+returned value, stopped callee, and continuing caller were all correct. The return-scope blocker is
+recovered. Next: compare a returned status with process exit inside a callable, then restore the
+CLI failure-path trace.
+
+The return-versus-process-exit trace passed at confidence 100: Run A returns `1` and its caller
+continues; Run B exits before the caller receives a normal value or reaches its final print. The
+testability/outer-entry-point rationale was omitted. Ask only that missing field at the same rung,
+then restore the CLI failure-path trace.
+
+On the narrowed rationale prompt, the learner said the caller receives exit code `1`; confidence
+and the testability rationale were omitted. Correct the recipient distinction: `sys.exit(1)` raises
+`SystemExit`, the caller's assignment does not complete, and the uncaught status is reported to the
+shell/operating environment. Descend to one R1 assignment-completion check, then re-ask the
+testability rationale.
+
+The R1 assignment-completion check passed at confidence 100: the learner correctly stated that
+the assignment and following print do not complete and that the shell/operating environment
+receives the uncaught exit status. Next: one near-transfer connecting a normal return to a test
+assertion, then rebuild the CLI failure path and full teach-aloud.
+
+The testability near-transfer passed at confidence 100. The learner connected returned data to the
+test assertion and explained why `sys.exit` belongs outside callable `main`. Refine the sequence:
+`SystemExit` is raised first, then an uncaught process termination is observed by the shell; import
+alone does not invoke `main`. Return-versus-exit is recovered. Next: rebuild caught file failure,
+stderr routing, and the three CLI failure paths before the fresh full teach-aloud.
+
+The fresh caught-failure composition was incorrect at confidence 90. stdout/stderr were reversed,
+the caught exception was treated as automatically printed, and downstream `deploy`/`return 0`
+were predicted to run after `return 2`. The primary blocker is composing an exception-handler
+return with later function statements. Remove streams and descend to one caught-exception/return
+control-flow trace before rebuilding output routing.
+
+The reduced trace was not answered; the learner clarified that `deploy` had been read as outside
+the function. This exposes an indentation/block-membership syntax prerequisite. Activate syntax-
+only help: explain that dedenting from `except` can still leave a line indented inside `def`, then
+use an R0 membership micro-example before returning to the exception trace.
+
+The R0 membership example passed at confidence 90. The learner distinguished leaving the nested
+`if` block from leaving the enclosing function: `print("B")` remains inside the function, while
+`print("C")` is outside. Per the learning rules, require one fresh same-rung variant on a try/except
+surface before adding execution behavior.
+
+The learner asked to skip the fresh same-rung try/except membership check and move on. The check
+was paused without an answer, so it is neither passed nor failed. Under the mandatory learning and
+implementation gates, later Phase 6 work cannot begin yet. On resumption, use a new R0 surface to
+verify nested-block versus enclosing-function membership, then rebuild the exception-handler return,
+stderr routing, three CLI failure paths, and full cold teach-aloud.
+
+The learner explicitly asked that inside/outside function membership be assumed understood. Treat
+it as a working assumption, not verified mastery, and do not repeat that syntax check now. Resume
+at a fresh exception-handler return trace without streams. Revisit indentation only if it causes
+another error.
+
+The fresh exception-handler return trace passed at confidence 90. The learner correctly predicted
+status `3`, skipped `send` and `return 0`, and continuing module-level `record(3)`. Exception-handler
+return flow is recovered under the learner-requested indentation assumption. Next: add only stderr
+routing, then rebuild the three CLI failure paths and full cold teach-aloud.
+
+The caught-failure stream trace was partial at confidence 100. Status `3`, skipped `send`, and no
+automatic exception printing were correct. stdout was incorrectly called `None`, while stderr was
+given both the explicit message and the exception name. Correct result: caller prints `status 3`
+to stdout; handler prints only `Input missing` to stderr. Isolate two explicit print destinations
+without exceptions or calls, then rebuild the composition.
+
+The stream-only two-print check failed at confidence 90: the answer carried `Input missing` and
+`FileNotFoundError` from the previous surface even though neither appears in the new program.
+Activate syntax-only help: `print` emits its explicit value arguments; `file=sys.stderr` selects
+the destination and adds no content. Reduce to one literal print call before a fresh two-call check.
+
+The R0 single-print stream check passed at confidence 90. Destination and literal content were
+correct; refine `None` to “empty stdout,” because no `None` value is printed. Require one fresh
+same-rung multi-value stderr print before adding a second output stream.
+
+On the fresh one-call multi-value check, the learner correctly said stdout is empty but omitted the
+stderr content and confidence. Narrow to the two missing fields without lowering the rung.
+
+On the narrowed stderr field, the learner correctly stated the routing principle at confidence 100
+but again omitted the exact emitted text. Ask one fill-in blank for the current call; add no new
+concept.
+
+The exact stderr fill-in passed: `Warning 5`. The single-call content/destination step is closed.
+Next: a fresh two-call example with one stdout and one stderr print, then return to the caught-
+failure composition.
+
+The fresh two-stream check passed at confidence 90: `Ready` to stdout and `Problem 7` to stderr.
+Stream routing is independently recovered in isolation. Next: recombine caught file failure,
+stderr, returned status, skipped downstream work, and continuing caller on a fresh surface.
+
+The combined fresh caught-failure trace passed at confidence 100. stdout/stderr, returned status,
+skipped downstream work, absence of automatic exception printing, and caller continuation were
+all correct. Combined failure mechanics are recovered. Next: retrieve the trigger, stream behavior,
+and returned status for all three actual `cli.py` failure paths from memory.
+
+The three-path CLI retrieval was partial. Invalid argument count and missing-file triggers were
+recalled, but user-visible details were imprecise, `main` return was described as an exit code, and
+the caught exception was named as visible output. The unsupported-command path was not recalled;
+confidence was omitted. Descend to two equal-length invocations to separate the length guard from
+command-token validation, then rebuild all three contracts.
+
+The equal-length comparison exposed ambiguous prompt wording; the learner had considered the
+unsupported-command path but thought it violated the instruction not to double-count missing-
+argument variants. After clarification, `argv[1]`, return-before-open, and returned `1` passed at
+confidence 90. “Passes the length guard” was reversed: with length 3, `len(argv) != 3` is false, so
+the failure body is skipped. Isolate that Boolean once, then rebuild the three paths.
+
+The isolated length-guard trace passed at confidence 90. `len(argv)` is 3, the failure body is
+skipped, `return 1` does not run, and command validation follows. Refine the Boolean field to the
+literal value `False`. Next: rebuild all three actual CLI failure contracts with unambiguous labels.
+
+The rebuilt three-path CLI contract was a strong partial at confidence 60. Wrong-count and
+unsupported-command paths passed fully. For missing-file, trigger, readable message, returned `1`,
+and skipped summarization passed; only the stream field used the exception type instead of the
+destination. Ask only which stream receives the readable missing-file message, then treat the
+three-path rebuild as closed if correct.
+
+The narrowed missing-file stream field passed: the readable message goes to stderr, while
+`FileNotFoundError` is the caught exception type. All three CLI failure contracts are rebuilt.
+Next: a fresh full `cli.py` teach-aloud from memory. If it passes, continue in the recorded order
+to the separate `__name__` retrieval and Phase 6 transfer variant before argparse.
+
+SESSION PAUSE — 2026-09-01: a fresh target-level full `cli.py` teach-aloud was presented, but the
+learner asked to pause and move locations before answering. It is unattempted and must not be
+graded. Resume with a newly presented full teach-aloud from memory. The remediation beneath
+`EV-P6-CLI-EXPLANATION-275` has recovered return scope, return-versus-exit/testability, caught
+`FileNotFoundError`, stdout/stderr routing, and all three CLI failure contracts. Indentation is a
+learner-requested working assumption, not newly verified mastery.
+
 ## Session-close fields
 
 ```text
-phase                       Phase 5 complete; cumulative foundation review in progress
-last knowledge gate         EV-P6-CLI-EXPLANATION-274, teach-aloud passed
-next retrieval due          __name__ on a fresh surface; foundation checkpoint after Phase 8
+phase                       Phase 6 in progress; first CLI patch complete
+last knowledge gate         EV-P6-CLI-EXPLANATION-275 remediation rebuilt; fresh teach-aloud owed
+next retrieval due          full cli.py teach-aloud, then __name__ on a fresh surface
 next architecture reset     complete; next by time or major transition
-next implementation step    repeat cli.py teach-aloud first; then transfer variant; then argparse patch
-last published commit       current handoff — feat: enforce Session string contract
+next implementation step    full teach-aloud; then __name__, transfer variant, argparse patch
+last published commit       docs: record Phase 6 remediation pause
 ```
 
 Files the learner should currently be able to teach:
