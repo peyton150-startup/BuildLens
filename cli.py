@@ -4,19 +4,18 @@ Contract:
     in        a command line: analyze <path-to-diff-file>
     out       three labelled counts on stdout, one per line
     status    0 when the summary was produced
-              1 when the command line is wrong or the file cannot be read
+              1 when the file cannot be read
+              2 when argparse rejects the command line
     errors    reported on stderr as a readable line; never a raw traceback
 
 This module owns the process boundary only. Counting stays in summarize.py,
 which knows nothing about files, arguments, or exit status.
 """
 
+import argparse
 import sys
 
 from summarize import summarize_diff
-
-USAGE = "usage: cli.py analyze <path>"
-
 
 def read_diff(path: str) -> str:
     """Return the whole text stored in the file named by path."""
@@ -38,23 +37,16 @@ def format_summary(summary) -> str:
 
 
 def main(argv: list[str]) -> int:
-    """Run one command. Return the exit status, never raise for user error."""
-    if len(argv) != 3:
-        print(USAGE, file=sys.stderr)
-        return 1
-
-    action = argv[1]
-    path = argv[2]
-
-    if action != "analyze":
-        print("unknown action: " + action, file=sys.stderr)
-        print(USAGE, file=sys.stderr)
-        return 1
+    """Run one command, allowing argparse to exit for malformed syntax."""
+    parser = argparse.ArgumentParser(prog=argv[0])
+    parser.add_argument("action", choices=["analyze"])
+    parser.add_argument("path")
+    args = parser.parse_args(argv[1:])
 
     try:
-        diff_text = read_diff(path)
+        diff_text = read_diff(args.path)
     except FileNotFoundError:
-        print("no such file: " + path, file=sys.stderr)
+        print("no such file: " + args.path, file=sys.stderr)
         return 1
 
     summary = summarize_diff(diff_text)

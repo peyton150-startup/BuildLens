@@ -28826,3 +28826,593 @@ diagnostic before writing exception-capture syntax.
 NEXT REQUIRED STEP:
 Given `main(["cli.py"])`, require the exact raised exception/status and the diagnostic stream. Then
 construct the smallest `try`/`except` test together.
+
+REMEDIATION ATTEMPT 2 PROMPT:
+
+```text
+Control effect: raises ______
+Status: ______
+Usage/error stream: ______
+Confidence: ______
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+usage error
+2
+stderr
+30
+```
+
+EVALUATION:
+Status 2 and stderr pass. `usage error` names the diagnostic text, not the exception/control effect.
+Reduce to only the exception constructor form before rebuilding the three observables.
+
+PRIMARY BLOCKER:
+diagnostic message versus raised exception type
+
+NEXT REQUIRED STEP:
+Ask the learner to complete only `raise ______(2)`. Do not introduce try/except test syntax until
+the exception type is retrieved.
+
+REMEDIATION ATTEMPT 3 PROMPT:
+Complete only `raise ______(2)`. Confidence: 0–100.
+
+LEARNER ANSWER (verbatim):
+
+```text
+systemexit&#x20;
+100
+```
+
+EVALUATION:
+PASS with capitalization refinement: `raise SystemExit(2)`. Combined with the prior attempt, the
+learner now identifies all three observables: raised `SystemExit`, code 2, and usage/error text on
+stderr. Move to the smallest exception-aware test skeleton.
+
+NEXT REQUIRED STEP:
+Present a `try`/`except SystemExit as error` skeleton for the missing-arguments case and require only
+the assertion on `error.code`. Do not write the test file until the learner completes it.
+
+TEST-SYNTAX ATTEMPT 1 PROMPT:
+
+```python
+def test_missing_arguments_raise_system_exit_2():
+    try:
+        main(["cli.py"])
+    except SystemExit as error:
+        assert ______
+    else:
+        raise AssertionError("main did not raise SystemExit")
+```
+
+`error.code` contains the status carried by the exception. Complete only the assertion.
+
+LEARNER ANSWER (verbatim):
+
+```text
+SystemExit == 2
+90
+```
+
+EVALUATION:
+The intended status 2 is correct, but `SystemExit` is the exception class rather than the caught
+exception object. `except SystemExit as error` binds the raised instance to `error`; its `.code`
+attribute carries 2. Reduce to the attribute-access assertion frame.
+
+PRIMARY BLOCKER:
+exception class versus caught exception instance and its status attribute
+
+NEXT REQUIRED STEP:
+Require only `assert error.____ == ____`; do not write the test file yet.
+
+TEST-SYNTAX ATTEMPT 2 ANSWER (verbatim):
+
+```text
+so it would be error == 2
+```
+
+EVALUATION:
+The learner now uses the caught object name but still compares the whole `SystemExit` instance to
+the integer rather than retrieving its named `code` value.
+
+TEST-SYNTAX ATTEMPT 3 ANSWER (verbatim):
+
+```text
+main.error == 2
+90
+```
+
+EVALUATION:
+The learner adds attribute syntax but assigns the attribute to `main`, which is the function.
+`except SystemExit as error` makes `error` the caught object that owns `code`. Because the same
+ownership/access blocker has repeated, descend to a familiar one-field `Namespace` before returning
+to the exception.
+
+PRIMARY BLOCKER AFTER ATTEMPTS:
+identifying the object that owns the named value, then retrieving that value rather than comparing
+the whole object
+
+NEXT REQUIRED STEP:
+Given `result = Namespace(code=2)`, ask only for the expression that retrieves integer 2.
+
+REMEDIATION ATTEMPT 4 PROMPT:
+
+```python
+result = Namespace(code=2)
+```
+
+What exact expression retrieves integer 2 from `result`? Confidence: 0–100.
+
+LEARNER ANSWER (verbatim):
+
+```text
+result.code
+90
+```
+
+EVALUATION:
+PASS. The learner retrieves the named `code` value from its owning object using dot syntax. Move to
+a near-transfer where `error` is the caught object and `code` remains the attribute name.
+
+NEXT REQUIRED STEP:
+Given `except SystemExit as error`, ask only for the expression that retrieves status 2 from the
+caught `error` object. Do not add the assertion comparison yet.
+
+REMEDIATION ATTEMPT 5 PROMPT:
+Given `except SystemExit as error`, with `error` as the caught object and `code` as its status
+attribute, what exact expression retrieves the status? Confidence: 0–100.
+
+LEARNER ANSWER (verbatim):
+
+```text
+error.code&#x20;
+but how would i know it was code if it is not named anywhere, this was also the case in the previous example
+90
+```
+
+EVALUATION:
+PASS. `error.code` correctly transfers the object/attribute access. The learner also identifies a
+real information-source issue: `except SystemExit as error` names only the local variable; it does
+not reveal attributes supplied by the `SystemExit` type. Unlike `Namespace(code=2)`, where `code`
+is explicit at construction, `SystemExit(2)` maps its positional value to the documented `.code`
+attribute. This must be learned from the library contract, documentation, editor/type information,
+or inspection; it cannot be inferred from the except syntax alone.
+
+EVIDENCE CHECK:
+A live `SystemExit(2)` instance reported type `SystemExit`, `args == (2,)`, and `code == 2`.
+
+NEXT REQUIRED STEP:
+Explain the API-source distinction, then require the complete assertion `assert error.code == 2`.
+
+REMEDIATION ATTEMPT 6 PROMPT:
+Complete `assert error.code == ______`. Confidence: 0–100.
+
+LEARNER ANSWER (verbatim):
+
+```text
+2
+```
+
+EVALUATION:
+PASS. The completed assertion is `assert error.code == 2`. The exception class, caught object,
+status attribute, and expected integer are now correctly separated. Add this collaboratively built
+missing-arguments test without changing production code, then run it to verify RED.
+
+RED EVIDENCE:
+`python test_cli.py` exited 1 at the new test with
+`AssertionError: main did not raise SystemExit`. Current `main(["cli.py"])` printed usage and
+returned 1, so the expected `SystemExit(2)` behavior is absent.
+
+RED TRACE PROMPT:
+State whether `main(["cli.py"])` returned or raised, whether the `except SystemExit` block ran, why
+the `else` block ran, and what missing production behavior the test detected.
+
+LEARNER ANSWER (verbatim):
+
+```text
+it raised, yes, becasue the current main prints usage and reutrns 1 so execution reaches the else block, can you tell me why that is, not sure about the last question, 90
+```
+
+EVALUATION:
+The learner correctly states that current `main` returns 1 and that execution reaches `else`, but
+also says `main` raised and that the `except SystemExit` block ran. Exact control flow: returning is
+normal completion of the try suite, so `except SystemExit` is skipped; Python then runs `else`, whose
+explicit `raise AssertionError(...)` produces the observed exception. The missing production
+behavior is `main` raising `SystemExit(2)` for malformed arguments. Descend to a no-function
+try/except/else trace before returning to the test.
+
+NEXT REQUIRED STEP:
+Give one non-raising assignment inside `try`, a `ValueError` handler, and an `else` print. Ask which
+branch runs and why.
+
+LEARNER TDD RESTATEMENT (verbatim):
+
+```text
+so we are trying to create a test that will change the behavior of the current main so that we can make this test green.
+```
+
+EVALUATION:
+The learner has the RED-to-GREEN direction. Refine causality: the test specifies and detects the
+chosen behavior; it does not change `main`. A later production patch changes `main`, and the same
+test becoming green supplies evidence that the behavior now matches the contract. The reduced
+try/except/else trace remains unanswered and must pass before production editing.
+
+RED-TRACE REMEDIATION PROMPT:
+
+```python
+try:
+    value = 7
+except ValueError:
+    print("caught")
+else:
+    print("finished")
+```
+
+What prints, and why? Confidence: 0–100.
+
+LEARNER ANSWER (verbatim):
+
+```text
+finished, there is no value error because the value is 7 so we skip the except and goi to the else, 90
+```
+
+EVALUATION:
+PASS. The assignment completes without raising, so the except handler is skipped and else runs,
+printing `finished`. Refine that else runs because no exception was raised, not because integer 7
+has a special property. Return to the real RED test and require the same branch trace.
+
+NEXT REQUIRED STEP:
+On the real missing-arguments test, require: `main` outcome, whether except runs, whether else runs,
+the final exception raised by the test, and the missing production behavior.
+
+FRESH REAL-TEST TRACE ANSWER (verbatim):
+
+```text
+so because main does not raise the system exti because it returns 1 we move to the else and then the assertion error is rasied
+```
+
+EVALUATION:
+Correct causal trace: current `main` returns 1, no `SystemExit` propagates, else runs, and the test
+raises `AssertionError`. The learner did not explicitly state that the except block is skipped or
+name the missing production behavior. Ask only those two fields.
+
+NEXT REQUIRED STEP:
+Require: whether `except SystemExit` runs, and the exact behavior production must add for malformed
+arguments. Then the RED interpretation gate can close.
+
+NARROWED COMPLETION ANSWERS (verbatim):
+
+```text
+90
+```
+
+```text
+it runs to check to see if SystemExit is the error but when it is not it moves onto else, it must raise a systemexit 2 when the argvs is bad, 90
+```
+
+EVALUATION:
+The missing production behavior passes: malformed argv must raise `SystemExit(2)`. The control-flow
+description needs refinement. The except handler does not run as a check, and else does not mean
+“the exception was not SystemExit.” Else runs only when the try suite raises no exception. If a
+different exception is raised, else is skipped and that exception propagates. Isolate unmatched
+exception behavior before GREEN.
+
+PRIMARY BLOCKER:
+normal try completion versus an exception that does not match the available handler
+
+NEXT REQUIRED STEP:
+Use a tiny try that raises `ValueError`, with only an `except SystemExit` handler and an else branch.
+Ask whether else runs or ValueError propagates.
+
+UNMATCHED-EXCEPTION ATTEMPT 1 ANSWER (verbatim):
+
+```text
+it continues onward, value error is not what the except was looking for so systemexit is bypassed and finsished it printed, 90
+```
+
+EVALUATION:
+Partial. `ValueError` does not match `except SystemExit` and therefore propagates outward. However,
+`finished` is not printed: any exception leaving the try suite prevents else from running. Reduce
+to a binary question about whether the else print executes.
+
+NEXT REQUIRED STEP:
+Restate that unmatched `ValueError` propagates, then ask only whether `print("finished")` executes.
+
+UNMATCHED-EXCEPTION ATTEMPT 2 ANSWERS (verbatim):
+
+```text
+oh your right
+```
+
+```text
+no, i was thinking in terms of the example beforehand. you are correct 80
+```
+
+EVALUATION:
+PASS. With an unmatched ValueError propagating, the else print does not execute. The learner
+correctly distinguishes this from the preceding normal-completion example, where else did run.
+The try/except/else prerequisite is recovered; return to test design.
+
+NEXT REQUIRED STEP:
+Before production code, transfer the chosen `SystemExit(2)` contract to the existing unknown-action
+and too-many-arguments cases so the test suite contains no stale return-1 expectations.
+
+MALFORMED-CASE TRANSFER PROMPT:
+For an unknown action and an extra positional argument, state return-versus-raise, exact status, and
+why each argv is malformed under the chosen argparse policy.
+
+LEARNER ANSWER (verbatim):
+
+```text
+return
+1
+banana is not a command
+
+return&#x20;
+1
+usage stderr
+70
+```
+
+EVALUATION:
+The learner correctly identifies `banana` as an invalid command but reverts both cases to the old
+return-1 contract. Under the committed policy, both malformed parse cases raise `SystemExit(2)` and
+emit usage/error text to stderr. The second reason is not the output; it is that a fourth token is
+an unexpected extra positional argument. Reduce to one invalid-choice case before retrying excess
+arguments.
+
+PRIMARY BLOCKER:
+transferring the chosen parser policy from missing arguments to other malformed syntax
+
+NEXT REQUIRED STEP:
+With allowed command only `analyze`, ask whether parsing `banana` returns 1 or raises
+`SystemExit(2)`. Then near-transfer to one extra positional token.
+
+MALFORMED-CASE REMEDIATION 1 PROMPT:
+With allowed command only `analyze`, does
+`main(["cli.py", "banana", "changes.diff"])` return 1 or raise `SystemExit(2)`? Why?
+
+LEARNER ANSWER (verbatim):
+
+```text
+rasie system exit2
+90
+```
+
+EVALUATION:
+PASS. The invalid command choice raises `SystemExit(2)` under the committed default-argparse
+policy. Near-transfer to one unexpected extra positional token.
+
+NEXT REQUIRED STEP:
+Ask whether `main(["cli.py", "analyze", "a.diff", "b.diff"])` returns 1 or raises
+`SystemExit(2)`, and require the malformed-input reason.
+
+MALFORMED-CASE REMEDIATION 2 PROMPT:
+Does `main(["cli.py", "analyze", "a.diff", "b.diff"])` return 1 or raise `SystemExit(2)`? What
+exactly makes this argv malformed? Confidence: 0–100.
+
+LEARNER ANSWER (verbatim):
+
+```text
+system exit 2, there are too many paths
+90
+```
+
+EVALUATION:
+PASS. The unexpected second path is an extra positional token, so default argparse raises
+`SystemExit(2)`. The chosen malformed-syntax contract is now transferred across missing arguments,
+an invalid command choice, and excess arguments.
+
+NEXT REQUIRED STEP:
+Collaboratively specify a test-only helper that accepts one argv list and verifies that calling the
+real `main` raises `SystemExit` with code 2. Then refactor the first RED test and update the two stale
+return-1 tests to use it before touching production code.
+
+TEST-HELPER TRACE ANSWER (verbatim):
+
+```text
+these look good to me, everytime it raises the systemexit 2 each for the reasons we stated before, except runs, the helper finsihes normally, 90
+```
+
+EVALUATION:
+PASS. For each malformed input, raised `SystemExit(2)` enters the matching except handler, the code
+assertion passes, and the helper returns normally. The three named tests retain the distinct
+malformed-input reasons while sharing only the repeated exception verification.
+
+NEXT REQUIRED STEP:
+Add the agreed helper to `test_cli.py`, update all three malformed-input tests to call it, leave
+`cli.py` unchanged, and rerun `python test_cli.py` to verify RED.
+
+RED EVIDENCE:
+`python test_cli.py` exited 1 at `test_unknown_action_fails`. The shared helper reached
+`raise AssertionError("main did not raise SystemExit")` because current `main` printed its manual
+unknown-action diagnostic and returned 1. This is the expected failure caused by the absent
+argparse behavior; `cli.py` remained unchanged.
+
+NEXT REQUIRED STEP:
+Collaboratively trace the proposed minimal parser for valid argv: `argv[1:]`, `args.action`, and
+`args.path`. After that passes, replace the manual length/action checks with argparse parsing.
+
+GREEN-DESIGN TRACE PROMPT:
+Given the proposed parser and `argv = ["cli.py", "analyze", "changes.diff"]`, identify `argv[1:]`,
+`args.action`, `args.path`, and why the script name is excluded from `parse_args`.
+
+LEARNER ANSWER (verbatim):
+
+```text
+changes.diff
+analyee
+changes.diff
+because we are running it in the main so it has to be called regardless, if it was cop.py then we would not be running it, 90
+```
+
+EVALUATION:
+Action and path fields pass conceptually with spelling refinement to `"analyze"` and
+`"changes.diff"`. `argv[1:]` was reduced incorrectly to only the path; it is a list containing both
+elements from index 1 onward. The script-name rationale is also unstable: `argv[0]` identifies the
+invoked program and is supplied separately as `prog` for diagnostics, while `parse_args` receives
+only the user argument tokens. Descend first to one unrelated list slice.
+
+PRIMARY BLOCKER:
+the representation produced by a `[1:]` slice
+
+NEXT REQUIRED STEP:
+Given `tokens = ["runner.py", "scan", "events.log"]`, require only the exact value of `tokens[1:]`.
+
+SLICE REMEDIATION PROMPT:
+Given `tokens = ["runner.py", "scan", "events.log"]`, what is the exact value of `tokens[1:]`?
+Confidence: 0–100.
+
+LEARNER ANSWER (verbatim):
+
+```text
+it is [scan,eventslog], my question is what is the purpsoe of this? 90
+```
+
+EVALUATION:
+PASS conceptually, with exact representation refined to `["scan", "events.log"]`. The learner asks
+for the purpose of the slice. At the process boundary, `argv[0]` identifies the invoked program;
+the remaining elements are user-supplied tokens to interpret. Because BuildLens `main` accepts the
+whole argv list for direct testing, it passes `argv[1:]` to `parse_args` and passes `argv[0]`
+separately as argparse's `prog` name for usage/error text.
+
+NEXT REQUIRED STEP:
+On one fresh argv list, ask which string becomes `prog` and which list is passed to `parse_args`.
+Then return to the proposed BuildLens parser trace.
+
+LEARNER SYNTAX QUESTION (verbatim):
+
+```text
+what is prog?
+```
+
+ADAPTATION:
+Pause the surrounding argv trace. Explain only that argparse's `prog` keyword sets the program name
+displayed in generated help, usage, and error text. It does not execute a program and is not one of
+the positional tokens being parsed. Use one fixed-string R0 example and ask which name appears in
+the usage line.
+
+NEXT REQUIRED STEP:
+Given `ArgumentParser(prog="audit-tool")`, ask which program name argparse displays in usage text.
+
+LEARNER ANSWER / SPONTANEOUS BUILDLENS TRANSFER (verbatim):
+
+```text
+so prog is cli.py ?
+```
+
+EVALUATION:
+PASS for the BuildLens surface. With `prog=argv[0]` and the tested argv beginning with `"cli.py"`,
+argparse displays `cli.py` in generated usage/error text. The value is supplied, so another
+`argv[0]` name or path would be displayed instead. Return to the fresh prog/tokens mapping.
+
+NEXT REQUIRED STEP:
+For `argv = ["audit.py", "check", "build.log"]`, require the value supplied as `prog` and the list
+supplied to `parse_args`.
+
+PROG/TOKENS MAPPING ANSWER (verbatim):
+
+```text
+audit.py
+[chekc, buildlog]
+90
+```
+
+EVALUATION:
+PASS conceptually, treating fast-typing spelling and omitted string punctuation as noise:
+`prog = "audit.py"` and the parse list is `["check", "build.log"]`. The program-name/user-token
+boundary is recovered. The agreed minimal GREEN implementation is now authorized.
+
+NEXT REQUIRED STEP:
+Add argparse to `cli.py`, replace manual length/action checks with the reviewed parser, keep
+file-read failure at return 1, and run `python test_cli.py` for GREEN evidence.
+
+GREEN EVIDENCE:
+`python test_cli.py` exited 0. Valid analysis and missing-file behavior passed. Unknown action,
+missing arguments, and excess arguments each produced generated argparse usage/error text; the
+shared helper caught `SystemExit` and verified code 2.
+
+NEXT REQUIRED STEP:
+Do not mark the patch or phase complete from automated evidence alone. Require the learner to trace
+where one valid command proceeds after `parse_args` and where one malformed command stops. Then run
+the full four-suite verification if the trace passes.
+
+POST-GREEN TRACE PROMPT:
+Trace valid `main(["cli.py", "analyze", "changes.diff"])` through parse input, returned Namespace,
+`read_diff` input, and continuation to `summarize_diff`; then trace invalid command `banana` through
+stopping point, file-read exclusion, direct-caller observation, and shell status.
+
+LEARNER ANSWER (verbatim):
+
+```text
+[ananlyze, changes.diff]
+Namespace(command = analyze, poath=changes.diff)
+path
+yes
+
+it stops at choices [analyze]
+no
+systemexit2
+2
+90
+```
+
+EVALUATION:
+The malformed path passes fully: parse stops at the action choices rule, read_diff does not run, a
+direct caller observes `SystemExit(2)`, and the shell receives 2. The valid path has the correct
+token-list shape and correctly continues to summarization, but exact field names drift: the parser
+registers `action` and `path`, not `command` and `poath`; the file reader receives `args.path`, not a
+standalone `path` variable. Correct the exact representation, then require a fresh fill-in.
+
+PRIMARY BLOCKER:
+preserving registered argparse field names through Namespace access
+
+NEXT REQUIRED STEP:
+Require only the exact `Namespace(...)` representation and exact expression inside
+`read_diff(...)`. Do not run full verification yet.
+
+VALID-PATH REMEDIATION ANSWER (verbatim):
+
+```text
+analyze&#x20;
+changes.diff
+args.path
+90
+because path is inside the namespace of args namespace object
+```
+
+EVALUATION:
+PASS. With string punctuation treated as fast-typing noise, the exact representation is
+`Namespace(action="analyze", path="changes.diff")`, and `read_diff` receives `args.path`. The
+learner correctly explains that `path` is a named attribute on the Namespace object referenced by
+`args`. The post-GREEN trace is closed.
+
+NEXT REQUIRED STEP:
+Rename vague malformed-input test names to state the exact `SystemExit(2)` behavior, rerun the
+targeted CLI suite, then run all four suites for fresh verification evidence. Do not call Phase 6
+complete solely from tests; use the already recorded explanation and transfer evidence in the
+milestone audit.
+
+REFACTOR AND VERIFICATION EVIDENCE:
+The vague unknown-action and too-many-arguments test names were changed to state raised
+`SystemExit(2)` explicitly. A fresh targeted `python test_cli.py` run exited 0. A subsequent fresh
+four-suite run executed `test_classify.py`, `test_summarize.py`, `test_session.py`, and
+`test_cli.py`; every suite printed `test passed` and the combined command exited 0.
+
+MILESTONE AUDIT:
+
+```text
+implementation       complete — argparse parser in cli.py
+automated tests      complete — fresh targeted and four-suite runs
+learner trace        complete — valid Namespace/file path and malformed parser-exit path
+learner explanation  complete — EV-P6-CLI-EXPLANATION-275 plus policy/RED-GREEN reasoning
+transfer variant     complete — EV-P6-CLI-TRANSFER-277 plus argparse micro-transfers
+policy decision      complete — EV-P6-ARGPARSE-POLICY-280
+```
+
+FINAL RESULT:
+Phase 6 is complete. Malformed command syntax follows default argparse behavior and raises
+`SystemExit(2)`; a missing file remains an application failure returning 1. The foundation counter
+advances from 0/3 to 1/3. Do not begin Phase 7 automatically.

@@ -32,6 +32,15 @@ def remove_sample():
     os.remove(TEMP_PATH)
 
 
+def assert_argument_error(argv):
+    try:
+        main(argv)
+    except SystemExit as error:
+        assert error.code == 2
+    else:
+        raise AssertionError("main did not raise SystemExit")
+
+
 def test_read_diff_returns_the_file_contents():
     write_sample()
     try:
@@ -63,27 +72,23 @@ def test_missing_file_fails_without_raising():
     assert main(["cli.py", "analyze", "_no_such_file.diff"]) == 1
 
 
-def test_unknown_action_fails():
-    write_sample()
-    try:
-        assert main(["cli.py", "banana", TEMP_PATH]) == 1
-    finally:
-        remove_sample()
+def test_unknown_action_raises_system_exit_2():
+    assert_argument_error(["cli.py", "banana", TEMP_PATH])
 
 
-def test_missing_arguments_fail():
-    assert main(["cli.py"]) == 1
+def test_missing_arguments_raise_system_exit_2():
+    assert_argument_error(["cli.py"])
 
 
-def test_too_many_arguments_fail():
-    assert main(["cli.py", "analyze", "a.diff", "b.diff"]) == 1
+def test_too_many_arguments_raise_system_exit_2():
+    assert_argument_error(["cli.py", "analyze", "a.diff", "b.diff"])
 
 
 test_read_diff_returns_the_file_contents()
 test_format_summary_labels_all_three_counts()
 test_analyze_on_a_real_file_succeeds()
 test_missing_file_fails_without_raising()
-test_unknown_action_fails()
-test_missing_arguments_fail()
-test_too_many_arguments_fail()
+test_unknown_action_raises_system_exit_2()
+test_missing_arguments_raise_system_exit_2()
+test_too_many_arguments_raise_system_exit_2()
 print("test passed")

@@ -4,12 +4,12 @@
 > obsolete statements whenever state changes. Preserve historical prompts, answers, remediation, and
 > rationale in `learning/LEARNING_LEDGER.md`, `QUIZZES.md`, and Git history.
 
-Last updated: 2026-08-29
+Last updated: 2026-09-02
 
 ## Lifecycle
 
-**Current phase:** Phase 5 complete. The mandatory cumulative foundation review is now due before
-substantial Phase 6 work; no Phase 6 product implementation is authorized yet.
+**Current phase:** Phase 6 complete. Do not begin Phase 7 automatically; start its specification and
+adjacent-learning sequence in the next implementation session.
 
 Phase 3 is complete in every required dimension:
 
@@ -41,6 +41,17 @@ automated tests      complete — EV-P5-COMPLETE-259
 learner trace        complete — EV-P5-SESSION-POSTPATCH-TRACE-249
 learner explanation  complete — EV-P5-ANNOTATION-VALIDATION-250
 transfer variant     complete — EV-P5-RETRY-TRANSFER-COMPLETE-258
+```
+
+Phase 6 is complete in every required dimension:
+
+```text
+implementation       complete — argparse CLI vertical slice
+automated tests      complete — all four suites passed 2026-09-02
+learner trace        complete — valid Namespace path and malformed SystemExit path
+learner explanation  complete — EV-P6-CLI-EXPLANATION-275
+transfer variant     complete — EV-P6-CLI-TRANSFER-277
+policy decision      complete — EV-P6-ARGPARSE-POLICY-280
 ```
 
 ## Exact code that exists
@@ -108,15 +119,24 @@ before mutation for a non-string. Valid strings append in order and the method r
 string-only guarantee is deliberately scoped to supported API paths, not arbitrary Python
 introspection of `_changes`.
 
+### `cli.py`
+
+`main(argv)` owns the command-line/process boundary. It gives `argv[0]` to argparse as the displayed
+program name, parses `argv[1:]` into `Namespace(action=..., path=...)`, restricts action to
+`"analyze"`, reads `args.path`, delegates counting to `summarize_diff`, and prints the formatted
+summary. Malformed syntax uses argparse's generated stderr diagnostic and raises `SystemExit(2)`.
+A missing file prints a readable stderr message and returns 1; success returns 0.
+
 ## Automated verification
 
 ```text
 python test_classify.py   — 8 test functions
 python test_summarize.py  — 1 end-to-end summary test function
 python test_session.py    — 7 test functions
+python test_cli.py        — 7 test functions
 ```
 
-All three passed locally after the Phase 5 Session contract patch on 2026-08-31.
+All four passed together after the Phase 6 argparse patch on 2026-09-02.
 
 Load-bearing Session tests include:
 
@@ -144,6 +164,19 @@ Session()
 → fresh instance-owned changes list
 → record(diff_text) mutates that list in order
 → history() returns a separate snapshot
+```
+
+```text
+shell argv
+→ main separates argv[0] from argv[1:]
+→ argparse validates action/path and returns Namespace
+→ read_diff(args.path)
+→ summarize_diff(diff_text)
+→ format_summary(summary)
+→ stdout + status 0
+
+malformed syntax → argparse stderr + SystemExit(2)
+missing file     → BuildLens stderr + return 1
 ```
 
 ## Current architecture decision
@@ -430,7 +463,7 @@ The Phase 0–2 foundation counter was reset on 2026-08-29 after four formal cum
 passed with remediation where needed.
 
 The Phase 3-5 foundation counter reached 3/3, the review ran on 2026-08-31, all five questions
-passed, and the counter is now RESET as of 2026-08-31. It stands at 0/3; Phase 6 will count as 1/3.
+passed, and the counter reset. Phase 6 is now complete, so the foundation counter stands at 1/3.
 
 The major/deep Phase 7–15 counter has not started.
 
@@ -1045,13 +1078,124 @@ prompt is `main(["cli.py"])` with no command/path; ask for the exact raised exce
 usage/error stream. After that passes, construct the smallest `try`/`except` RED test together. No
 `cli.py` or `test_cli.py` argparse implementation has been made.
 
+On resumption, the learner correctly supplied status 2 and stderr at confidence 30 but named
+`usage error` as the control effect. The diagnostic text and exception type are being merged.
+On the reduced constructor form, the learner supplied `systemexit` at confidence 100; refine
+capitalization to `SystemExit`. Together the attempts recover raised `SystemExit(2)` plus
+usage/error text on stderr. Present the smallest exception-aware test skeleton and require only its
+`error.code` assertion before editing `test_cli.py`. The first assertion attempt was
+`SystemExit == 2` at confidence 90: status 2 is correct, but the exception class was compared instead
+of the caught `error` instance's `.code`. Two further attempts were `error == 2` and
+`main.error == 2` at confidence 90: the first compares the whole exception object, while the second
+puts the field on the `main` function. Descend to retrieving `code` from a familiar one-field
+`Namespace` object before restoring the exception surface. The learner correctly retrieved
+`result.code` at confidence 90. Near-transfer the same object/attribute pattern to the caught
+`error` object next, without adding comparison syntax yet. The learner then correctly supplied
+`error.code` at confidence 90 and asked how `code` could be known when the except statement never
+names it. This is a valid API-contract distinction: the syntax names `error`; the `SystemExit` type
+defines `.code`. A live object check confirmed `SystemExit(2).code == 2`. Explain that library
+attributes come from documentation/type information/inspection, then rebuild the assertion.
+
+The learner completed `assert error.code == 2`. The first collaborative test is now authorized:
+replace only the missing-arguments return-1 assertion with a `try`/`except SystemExit as error`
+test and verify that it fails because current `main` returns rather than raises. Production code
+must remain unchanged during RED.
+
+RED was verified: `python test_cli.py` exited 1 because the new test reached its `else` and raised
+`AssertionError: main did not raise SystemExit`. In tracing this, the learner correctly noted that
+current `main` returns 1 and execution reaches `else`, but also said it raised and that `except`
+ran. Clarify that normal return skips `except` and activates `else`; the test's own explicit raise
+creates the observed AssertionError. Descend to a no-function try/except/else trace next.
+
+The learner correctly restated the RED-to-GREEN intention but said the test changes `main`.
+Refine that the test specifies/detects behavior; the later production patch changes `main`. The
+reduced try/except/else trace then passed at confidence 90: normal assignment skips except and runs
+else. Refine that absence of any exception, not the particular integer 7, controls the branch.
+Return to a fresh trace of the real RED test before production editing.
+
+On the real test, the learner correctly traced current `main` returning 1, control reaching else,
+and the test raising AssertionError. Two explicit fields were omitted: the `except SystemExit`
+handler is skipped, and production must raise `SystemExit(2)` for malformed arguments. Ask only
+those fields before GREEN.
+
+The learner correctly named the missing `SystemExit(2)` behavior at confidence 90 but described
+except as running to check and else as running when the error is not SystemExit. Correct rule: else
+runs only after zero exceptions; an unmatched exception propagates and skips else. Isolate this with
+a tiny `ValueError`/`except SystemExit` example before GREEN.
+
+On the unmatched-exception example, the learner correctly said ValueError continues outward because
+the SystemExit handler does not match, but also said the else branch prints `finished`. Correct that
+any exception leaving try skips else. On the binary follow-up, the learner correctly answered that
+`finished` does not print at confidence 80 and distinguished it from the earlier normal-completion
+example. The prerequisite is recovered. Transfer the chosen contract to unknown-action and
+too-many-argument tests before production editing.
+
+The first transfer reverted both cases to return 1 at confidence 70. The learner correctly named
+`banana` as an invalid command but used `usage stderr` as the reason for the too-many-arguments case.
+Under the chosen policy both raise `SystemExit(2)` and write diagnostics to stderr; the second is
+malformed because it has an unexpected extra positional token. Reduce to one invalid choice, then
+retry the excess-token case. The invalid-choice reduction passed at confidence 90 with raised
+`SystemExit(2)`. Ask the excess-token near-transfer next.
+
+The excess-token near-transfer passed at confidence 90: the second path is unexpected and produces
+`SystemExit(2)`. The policy now transfers across all three malformed cases. Collaboratively specify
+one test helper taking argv and asserting raised code 2, then update the tests before production.
+
+The learner approved and correctly traced the proposed helper at confidence 90: each malformed argv
+causes the except handler to verify code 2 and the helper then finishes normally. Update all three
+malformed-input tests to use it and rerun RED with `cli.py` unchanged.
+
+All three tests now use the agreed helper. RED was verified: `python test_cli.py` exited 1 at the
+first malformed case because current `main` returned 1 and the helper raised its deliberate
+`AssertionError`. `cli.py` remains unchanged. Before GREEN, trace the proposed parser's valid
+`argv[1:]` input and returned action/path fields.
+
+The valid parser trace passed action/path conceptually at confidence 90, but gave only the path for
+`argv[1:]` and tied script-name exclusion to `main`. Descend to one unrelated `[1:]` slice. Then
+rebuild that `argv[0]` is the program name used for diagnostics while argparse consumes user tokens
+after it. Production remains unchanged.
+
+The unrelated slice passed conceptually at confidence 90 as `["scan", "events.log"]`. The learner
+asked its purpose. Explain that argv element 0 identifies the program, while elements from 1 onward
+are user tokens; BuildLens keeps the former as argparse `prog` and parses the latter. Require one
+fresh prog/tokens mapping before production editing.
+
+The learner asked what `prog` means. Activate syntax-only help: `prog` is argparse's display name
+for generated help/usage/error text; it neither runs the program nor becomes a parsed positional
+value. Use one fixed `prog="audit-tool"` example before returning to argv mapping.
+
+The learner spontaneously transferred the concept to BuildLens: `prog` is `"cli.py"` when
+`prog=argv[0]` and argv begins with that string. This passes the syntax check. Return to one fresh
+prog/tokens mapping before production editing.
+
+The fresh mapping passed at confidence 90: `prog` receives `"audit.py"` and `parse_args` receives
+`["check", "build.log"]`. The parser boundary is recovered. Apply the agreed minimal argparse
+implementation and run the targeted CLI suite for GREEN evidence; do not mark the milestone complete
+without the learner trace/explanation/transfer requirements.
+
+The minimal argparse implementation is present in `cli.py`. Targeted GREEN was verified with
+`python test_cli.py` exiting 0: valid analysis, file-read return 1, and all three malformed
+`SystemExit(2)` cases passed. Stop before full verification/completion and require a learner trace
+of one valid parse path and one malformed parser-exit path.
+
+The post-GREEN malformed trace passed fully at confidence 90. The valid trace had the right token
+list shape and continuation but renamed `action` to `command`, misspelled `path` as `poath`, and
+passed standalone `path` rather than `args.path` to `read_diff`. Require only the exact Namespace
+fields and file-read expression before full-suite verification.
+
+The exact valid-path completion passed at confidence 90:
+`Namespace(action="analyze", path="changes.diff")` and `read_diff(args.path)`. The learner explained
+that `path` is an attribute on the Namespace referenced by `args`. The post-GREEN trace is closed.
+Rename the two remaining vague malformed-input tests, rerun targeted tests, then run all four suites
+for fresh verification evidence.
+
 ```text
-phase                       Phase 6 in progress; first CLI patch complete
-last knowledge gate         EV-P6-ARGPARSE-POLICY-280, passed at confidence 90
+phase                       Phase 6 complete; argparse vertical slice verified
+last knowledge gate         Phase 6 post-argparse trace, passed after remediation
 next retrieval due          delayed argparse parser-versus-Namespace retrieval on a fresh surface
 next architecture reset     complete; next by time or major transition
-next implementation step    collaboratively design failing argparse test, then implement
-last published commit       1eb5be1 — docs: record Phase 6 teaching and retrieval state
+next implementation step    begin Phase 7 specification/adjacent learning; no code automatically
+last published commit       d1131ba — docs: record argparse policy decision
 ```
 
 Files the learner should currently be able to teach:
