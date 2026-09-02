@@ -30579,3 +30579,41 @@ Before the implementation plan exposes controlled-subprocess test syntax, ask on
 prediction: if the test temporarily replaces `subprocess.run` with a stand-in that returns a prepared
 result, whether the operating system starts a real Git child process. Record the answer before
 showing mock/patch syntax.
+
+CONTROLLED-STAND-IN PREDICTION ANSWER (verbatim):
+
+```text
+no, but the beginner mechanism is waht we need to make sure works before intorducing a child process
+```
+
+EVALUATION:
+PASS WITH PRECISION. No real Git child starts when the test substitutes a stand-in for
+`subprocess.run`. The learner correctly values stabilizing the simpler parent-side mechanism first.
+Precision: the controlled test proves how BuildLens constructs and interprets the boundary call; it
+does not prove operating-system launch or real Git behavior. That evidence comes from the deferred
+real-Git integration test.
+
+NEXT REQUIRED STEP:
+Ask for one fact the controlled test can prove and one fact it cannot prove. After that passes, show
+the smallest `unittest.mock.patch` syntax needed by the implementation plan.
+
+CONTROLLED-TEST EVIDENCE ANSWER (verbatim):
+
+```text
+that the subprocess run when called will return the stand in, so when we want to call a child process which we cannot prove it can call git yet, but it will attempt to call the chile process
+```
+
+EVALUATION:
+PASS WITH PRECISION. The learner identifies that the controlled call returns the prepared stand-in
+result and that the test cannot prove real Git launch. The stand-in's recorded call can prove that
+BuildLens attempted the expected invocation; a later integration test must prove the operating-system
+and real-Git path.
+
+NEXT REQUIRED STEP:
+Show one minimal `with patch(..., return_value=prepared) as fake_run:` example. Explain only that the
+replacement is active inside the indented block and that `fake_run` records calls. Ask what value the
+function receives from `subprocess.run` inside the block.
+
+SESSION PAUSE — 2026-09-02:
+The learner needed to move locations and requested a commit and push. Resume at the exact minimal
+`mock.patch` syntax check above. Do not skip to implementation-plan code or Phase 7 product code.

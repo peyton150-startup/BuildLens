@@ -271,6 +271,20 @@ The learner reviewed the written design and said everything looks good. The desi
 Before the implementation plan reveals concrete controlled-subprocess test syntax, run one smallest
 prerequisite check: whether substituting a test stand-in for `subprocess.run` launches real Git.
 
+The learner correctly answered that the controlled stand-in does not launch a real Git child. Their
+reasoning correctly favors learning the parent-side boundary mechanism first. Preserve the precision
+that this proves BuildLens's construction/interpretation behavior, not operating-system process
+launch or real Git behavior. Require one proves/does-not-prove check before showing mock syntax.
+
+The learner's proves/does-not-prove answer passed with precision. A controlled test can prove that
+BuildLens attempted the expected call and interpreted the prepared result; it cannot prove operating-
+system launch or real Git output. Show only the smallest `unittest.mock.patch` form and require a
+one-value trace before writing the implementation plan.
+
+The session paused because the learner needed to move locations. Resume by showing the minimal
+`mock.patch` example described above and ask only what value `subprocess.run` returns inside the
+indented block. No Phase 7 product code or implementation plan exists yet.
+
 Phase 3 is complete in every required dimension:
 
 ```text
@@ -1451,10 +1465,10 @@ for fresh verification evidence.
 
 ```text
 phase                       Phase 7 specification/adjacent learning; no implementation authorized
-last knowledge gate         written Phase 7 Git-boundary design approved
+last knowledge gate         controlled-test evidence boundary passed
 next retrieval due          delayed argparse parser-versus-Namespace retrieval on a fresh surface
 next architecture reset     complete; next by time or major transition
-next implementation step    controlled-subprocess stand-in behavior check; then write implementation plan
+next implementation step    minimal mock.patch syntax trace; then write implementation plan
 last published commit       73daeb4 — docs: refine phase 7 subprocess contract
 ```
 
