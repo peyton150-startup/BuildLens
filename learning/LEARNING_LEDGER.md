@@ -30205,3 +30205,377 @@ Ask only why the file should remain visible when both line counts are zero.
 SESSION PAUSE — 2026-09-02:
 The learner paused for dinner and requested a commit and push. Resume with the single reasoning
 question above. No Phase 7 product code exists.
+
+EMPTY-UNTRACKED-FILE REASONING ATTEMPT 1 ANSWER (verbatim):
+
+```text
+i do not know
+```
+
+EVALUATION:
+UNANSWERED. The learner selected the correct representation earlier but could not yet explain why
+an empty file must remain visible despite zero added/removed lines.
+
+PRIMARY BLOCKER:
+Distinguishing the fact that a file exists from the separate fact that its content contains zero
+lines.
+
+ADAPTATION:
+Descend to R1 with no Git vocabulary and no counts. Show a folder before and after creation of an
+empty file. Ask only whether the folder state changed.
+
+NEXT REQUIRED STEP:
+Ask the R1 presence-versus-content question. After it passes, use a near-transfer that reconnects
+file presence to a complete snapshot.
+
+R1 EMPTY-FILE PRESENCE ANSWER (verbatim):
+
+```text
+yes
+```
+
+EVALUATION:
+PASS. Creating an empty `placeholder.py` changed the folder state because a new path now exists,
+even though the new file contains zero lines. File presence and content line count are separate
+facts.
+
+NEXT REQUIRED STEP:
+Ask whether a snapshot claiming to show every folder change is complete if it hides the newly
+created empty file. Require only complete/incomplete and a short reason.
+
+EMPTY-FILE COMPLETENESS NEAR-TRANSFER ANSWER (verbatim messages):
+
+```text
+so we show the empy file because it is a change in state
+```
+
+```text
+and that is apart of the snapshot
+```
+
+EVALUATION:
+PASS. The learner correctly connected the file's changed existence to the snapshot's completeness
+contract. An empty untracked file is a file-level state change even though it contributes zero added
+and zero removed content lines. The Phase 7 requirement is approved: show it in UNSTAGED as one
+changed file with zero line counts. The remediation chain is closed.
+
+NEXT REQUIRED STEP:
+Compare implementation mechanisms for preserving the empty file without weakening the approved
+adapter/core boundary. Do not write Phase 7 product code until the learner understands and approves
+the mechanism.
+
+FILE-PRESENCE EVIDENCE ATTEMPT 1 ANSWER (verbatim):
+
+```text
+the content line counter, if no lines are ever added then it will be empty , i am not sure
+```
+
+EVALUATION:
+INCORRECT / UNCERTAIN. The content-line counter cannot establish whether an empty file exists. Both
+“no file created” and “empty file created” yield zero added and zero removed content lines, so those
+counts collapse two repository states that Phase 7 must distinguish.
+
+PRIMARY BLOCKER:
+Recognizing that a representation is insufficient when two relevant real states produce the same
+represented value.
+
+ADAPTATION:
+Descend to R1. Present two cases that both have added=0 and removed=0, with only one containing a new
+empty file. Ask whether line counts alone can tell the cases apart.
+
+NEXT REQUIRED STEP:
+Ask only the R1 distinguishability question. After it passes, return to choosing which evidence owns
+file presence.
+
+R1 ZERO-LINES/TWO-STATES ANSWER (verbatim):
+
+```text
+no
+```
+
+EVALUATION:
+PASS. Identical `added = 0` and `removed = 0` values cannot distinguish the state in which no file
+was created from the state in which a new empty file exists. The learner now recognizes the
+information loss in content counts alone.
+
+NEXT REQUIRED STEP:
+Show the untracked-path discovery results for the same two cases—no paths in Case A and
+`placeholder.py` in Case B—and ask whether that evidence can distinguish them.
+
+LEARNER EVIDENCE-BOUNDARY QUESTION (verbatim):
+
+```text
+but how would path disocervy tell you it is empty
+```
+
+FACILITATOR CLARIFICATION:
+It would not. Path discovery proves only that a new untracked path exists. Content inspection
+separately determines how many lines the file contains. Together they preserve both the file-level
+state change and its content counts.
+
+FILE-PRESENCE/CONTENT-EVIDENCE ANSWER (verbatim):
+
+```text
+so we would need path discovery to show a file is there, then we would need content inspection to see how many lines the file has and finally the counts would show us if there is a change in the file
+```
+
+EVALUATION:
+PASS WITH PRECISION. The learner correctly assigns existence to path discovery and line measurement
+to content inspection. Precision: for an untracked file, discovery already proves the file-level
+change; content counts describe its content and may be zero. This remediation chain is closed.
+
+NEXT REQUIRED STEP:
+Inspect the exact current summary representation, then present the smallest candidate Phase 7
+representation that can preserve staged/unstaged separation, untracked path presence, and content
+counts without making line counts infer file existence. Require learner approval before code.
+
+LEARNER COUNT-AUTHORITY FOLLOW-UP (verbatim):
+
+```text
+but after the file level change the counts will be needed to see there is a change
+```
+
+EVALUATION:
+PARTIAL. Counts are needed to describe changed content, but not to establish every file-level
+change. The existing summarizer increments `files_changed` from a `diff --git` header independently
+of `+` and `-` content lines.
+
+VERIFIED LOCAL GIT PROBE:
+
+```text
+git diff --no-index -- /dev/null .claude-flow/data/pending-insights.jsonl
+
+diff --git a/.claude-flow/data/pending-insights.jsonl b/.claude-flow/data/pending-insights.jsonl
+new file mode 100644
+index 0000000..e69de29
+RETURN_CODE=1
+```
+
+The compared right-hand file was empty. Git represented creation with a file header and metadata,
+returned the documented “different” status 1, and emitted no added/removed content lines. This
+preserves the exact facts needed by the existing core: one file changed, zero lines added, zero lines
+removed.
+
+DESIGN CORRECTION:
+The earlier reduced explanation used an existing empty baseline to teach comparison direction. That
+was useful for the line-direction remediation but is not sufficient as the final empty-file
+mechanism because two existing empty files compare equal. The implementation candidate uses
+`/dev/null` as the conventional “did not exist before” side, which preserves file creation even
+when the created file is empty.
+
+NEXT REQUIRED STEP:
+Show the three-line verified Git output and ask the learner to trace the exact `DiffSummary` through
+the existing classifier/summarizer: `diff --git` increments files, while metadata increments neither
+line counter.
+
+INDEX-LINE SYNTAX QUESTION (verbatim):
+
+```text
+so index 00000000 is the number of lines in the file?
+```
+
+ADAPTATION:
+Pause the surrounding summary trace. Explain only the unified-diff `index old..new` form:
+abbreviated Git object identifiers, not line counts; left is BEFORE, right is AFTER; all-zero old
+identifier represents no prior file object here; `e69de29` identifies Git's empty blob. Ask which
+side is BEFORE.
+
+INDEX SYNTAX MICRO-CHECK + EMPTY-FILE TRACE ANSWER (verbatim):
+
+```text
+before is the left and after is the right ok i understand, and the new file mode is how we know it is new, and the files changes is 1 and the lines added and removed are zero so all of that tells us it is empty
+```
+
+EVALUATION:
+PASS. The learner correctly read left as BEFORE and right as AFTER, identified `new file mode` as
+creation metadata, and traced the output through the existing summarizer to
+`DiffSummary(files_changed=1, lines_added=0, lines_removed=0)`. The syntax-only interruption and the
+surrounding trace are both closed.
+
+NEXT REQUIRED STEP:
+Ask whether the learner approves using Git's `/dev/null`-to-untracked-file no-index comparison for
+new files, including empty ones, with command-specific acceptance of status 1 and unchanged use of
+the existing diff summarizer. Do not implement until approved.
+
+REPRESENTATION CLARIFICATION REQUEST (verbatim):
+
+```text
+can you explain both so i know what they actually mean i am reading the changes and it is going over my head
+```
+
+FACILITATOR CORRECTION:
+The earlier “hardened versus structured” comparison mixed two independent decisions. Malformed-output
+validation is required under either representation. The real choice is validated plain diff text
+versus a validated record containing named fields such as path, diff text, and return code.
+
+REPRESENTATION DECISION (verbatim):
+
+```text
+it seems liek the strucutred result is overkill, since we only need the plain diff text, check me on that
+```
+
+EVALUATION:
+PASS / APPROVED FOR THE PER-COMMAND ADAPTER BOUNDARY. The current downstream consumer needs only
+validated unified-diff text. The adapter may use path, return code, and stderr internally to validate
+the command and output without exporting them in a new object. Introducing a structured result now
+would add a type and caller step without a current consumer requirement. Precision: the overall
+snapshot must still preserve separately labeled UNSTAGED and STAGED captures.
+
+ACCEPTED DOWNSIDE:
+The returned string does not carry the validation evidence or source path as named fields. That
+information remains internal to the adapter operation.
+
+NEXT REQUIRED STEP:
+Ask what concrete future requirement would make the structured result worth introducing. Require a
+reversal condition tied to a consumer need, not “cleaner code.”
+
+PLAIN-DIFF MECHANISM APPROVAL (verbatim):
+
+```text
+sounds good to me
+```
+
+EVALUATION:
+APPROVED. Phase 7 will use validated plain unified-diff text for each Git capture, including real
+`/dev/null`-to-file output for untracked files. The adapter retains process/path/diagnostic evidence
+internally while the unchanged summarizer receives only validated diff text.
+
+NEXT REQUIRED STEP:
+Ask for one concrete reversal condition that would justify replacing the string boundary with a
+structured result later.
+
+STRUCTURED-RESULT REVERSAL ANSWER (verbatim):
+
+```text
+the return code, i am not sure
+```
+
+EVALUATION:
+PASS WITH PRECISION. The exact return code can justify a structured result if a downstream consumer
+gains a concrete requirement to receive it, such as displaying diagnostics or persisting an audit
+record. Its mere existence inside the adapter does not justify exporting it; the adapter already
+uses it to validate the command-specific process contract.
+
+REVERSAL CONDITION:
+Replace the validated-string boundary when a real downstream feature must consume process/path/
+diagnostic metadata that cannot be obtained from the diff text without recreating Git knowledge
+outside the adapter.
+
+NEXT REQUIRED STEP:
+Give one unrelated transfer: an image converter currently returns validated image bytes, but a new
+UI must display codec and dimensions. Ask whether a structured result is now justified and why.
+
+STRUCTURED-RESULT TRANSFER ANSWER (verbatim):
+
+```text
+yes, because we need more than just the image we need the width and height, i still am not sure what data type we would need to add to a downstream caller
+```
+
+EVALUATION:
+PASS. The learner correctly identified a new consumer requirement for multiple related values and
+therefore justified reversing from a bytes-only return to a structured result. The design principle
+transferred outside Git.
+
+SYNTAX/REPRESENTATION QUESTION:
+The learner is unsure what data type would cross the boundary. Explain only that the adapter can
+define and return a small record type, such as a Python dataclass, and the caller receives one
+instance and reads named fields. Do not suggest adding that type to current Phase 7 code.
+
+NEXT REQUIRED STEP:
+Show a minimal `ImageResult(data, width, height)` dataclass and one returned instance. Ask what
+`result.width` evaluates to.
+
+BYTES-LITERAL SYNTAX QUESTION (verbatim):
+
+```text
+is this a typo: (b"image bytes", 800, 600)
+```
+
+FACILITATOR CLARIFICATION:
+No. The `b` prefix creates a `bytes` literal rather than a `str`; image payloads are binary data in
+this transfer example. The positional arguments map to `data`, `width`, and `height` in declaration
+order.
+
+FIELD-ACCESS MICRO-CHECK ANSWER (verbatim):
+
+```text
+800
+```
+
+EVALUATION:
+PASS. `800` is assigned to `width`, so `result.width` evaluates to `800`. The syntax-only interruption
+is closed. No structured result is introduced into Phase 7; validated plain diff text remains the
+approved per-command boundary.
+
+NEXT REQUIRED STEP:
+Present one narrowly scoped first Phase 7 implementation patch for learner approval. The patch must
+introduce only the process-running boundary and its focused tests, leaving multi-command snapshot
+composition, untracked discovery, `/dev/null` capture, CLI replacement, and final output formatting
+for later patches.
+
+STAGED-CAPTURE SCOPE QUESTION (verbatim):
+
+```text
+so are we creating the staged capture later?
+```
+
+FACILITATOR CLARIFICATION:
+Yes. Patch splitting changes sequence, not the approved final behavior. The planned order is tracked
+UNSTAGED capture, tracked STAGED capture, untracked discovery plus `/dev/null` diffs, then labeled
+CLI composition.
+
+FIRST PATCH SCOPE APPROVAL (verbatim):
+
+```text
+yes
+```
+
+EVALUATION:
+APPROVED. The first Phase 7 product patch is limited to one tracked-UNSTAGED capture function and
+focused tests. It does not implement staged capture, untracked files, `/dev/null`, CLI integration,
+or final formatting. Those remain explicit later slices.
+
+NEXT REQUIRED STEP:
+Complete the test-strategy section of the architectural design. Compare controlled subprocess-result
+tests against temporary-real-repository tests, explain the tradeoff in plain language, and ask the
+learner to approve one approach before any product code.
+
+FIRST-PATCH TEST-STRATEGY APPROVAL (verbatim):
+
+```text
+yes lets do the subprocess tests
+```
+
+EVALUATION:
+APPROVED. The first patch will use controlled subprocess results to verify exact arguments, child
+working directory, text capture, timeout, accepted status, returned stdout, and unexpected-status
+rejection without mutating a real repository. The accepted downside is that this does not prove real
+Git integration. A small real-Git integration test is deferred until the capture paths are assembled.
+
+DESIGN RECORD:
+`docs/superpowers/specs/2026-09-02-phase-7-git-boundary-design.md`
+
+SELF-REVIEW:
+No placeholders remain. The design preserves separate UNSTAGED/STAGED output, read-only Git capture,
+validated plain diff text, whole-snapshot failure, and later untracked empty-file support. The first
+slice is explicitly narrower than the final Phase 7 behavior and is not wired into the CLI.
+
+NEXT REQUIRED STEP:
+Ask the learner to review and approve the written design. Do not create an implementation plan or
+write product code until that approval is explicit.
+
+WRITTEN DESIGN APPROVAL (verbatim):
+
+```text
+everything looks good
+```
+
+EVALUATION:
+APPROVED. The Phase 7 Git-boundary design is ready for implementation planning. No product code has
+been written.
+
+NEXT REQUIRED STEP:
+Before the implementation plan exposes controlled-subprocess test syntax, ask one prerequisite
+prediction: if the test temporarily replaces `subprocess.run` with a stand-in that returns a prepared
+result, whether the operating system starts a real Git child process. Record the answer before
+showing mock/patch syntax.

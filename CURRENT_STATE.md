@@ -185,6 +185,92 @@ correct, but require their completeness reasoning before approving the requireme
 The session paused for dinner before that reasoning was supplied. Resume by asking only why an empty
 untracked file should remain visible when both line counts are zero. Do not implement Phase 7 yet.
 
+When resumed, the learner answered `i do not know`. Primary blocker: distinguishing file presence
+from file contents. Descend below Git and line-count policy to an R1 before/after check asking only
+whether creating an empty file changed the folder state.
+
+The R1 check passed: the learner correctly identified that creating an empty `placeholder.py`
+changes the folder state even though the file contains no lines. Require one near-transfer linking
+that changed existence to the completeness of a repository snapshot.
+
+The near-transfer passed. The learner explained that the empty file must be shown because its
+creation is a state change and that change belongs in the snapshot. Approve the requirement:
+UNSTAGED reports the empty untracked file as one changed file with zero added and zero removed
+lines. Next compare implementation mechanisms without writing Phase 7 code yet.
+
+When asked which evidence should determine file presence, the learner chose the content-line counter
+and was unsure. This is incorrect because both “no file created” and “empty file created” produce
+zero added/removed content lines. Primary blocker: recognizing when one representation cannot
+distinguish two relevant states. Descend to an R1 two-case distinguishability check.
+
+The R1 distinguishability check passed: the learner correctly said identical zero line counts cannot
+tell “no file created” from “empty file created” apart. Now ask which available evidence does
+distinguish those states.
+
+The learner correctly questioned that path discovery cannot itself tell whether a file is empty.
+Clarify the split: path discovery proves that the untracked file exists and therefore establishes
+the file-level change; content inspection establishes its line counts. The learner then explained
+the two-source sequence correctly. Preserve the precision that content counts measure content and
+do not decide whether the new path exists. This remediation chain is closed.
+
+The learner then suggested the counts are needed to see whether there is a change. Correct the
+precision: a file header/path establishes a file-level change; content counts only measure changed
+lines. A local read-only Git probe compared `/dev/null` (nonexistence before) with an existing empty
+file and returned status 1 plus `diff --git`, `new file mode`, and `index` metadata, with no content
+hunk. This is sufficient for the existing summarizer to report one changed file and zero added or
+removed lines. The earlier “empty baseline” teaching simplification is not the final mechanism:
+an existing empty file compared with another empty file would erase the creation distinction.
+
+During the exact trace, the learner asked whether `index 0000000..e69de29` counted lines. Syntax-only
+help explained that these are abbreviated Git object identifiers: left is the absent-before side and
+right identifies empty content. The learner then correctly traced BEFORE/AFTER, `new file mode`, one
+file changed, and zero added/removed lines. Ask for explicit approval of the `/dev/null` mechanism.
+
+When comparing representations, clarify that validation and representation are separate decisions:
+both a plain string and a structured result must reject malformed required output. The learner judged
+the structured per-command result to be overkill because the current downstream core needs only
+validated diff text. Approve validated plain diff text at this boundary; keep path, return code, and
+stderr inside the adapter's validation work. This does not collapse the separately labeled UNSTAGED
+and STAGED captures. Require a reversal condition before closing the design decision.
+
+The learner explicitly approved the validated plain-diff mechanism. The only remaining design-defense
+item for this representation is a concrete future consumer requirement that would justify reversing
+the decision and introducing a structured result.
+
+The learner proposed “the return code” as a tentative reversal condition. Accept with precision:
+the structured result becomes justified if a downstream consumer gains a concrete requirement to
+receive the exact return code (for example, display or audit), rather than the adapter merely using
+it internally for validation. Require one unrelated representation transfer before closing the
+decision.
+
+The image-converter transfer passed: the learner correctly justified a structured result when the
+UI needs image bytes plus width and height. They remain unsure what data type crosses to the caller.
+Activate syntax-level help for one small record/dataclass example and field access; do not add such
+a type to Phase 7.
+
+The learner asked whether `b"image bytes"` was a typo. Syntax-only help distinguished a bytes literal
+from a text string and mapped the positional `ImageResult` arguments. The learner correctly read
+`800` as the width. The representation decision, reversal condition, unrelated transfer, and syntax
+check are complete. Present the first Phase 7 implementation patch scope for approval; do not code
+before approval.
+
+The learner asked whether staged capture would still be built later, then explicitly approved the
+first patch after confirming that the split changes sequencing rather than final scope. Patch 1 is
+limited to one tracked-UNSTAGED capture function and focused tests. STAGED capture, untracked
+discovery, `/dev/null` new-file diffs, multi-command composition, and CLI integration remain required
+later patches. Complete the test-strategy design section before writing the architectural design
+record or product code.
+
+The learner approved controlled subprocess tests for the first patch, with a real-Git integration
+test deferred until the capture paths are assembled. The full approved design is recorded in
+`docs/superpowers/specs/2026-09-02-phase-7-git-boundary-design.md`. Self-review found no placeholders,
+scope contradictions, or unresolved first-slice behavior. The learner must review and approve that
+written design before implementation planning. No Phase 7 product code exists.
+
+The learner reviewed the written design and said everything looks good. The design is approved.
+Before the implementation plan reveals concrete controlled-subprocess test syntax, run one smallest
+prerequisite check: whether substituting a test stand-in for `subprocess.run` launches real Git.
+
 Phase 3 is complete in every required dimension:
 
 ```text
@@ -1365,11 +1451,11 @@ for fresh verification evidence.
 
 ```text
 phase                       Phase 7 specification/adjacent learning; no implementation authorized
-last knowledge gate         process-success/data-failure near-transfer passed at confidence 90
+last knowledge gate         written Phase 7 Git-boundary design approved
 next retrieval due          delayed argparse parser-versus-Namespace retrieval on a fresh surface
 next architecture reset     complete; next by time or major transition
-next implementation step    require reasoning for empty-untracked-file representation
-last published commit       01ed359 — documentation handoff; HEAD matched origin/main before this session's documentation edits
+next implementation step    controlled-subprocess stand-in behavior check; then write implementation plan
+last published commit       73daeb4 — docs: refine phase 7 subprocess contract
 ```
 
 Files the learner should currently be able to teach:
