@@ -994,13 +994,64 @@ The narrowed retrieval passed: argparse generates usage/error text on stderr and
 adaptive remediation. Before the product patch, resolve whether BuildLens adopts argparse's status 2
 or preserves the current status-1 user-error contract.
 
+A requested four-topic pre-policy review began (`EV-P6-ARGPARSE-REVIEW-279`). The filename/content
+distinction and the CLI/domain responsibility boundary passed at confidence 90. The original prompt
+did not name the variable receiving `parse_args(...)`; the learner correctly objected that using
+`parser` as that missing name did not establish parser/result confusion. On an explicit
+`rules`/`result` surface, the learner correctly identified `result` as the object containing the
+parsed value at confidence 100, but omitted the requested field-access expression passed to
+`read_log`. The completion `resukt.source` passes as `result.source`, treating the typo as
+transcription noise; the representation item is closed. Default argparse failure was recalled as
+returning 1 instead of raising `SystemExit(2)`. On a reduced fresh surface, the learner then
+correctly predicted generated usage/error text on stderr and raised `SystemExit(2)` at confidence
+90. `EV-P6-ARGPARSE-REVIEW-279` is CLOSED. Do not treat this one short review as durable mastery.
+The BuildLens status-policy choice remains the next gate before the product patch.
+
+The learner began the status-policy reasoning (`EV-P6-ARGPARSE-POLICY-280`). Their core process-level
+intuition is directionally correct: when the file runs as a script, both returning 1 through
+`sys.exit(main(sys.argv))` and argparse raising `SystemExit(2)` terminate the process nonzero. Before
+a final choice, distinguish the exact shell status, where control stops, and what a direct Python
+call to `main(...)` observes. No argparse product patch is authorized yet.
+
+The learner then tentatively chose standard `SystemExit(2)` but asked whether return 1 could still
+print a bad-argv message and interpreted the existing assertion as obscuring failure. Separate
+diagnostic output from failure signaling: both policies can print to stderr and both can be tested;
+the assertion only encodes which outcome is expected. Require a confirmed choice, downside, and
+reversal condition before patching.
+
+After separating output from signaling, the learner leaned toward preserving return 1 because both
+policies can print diagnostics and the remaining concern appeared to be `main`'s structure. Refine
+that the shell normally sees the numeric status, not the meaning of stderr, so the decision also
+controls whether malformed syntax (2) is distinguishable from file/other user errors (1). Continue
+the tradeoff discussion before requiring a final defense.
+
+The learner made the final policy choice at confidence 90: adopt argparse's standard
+`SystemExit(2)` for malformed command syntax so the shell receives a distinct syntax-error status,
+accepting that this breaks `main`'s former return-only user-error contract and requires
+exception-aware tests. Reconsider only if a future uniform library-style `main(argv) -> int`
+interface becomes more important than shell-visible error categorization. The policy gate is
+passed; implement via a failing test first. File-read failure remains return status 1.
+
+The learner requested collaborative test construction, so an unrun Codex-authored `test_cli.py`
+edit was fully reversed. On the first missing-arguments test-design prompt, the learner named
+`SystemExit(2)` and usage/error content but asked how to call SystemExit without bad argv and omitted
+stderr at confidence 20. Clarify that the test intentionally supplies malformed real input rather
+than calling the expected exception itself. On the reduced comparison, the learner correctly
+identified command/action and path as the two missing tokens at confidence 100. Next reconnect this
+malformed input to exception/status and stderr before writing test syntax.
+
+SESSION STOP — 2026-09-02: the learner is moving locations and requested commit/push. The pending
+prompt is `main(["cli.py"])` with no command/path; ask for the exact raised exception, status, and
+usage/error stream. After that passes, construct the smallest `try`/`except` RED test together. No
+`cli.py` or `test_cli.py` argparse implementation has been made.
+
 ```text
 phase                       Phase 6 in progress; first CLI patch complete
-last knowledge gate         EV-P6-ARGPARSE-SYNTAX-278, closed after adaptive remediation
+last knowledge gate         EV-P6-ARGPARSE-POLICY-280, passed at confidence 90
 next retrieval due          delayed argparse parser-versus-Namespace retrieval on a fresh surface
 next architecture reset     complete; next by time or major transition
-next implementation step    choose status-1 vs argparse status-2 policy; then implement argparse patch
-last published commit       ac86e67 — docs: record Phase 6 teaching and retrieval state
+next implementation step    collaboratively design failing argparse test, then implement
+last published commit       1eb5be1 — docs: record Phase 6 teaching and retrieval state
 ```
 
 Files the learner should currently be able to teach:

@@ -28565,3 +28565,264 @@ closed after adaptive remediation
 TRANSFER / NEXT RETRIEVAL:
 Do not advance to the separate `__name__` retrieval, Phase 6 transfer variant, or argparse patch
 until this remediation climbs back to a fresh full `cli.py` teach-aloud.
+
+---
+
+## EV-P6-ARGPARSE-REVIEW-279
+
+DATE: 2026-09-02
+
+BUILD PHASE:
+Phase 6 — pre-policy argparse review
+
+ACADEMIC SOURCE:
+`PY-ARGPARSE`
+
+DEEP SKILL:
+Keep the parser/rules object, returned parsed representation, downstream file-content
+representation, default failure control effect, and module responsibility boundary distinct.
+
+EXERCISE TYPE:
+DELAYED_RETRIEVAL_REVIEW
+
+SCAFFOLD RUNG:
+R4, descending to R0/R1 after the first attempt
+
+PROMPT (verbatim):
+
+```text
+1. Parsing representation
+A parser registers positional arguments `command` and `source`, then parses `["scan", "events.log"]`. What object does parsing return, and how do you retrieve `"events.log"`?
+
+2. Representation boundary
+In a CLI, `args.source` is `"events.log"`, then `contents = read_log(args.source)`. What does each variable represent?
+
+3. Invalid-input behavior
+Both positionals are required, but the parser receives only `["scan"]`. What does default `argparse` do, where does its message go, and what status is involved?
+
+4. Responsibility boundary
+Why should argument parsing remain in `main` while deterministic event counting stays in a separate function?
+
+Include your confidence from 0–100 for each answer.
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+it is a Namespcae object and you would type parser.source
+contents is what is read inside eventslog so basically the string that events log has inside of it, readlog is the function that takes the namespace object and reads it into another object, args is the namespace object that = Namespace(command=scan,source=eventslog), source is the namespace argument that contians eventlog, it prints usage to stderr and it returns 1 effectivvly ending the exectuon, it is the responsiblity of the cli to handle all command line responsiblities and that makes the boundary stable for a counter in another module to have the sole responsilbity to count when the cli calls for it to count. 90
+```
+
+EVALUATION:
+The filename/content distinction and responsibility boundary pass. The answer correctly identifies
+the returned representation as a `Namespace`. The prompt did not name the variable receiving
+`parse_args(...)`, so `parser.source` cannot fairly establish confusion between the rule-holding
+parser and the returned result; the learner later explained that they supplied `parser` as the
+missing result-variable name. The answer does say `read_log` receives the Namespace instead of its
+source string. Default argparse failure was also described as returning status 1; it instead prints
+its generated usage/error to stderr and raises `SystemExit(2)`. BuildLens's separate policy choice
+between preserving status 1 and adopting status 2 remains deliberately unresolved.
+
+PRIMARY BLOCKER:
+which field-access expression crosses from the returned Namespace into `read_log`; the original
+parser/result-variable inference is withdrawn because the prompt was underspecified
+
+REMEDIATION ATTEMPT 1 PROMPT:
+
+```python
+rules = ArgumentParser()
+rules.add_argument("source")
+result = rules.parse_args(["events.log"])
+```
+
+Which object contains `"events.log"`, and what exact expression should be passed to
+`read_log(...)`? Confidence: 0–100.
+
+LEARNER ANSWER (verbatim):
+
+```text
+result, when you asked the question you did not give me a Namespace object so i named it parser, 100
+```
+
+EVALUATION:
+The objection is correct: the original prompt omitted a result-variable name, so the earlier answer
+did not establish a parser/result misconception. On the now-explicit surface, `result` correctly
+identifies the object containing the parsed value at confidence 100. The requested exact
+field-access expression passed to `read_log(...)` was omitted; ask only for that expression.
+
+REMEDIATION ATTEMPT 1 COMPLETION PROMPT:
+Supply only the exact expression passed to `read_log(...)`.
+
+LEARNER ANSWER (verbatim):
+
+```text
+resukt.source
+```
+
+EVALUATION:
+PASS, treating the misspelling as transcription noise: `result.source` retrieves the parsed filename
+string and is the expression passed to `read_log(...)`. The representation item is closed.
+
+FAILURE-CONTROL REMEDIATION PROMPT:
+
+```text
+Default `argparse` does not return `1` for malformed arguments. It writes generated usage/error text
+to `stderr` and raises `SystemExit(2)`.
+
+A parser requires positional `mode`, then runs `parser.parse_args([])`. Does this call return a
+number or raise something? Give the exact exception and status. Confidence: 0–100.
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+it would raise system exit 2 and generate a usage/error text to stderr, 90
+```
+
+EVALUATION:
+PASS. The learner distinguishes raising from returning, identifies `SystemExit(2)`, and places the
+generated usage/error text on stderr.
+
+FINAL RESULT:
+The requested four-topic review is CLOSED after correction of an underspecified prompt and reduced
+retrieval. Parsing representation, filename-versus-content representation, default argparse failure
+control, and CLI/domain responsibility boundaries all pass. Do not infer durable mastery from this
+single short review.
+
+NEXT REQUIRED STEP:
+Return to the deferred policy gate: the learner must choose and defend whether BuildLens preserves
+its current status-1 user-error contract or adopts argparse's standard `SystemExit(2)`. Only after
+that committed choice may the TDD argparse patch begin.
+
+---
+
+## EV-P6-ARGPARSE-POLICY-280
+
+DATE: 2026-09-02
+
+BUILD PHASE:
+Phase 6 — malformed-command exit-policy decision
+
+ACADEMIC SOURCE:
+`PY-ARGPARSE`; `PY-SUBPROCESS`
+
+DEEP SKILL:
+Distinguish a function returning an integer from an exception unwinding that function, then trace
+how the process entry-point wrapper converts a returned integer into the shell-visible exit status.
+
+EXERCISE TYPE:
+DESIGN_DECISION_PREDICTION
+
+SCAFFOLD RUNG:
+R5
+
+PROMPT:
+Choose whether BuildLens should preserve its existing return-code `1` contract for malformed
+commands or adopt argparse's standard `SystemExit(2)`. Name the prioritized requirement, one
+downside, and a reversal condition.
+
+LEARNER REASONING (verbatim):
+
+```text
+here is my thinking i need you to verfiy this: if we prio return 1 the cli will still most likely if we are running it on a cmd be the main and the return 1 effectivly ends the execution of main nad then the bottom if **name** == "**main**": sys.exit(main(sys.argv))  ends all execution in the shell anyway so adding in the systemexit 2 does not do a whole lot different than the reutrn 1, i will need more explaining after this
+```
+
+EVALUATION:
+Directionally correct for process-level control: under direct script execution, returning 1 from
+`main` reaches `sys.exit(...)`, which terminates the process nonzero; argparse can instead raise
+`SystemExit(2)` inside `main`, also terminating the process nonzero. The reasoning is incomplete
+because the exact shell status differs (1 versus 2), the point where control stops differs, and a
+direct Python call to `main(...)` observes a returned integer in the former design but an exception
+in the latter. Explain these distinctions before requiring a policy commitment.
+
+NEXT REQUIRED STEP:
+Use a minimal two-context trace—direct function call versus script entry point—to stabilize return
+versus raise. Then ask the learner to make and defend the BuildLens policy choice. Do not patch yet.
+
+POLICY FOLLOW-UP (verbatim):
+
+```text
+ok well when you put it like that the systemexit 2 seems like the obvious choice, if we return 1 it passes on the assertion and i am still confused becasue cant we just print something like before where we then know it is a bad argv.
+```
+
+EVALUATION:
+The learner tentatively selects standard `SystemExit(2)` but merges two independent observables:
+the diagnostic text printed for a human and the control signal observed by Python or the shell.
+Either policy can print usage/error text to stderr, and either policy can be asserted in a test. A
+passing assertion means the observed behavior matched the chosen contract; it does not conceal bad
+argv. Explain that separation, then require the learner to confirm the choice with a downside and
+reversal condition before implementation.
+
+LEARNER FOLLOW-UP (verbatim):
+
+```text
+so if both can print the error so that both the user and the shell have an idea of what went wrong the only thing to think about is the cli main structure isself, which makes me lean towards retunr 1 but i want to talk about this further
+```
+
+EVALUATION:
+The lean toward return 1 is coherent with preserving `main` as a function that returns integer
+statuses. Refine one claim: stderr tells the human details, while the shell normally observes only
+the numeric status unless another program captures and interprets stderr. Therefore the remaining
+tradeoff includes both `main`'s Python-call contract and whether status codes distinguish malformed
+syntax (2) from other user-facing failures (1). Continue discussion before commitment.
+
+FINAL POLICY CHOICE (verbatim):
+
+```text
+I want to go with the systemexit 2 because it would make sense for the seell to get the coreect status that would distiguish malformed command systeax even if we have to break the contract and test around that, it also seems like the long terms ramifications for return 1 out weigh the benefits it would have if we went with it now, it seeems better to have to create a test function for this than to change the default behavior of argv parse. 90
+```
+
+EVALUATION:
+PASS. The decision starts from the shell/process-boundary requirement, prioritizes a distinct
+malformed-syntax status and standard argparse behavior, and accepts the real downside that
+`main(bad_argv)` will raise rather than satisfy its former return-only contract. The stated
+long-term concern supplies a reversal direction: reconsider if BuildLens later needs a uniform
+library-style `main(argv) -> int` interface more than shell-visible error categorization. Implement
+with TDD; keep file-read failure at return status 1.
+
+FINAL RESULT:
+Policy gate passed at confidence 90. Adopt default argparse `SystemExit(2)` for malformed command
+syntax; do not catch and translate it to 1.
+
+COLLABORATIVE TDD — TEST INPUT PROMPT:
+For `main(["cli.py"])`, identify the exception/control effect, status, and diagnostic
+destination/content that the first missing-arguments test should verify.
+
+LEARNER ANSWER (verbatim):
+
+```text
+if there is a way to call the system exit 2 without having argv be bad
+system exit 2&#x20;
+usage and then the error text&#x20;
+20
+```
+
+EVALUATION:
+The learner identifies `SystemExit(2)` and usage/error content but is uncertain about the test
+stimulus and omits stderr. The test must not invoke `SystemExit` itself because that would test
+Python rather than BuildLens. `main(["cli.py"])` is intentionally malformed: it contains the script
+name but omits both required positional tokens. Descend to identifying those missing tokens before
+introducing try/except test syntax.
+
+NEXT REQUIRED STEP:
+Ask only which tokens are missing from `["cli.py"]` relative to the valid command shape. Then rebuild
+the real-input → argparse → stderr + raised-exception trace.
+
+REMEDIATION ATTEMPT 1 PROMPT:
+Compare valid `["cli.py", "analyze", "changes.diff"]` with test input `["cli.py"]`. Which two
+required tokens are missing? Confidence: 0–100.
+
+LEARNER ANSWER (verbatim):
+
+```text
+path and command, 100
+```
+
+EVALUATION:
+PASS. The command/action token and path token are both missing, so the test input is genuinely
+malformed. Climb one rung by connecting this input to argparse's exception, status, and stderr
+diagnostic before writing exception-capture syntax.
+
+NEXT REQUIRED STEP:
+Given `main(["cli.py"])`, require the exact raised exception/status and the diagnostic stream. Then
+construct the smallest `try`/`except` test together.
