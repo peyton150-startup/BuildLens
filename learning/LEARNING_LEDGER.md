@@ -29944,3 +29944,264 @@ Then use one fresh empty-before/nonempty-after transfer before returning to no-i
 SESSION STOP — 2026-09-02:
 The learner requested a commit/push and a two-sentence handoff for a new session. No Phase 7 product
 code exists. Resume at the visual remediation question above; do not skip ahead to implementation.
+
+VISUAL DIRECTION REMEDIATION ANSWER (verbatim):
+
+```text
+added
+```
+
+EVALUATION:
+PASS. From an empty BEFORE state to an AFTER state containing `print("ready")`, the learner correctly
+identified the line as added. The primary comparison-direction blocker passed on this reduced
+BuildLens-adjacent surface.
+
+NEXT REQUIRED STEP:
+Give one fresh empty-before/nonempty-after transfer with different content. Ask only whether the new
+line was added or removed. Do not reintroduce Git or status codes until that transfer passes.
+
+VISUAL DIRECTION TRANSFER ANSWER (verbatim):
+
+```text
+added
+```
+
+EVALUATION:
+PASS. From an empty BEFORE state to an AFTER state containing `status = "online"`, the learner
+correctly identified the new line as added. Comparison direction transferred to a fresh surface.
+
+NEXT REQUIRED STEP:
+Return to the explicit no-index scenario: Git compares a known-empty file with a one-line
+`helper.py`, emits that line as added content, and returns documented status 1 because the files
+differ. Ask whether status 1 is valid difference data or an adapter failure.
+
+NO-INDEX STATUS INTERPRETATION ANSWER (verbatim):
+
+```text
+difference data, it means that the helper.py is not emprty because if it was it would not return 1
+```
+
+EVALUATION:
+PASS. Status 1 is valid difference data under the `git diff --no-index` command contract, not a
+generic adapter failure. The learner correctly connected the known-empty baseline to the nonempty
+right-hand file and predicted status 0 for identical empty contents. Precision: status 1 directly
+means the compared paths differ; nonemptiness follows here because one path is known empty.
+
+NEXT REQUIRED STEP:
+Introduce only timeout behavior. Ask whether `subprocess.run(..., timeout=10)` returns a normal
+`CompletedProcess` or raises `subprocess.TimeoutExpired` when Git has not finished after ten seconds.
+
+TIMEOUT PREDICTION ANSWER (verbatim):
+
+```text
+rasie
+```
+
+EVALUATION:
+PASS. When the child does not finish within the supplied timeout, `subprocess.run` raises
+`subprocess.TimeoutExpired` instead of returning a normal `CompletedProcess`. This is distinct from
+a child that finishes with a nonzero status when `check=True` is absent.
+
+NEXT REQUIRED STEP:
+Use an unrelated parent program launching a compressor with `timeout=5`. Ask what the Python parent
+receives if the compressor is still running after five seconds, and why it does not receive a normal
+completed result.
+
+TIMEOUT TRANSFER ANSWER (verbatim):
+
+```text
+the timeoutexpired error  is what it receives and it is becasue a completed process would be completed before the 5 seconds are up
+```
+
+EVALUATION:
+PASS. The learner transferred timeout behavior to an unrelated compressor process: the Python
+parent receives `subprocess.TimeoutExpired`, and no normal `CompletedProcess` exists because the
+child did not complete within the configured limit.
+
+NEXT REQUIRED STEP:
+Present the complete Phase 7 subprocess/error contract for explicit approval or revision:
+argument-list execution without a shell; child cwd set to the repository; captured text channels;
+ten-second timeout; command-specific return-code interpretation including no-index status 1;
+whole-snapshot failure with no partial summary; readable stderr telling the learner to rerun
+`buildlens analyze`.
+
+LEARNER SUBPROCESS/ERROR CONTRACT REVISION (verbatim):
+
+````text
+can we add this in: I checked the BuildLens Phase 7 material and CMU material. There **is one worthwhile revision pass left**, but I would keep it small rather than expanding Phase 7.
+
+BuildLens explicitly says Phase 7 should exercise **executable-not-found, non-zero exit, timeout, and valid-process/malformed-output cases**. Your proposed contract covers almost everything except **malformed output** and makes executable-launch failure only implicit. The curriculum also deliberately wants you to understand the full `Python → child process → stdout/stderr → return code → interpretation` path.
+
+The actual CMU Agentic AI program doesn't add anything useful at this particular level. Its curriculum begins much higher up—LLMs, agent architecture, tools, RAG, multi-agent systems, evaluation, guardrails, logging, and observability. ([Executive Online](https://execonline.cs.cmu.edu/agentic-ai-program?utm_source=chatgpt.com)) So I would **not hold up Phase 7 trying to force Agentic-AI concepts into subprocess handling**.
+
+I would revise your contract to this:
+```text
+BuildLens invokes Git with an argument list and no shell
+→ Git is launched as a child process with the target repository as its working directory
+→ failure to launch Git is a command failure
+→ stdout and stderr are captured as text
+→ each command has a 10-second timeout
+→ return codes are interpreted according to that specific Git command's contract
+→ git diff --no-index status 1 means valid difference data, not failure
+→ successful execution does not automatically mean valid data
+→ malformed or unusable Git output is a snapshot failure
+→ any launch failure, genuine command error, malformed required output, or timeout rejects the whole snapshot
+→ no partial summary is printed
+→ stderr identifies which snapshot component failed, preserves useful Git diagnostic information, and says to rerun buildlens analyze
+→ CLI returns status 1
+```
+
+### Why I think those additions matter
+
+The strongest addition is:
+
+> **successful execution does not automatically mean valid data**
+
+That is an important engineering distinction. You now have **two layers of success**:
+```text
+PROCESS CONTRACT
+Did Git execute successfully?
+
+        ↓
+
+DATA CONTRACT
+Did Git produce output BuildLens can actually use?
+```
+
+A process can return something that passes its process-level contract while still violating what BuildLens expects from the data. Your own learning plan specifically calls for the `valid-process/malformed-output` case, so leaving that out would skip one of the exercises Phase 7 was designed to teach.
+
+I'd also explicitly add:
+
+> **failure to launch Git is a command failure**
+
+because this is different from:
+```text
+Git launched → Git returned 128
+```
+
+versus:
+```text
+BuildLens tried to launch Git
+→ operating system could not start Git at all
+```
+
+That distinction gets you closer to the systems-level reasoning BuildLens is trying to develop instead of treating every failure as merely "nonzero return code."
+
+I **would not add** retries, logging infrastructure, kill trees, concurrency, elaborate observability, configurable timeout policies, or recovery state here. Those are useful concepts, but your curriculum deliberately moves deeper reliability/concurrency/reconciliation concepts into later phases. Phase 9 onward covers things such as timeouts, retries, idempotency, partial failure, stale state, and reconciliation.
+
+So my recommendation is: **make those two/three small revisions, test the four failure classes, defend them, and move on from the contract.**
+
+Your Phase 7 test matrix should essentially be:
+
+| SituationExpected interpretation          |                  |
+| ----------------------------------------- | ---------------- |
+| Git returns expected `0`                  | valid            |
+| `git diff --no-index` returns `1`         | valid difference |
+| Git returns genuine error code            | reject snapshot  |
+| Git executable can't launch               | reject snapshot  |
+| Git exceeds 10 sec                        | reject snapshot  |
+| Git runs but required output is malformed | reject snapshot  |
+
+Once you can explain **why&#x20;****`1`****&#x20;can mean data for one command but failure for another**, and **why process success ≠ data validity**, I don't see much educational value in continuing to revise this contract. **Then move on.**
+````
+
+EVALUATION:
+PASS / approved revision. The learner found the two omissions already named by the Phase 7
+curriculum: executable launch failure and valid-process/malformed-output. They correctly separated
+the process contract from the data contract, distinguished launch failure from a launched Git child
+returning a genuine error status, supplied a focused failure matrix, and explicitly deferred later
+reliability and Agentic-AI concerns. The contract is now recorded in `IMPLEMENTATION_PLAN.md`.
+
+NEXT REQUIRED STEP:
+Require one non-Git transfer: a child process exits with its documented success status but emits
+output that the parent application cannot parse. Ask whether the process contract, data contract,
+both, or neither passed, and what the parent should do.
+
+PROCESS/DATA CONTRACT TRANSFER ATTEMPT 1 ANSWER (verbatim):
+
+```text
+the contract did not pass or it would have been status 1, the data contract aslo did not pass since it should have been a numeric temperature and the parent should raise an error so the user can take a look
+```
+
+EVALUATION:
+PARTIAL. The learner correctly identified the data-contract failure and the need for the parent to
+reject/surface the unusable result. The process-contract conclusion is incorrect: the exercise
+defined status 0 as the weather command's documented success status. Status 1 is not a universal
+success code; meanings belong to each command's contract.
+
+PRIMARY BLOCKER:
+Keeping the child's documented completion status separate from the parent's later validation of the
+returned data.
+
+ADAPTATION:
+Descend to R1 with no malformed data and no Git-specific status. State that a generic tool's
+contract defines status 0 as successful completion and that the tool returns 0. Ask only whether the
+process contract passed.
+
+NEXT REQUIRED STEP:
+Ask the R1 process-only check. After it passes, use a fresh process-success/data-failure near-transfer
+before returning to Phase 7 specification.
+
+R1 DOCUMENTED-STATUS ANSWER (verbatim):
+
+```text
+pass, i thought for the git diff if it returned 1 that was a pass or am i imagining that
+```
+
+EVALUATION:
+PASS. For the generic tool whose documented contract defines status 0 as successful completion,
+returned status 0 satisfies the process contract. The learner also correctly recalled the special
+Git rule that prompted the confusion: `git diff --no-index` uses 0 for no differences and 1 for
+differences found, so the adapter accepts both as valid command outcomes. Status meanings are
+command-specific; status 1 is not universal success.
+
+NEXT REQUIRED STEP:
+Give a fresh non-Git near-transfer in which a child returns its documented success status 0 but
+emits syntactically unusable application data. Ask separately whether the process contract and data
+contract passed. Do not ask for exception mechanics yet.
+
+PROCESS/DATA CONTRACT NEAR-TRANSFER ANSWER (verbatim):
+
+```text
+the process contract passed bu the data contract dud not, 90
+```
+
+EVALUATION:
+PASS. The inventory child returned its documented success status 0, so the process contract passed;
+its `not-json` output violated the parent's required JSON representation, so the data contract
+failed. The learner independently separated process completion from application-data validity at
+confidence 90. The remediation chain is closed.
+
+NEXT REQUIRED STEP:
+Return to the Phase 7 empty-untracked-file edge case. Ask whether an empty newly created file should
+be omitted or represented in the UNSTAGED snapshot as one changed file with zero added/removed
+lines. Require reasoning from the already-approved completeness requirement.
+
+VOCABULARY QUESTION (verbatim):
+
+```text
+what does omit mean
+```
+
+ADAPTATION:
+Pause the surrounding design choice. Explain only that “omit” means leave out or not include, then
+give an R0 report-membership example and ask whether `placeholder.py` was included or omitted.
+
+EMPTY-UNTRACKED-FILE CHOICE (verbatim):
+
+```text
+show it as unstaged and have them be zeros for added and removed
+```
+
+EVALUATION:
+CORRECT CHOICE / REASONING DUE. The learner chose to preserve the empty untracked file in the
+UNSTAGED snapshot as one changed file with zero added and zero removed lines. This also demonstrates
+the vocabulary distinction: the file is not omitted. Require the reason from the approved
+completeness requirement before treating the specification decision as complete.
+
+NEXT REQUIRED STEP:
+Ask only why the file should remain visible when both line counts are zero.
+
+SESSION PAUSE — 2026-09-02:
+The learner paused for dinner and requested a commit and push. Resume with the single reasoning
+question above. No Phase 7 product code exists.

@@ -136,10 +136,54 @@ The learner still did not understand the explicit no-index comparison. Descend b
 to one empty-before versus one-line-after text comparison. Ask only whether the line is added or
 removed.
 
-The learner requested a picture-based explanation. A two-panel visual was prepared outside the
-repository showing an empty BEFORE baseline and `helper.py` containing `print("ready")` AFTER, with
-the line marked as added. The session paused before the learner answered the reduced question. No
-Phase 7 product code exists.
+The learner requested a picture-based explanation. A two-panel visual showed an empty BEFORE
+baseline and `helper.py` containing `print("ready")` AFTER. The learner correctly identified the
+line as added, passed a fresh transfer, and then correctly interpreted `git diff --no-index` status
+1 as valid difference data rather than adapter failure. Their reasoning also correctly predicted
+status 0 when both compared files are empty. Introduce timeout behavior next. No Phase 7 product
+code exists.
+
+The learner correctly predicted that `subprocess.run(..., timeout=10)` raises
+`subprocess.TimeoutExpired` when the Git child does not finish in time, rather than returning a
+normal `CompletedProcess`, then transferred that behavior to a compressor child with a five-second
+timeout.
+
+The learner revised and approved the Phase 7 subprocess/error contract. Launch failure is explicit,
+and process-level success is distinct from data validity: malformed or unusable required Git output
+invalidates the whole snapshot even when the child process completed acceptably. The complete
+contract is now recorded in `IMPLEMENTATION_PLAN.md`. The required test matrix covers expected
+status 0, no-index status 1 as valid difference data, genuine Git error status, launch failure,
+timeout, and valid-process/malformed-output rejection. Higher-level Agentic-AI concepts and later
+reliability machinery remain deferred.
+
+Next require one non-Git transfer that distinguishes a successfully completed process from unusable
+application data, then return to the remaining Phase 7 specification edge cases. No Phase 7 product
+code exists.
+
+On the first non-Git transfer, the learner correctly rejected nonnumeric weather data and said the
+parent should surface an error, but incorrectly concluded that the process contract also failed and
+that success would have used status 1. Primary blocker: keeping a documented process status separate
+from later validation of returned data. Descend to an R1 process-only check before a fresh
+process-success/data-failure near-transfer. No Phase 7 product code exists.
+
+The R1 process-only check passed: for a generic tool whose contract defines status 0 as successful
+completion, returned status 0 satisfies the process contract. The learner correctly recalled that
+`git diff --no-index` differs: statuses 0 and 1 are both valid command outcomes, with 1 meaning
+differences found. Require a fresh near-transfer separating valid process completion from invalid
+application data.
+
+The fresh inventory-tool near-transfer passed at confidence 90: status 0 satisfied that child's
+process contract while malformed required JSON failed the data contract. The learner independently
+separated the two layers, so this remediation chain is closed. Return to the empty-untracked-file
+Phase 7 specification edge case.
+
+When asked whether an empty untracked `placeholder.py` should be omitted or shown, the learner first
+asked what “omit” means. Syntax-only vocabulary help defined it as “leave out / not include.” The
+learner then chose to show the file in UNSTAGED with zero added and removed lines. The choice is
+correct, but require their completeness reasoning before approving the requirement.
+
+The session paused for dinner before that reasoning was supplied. Resume by asking only why an empty
+untracked file should remain visible when both line counts are zero. Do not implement Phase 7 yet.
 
 Phase 3 is complete in every required dimension:
 
@@ -1321,11 +1365,11 @@ for fresh verification evidence.
 
 ```text
 phase                       Phase 7 specification/adjacent learning; no implementation authorized
-last knowledge gate         subprocess default return-code transport, passed after remediation
+last knowledge gate         process-success/data-failure near-transfer passed at confidence 90
 next retrieval due          delayed argparse parser-versus-Namespace retrieval on a fresh surface
 next architecture reset     complete; next by time or major transition
-next implementation step    ask whether the pictured line is added or removed; then transfer and restore no-index status 1
-last published commit       e808e4b — feat: complete phase 6 argparse CLI
+next implementation step    require reasoning for empty-untracked-file representation
+last published commit       01ed359 — documentation handoff; HEAD matched origin/main before this session's documentation edits
 ```
 
 Files the learner should currently be able to teach:

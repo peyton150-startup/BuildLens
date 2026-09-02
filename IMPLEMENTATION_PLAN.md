@@ -1189,6 +1189,50 @@ BuildLens Python process
 
 Exercise executable-not-found, non-zero exit, timeout, and valid-process/malformed-output cases. Captured output is bytes by default and can be decoded/text mode. Avoid `shell=True` unless a concrete requirement is defended.
 
+#### Phase 7 subprocess/error contract
+
+```text
+BuildLens invokes Git with an argument list and no shell
+→ Git is launched as a child process with the target repository as its working directory
+→ failure to launch Git is a command failure
+→ stdout and stderr are captured as text
+→ each command has a 10-second timeout
+→ return codes are interpreted according to that specific Git command's contract
+→ git diff --no-index status 1 means valid difference data, not failure
+→ successful execution does not automatically mean valid data
+→ malformed or unusable required Git output is a snapshot failure
+→ any launch failure, genuine command error, malformed required output, or timeout rejects the whole snapshot
+→ no partial summary is printed
+→ stderr identifies which snapshot component failed, preserves useful Git diagnostic information, and says to rerun buildlens analyze
+→ CLI returns status 1
+```
+
+Keep the two success layers distinct:
+
+```text
+PROCESS CONTRACT
+Did Git execute according to the command-specific process contract?
+
+        ↓
+
+DATA CONTRACT
+Did Git produce output BuildLens can actually use?
+```
+
+Required Phase 7 subprocess cases:
+
+| Situation | Expected interpretation |
+|---|---|
+| Git returns expected `0` | valid |
+| `git diff --no-index` returns `1` | valid difference |
+| Git returns a genuine error code | reject snapshot |
+| Git executable cannot launch | reject snapshot |
+| Git exceeds 10 seconds | reject snapshot |
+| Git runs but required output is malformed or unusable | reject snapshot |
+
+Retries, logging infrastructure, process-tree control, concurrency, configurable timeout policies,
+and recovery-state machinery remain deferred until a later phase creates the requirement.
+
 **Curriculum:** Strands 6, 7, 8, 9.5. **Python:** `subprocess`, `pathlib`.
 
 ### Academic anchors
