@@ -11,6 +11,136 @@ Last updated: 2026-09-02
 **Current phase:** Phase 6 complete. Do not begin Phase 7 automatically; start its specification and
 adjacent-learning sequence in the next implementation session.
 
+Phase 7 specification has begun (`EV-P7-GIT-SPEC-281`); no Phase 7 code exists. The learner
+tentatively prefers `buildlens analyze` inspecting the repository containing the current working
+directory but has not approved the choice. Clarify whether Phase 7 optimizes for invocation inside
+the target repository or central inspection from elsewhere.
+
+The learner committed to the inside-repository workflow. Phase 7 CLI behavior is
+`buildlens analyze` with no repository argument; the CLI resolves current-directory context and the
+future adapter receives the repository path explicitly. Next decide which Git comparison is
+authoritative: unstaged, staged, or both.
+
+The learner tentatively chose combined `git diff HEAD` to see the current tracked worktree state but
+identified the choice as gut instinct. Explain that the combined diff preserves the net content
+difference while collapsing staged-versus-unstaged provenance. Ask whether that distinction is
+required in Phase 7 before treating the choice as approved.
+
+The learner refined the need: inspect active edits and separately double-check staged changes before
+push, suggesting both unstaged and staged views rather than one combined diff. Correct that these
+states do not encode edit recency and that Phase 7 is snapshot inspection, not continuous real-time
+streaming. Discuss two labeled snapshots first; defer filters/UI/live monitoring.
+
+The learner approved two separately labeled unstaged and staged summaries, with no filter syntax in
+Phase 7 and no summing of the two views. They asked whether later continuous observation watches
+files rather than summaries. Clarify: events/watchers signal possible change; Git inspection remains
+authoritative; diffs and summaries are recomputed derived views. Live observation remains deferred.
+Next decide untracked-file scope.
+
+The learner did not yet know whether Phase 7 must include untracked files. Descend to a concrete
+scenario with one edited tracked file and one newly created source file. Ask whether omitting the
+new file would violate the intended snapshot; defer implementation tradeoffs until that requirement
+is clear.
+
+The concrete scenario established that omitting a newly created dependency would make the snapshot
+incomplete. Phase 7 must discover untracked files. Next clarify whether it only lists their paths or
+also treats their text contents as additions in the summary pipeline.
+
+The learner chose full new-file content for untracked text files, correctly noting that filename-only
+or omission would hide half of a cross-file change. Treat these files as entirely added content in
+the unstaged view. Refine “timeline” to point-in-time snapshot; chronology is not inferred. Next
+decide whether any failed snapshot component invalidates the whole result or permits partial output.
+
+The learner clarified the Phase 7 operating workflow: Claude Code and BuildLens are side by side;
+after Claude changes files and settles for a few seconds, the learner manually runs
+`buildlens analyze` for a fresh snapshot. This is not automatic monitoring. Given the completeness
+requirement and cheap retry, recommend rejecting an incomplete snapshot with a readable error and
+letting the learner rerun. Await explicit approval.
+
+The learner approved whole-snapshot failure with one added contract: the readable stderr diagnostic
+must tell the learner to try `buildlens analyze` again. Failure returns 1 and emits no partial
+summary. Next decide successful no-change output.
+
+The learner approved clean-repository behavior: status 0 with explicit UNSTAGED and STAGED sections,
+each showing zero counts. Requirements are now sufficient to compare non-mutating Git capture
+approaches; implementation remains unauthorized.
+
+The learner approved Git-native, read-only capture. Planned commands separately obtain tracked
+unstaged and staged diffs, discover untracked paths, and ask Git to create no-index new-file diffs.
+The adapter must understand that no-index status 1 means “different,” not failure. Index-mutating
+approaches are rejected. Present module/data-flow design next.
+
+During the module/data-flow design, the learner asked what `cwd()` means. Activate syntax-only help:
+`Path.cwd()` returns the process's current working directory as a Path object and does not change
+directories. Require one micro-prediction before resuming design approval.
+
+The `Path.cwd()` micro-check passed at confidence 90: it represents the current directory and does
+not change it. Resume approval of the module/data-flow design.
+
+The learner approved the module/data-flow boundary at confidence 90 and defended it through
+responsibility separation. CLI orchestrates, the Git adapter owns Git/process details, and the
+existing core consumes only diff text. Present subprocess/error handling design next.
+
+During subprocess/error design, the learner asked for every line of `subprocess.run(...)` to be
+explained. Activate syntax-only help and pause design approval. Explain the call/keywords and require
+one small non-Git call-reading prediction before resuming.
+
+The subprocess call-reading micro-check passed at confidence 90: executable, arguments, child cwd,
+string stdout, and timeout were all correct. Resume approval of the subprocess/error contract.
+
+The learner correctly objected that subprocess syntax was taught but the process/error semantics
+were presented for approval before teaching. Treat the apparent approval as provisional. Restore
+the required adjacent-learning sequence using `CMU-15213-SYSTEMS` and `PY-SUBPROCESS`: begin with a
+parent-Python/child-Git prediction, then channels, status, timeout, and application/transfer before
+final design approval.
+
+The first parent/child prediction was `i have no idea` at confidence 5. Descend to one concept:
+BuildLens Python is the parent process; the operating system starts Git as a separate child;
+`subprocess.run` waits for it to finish. Defer every other subprocess concept and require one
+generic-tool labeling check.
+
+The parent/child model passed on the BuildLens surface at confidence 90: Git is a separate child and
+the BuildLens Python parent waits for it to finish. Require one unrelated same-rung transfer before
+adding stdout/stderr.
+
+The non-Git compressor transfer passed at confidence 90: Python parent, compressor child, parent
+wait, and resume-after-child-exit were all correct. Parent/child remediation is closed. Add captured
+stdout/stderr through a prediction next.
+
+The captured-channel prediction passed at confidence 90: normal and error strings are available as
+`result.stdout` and `result.stderr`. Add child return code behavior next; defer timeout and Git
+status interpretation.
+
+The first default return-code prediction was `i have no idea`. Explain only that without
+`check=True`, a started/completed child returning nonzero still yields a CompletedProcess and stores
+the integer in `result.returncode`. Require one fresh numeric example; defer all other failures.
+
+The learner correctly explained normal return and parent interpretation at confidence 90 but copied
+status 3 into a case where the child exited 4. Ask only for the exact stored integer before adding
+Git-specific status meaning.
+
+The exact status correction passed: a child exiting 4 produces `result.returncode == 4`. Default
+nonzero transport is recovered. Apply it to `git diff --no-index`, where status 1 has a documented
+command-specific meaning.
+
+On the no-index scenario, the learner asked whether it meant `helper.py` was empty. Clarify that the
+first path is a separate empty baseline and the second is the new file. A nonempty helper differs
+and yields added content with status 1. This also exposes an empty-untracked-file edge case that must
+be handled explicitly later. First require one nonempty comparison trace.
+
+The learner asked whether the empty file is what Git compares against `helper.py`. Confirm yes and
+acknowledge that the placeholder notation was undefined. Re-present explicit contents before asking
+for status interpretation.
+
+The learner still did not understand the explicit no-index comparison. Descend below Git/files/status
+to one empty-before versus one-line-after text comparison. Ask only whether the line is added or
+removed.
+
+The learner requested a picture-based explanation. A two-panel visual was prepared outside the
+repository showing an empty BEFORE baseline and `helper.py` containing `print("ready")` AFTER, with
+the line marked as added. The session paused before the learner answered the reduced question. No
+Phase 7 product code exists.
+
 Phase 3 is complete in every required dimension:
 
 ```text
@@ -1190,12 +1320,12 @@ Rename the two remaining vague malformed-input tests, rerun targeted tests, then
 for fresh verification evidence.
 
 ```text
-phase                       Phase 6 complete; argparse vertical slice verified
-last knowledge gate         Phase 6 post-argparse trace, passed after remediation
+phase                       Phase 7 specification/adjacent learning; no implementation authorized
+last knowledge gate         subprocess default return-code transport, passed after remediation
 next retrieval due          delayed argparse parser-versus-Namespace retrieval on a fresh surface
 next architecture reset     complete; next by time or major transition
-next implementation step    begin Phase 7 specification/adjacent learning; no code automatically
-last published commit       d1131ba — docs: record argparse policy decision
+next implementation step    ask whether the pictured line is added or removed; then transfer and restore no-index status 1
+last published commit       e808e4b — feat: complete phase 6 argparse CLI
 ```
 
 Files the learner should currently be able to teach:

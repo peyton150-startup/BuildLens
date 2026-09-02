@@ -29416,3 +29416,531 @@ FINAL RESULT:
 Phase 6 is complete. Malformed command syntax follows default argparse behavior and raises
 `SystemExit(2)`; a missing file remains an application failure returning 1. The foundation counter
 advances from 0/3 to 1/3. Do not begin Phase 7 automatically.
+
+---
+
+## EV-P7-GIT-SPEC-281
+
+DATE: 2026-09-02
+
+BUILD PHASE:
+Phase 7 — Git boundary specification
+
+ACADEMIC SOURCE:
+`CMU-15213-SYSTEMS`; `PY-SUBPROCESS`; `PY-PATHLIB`
+
+DEEP SKILL:
+Identify which process-boundary inputs are explicit arguments and which are inherited execution
+context before designing an external-system adapter.
+
+EXERCISE TYPE:
+DESIGN_SPECIFICATION
+
+PROMPT:
+Choose whether `buildlens analyze` inspects the repository containing the current working directory,
+requires an explicit repository path, or supports both through an optional path. Explain why.
+
+LEARNER ANSWER (verbatim):
+
+```text
+i am leaning towards a but am not sure can we discuss this further
+```
+
+EVALUATION:
+Tentative preference for current-working-directory behavior. Do not treat it as approval. Clarify
+the intended operational workflow: BuildLens launched inside the repository versus a central
+inspector launched elsewhere. Continue one question at a time before presenting approaches/design.
+
+NEXT REQUIRED STEP:
+Ask which of those two operational workflows Phase 7 should optimize for. Do not implement.
+
+WORKFLOW CLARIFICATION PROMPT:
+Should Phase 7 optimize for a developer opening a shell inside the target repository, or for
+BuildLens inspecting repositories from a separate central location?
+
+LEARNER ANSWER (verbatim):
+
+```text
+the developer opens a shell inside the target repository
+```
+
+EVALUATION:
+PASS / committed specification choice. The Phase 7 CLI should support `buildlens analyze` from
+inside the target repository. Preserve adapter testability by resolving the CLI's current directory
+and passing that repository path explicitly into the Git adapter rather than letting adapter logic
+read ambient process state invisibly.
+
+NEXT REQUIRED STEP:
+Clarify which Git comparison supplies Phase 7 input: unstaged working-tree changes, staged index
+changes, or both. Do not implement.
+
+GIT COMPARISON PROMPT:
+Choose whether Phase 7 summarizes unstaged tracked changes (`git diff`), staged tracked changes
+(`git diff --cached`), or the combined tracked-file state relative to HEAD (`git diff HEAD`). Explain
+why; untracked files remain a separate decision.
+
+LEARNER ANSWER (verbatim):
+
+```text
+c, if we want to see what the worktree looks like in the current state to make changes then it makes sense to do so, can we talk about this further this is a gut instict
+```
+
+EVALUATION:
+Tentative preference for combined `git diff HEAD`. The rationale maps to seeing the net current
+tracked-file state relative to the last commit. Explain the tradeoff: one combined patch includes
+staged and unstaged content but collapses the distinction between those Git states. Do not treat the
+choice as approved until the learner decides whether that provenance loss is acceptable for Phase 7.
+
+NEXT REQUIRED STEP:
+Ask whether Phase 7 needs to tell staged from unstaged changes, or only needs the combined tracked
+result. Do not implement.
+
+LEARNER REQUIREMENT REFINEMENT (verbatim):
+
+```text
+i want to see the most recent edits, so if claude code made the edits i can see them in real time, i cannot do that with staged edits, but that would be nice to do so i can double check the code before we push, so both seem needed, so we would need to go with a and b so that we can see the most recent and check before pushes and maybe make a filter for that or something, we need to keep talking abou thsi.
+```
+
+EVALUATION:
+The learner identifies two distinct product needs: inspect active working-tree changes and review
+the staged commit candidate. This argues for preserving separate unstaged and staged comparisons
+rather than collapsing them with `git diff HEAD`. Correct two mental-model points before interface
+design: staged/unstaged are repository states, not chronological recency, and Phase 7 command
+execution is a snapshot rather than continuous real-time observation. Filters and live monitoring
+remain separate later decisions.
+
+NEXT REQUIRED STEP:
+Explain HEAD → index → working-tree comparisons and the non-additivity of their line counts. Then ask
+whether Phase 7 should expose two labeled snapshots without yet designing filter syntax.
+
+TWO-SNAPSHOT DESIGN APPROVAL / QUESTION (verbatim):
+
+```text
+yes, i was jumping the gun, so for continous realtime observation that is actually observing files correct not summaires?
+```
+
+EVALUATION:
+The learner approves two separately labeled staged and unstaged snapshots for Phase 7 and correctly
+separates the later live-observation concern. Refine the architecture: a watcher or lifecycle event
+is only a signal that repository state may have changed; BuildLens then inspects authoritative Git
+state, derives diffs, and recomputes summaries. Summaries may update in near real time, but they are
+outputs rather than observers. Keep continuous observation out of Phase 7.
+
+APPROVED DESIGN SO FAR:
+
+```text
+invocation        buildlens analyze from inside target repository
+repository input  CLI resolves current directory and passes path explicitly to adapter
+Git views         separate unstaged and staged diffs
+presentation      two labeled summaries; do not sum their counts
+live observation  deferred; Phase 7 is command-triggered snapshot inspection
+```
+
+NEXT REQUIRED STEP:
+Clarify whether untracked files are reported or explicitly out of scope for Phase 7. Do not
+implement.
+
+UNTRACKED-FILE SCOPE PROMPT:
+Git's normal diff commands omit brand-new untracked files. Must Phase 7 include files Claude created
+but Git has never tracked, or should support be deferred?
+
+LEARNER ANSWER (verbatim):
+
+```text
+i have no idea
+```
+
+ADAPTATION:
+The behavior is new. Reduce to one concrete repository state: a tracked file is edited and one new
+source file is created. Explain that `git diff` shows the tracked edit while `git status` separately
+reports the new file as untracked. Ask whether a BuildLens snapshot that omits the new file would
+meet the learner's observation goal. Do not discuss implementation mechanisms yet.
+
+NEXT REQUIRED STEP:
+Use the concrete two-file scenario and ask one product-expectation question.
+
+CONCRETE UNTRACKED SCENARIO ANSWER (verbatim):
+
+```text
+no, if the helper is needed for the app.py the snapshot is needed and it gives an incomplete snapshot
+```
+
+EVALUATION:
+PASS / requirement established. A snapshot that omits a newly created dependency is incomplete even
+if it includes the tracked caller edit. Phase 7 must discover untracked files. Before selecting a
+mechanism, clarify whether completeness requires only their paths or their contents/line counts in
+the same analysis pipeline.
+
+NEXT REQUIRED STEP:
+Ask whether Phase 7 should list untracked filenames only or represent each new text file as entirely
+added content for diff summarization. Do not implement.
+
+UNTRACKED REPRESENTATION ANSWER (verbatim):
+
+```text
+B, this shows the complete timeline as well as gives the user context as to why app.py has the changes made to it, like if we changed summarize for another module and the other module was not tracked the user would only see half the picture
+```
+
+EVALUATION:
+PASS / committed requirement. Phase 7 must include untracked text-file contents as entirely added
+content in the unstaged diff/summary, not merely list paths. The rationale correctly identifies a
+cross-file dependency: a tracked caller edit without its new untracked dependency is only half the
+change picture. Refine wording from complete timeline to complete point-in-time snapshot; Git diffs
+do not establish chronological edit order.
+
+NEXT REQUIRED STEP:
+Clarify whether failure to obtain any component of staged/unstaged/untracked state invalidates the
+whole snapshot or permits explicitly partial output. Do not choose commands or implement yet.
+
+OPERATOR WORKFLOW CLARIFICATION (verbatim):
+
+```text
+ok the situation we are trying to go for is claude code on the left half and build lens on the right half of the screen, when claude makes a change we wait a few seconds and then call buildlens analyze and then we get the summary
+```
+
+EVALUATION:
+This defines Phase 7 as repeated, operator-triggered point-in-time inspection beside Claude Code,
+not automatic monitoring. Waiting briefly reduces transient write races but does not prove a stable
+snapshot. Because the command is cheap to rerun and completeness is required, recommend failing the
+whole snapshot with a readable diagnostic if any required component cannot be obtained, rather than
+presenting a misleading partial summary. Require explicit learner approval before design adoption.
+
+APPROVED WORKFLOW SO FAR:
+
+```text
+Claude Code edits in one pane
+→ learner waits for a reasonable command boundary
+→ learner runs buildlens analyze in the repository
+→ BuildLens captures one complete point-in-time snapshot
+→ BuildLens prints separately labeled unstaged and staged summaries
+```
+
+NEXT REQUIRED STEP:
+Ask whether fail-whole-snapshot plus manual retry fits this workflow. Do not implement.
+
+FAILURE-ATOMICITY APPROVAL (verbatim):
+
+```text
+yes, as long as they know to try again
+```
+
+EVALUATION:
+PASS / approved design. If any required staged, tracked-unstaged, or untracked component cannot be
+captured, Phase 7 prints no partial summary, writes a readable diagnostic to stderr, returns 1, and
+explicitly tells the learner to rerun `buildlens analyze`. The retry instruction is part of the
+user-facing contract, not incidental wording.
+
+NEXT REQUIRED STEP:
+Clarify successful output when both staged and unstaged snapshots contain zero changes. Do not
+implement.
+
+CLEAN-REPOSITORY OUTPUT APPROVAL (verbatim):
+
+```text
+yes this works
+```
+
+EVALUATION:
+PASS / approved design. A clean repository returns 0 and prints both labeled sections with zero
+files changed, lines added, and lines removed. Empty Git output is therefore a successful empty
+snapshot, not an error or ambiguous blank display.
+
+NEXT REQUIRED STEP:
+Requirements are sufficient to compare Git capture approaches. Present 2–3 approaches with
+tradeoffs and a recommendation, then obtain approval before writing the design spec.
+
+CAPTURE-APPROACH DECISION (verbatim):
+
+```text
+yeah git native is the correct choice here
+```
+
+EVALUATION:
+PASS / approved design direction. Use a Git-native, read-only approach: separate Git commands for
+tracked unstaged and staged diffs, Git discovery for untracked paths, and Git no-index diffing to
+represent untracked contents without mutating the index. Accept extra child processes and
+command-specific interpretation of no-index status 1. Reject intent-to-add because an observation
+command must not mutate developer staging state.
+
+NEXT REQUIRED STEP:
+Present the module/data-flow design section for approval. Do not implement.
+
+MODULE-DESIGN SYNTAX QUESTION (verbatim):
+
+```text
+what is cwd()
+```
+
+ADAPTATION:
+Pause architecture evaluation. Explain only that `Path.cwd()` means current working directory and
+returns a Path object naming the directory in which the Python process is currently operating. It
+takes no argument and does not change directories. Give one shell-location example and require a
+fresh path prediction before returning to the design.
+
+NEXT REQUIRED STEP:
+Given a shell currently in one repository directory, ask what `Path.cwd()` returns and whether it
+changes the directory.
+
+CWD MICRO-CHECK ANSWER (verbatim):
+
+```text
+it represents `C:\projects\Argos`   and it does not change directories, 90
+```
+
+EVALUATION:
+PASS. `Path.cwd()` returns a Path representing the current process directory and performs no
+directory-changing side effect. Resume evaluation of the module/data-flow design.
+
+NEXT REQUIRED STEP:
+Re-present the compact boundary: CLI resolves Path.cwd, adapter returns staged/unstaged diff text,
+existing core summarizes. Ask for approval or revision. Do not implement.
+
+MODULE/DATA-FLOW APPROVAL (verbatim):
+
+```text
+yes, each midule still has the correct respoinsiblities and boundaries are upheld, 90
+```
+
+EVALUATION:
+PASS / approved design. The learner correctly defends the module split through responsibility and
+boundary preservation: CLI owns orchestration/process-facing presentation, the Git adapter owns
+external Git knowledge, and the existing deterministic core remains Git-unaware.
+
+NEXT REQUIRED STEP:
+Present error handling and subprocess semantics for approval: argument-list execution without a
+shell, timeout, text decoding, command-specific statuses, atomic snapshot failure, and CLI recovery.
+
+SUBPROCESS SYNTAX QUESTION (verbatim):
+
+```text
+can you explain each line?in run
+```
+
+ADAPTATION:
+Pause design approval. Explain only the multiline `subprocess.run(...)` call: function call and
+returned CompletedProcess, command list, child-only cwd, captured stdout/stderr, text decoding,
+timeout, shell exclusion, and trailing commas. Then require one small call-reading prediction before
+returning to the error-contract design.
+
+NEXT REQUIRED STEP:
+Explain each line without solving the surrounding adapter, then give one non-Git subprocess call and
+ask for executable/arguments, child directory, output representation, and timeout.
+
+SUBPROCESS CALL-READING ANSWER (verbatim):
+
+```text
+tool
+inspect , --short
+repository path
+string
+5 seconds
+90
+```
+
+EVALUATION:
+PASS. The learner correctly identifies the executable, both arguments, child working directory,
+string output representation, and timeout. The multiline subprocess call is readable. Resume the
+subprocess/error-contract design approval.
+
+NEXT REQUIRED STEP:
+Re-present the compact error contract and ask whether the learner approves argument-list execution,
+captured UTF-8 text, shell exclusion, ten-second timeout, command-specific statuses, whole-snapshot
+failure, and retry guidance.
+
+LEARNER PROCESS OBJECTION / PROVISIONAL APPROVAL (verbatim):
+
+```text
+yes, but werent you supposed to teach me this first?
+```
+
+EVALUATION:
+The objection is correct. Only multiline call syntax was taught; the design approval also depends on
+untaught process semantics: parent versus child process, captured channels, timeout control, and
+command-specific status interpretation. Treat approval as provisional and restore the mandatory
+teaching sequence from the smallest prerequisite. Academic objective: trace Python process → child
+process → stdout/stderr/status → Python interpretation (`CMU-15213-SYSTEMS`, `PY-SUBPROCESS`).
+
+NEXT REQUIRED STEP:
+Ask one prediction first: whether invoking Git through `subprocess.run` executes Git inside the
+existing Python process or starts a separate child process. Do not explain or approve the design
+until the learner commits.
+
+PARENT/CHILD PREDICTION PROMPT:
+For `subprocess.run(["git", "--version"])`, predict whether Git executes inside the existing
+BuildLens Python process or the operating system starts a separate Git process; name the relationship
+if known. Confidence: 0–100.
+
+LEARNER ANSWER (verbatim):
+
+```text
+i have no idea, 5
+```
+
+ADAPTATION:
+Descend to one concept only. The running BuildLens Python program is the parent process. The
+operating system starts the requested executable as a separate child process. `subprocess.run`
+waits for that child to finish before returning. Defer channels, statuses, timeout, memory, and Git
+semantics. Require one unrelated parent/child labeling check.
+
+NEXT REQUIRED STEP:
+Use Python launching a generic formatter tool. Ask which is parent and which is child.
+
+PARENT/CHILD REMEDIATION ANSWER (verbatim):
+
+```text
+so run git starts it as a sepreate child process and then the parent or buildlens process waits until the child is done beofre continueing exectuoin, 90
+```
+
+EVALUATION:
+PASS on the BuildLens surface. Git runs as a separate child process; the BuildLens Python parent
+waits inside `subprocess.run` and resumes after the child finishes. Require one unrelated same-rung
+transfer before adding channels.
+
+NEXT REQUIRED STEP:
+Use a Python backup program launching a compressor executable. Ask for parent, child, and which waits.
+
+PARENT/CHILD TRANSFER ANSWER (verbatim):
+
+```text
+python program is the parent, compressor is the child process, parent waits for child, python program coninutes when the compressor finishies with the archive.data, 90
+```
+
+EVALUATION:
+PASS. Parent, child, waiting process, and resume condition all transfer correctly to a non-Git
+surface. Parent/child remediation is closed. Add captured stdout/stderr as the next single concept.
+
+NEXT REQUIRED STEP:
+Before explaining, ask where one normal child message and one error child message appear when
+`capture_output=True` and the returned object is named `result`.
+
+CAPTURED-CHANNELS PREDICTION ANSWER (verbatim):
+
+```text
+it is inside result in the stdout stream&#x20;
+it is inside result in the stderr stream
+strings
+90
+```
+
+EVALUATION:
+PASS. The parent reads normal text from `result.stdout`, error text from `result.stderr`, and both
+are strings because text mode is enabled. Add only numeric child completion status next.
+
+NEXT REQUIRED STEP:
+With no `check=True`, ask what `result.returncode` contains when the child exits 3 and whether
+`subprocess.run` automatically raises for that nonzero status.
+
+RETURN-CODE PREDICTION ANSWER (verbatim):
+
+```text
+i have no idea
+```
+
+ADAPTATION:
+Descend to one default rule. When `check=True` is not supplied, a child that starts and finishes
+with nonzero status still produces a returned CompletedProcess; the integer is stored in
+`result.returncode`. The parent code decides what that command-specific number means. Defer every
+other exception source and require one new numeric fill-in.
+
+NEXT REQUIRED STEP:
+Use a child exiting 4 with no `check=True`. Ask for `result.returncode` and whether run returns
+normally.
+
+RETURN-CODE REMEDIATION ATTEMPT 1 ANSWER (verbatim):
+
+```text
+3
+yes
+90
+it runs normally and lets the parent process decide what the returncode menas
+```
+
+EVALUATION:
+The control model passes: run returns normally and the parent interprets the code. The exact integer
+was carried over from the modeled status-3 example. In this fresh case the child exited 4, so
+`result.returncode` must be 4. Ask only for that value before adding complexity.
+
+NEXT REQUIRED STEP:
+State “the child exits 4” and require only `result.returncode`.
+
+RETURN-CODE REMEDIATION ATTEMPT 2 ANSWER (verbatim):
+
+```text
+4
+```
+
+EVALUATION:
+PASS. The child's exact nonzero status is preserved as `result.returncode`; combined with the prior
+reasoning, run returns normally and the parent interprets it. Move to Git-specific status semantics.
+
+NEXT REQUIRED STEP:
+Ask whether `git diff --no-index` status 1 with diff text is a valid “different” result or a Git
+adapter failure. Require reasoning from the command contract.
+
+NO-INDEX FIRST RESPONSE (verbatim):
+
+```text
+is it just saying that helper.py is empty?
+```
+
+ADAPTATION:
+Clarify only the comparison. `<empty-file>` names a separate known-empty baseline; it does not
+describe `helper.py`. A nonempty helper differs from that baseline, so Git emits its contents as
+additions and returns no-index status 1. The question exposes a real edge case: an actually empty
+untracked file may produce no content diff and needs explicit design handling to avoid silent
+omission. Defer that design choice until the basic comparison passes.
+
+NEXT REQUIRED STEP:
+Ask whether the empty baseline is the object being compared with `helper.py`, then replace the
+placeholder with explicit contents before asking for status interpretation.
+
+NO-INDEX CLARIFICATION QUESTION (verbatim):
+
+    ```csharp
+    <empty-file> is what git compares helper.py with?
+    ```
+
+FACILITATOR CLARIFICATION:
+Yes. `<empty-file>` was an undefined placeholder for the left-hand filesystem path; `helper.py` is
+the right-hand path. No-index compares those two paths without consulting the repository index. A
+nonempty right-hand file therefore appears as added content relative to the empty baseline. The
+earlier notation was ambiguous; replace it with explicit contents before requiring the prediction.
+
+NEXT REQUIRED STEP:
+Give explicit empty-baseline and one-line-helper contents. Ask same/different, added line, and whether
+documented status 1 is valid data or failure.
+
+LEARNER RESPONSE (verbatim):
+
+```text
+i still do not understand
+```
+
+EVALUATION:
+The no-index surface remains unclear. Descend below Git, files, and statuses to one before/after text
+comparison: before is empty; after contains one line. Ask only whether that line was added or removed.
+
+PRIMARY BLOCKER:
+direction of a comparison from an empty before-state to a nonempty after-state
+
+NEXT REQUIRED STEP:
+Use `before = ""` and `after = "hello\n"`. Ask only whether `hello` is added or removed.
+
+VISUAL-EXPLANATION REQUEST (verbatim):
+
+```text
+can you describe with pictures
+```
+
+ADAPTATION:
+Provide a two-panel visual containing only the reduced concept: an empty BEFORE baseline on the left
+and `helper.py` containing `print("ready")` in the AFTER state on the right. Label the line with `+`
+as added. Do not reintroduce Git, `--no-index`, or status codes until the direction is recovered.
+
+NEXT REQUIRED STEP:
+After the pause, show the visual again if needed and ask only: is `print("ready")` added or removed?
+Then use one fresh empty-before/nonempty-after transfer before returning to no-index status 1.
+
+SESSION STOP — 2026-09-02:
+The learner requested a commit/push and a two-sentence handoff for a new session. No Phase 7 product
+code exists. Resume at the visual remediation question above; do not skip ahead to implementation.
