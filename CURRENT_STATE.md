@@ -1697,13 +1697,72 @@ caller remember to split it.
 Syntax closed this slice: iterating a string yields characters while iterating a list yields entries;
 `"".splitlines()` is `[]`; a trailing newline produces no extra empty entry.
 
+SESSION 2026-09-03 (continued) — ENCODING PATCH, AND A FACILITATOR BUG CAUGHT BY REAL GIT.
+
+The learner asked unprompted how untracked paths relate to `summarize`, which produced the snapshot
+cost analysis (`EV-P7-SNAPSHOT-COST-300`). Process count is `3 + n`. Measured: ~59 ms per Git child
+versus ~1 ms for `summarize_diff` on a 1734-line input, a 58x ratio. The learner declined to change
+the design, citing linear growth and a realistic n of 3-4 — the strongest architecture judgement
+recorded so far.
+
+`EV-P7-ENCODING-301`: `text=True` was decoding Git output with the locale encoding (`cp1252` here),
+which either raised or silently produced wrong text. The learner chose strict UTF-8 over
+`errors="replace"`, accepting that one latin-1 file fails every snapshot, because lossy decoding
+trades a crash for uncountable wrong numbers. They also revised an initial choice to leak
+`UnicodeDecodeError` to callers, settling on one normalized `GitCaptureError`.
+
+`EV-P7-MOCK-LIMIT-302` — IMPORTANT. The first encoding patch was WRONG and all eight tests passed
+anyway. `subprocess.run` decodes in a background reader thread; a `UnicodeDecodeError` there is
+printed and discarded, and `run` returns normally with `stdout` as `None` and status 0. The
+`except UnicodeDecodeError` never fired and the adapter returned `None` as text. The test passed
+because its stand-in raised an exception real `subprocess.run` never raises — a green test asserting
+fiction. A real repository with a latin-1 file exposed it.
+
+This is the concrete realization of the limitation the learner articulated at
+`EV-P7-PREPATCH-CALL-282`.
+
+Resolution: capture raw bytes and decode in BuildLens's own code, so the failure is raised by a
+documented method at a line we wrote. The learner rejected the alternative of checking for `None`
+after being shown that documenting an assumption about someone else's library does not bind that
+library.
+
+STANDING RULE ADOPTED: any adapter behavior that depends on how a real external tool or the operating
+system actually behaves must be verified against the real tool at least once. A passing controlled
+test can encode a false belief.
+
+OPEN RECOMMENDATION: add a real-Git integration test. The plan deferred it until the capture paths
+were assembled; three now exist, and this bug is exactly what it would have caught.
+
+### `git_adapter.py` (current)
+
 ```text
-phase                       Phase 7 — unstaged, staged, and untracked discovery complete
-last knowledge gate         untracked representation and boundary (EV-P7-UNTRACKED-TRACE-298,
-                            EV-P7-REPRESENTATION-CHOICE-299)
+_capture(repository, args, label)
+    runs ["git"] + args, no shell, 10s timeout, capture_output, NO text mode
+    nonzero status      -> GitCaptureError, label + status + stderr detail
+    stdout decode fails -> GitCaptureError, label + not valid UTF-8
+    otherwise           -> stdout decoded strictly as UTF-8
+
+_diff_args(extra)  ["diff", "--no-ext-diff", "--no-color"] + extra + ["--"]
+
+capture_unstaged_diff    -> str        _diff_args([])
+capture_staged_diff      -> str        _diff_args(["--cached"])
+capture_untracked_paths  -> list[str]  ls-files --others --exclude-standard, splitlines()
+```
+
+Deliberate asymmetry, disclosed: `stderr` decodes with `errors="replace"` because it is only a human
+diagnostic; `stdout` is strict because it is counted data.
+
+`test_git_adapter.py` has eight tests, and its stand-ins now return BYTES because the adapter performs
+the decode itself.
+
+```text
+phase                       Phase 7 — unstaged, staged, untracked discovery, and decoding complete
+last knowledge gate         encoding policy and mock limitation (EV-P7-ENCODING-301,
+                            EV-P7-MOCK-LIMIT-302)
 next retrieval due          delayed argparse parser-versus-Namespace retrieval on a fresh surface
 next architecture reset     complete; next by time or major transition
-next implementation step    second untracked patch — one git diff --no-index -- /dev/null <path> per
+next implementation step    RECOMMENDED FIRST: a real-Git integration test (see EV-P7-MOCK-LIMIT-302).
+                            Then the --no-index patch — one git diff --no-index -- /dev/null <path> per
                             discovered path, where status 0 AND status 1 are both valid. This forces
                             a per-caller accepted-status rule into _capture and directly tests the
                             reversal condition in EV-P7-STAGED-DESIGN-292. Preserve the approved
@@ -1713,7 +1772,7 @@ next implementation step    second untracked patch — one git diff --no-index -
 milestone owed              Phase 7 milestone transfer at phase close; the slice gates do not
                             substitute for it
 major/deep counter          Phase 7-15 counter has not started; Phase 7 is not yet complete
-last published commit       3a38583 — merge: phase 7 git adapter unstaged and staged capture
+last published commit       0190ebe — merge: phase 7 untracked path discovery
 ```
 
 Files the learner should currently be able to teach:

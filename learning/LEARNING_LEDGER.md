@@ -32085,3 +32085,181 @@ The second untracked patch — one `git diff --no-index -- /dev/null <path>` per
 status 0 AND status 1 are BOTH valid. This forces a per-caller accepted-status rule into `_capture`
 and is the direct test of the reversal condition in EV-P7-STAGED-DESIGN-292. The empty-untracked-file
 edge case approved on 2026-09-02 must be preserved: one changed file, zero added, zero removed.
+
+## EV-P7-SNAPSHOT-COST-300 — learner-initiated architecture and cost reasoning
+
+The learner asked, unprompted, whether untracked paths feed `summarize` the way staged and unstaged
+do. Clarified: nothing is wired to `summarize` yet, and paths are an INTERMEDIATE — not diff text —
+that the next patch converts into per-file `--no-index` diffs counted as added content in UNSTAGED.
+
+PROCESS COUNT (verbatim, after one narrowing):
+
+```text
+3+ n , 23
+```
+
+PASSED. Three fixed commands plus one per untracked file; linear growth.
+
+MEASUREMENT taken because the plan requires evidence over adjectives:
+
+```text
+20 git child processes : 1187 ms   (~59 ms each)
+20 summarize_diff calls:   21 ms   (~1 ms each, 1734-line input)
+ratio                  :   58 x
+```
+
+JUDGEMENT (verbatim):
+
+```text
+i do not think 1.4 seconds for 20 untracked files is worth changing the design now, if it were not
+linear work i would say something but most of thetime it will be 3 or 4 files max which is 5 or 6
+subprocesses
+```
+
+EVALUATION:
+STRONGEST ARCHITECTURE JUDGEMENT TO DATE. Measurement, expected workload, growth shape, and a
+reversal trigger in one answer. Reversal recorded: revisit if untracked counts routinely reach tens
+of files, or if per-call cost stops being flat.
+
+## EV-P7-ENCODING-301 — decoding as part of the data contract
+
+DISCOVERY: a `UnicodeDecodeError` while reading a project file revealed that the adapter's `text=True`
+decodes Git output with the LOCALE encoding, which is `cp1252` on this machine.
+
+Evidence gathered:
+
+```text
+git bytes  b'caf\xc3\xa9 \xe2\x80\x93 dash'
+utf-8   -> 'caf\xe9 \u2013 dash'                correct
+cp1252  -> 'caf\xc3\xa9 \xe2\u20ac\u201c dash'  WRONG, silent, no error
+b'path\x9dname' + cp1252 -> UnicodeDecodeError
+```
+
+Both failure modes were live: sometimes a crash, sometimes silently wrong text that `summarize_diff`
+would count.
+
+SCHEDULING DECISION (verbatim):
+
+```text
+next patch, this one seems like we could run into it later on and getting on top of it now also will
+help later with the live coding past that i do not knwo
+```
+
+ENCODING POLICY (verbatim):
+
+```text
+option A seems like the besst if we went with option b then we might not get the correct count and
+the data becomes untrustworthy
+```
+
+PASSED. Strict UTF-8 chosen over `errors="replace"`, because lossy decoding trades a crash for wrong
+numbers that nothing flags. The learner explicitly accepted the cost that one latin-1 file makes
+every snapshot fail.
+
+EXCEPTION SURFACE: the learner first chose to let `UnicodeDecodeError` reach the caller alongside
+`GitCaptureError`. Challenged with the caller's growing `except` clause and the fact that
+`UnicodeDecodeError` carries no component label. Revised (verbatim):
+
+```text
+then one, if we keep acting on this precident if there are more similar errorrs the except could get
+really big
+```
+
+PASSED. One normalized exception type; the caller stays decoupled from adapter internals.
+
+## EV-P7-MOCK-LIMIT-302 — FACILITATOR BUG, CAUGHT BY REAL GIT
+
+The first encoding patch used `encoding="utf-8"` with `text=True` and wrapped `subprocess.run` in
+`except UnicodeDecodeError`. All eight tests passed. Verification against a REAL repository
+containing a latin-1 file proved the patch did not work at all:
+
+```text
+returncode : 0
+stdout     : None
+stderr     : "warning: ...LF will be replaced by CRLF..."
+```
+
+`subprocess.run` decodes in a background reader thread. The `UnicodeDecodeError` is raised, printed,
+and DISCARDED inside that thread; `run` returns normally with `stdout` as `None` and status 0. The
+`except` clause never fired, the status check passed, and the adapter returned `None` as text — the
+caller then failed far away with `TypeError: object of type 'NoneType' has no len()`.
+
+The test passed because its stand-in raised an exception that real `subprocess.run` never raises. A
+GREEN test asserting fiction.
+
+This is the concrete realization of the limitation the learner articulated at
+`EV-P7-PREPATCH-CALL-282`: a controlled test proves call construction and result interpretation, not
+operating-system or real-tool behavior.
+
+LEARNER QUESTION (verbatim):
+
+```text
+but is None different than an empty repository or no files changed?
+```
+
+EVALUATION:
+Exactly the distinguishability test the learner established for "no file created" versus "empty file
+created". Measured:
+
+```text
+clean repo          returncode 0   stdout ''
+valid change        returncode 0   stdout <106 chars>
+undecodable change  returncode 0   stdout None
+```
+
+`None` IS distinguishable, so checking for it was technically viable.
+
+LEARNER PROPOSAL (verbatim):
+
+```text
+could we then document in the contract or somewher that if it is a Nonetype then there are a certain
+number of possiblities that it could be,
+```
+
+EVALUATION:
+Good instinct, wrong target. Documenting YOUR OWN contract binds you because you control the code
+upholding it; documenting an assumption about someone else's library is a written-down belief that
+does not travel with their implementation. Second problem: the possibilities are not enumerable —
+one path to `None` was observed, others are unknown.
+
+DECISION (verbatim):
+
+```text
+ok so option B seems the best route becasue we then can be sure it is an encoding error
+```
+
+PASSED. Capture raw bytes; decode with `.decode("utf-8")` in BuildLens's own code so the failure is
+raised by a documented method at a line we wrote.
+
+TEST DISPOSITION (verbatim):
+
+```text
+it should be adjusted, the stand in should just have the bytes retunred
+```
+
+PASSED. The stand-in now returns a `CompletedProcess` whose `stdout` is invalid UTF-8 BYTES, and the
+adapter's own decode raises.
+
+REAL-GIT VERIFICATION after the fix:
+
+```text
+clean repo     returned str, length 0
+valid utf-8    returned str, length 106
+undecodable    GitCaptureError -> UNSTAGED tracked: Git output was not valid UTF-8 text
+```
+
+DELIBERATE ASYMMETRY, disclosed to the learner: `stderr` is decoded with `errors="replace"` because
+it is only ever a human diagnostic and never counted data. `stdout` remains strict.
+
+STANDING RULE ADOPTED:
+Any adapter behavior that depends on how a real external tool or the operating system actually
+behaves must be verified against the real tool at least once. Controlled tests alone are not
+sufficient evidence for such a claim, and a passing controlled test can encode a false belief.
+
+RECOMMENDATION CARRIED FORWARD:
+The plan deferred a real-Git integration test until the capture paths were assembled. Three capture
+paths now exist, and this bug is exactly what such a test would have caught. Propose adding one.
+
+NEXT REQUIRED STEP:
+The `--no-index` new-file diff patch, where status 0 AND status 1 are both valid, forcing a
+per-caller accepted-status rule into `_capture`.
