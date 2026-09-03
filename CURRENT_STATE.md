@@ -1663,12 +1663,13 @@ last knowledge gate         staged trace and message assembly (EV-P7-STAGED-TRAC
                             EV-P7-MESSAGE-ASSEMBLY-295)
 next retrieval due          delayed argparse parser-versus-Namespace retrieval on a fresh surface
 next architecture reset     complete; next by time or major transition
-next implementation step    untracked discovery slice — path discovery plus
-                            git diff --no-index -- /dev/null <path>, where status 0 AND status 1 are
-                            both valid. This forces a per-caller status rule into _capture and is the
-                            concrete test of the reversal condition in EV-P7-STAGED-DESIGN-292.
-                            Then command composition, then CLI integration. Launch failure and
-                            timeout normalization remain a separate later slice.
+next implementation step    RESUME AT EV-P7-UNTRACKED-DESIGN-296, presented and unanswered.
+                            The untracked work is SPLIT: patch one is path discovery with
+                            git ls-files --others --exclude-standard; patch two is the new-file
+                            diff with git diff --no-index -- /dev/null <path>, where status 0 AND
+                            status 1 are both valid. Re-present the saved prompt verbatim and do not
+                            reveal its answer. Then command composition, then CLI integration.
+                            Launch failure and timeout normalization remain a separate later slice.
 milestone owed              Phase 7 milestone transfer at phase close; the slice gates do not
                             substitute for it
 major/deep counter          Phase 7-15 counter has not started; Phase 7 is not yet complete

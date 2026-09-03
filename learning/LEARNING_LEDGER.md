@@ -31854,3 +31854,46 @@ NEXT REQUIRED STEP:
 Untracked discovery slice: path discovery plus `git diff --no-index -- /dev/null <path>`, where
 status 0 and status 1 are BOTH valid. This forces `_capture` to accept a per-caller status rule and
 is the concrete test of the reversal condition recorded in EV-P7-STAGED-DESIGN-292.
+
+### EV-P7-UNTRACKED-DESIGN-296 — PRESENTED, NOT ANSWERED
+
+SESSION INTERRUPTION: the learner reported a possible battery failure and requested commit/push
+before answering. The prompt below was presented and is UNATTEMPTED. It must not be graded, and its
+answer must not be revealed on resumption.
+
+The untracked work was split in two because it carries two new ideas. This patch is path discovery
+only; the `--no-index` accepted-status rule is a separate later patch.
+
+EXACT PROMPT:
+
+```text
+git ls-files --others --exclude-standard
+```
+
+prints one untracked path per line and exits 0.
+
+`_capture` currently hard-codes:
+
+```text
+["git", "diff", "--no-ext-diff", "--no-color"] + extra_args + ["--"]
+```
+
+The new command shares `git`, `cwd`, `capture_output`, `text`, `timeout`, `shell`, and the
+nonzero-is-failure rule. It does NOT share `diff`, `--no-ext-diff`, `--no-color`, or the trailing
+`--`.
+
+```text
+Does capture_untracked_paths go through _capture, yes or no =
+If yes, name what _capture must stop hard-coding =
+If no, name what gets duplicated instead =
+Which cost you would rather pay, and why =
+Confidence =
+```
+
+CONTEXT FOR RESUMPTION:
+This is the reversal-condition test the learner predicted in EV-P7-STAGED-DESIGN-292, arriving one
+patch earlier than expected. They anticipated the pressure coming from the status rule; it arrives
+first from the subcommand and argument shape instead.
+
+NEXT REQUIRED STEP:
+Re-present the prompt above verbatim. Do not implement before the learner's decision.
