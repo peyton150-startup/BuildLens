@@ -14,13 +14,14 @@ def _capture(repository: Path, args: list[str], label: str) -> str:
         ["git"] + args,
         cwd=repository,
         capture_output=True,
-        text=True,
         timeout=10,
         shell=False,
     )
 
     if process_result.returncode != 0:
-        detail = process_result.stderr.strip()
+        # stderr is a human diagnostic, never counted data, so a lossy decode
+        # is acceptable here where it would not be for stdout.
+        detail = process_result.stderr.decode("utf-8", errors="replace").strip()
         message = (
             label
             + ": Git failed with status "
@@ -30,7 +31,12 @@ def _capture(repository: Path, args: list[str], label: str) -> str:
             message = message + ": " + detail
         raise GitCaptureError(message)
 
-    return process_result.stdout
+    try:
+        return process_result.stdout.decode("utf-8")
+    except UnicodeDecodeError:
+        raise GitCaptureError(
+            label + ": Git output was not valid UTF-8 text"
+        ) from None
 
 
 def _diff_args(extra: list[str]) -> list[str]:
