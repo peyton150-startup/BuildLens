@@ -54,6 +54,20 @@ def capture_staged_diff(repository: Path) -> str:
     return _capture(repository, _diff_args(["--cached"]), "STAGED tracked")
 
 
+def capture_repository_root(repository: Path) -> str:
+    """Return the root of the repository Git resolves from repository.
+
+    Git searches parent directories, so this may be an ancestor of the given
+    path. Reporting it lets the learner see which repository was inspected.
+    """
+    output = _capture(
+        repository,
+        ["rev-parse", "--show-toplevel"],
+        "ROOT resolution",
+    )
+    return output.strip()
+
+
 def capture_untracked_paths(repository: Path) -> list[str]:
     """Return repository-relative paths of untracked, non-ignored files."""
     output = _capture(
