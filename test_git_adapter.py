@@ -3,6 +3,9 @@
 Run it with:
 
     python test_git_adapter.py
+
+The subprocess stand-in returns BYTES, because git_adapter asks subprocess.run
+for raw output and performs the decode itself.
 """
 
 import subprocess
@@ -38,7 +41,7 @@ STAGED_DIFF = (
 )
 
 
-def completed(returncode=0, stdout="", stderr=""):
+def completed(returncode=0, stdout=b"", stderr=b""):
     return subprocess.CompletedProcess(
         args=["git", "diff"],
         returncode=returncode,
@@ -48,7 +51,7 @@ def completed(returncode=0, stdout="", stderr=""):
 
 
 def test_capture_unstaged_diff_runs_expected_command_and_returns_stdout():
-    prepared = completed(stdout=UNSTAGED_DIFF)
+    prepared = completed(stdout=UNSTAGED_DIFF.encode("utf-8"))
 
     with patch("git_adapter.subprocess.run", return_value=prepared) as fake_run:
         result = capture_unstaged_diff(REPOSITORY)
@@ -58,14 +61,13 @@ def test_capture_unstaged_diff_runs_expected_command_and_returns_stdout():
         ["git", "diff", "--no-ext-diff", "--no-color", "--"],
         cwd=REPOSITORY,
         capture_output=True,
-        text=True,
         timeout=10,
         shell=False,
     )
 
 
 def test_capture_unstaged_diff_rejects_unexpected_status():
-    prepared = completed(returncode=2, stderr="fatal: failed")
+    prepared = completed(returncode=2, stderr=b"fatal: failed")
 
     with patch("git_adapter.subprocess.run", return_value=prepared):
         try:
@@ -78,8 +80,24 @@ def test_capture_unstaged_diff_rejects_unexpected_status():
             raise AssertionError("capture_unstaged_diff did not reject status 2")
 
 
+def test_capture_rejects_undecodable_output_with_its_component_label():
+    prepared = completed(stdout=b"diff --git a/caf\xe9.py b/caf\xe9.py\n")
+
+    with patch("git_adapter.subprocess.run", return_value=prepared):
+        try:
+            capture_staged_diff(REPOSITORY)
+        except GitCaptureError as error:
+            assert str(error) == (
+                "STAGED tracked: Git output was not valid UTF-8 text"
+            )
+        else:
+            raise AssertionError(
+                "capture_staged_diff did not reject undecodable output"
+            )
+
+
 def test_capture_staged_diff_runs_expected_command_and_returns_stdout():
-    prepared = completed(stdout=STAGED_DIFF)
+    prepared = completed(stdout=STAGED_DIFF.encode("utf-8"))
 
     with patch("git_adapter.subprocess.run", return_value=prepared) as fake_run:
         result = capture_staged_diff(REPOSITORY)
@@ -89,14 +107,13 @@ def test_capture_staged_diff_runs_expected_command_and_returns_stdout():
         ["git", "diff", "--no-ext-diff", "--no-color", "--cached", "--"],
         cwd=REPOSITORY,
         capture_output=True,
-        text=True,
         timeout=10,
         shell=False,
     )
 
 
 def test_capture_staged_diff_rejects_unexpected_status_with_its_own_label():
-    prepared = completed(returncode=128, stderr="fatal: not a repository")
+    prepared = completed(returncode=128, stderr=b"fatal: not a repository")
 
     with patch("git_adapter.subprocess.run", return_value=prepared):
         try:
@@ -111,7 +128,7 @@ def test_capture_staged_diff_rejects_unexpected_status_with_its_own_label():
 
 
 def test_capture_untracked_paths_runs_expected_command_and_splits_lines():
-    prepared = completed(stdout="notes/new.py\nreadme.md\n")
+    prepared = completed(stdout=b"notes/new.py\nreadme.md\n")
 
     with patch("git_adapter.subprocess.run", return_value=prepared) as fake_run:
         result = capture_untracked_paths(REPOSITORY)
@@ -121,14 +138,13 @@ def test_capture_untracked_paths_runs_expected_command_and_splits_lines():
         ["git", "ls-files", "--others", "--exclude-standard"],
         cwd=REPOSITORY,
         capture_output=True,
-        text=True,
         timeout=10,
         shell=False,
     )
 
 
 def test_capture_untracked_paths_returns_empty_list_when_none_exist():
-    prepared = completed(stdout="")
+    prepared = completed(stdout=b"")
 
     with patch("git_adapter.subprocess.run", return_value=prepared):
         result = capture_untracked_paths(REPOSITORY)
@@ -137,7 +153,7 @@ def test_capture_untracked_paths_returns_empty_list_when_none_exist():
 
 
 def test_capture_untracked_paths_rejects_unexpected_status():
-    prepared = completed(returncode=129, stderr="usage: git ls-files")
+    prepared = completed(returncode=129, stderr=b"usage: git ls-files")
 
     with patch("git_adapter.subprocess.run", return_value=prepared):
         try:
@@ -153,6 +169,7 @@ def test_capture_untracked_paths_rejects_unexpected_status():
 
 test_capture_unstaged_diff_runs_expected_command_and_returns_stdout()
 test_capture_unstaged_diff_rejects_unexpected_status()
+test_capture_rejects_undecodable_output_with_its_component_label()
 test_capture_staged_diff_runs_expected_command_and_returns_stdout()
 test_capture_staged_diff_rejects_unexpected_status_with_its_own_label()
 test_capture_untracked_paths_runs_expected_command_and_splits_lines()
