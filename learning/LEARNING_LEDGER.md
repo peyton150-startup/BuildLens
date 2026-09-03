@@ -30901,3 +30901,605 @@ NEXT REQUIRED STEP:
 Commit and push the documentation checkpoint, establish the isolated worktree safely, run the four
 existing suites there, then resume Step 2 of the first-slice plan: the learner predicts the controlled
 subprocess call before any test code is written.
+
+---
+
+## EV-P7-PREPATCH-CALL-282 — pre-patch real subprocess call prediction
+
+BASELINE:
+Worktree `codex/phase-7-unstaged-capture` created at `C:/Users/nicol/BuildLens_wt/phase-7-unstaged-capture`.
+All four existing suites passed there on 2026-09-03 before any Phase 7 code.
+
+EXACT PROMPT:
+Read this call and say what each part does. The function body is deliberately not shown.
+
+```text
+process_result = subprocess.run(
+    ["git", "diff", "--no-ext-diff", "--no-color", "--"],
+    cwd=repository,
+    capture_output=True,
+    text=True,
+    timeout=10,
+    shell=False,
+)
+```
+
+Call:
+
+```text
+capture_unstaged_diff(Path("C:/projects/example"))
+```
+
+Fill in every field:
+
+```text
+Executable that is launched =
+Arguments passed to that executable =
+Child process working directory =
+What capture_output=True plus text=True make available, and as what type =
+What happens if the child has not finished after 10 seconds =
+Type/kind of object stored in process_result =
+Value that capture_unstaged_diff returns to its caller =
+Confidence =
+```
+
+FIRST COMMITTED ANSWER (verbatim):
+
+```text
+. this is the real subprocess, before we tested a test subprcess to make sure we could call the
+subprocess and to teach me that each subporcess calls a completed reuslt object that refers to ither
+objects inside of it, like the cwd caputre output and text,
+```
+
+EVALUATION:
+ORIENTING STATEMENT, NOT A FIELD ANSWER. No confidence supplied. Two separable parts:
+
+- CORRECT: this is the real production call; the earlier controlled stand-in proved call construction
+  and result interpretation, not operating-system launch or real Git behavior.
+- INCORRECT: `cwd`, `capture_output`, and `text` were named as objects the returned
+  `CompletedProcess` refers to. They are keyword arguments supplied TO `subprocess.run`, not fields
+  read back off the returned object.
+
+PRIMARY BLOCKER:
+Separating arguments passed into a call from the fields stored on the object that call returns.
+
+ADAPTATION:
+Descend below subprocess to one generic call whose keyword inputs and returned record fields are
+deliberately different names. Do not re-ask the seven-field subprocess prediction yet.
+
+NEXT REQUIRED STEP:
+Ask only which names are inputs to the call and which names are fields on the returned object, on
+the reduced non-subprocess surface.
+
+### EV-P7-PREPATCH-CALL-282A — reduced inputs-versus-returned-fields surface
+
+PROMPT (non-subprocess `measure`/`Reading` surface): name the call's inputs, the fields on the
+returned object, whether `result.units` exists, and the expression reading the measured number.
+
+ANSWER (verbatim):
+
+```text
+."bolt_A", units="cm", strict=False go into the call as the input, i have no idea, i have no idea,
+i have no idea
+```
+
+EVALUATION:
+PARTIAL. Inputs correct. Three remaining fields unknown; they collapse to one blocker — knowing
+which fields a returned object actually has.
+
+ADAPTATION:
+Descend to R0: one class, one attribute, no function wrapper.
+
+### EV-P7-PREPATCH-CALL-282B — R0 single-attribute read
+
+PROMPT: for `class Ticket` with `self.number = number` and `t = Ticket(7)`, name the field created
+and the expression reading 7 back.
+
+ANSWER (verbatim):
+
+```text
+. it has a number on it, it is self.number for this ticket instance, we would have to write a
+print(t) for it to print out 7 and to read it into 7 you have the t = teickjet(7)
+70
+```
+
+EVALUATION:
+PARTIAL at confidence 70. Field name correct. Reading expression incorrect: construction
+(`t = Ticket(7)`) and `print(t)` were given instead of an attribute expression. `print(t)` prints the
+object, not 7.
+
+ADAPTATION:
+Narrow to one blank at the same rung: `t.______`.
+
+NARROWED ANSWER (verbatim):
+
+```text
+t.number
+90
+```
+
+EVALUATION:
+PASSED at confidence 90.
+
+### EV-P7-DEFAULT-PARAMETERS-283 — syntax-only help, default parameter values
+
+LEARNER QUESTION (verbatim):
+
+```text
+. what is throwing me off is that the inputs for scan are deep=true and timeout=30, how are they
+inputs if they have a value already?
+```
+
+EVALUATION:
+Genuine syntax prerequisite, not a distraction. Syntax-only help activated: `name=value` in a `def`
+line is a default used when the caller leaves the argument out; the same shape in a call line is the
+caller supplying a value, which wins.
+
+PROMPT: for `def brew(bean, strength=3)`, predict `brew("kona")`, `brew("kona", strength=9)`, and say
+what 3 is used for.
+
+ANSWER (verbatim):
+
+```text
+. it prints kona, the seoncd call prints kona and 9, 3 could be a placeholder or to show the caller
+it is an integer object
+90
+```
+
+EVALUATION:
+PARTIAL at confidence 90. Second call correct. First call omitted the printed `3`. The default was
+described as a placeholder or type signal rather than the value actually bound.
+
+ADAPTATION:
+Narrow to one blank: `kona ____`.
+
+NARROWED ANSWER (verbatim):
+
+```text
+kona,3, so it would also be there as a placeholder if the caller has no other input
+```
+
+EVALUATION:
+PASSED on behavior. Wording refined: the default is not a stand-in, it IS the value the parameter
+holds for that call.
+
+FOLLOW-UP QUESTION (verbatim):
+
+```text
+.so it is 3 unless you input another integer value?
+```
+
+EVALUATION:
+CORRECT with one precision supplied: the caller's value need not be an integer. The default
+communicates intent but does not validate — the same annotation-versus-runtime-validation
+distinction already held on `Session.record`.
+
+VOCABULARY:
+"Omit" was asked again and re-defined as "leave out." Second occurrence; prefer "leave out" in
+future prompts.
+
+### EV-P7-PREPATCH-CALL-282C — rebuilt scan/Batch target
+
+ANSWER (verbatim):
+
+```text
+. folder, deep=True, timeout=30, /logs", deep=False, timeout=5, yes it is 5, b.count, 90
+```
+
+EVALUATION:
+PARTIAL at confidence 90. Inputs and `b.count` correct. `b.timeout` was said to exist with value 5 —
+the exact target misconception: a call's arguments were treated as fields on the object that call
+returned.
+
+ADAPTATION:
+Isolate the prerequisite — field names come only from the `self.` lines in the object's own
+`__init__`. Present `Batch` with `scan` removed.
+
+PREREQUISITE ANSWER (verbatim):
+
+```text
+.  it has a count and a label, self.count and self.label
+90
+```
+
+EVALUATION:
+PASSED at confidence 90.
+
+REBUILT TARGET ANSWER (verbatim):
+
+```text
+. no it only has a timeout inside of scan once scan has returned batch then timeout is not there
+regardless b has no timeout, 90
+```
+
+EVALUATION:
+PASSED at confidence 90. The learner independently used parameter locality and lifetime: `timeout`
+is local to `scan` and gone after it returns, so `b` carries only what `Batch.__init__` set. This
+correctly reuses the earlier scope-controls-names-not-object-lifetime recovery.
+
+CHAIN STATUS:
+CLOSED. Call arguments versus returned-object fields is recovered on a non-subprocess surface.
+
+NEXT REQUIRED STEP:
+Re-present the original seven-field real-`subprocess.run` prediction from EV-P7-PREPATCH-CALL-282.
+No Phase 7 product code exists.
+
+### EV-P7-PREPATCH-CALL-282D — first full target attempt on the real call
+
+ANSWER (verbatim):
+
+```text
+. subprocess.run, the path, not sure, it makes the output of the subprocess available and it is a
+string, you get a timeout error, it is a subprocess object, it returns a string that is the unstaged
+diff fro mthe path, 50
+```
+
+EVALUATION:
+PARTIAL at confidence 50, well calibrated. PASSED: captured output available as strings; timeout
+produces a timeout error (`subprocess.TimeoutExpired` named correctly on an earlier surface); adapter
+returns the diff text as a string. FAILED: the launched executable was given as `subprocess.run`
+(the Python function doing the launching, not the program launched); arguments were given as "the
+path"; child cwd unknown. `process_result` type was imprecise.
+
+PRIMARY BLOCKER:
+Reading an argument list — element 0 is the program, the rest are its arguments — and separating that
+from the Python function performing the launch.
+
+### EV-P7-ARGV-LIST-284 — argument-list role reading
+
+REDUCED SURFACE: `subprocess.run(["zip", "-r", "backup.zip", "notes"], cwd=folder)`
+
+ANSWER 1 (verbatim):
+
+```text
+. process result is a record type object, run, subprocess, ["zip", "-r", "backup.zip", "notes"],
+cwd=folder, folder, 60
+```
+
+EVALUATION:
+Field mapping ambiguous; not graded as a whole. `process_result` repaired to "record type object".
+`cwd=folder` → `folder` correct. Program/arguments split unresolved.
+
+NARROWED ANSWER (verbatim):
+
+```text
+. -r
+20
+```
+
+EVALUATION:
+FAILED at confidence 20. `-r` is an option, not the program name.
+
+ADAPTATION:
+Worked-example rescue on a command the learner types daily: `python test_cli.py` as
+`["python", "test_cli.py"]`.
+
+WORKED-EXAMPLE EXPLANATION (verbatim):
+
+```text
+. python is where the program is launched and testcli is the argument that is handeed to it, it is
+argv[1], 90
+```
+
+EVALUATION:
+PASSED at confidence 90. Naming index 1 as `argv[1]` is apt — the list becomes the child's argv.
+
+MISSING-STEP ANSWER (verbatim, after one restatement):
+
+```text
+. -x adn archive.tar, i assume -x is the command or action and archive.tar is the path, 90
+```
+
+EVALUATION:
+PASSED at confidence 90 after the first attempt repeated the supplied program name `tar` into the
+arguments slot. Roles of option and operand were read correctly.
+
+FRESH UNAIDED ANSWER (verbatim):
+
+```text
+.  zip
+["zip", "-r", "backup.zip", "notes"], cwd=folder
+folder
+90
+```
+
+EVALUATION:
+PARTIAL. Program and cwd correct; the arguments field still included the program and the `cwd`
+keyword.
+
+LEARNER QUESTION (verbatim):
+
+```text
+ok so i would remove zip and folder as arguments because we already used them in the call?
+```
+
+EVALUATION:
+Correct exclusions, wrong reason. Corrected to role: a program is not handed to itself, and `cwd`
+is an instruction to `subprocess.run` that the child program never receives as an argument. The
+learner restated the role-based reason correctly, then committed `"-r", "backup.zip", "notes"`.
+PASSED. Rescue sequence complete.
+
+### EV-P7-PREPATCH-CALL-282E — narrowed target retry
+
+ANSWER (verbatim):
+
+```text
+. git
+"diff", "--no-ext-diff", "--no-color", "--"
+repositiory
+record type
+90
+```
+
+EVALUATION:
+PASSED at confidence 90 on program, arguments, and child cwd. Spelling treated as transcription
+noise. The exact class name remained unretrieved.
+
+### EV-P7-COMPLETEDPROCESS-285 — returned class name
+
+ANSWER 1 (verbatim):
+
+```text
+subprocess.run
+90
+```
+
+EVALUATION:
+FAILED. The called function was named instead of the returned object's class.
+
+ADAPTATION:
+Return to the already-passed `Batch`/`scan` surface.
+
+ANSWER 2 (verbatim):
+
+```text
+. it is a processresult object
+```
+
+EVALUATION:
+FAILED — recurrence of the documented procedural blocker: carrying a previous scenario into a new
+program. `processresult` appears nowhere in the shown code. Full code restated with no omissions,
+which has cleared this blocker every prior time.
+
+R0 ANSWER (verbatim):
+
+```text
+. batch
+```
+
+CLIMB ANSWER (verbatim):
+
+```text
+. batch
+class batch
+100
+```
+
+EVALUATION:
+PASSED at confidence 100. Precision added: `class Batch` establishes the class; `return Batch(...)`
+is the line establishing what `scan` hands back. For `subprocess.run` the body is unreadable, so the
+return type comes from documentation — the same source rule already used for `SystemExit.code`.
+
+TARGET RETRY (verbatim):
+
+```text
+. subprocess object
+30
+```
+
+EVALUATION:
+NOT RETRIEVED at confidence 30, honestly calibrated. The concept (returned record-like object with
+its own fields, distinct from the function called) is held; only the proper noun was missing.
+Supplied rather than drilled, with live evidence from a real Git child run in the isolated worktree:
+
+```text
+class name : CompletedProcess
+fields     : ['args', 'check_returncode', 'returncode', 'stderr', 'stdout']
+returncode : 0
+stdout     : ''
+```
+
+The field list independently confirms the original EV-P7-PREPATCH-CALL-282 correction: `cwd`,
+`capture_output`, and `text` are inputs and do not appear on the returned object.
+
+WATCH ITEM:
+`CompletedProcess` as a name requires one delayed retrieval on a fresh surface before Phase 7 closes.
+The underlying distinction does not need re-teaching.
+
+CHAIN STATUS:
+EV-P7-PREPATCH-CALL-282 is CLOSED after remediation, not as a first-attempt pass. Plan Step 2 is
+satisfied.
+
+NEXT REQUIRED STEP:
+Plan Step 3 — write `test_git_adapter.py` as the failing controlled-subprocess test and verify RED
+before `git_adapter.py` exists.
+
+## EV-P7-ADAPTER-RED-GREEN-286 — first Phase 7 product patch
+
+RED (verbatim):
+
+```text
+ModuleNotFoundError: No module named 'git_adapter'
+exit status 1
+```
+
+Observed before `git_adapter.py` existed, at the test's import line.
+
+GREEN: `test_git_adapter.py` passed. All five suites pass in the worktree
+`codex/phase-7-unstaged-capture`. `classify.py`, `summarize.py`, `session.py`, and `cli.py` unchanged.
+NOT COMMITTED — plan Step 8/9 gates pending.
+
+### EV-P7-PATH-BINDING-287 — argument binding and constructor calls
+
+LEARNER QUESTION (verbatim):
+
+```text
+. also for the call is the path the repository or what is it ?
+```
+
+ATTEMPT 1 (verbatim):
+
+```text
+. ok so the repo is path
+```
+
+ATTEMPT 2 (verbatim):
+
+```text
+. it hold the value path not the args.path object, 90
+```
+
+EVALUATION:
+FAILED at confidence 90, miscalibrated. `args.path` belongs to a different program — recurrence of
+the carry-over blocker.
+
+ADAPTATION AND FACILITATOR ERROR:
+Descended to `greet("Ada")`, then `show(str(42))`. Both passed. The `str(42)` choice was a PROMPT-
+DESIGN ERROR: a constructor returning a string was used immediately before asking about a constructor
+returning a Path, signalling the wrong answer shape.
+
+LEARNER OBJECTION (verbatim):
+
+```text
+. so my orginal assumption was correct and you let me down a rabbit hole for no reason, i assumed
+that path was an object and you led me to beleive it was a string which started all of this, maybe i
+should have stopped you earlier on me, path is a path object that has the value C:/projects/example
+as a string and the repo hold that as a value object, 90
+```
+
+EVALUATION:
+PASSED, and the objection is PARTLY UPHELD. The `str(42)` example did signal "string." The descent
+itself was justified by the ambiguous attempt 2. Precision added: the Path object is not a string
+with extras; the string is its underlying representation.
+
+STANDING INSTRUCTION ADOPTED:
+When descending toward a constructor call, do not use a constructor whose result is a different type
+than the target. The learner is explicitly invited to halt a descent when they already hold the
+concept; assistance must fade.
+
+FURTHER QUESTION (verbatim):
+
+```text
+. is it the same way path could be the key and the lookup value is C:/projects/example
+```
+
+EVALUATION:
+Correctly rejected. `Path` is a class being called to construct a new object, not a key into a
+lookup table. Counter-evidence supplied: `Path("does/not/exist")` succeeds with no table to find,
+and two identical calls build two objects.
+
+### EV-P7-ADAPTER-TRACE-288 — post-GREEN learner trace
+
+ANSWER (verbatim):
+
+```text
+. git is launched and it starts in "C:/projects/example"
+a completedprocess obejct and the return code is 0
+it is entered if there is a git failure status
+processresult returns the standard output which would be the unstaged diff text as a string
+90
+```
+
+EVALUATION:
+STRONG PARTIAL at confidence 90. Program, child directory, returned object, returncode, and returned
+string all correct. `CompletedProcess` was retrieved UNAIDED, closing the EV-P7-COMPLETEDPROCESS-285
+watch item on first delayed retrieval. Field 3 stated the general rule instead of this run's outcome —
+the same capability-versus-this-call pattern seen earlier in the session.
+
+NARROWED ANSWER (verbatim):
+
+```text
+. it is not entered for this run since it passed
+90
+```
+
+EVALUATION:
+PASSED. Precision added: `0 != 0` evaluates to the literal `False`.
+
+TRACE STATUS: CLOSED.
+
+### EV-P7-ADAPTER-BOUNDARY-289 — boundary explanation and design defense
+
+ATTEMPT 1 (verbatim):
+
+```text
+. becauwe that is the git adapters responsilbity and we nned to uphold the boudary, we would need to
+write the git adapter subprocess into summarize.py, that we are on the right track in terms of
+boundary and repsosiblity, 90
+```
+
+EVALUATION:
+PARTIAL. Field 1 CIRCULAR — named the boundary as its own justification, which the design-review
+rubric does not accept. Field 2 answered the inverse question.
+
+NARROWED ANSWER (verbatim):
+
+```text
+. string
+no
+we would have to make sure that the git ouptut is properly formatted for summarize.py
+90
+```
+
+EVALUATION:
+Fields 1-2 PASSED. Field 3 substituted the data contract for the line count. The data-validity
+instinct is CORRECT and correctly belongs to the adapter — it is the next planned slice.
+
+REDUCED TWO-CALLER ANSWER (verbatim):
+
+```text
+. no, as long as the text from git is still serpated on lines by \n
+```
+
+EVALUATION:
+PASSED. Zero lines of `summarize.py` change. The learner independently named the real content
+contract — newline-separated unified-diff text — and correctly located it as the adapter's
+obligation rather than a check inside `summarize_diff`.
+
+DEFENSE ANSWER (verbatim):
+
+```text
+. we have to check to see where the string we are putting into summarize came from
+that the 2 inputs are giving a string that can still be digested by summarze and give a correct output
+not sure
+90
+```
+
+EVALUATION:
+Fields 1-2 PASSED. Sharper cost supplied: with the subprocess inside `summarize.py`, testing the
+counting logic would require launching or faking a Git child, where `test_summarize.py` currently
+runs a pure function on a string with no repository and no Git installed.
+
+ADVERSARIAL FIELD:
+`not sure` twice. Scaffolded with an explicit World A / World B choice after linking to the learner's
+own Phase 4 evidence-based decision not to create packages.
+
+ANSWER (verbatim):
+
+```text
+.  if git was the only input, then we can assume that every input comes from gitand a real repo
+exsits and plan only for that, 90
+```
+
+EVALUATION:
+PASSED. World A. A single permanent input source makes the adapter an option nobody exercises.
+
+CLOSING ANSWER (verbatim):
+
+```text
+. world b we have 2 inputs and have to check each to make sure that there is something that exsts in
+each
+```
+
+EVALUATION:
+PASSED on the load-bearing field — BuildLens has two input sources today with more planned. The
+"check each" clause is loose; the decisive fact is source multiplicity plus Git-free testability.
+
+GATE STATUS:
+Plan Step 8 CLOSED after remediation. Reversal condition required explicit scaffolding and is NOT
+yet independently generated — carry it forward.
+
+NEXT REQUIRED STEP:
+Plan Step 9 — one non-Git transfer: a parent program running a formatter child, receiving a completed
+result, rejecting an unexpected status, and returning stdout text. The learner must distinguish the
+subprocess result object from the adapter's returned string. Commit only after it passes.

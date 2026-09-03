@@ -1528,13 +1528,52 @@ that `path` is an attribute on the Namespace referenced by `args`. The post-GREE
 Rename the two remaining vague malformed-input tests, rerun targeted tests, then run all four suites
 for fresh verification evidence.
 
+SESSION 2026-09-03 — FIRST PHASE 7 PRODUCT CODE EXISTS.
+
+Isolated worktree `C:/Users/nicol/BuildLens_wt/phase-7-unstaged-capture` on branch
+`codex/phase-7-unstaged-capture`. Baseline verified there before any new code: all four existing
+suites passed.
+
+The pre-patch prediction (`EV-P7-PREPATCH-CALL-282`) closed only after a long remediation chain.
+The learner's first response treated `cwd`, `capture_output`, and `text` as fields on the returned
+object. Recovery ran through call-inputs-versus-returned-object-fields on a non-subprocess surface,
+default parameter values (`EV-P7-DEFAULT-PARAMETERS-283`), argument-list role reading with a
+worked-example rescue (`EV-P7-ARGV-LIST-284`), and the `CompletedProcess` class name
+(`EV-P7-COMPLETEDPROCESS-285`). A live probe in the worktree confirmed the returned fields are
+`args`, `returncode`, `stderr`, `stdout` — proving inputs do not reappear on the result.
+
+RED was observed as `ModuleNotFoundError: No module named 'git_adapter'` before implementation.
+GREEN followed, and all five suites now pass (`EV-P7-ADAPTER-RED-GREEN-286`).
+
+The post-GREEN trace closed (`EV-P7-ADAPTER-TRACE-288`) with `CompletedProcess` retrieved unaided on
+first delayed retrieval. The boundary explanation closed (`EV-P7-ADAPTER-BOUNDARY-289`): the learner
+established that zero lines of `summarize.py` change to accept Git output, and independently named
+the newline-separated unified-diff content contract as the adapter's obligation.
+
+FACILITATOR ERROR RECORDED (`EV-P7-PATH-BINDING-287`): a `str(42)` descent immediately preceded a
+question about `Path(...)`, signalling the wrong result type. The learner correctly objected. Do not
+descend through a constructor whose result type differs from the target. The learner is invited to
+halt any descent when they already hold the concept.
+
+CARRIED FORWARD: the reversal condition for the adapter needed explicit World A / World B
+scaffolding and was not independently generated. Re-target it later without scaffolding.
+
+Two recurring procedural patterns, both still live:
+
 ```text
-phase                       Phase 7 specification/adjacent learning; no implementation authorized
-last knowledge gate         module-qualified access structure accepted; formatting drill skipped
-next retrieval due          delayed argparse parser-versus-Namespace retrieval on a fresh surface
+carrying a previous scenario's names into the current program
+answering what code CAN accept instead of what THIS call does
+```
+
+```text
+phase                       Phase 7 — first product patch implemented, milestone NOT complete
+last knowledge gate         adapter boundary defense closed with scaffolding (EV-P7-ADAPTER-BOUNDARY-289)
+next retrieval due          adapter reversal condition, unscaffolded; delayed argparse
+                            parser-versus-Namespace retrieval on a fresh surface
 next architecture reset     complete; next by time or major transition
-next implementation step    commit/push plan; create isolated worktree; verify baseline; run pre-patch prediction
-last published commit       f90399b — docs: record phase 7 test-boundary gate
+next implementation step    plan Step 9 — non-Git formatter-child transfer; then Step 10 evidence,
+                            then Step 11 commit of the product patch
+last published commit       f44316a — docs: plan phase 7 unstaged capture
 ```
 
 Files the learner should currently be able to teach:
