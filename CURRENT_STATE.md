@@ -285,6 +285,71 @@ The session paused because the learner needed to move locations. Resume by showi
 `mock.patch` example described above and ask only what value `subprocess.run` returns inside the
 indented block. No Phase 7 product code or implementation plan exists yet.
 
+On resume, the learner correctly explained that the patched call reaches the Git-adapter stand-in
+rather than launching real Git, at confidence 90, but did not name the exact returned value. Ask only
+for the value assigned to `received`. The learner also requested moving to a new session after Phase
+7 implementation is complete; preserve that transition point rather than ending this session early.
+
+The exact return-value remediation passed: `received` gets the string `"controlled result"`. The
+learner then asked whether `received` is a record type when real Git runs. Clarify an ambiguity in the
+toy example: real `subprocess.run` returns a `CompletedProcess` record-like object inside the adapter;
+the approved adapter boundary extracts and returns only its `.stdout` string. Require a two-variable
+type mapping before showing the real controlled-test form.
+
+The two-variable mapping passed: `process_result` holds the `CompletedProcess`, while `diff_text`
+holds the stdout string. Show the realistic controlled test with a prepared `CompletedProcess` and
+ask separately what the subprocess stand-in returns and what `capture_unstaged_diff` returns.
+
+On the realistic controlled test, the learner said the patched subprocess returns diff text and the
+adapter gets unstaged-file diff, at confidence 90. The adapter-output intent is correct, but the
+first step regressed: patched `subprocess.run` returns the prepared `CompletedProcess`; the adapter
+then extracts `.stdout`. Ask only for the patched subprocess return before rebuilding the two-step
+trace.
+
+The isolated return check passed: the patched function returns the prepared `CompletedProcess`
+object. Rebuild the full two-step trace once without hints before writing the implementation plan.
+
+The rebuilt trace passed: the learner identified `process_result` as the `CompletedProcess` containing
+the prepared Git fields and the adapter return as the exact stdout string `"DIFF TEXT"`. When the
+learner asked what type `CompletedProcess` is, clarify that it is a class in `subprocess`; the returned
+value is an instance whose attributes reference other Python objects. The learner correctly identified
+`returncode` as an integer attribute at confidence 90 and then correctly stated that `diff_text`
+references only the `.stdout` string, not the entire `CompletedProcess`.
+
+While reviewing execution options, the learner asked whether objects inside functions/modules are
+only referable there. Clarify that scope controls names, not object lifetime: a local name disappears
+after return, while a returned object may remain reachable through the caller's new name. The learner
+correctly traced the returned list reference, with the precision that the object is not renamed; one
+binding ends and another exists. Require one module-name access transfer before execution selection.
+
+The learner restated the object-binding precision correctly, then supplied the correct module-dot-
+function access pattern but omitted underscores from both identifiers. Show the exact expression
+`git_adapter.capture_unstaged_diff()` and require one exact reproduction before execution selection.
+
+The learner placed every underscore correctly but escaped them as `\_`. Clarify that backslash
+escaping belongs to Markdown prose and is invalid in this Python expression. Require the literal
+expression in a fenced code block without backslashes.
+
+The learner's second response again displayed `\_` and was not fenced. Do not continue a formatting-
+sensitive copying loop. Descend to the underlying R0 rule: ask whether Python source includes a
+backslash before an underscore. If the learner answers no, accept the identifier syntax and return
+to execution selection.
+
+The learner requested skipping this as a nitpick. Honor that request: underscore placement and the
+module-qualified access model were already correct, and no useful Phase 7 understanding depends on
+continuing a Markdown-formatting drill. Return to implementation-plan execution selection.
+
+The learner chose inline execution because they want to learn how the patch is implemented. The
+checkout is the normal `main` workspace, so the learner requested committing/pushing the planning
+records and then implementing in an isolated worktree. Create branch
+`codex/phase-7-unstaged-capture`, verify all four existing suites in the isolated baseline, and only
+then resume the plan's pre-patch prediction. No Phase 7 product code exists.
+
+The first-slice implementation plan is recorded in
+`docs/superpowers/plans/2026-09-03-phase-7-git-boundary.md`. Self-review narrowed the plan to the one
+approved tracked-UNSTAGED patch; staged, untracked, CLI, and integration work remain separately
+planned later slices. No Phase 7 product code exists.
+
 Phase 3 is complete in every required dimension:
 
 ```text
@@ -1465,11 +1530,11 @@ for fresh verification evidence.
 
 ```text
 phase                       Phase 7 specification/adjacent learning; no implementation authorized
-last knowledge gate         controlled-test evidence boundary passed
+last knowledge gate         module-qualified access structure accepted; formatting drill skipped
 next retrieval due          delayed argparse parser-versus-Namespace retrieval on a fresh surface
 next architecture reset     complete; next by time or major transition
-next implementation step    minimal mock.patch syntax trace; then write implementation plan
-last published commit       73daeb4 — docs: refine phase 7 subprocess contract
+next implementation step    commit/push plan; create isolated worktree; verify baseline; run pre-patch prediction
+last published commit       f90399b — docs: record phase 7 test-boundary gate
 ```
 
 Files the learner should currently be able to teach:

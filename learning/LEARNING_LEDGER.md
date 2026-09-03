@@ -30617,3 +30617,287 @@ function receives from `subprocess.run` inside the block.
 SESSION PAUSE — 2026-09-02:
 The learner needed to move locations and requested a commit and push. Resume at the exact minimal
 `mock.patch` syntax check above. Do not skip to implementation-plan code or Phase 7 product code.
+
+MINIMAL MOCK.PATCH TRACE ATTEMPT 1 ANSWER (verbatim):
+
+```text
+the git adapter that is the subprocess but not the actaul git subprocess, after the phase 7 implementation we are going to move ot a new session, 90
+```
+
+EVALUATION:
+PARTIAL. The learner correctly explains that the call reaches the patched Git-adapter stand-in and
+does not launch a real Git child. The exact value assigned to `received` was not supplied.
+
+PRIMARY BLOCKER:
+Tracing `return_value=prepared` through the replacement call to the assignment target.
+
+SESSION TRANSITION REQUEST:
+After Phase 7 implementation is complete, move to a new session. Do not transition before the Phase
+7 automated tests, learner trace, explanation, transfer, and required completion gate are finished.
+
+NEXT REQUIRED STEP:
+Re-show only `prepared = "controlled result"`, `return_value=prepared`, and
+`received = ...`. Ask for the exact value of `received`; do not re-ask process semantics.
+
+PATCHED RETURN-VALUE REMEDIATION ANSWER (verbatim):
+
+```text
+it is the controlled result, so when the git subprocess actually works recieved will recieve the git diff etc, does that mean recived is a record type?
+```
+
+EVALUATION:
+PASS for the exact toy value: `received == "controlled result"`.
+
+SYNTAX/REPRESENTATION QUESTION:
+The learner asks whether the received value is a record type in real execution. The toy example was
+ambiguous because it replaced `subprocess.run` with a string directly. In the actual adapter,
+`subprocess.run` returns a `CompletedProcess` record-like object containing `stdout`, `stderr`, and
+`returncode`; `capture_unstaged_diff` extracts and returns the `stdout` string. This preserves the
+approved validated-plain-string downstream boundary.
+
+NEXT REQUIRED STEP:
+Show `process_result = subprocess.run(...)` followed by `diff_text = process_result.stdout`. Ask
+which variable is the `CompletedProcess` and which is the string.
+
+SUBPROCESS-RESULT/STRING MAPPING ANSWER (verbatim):
+
+```text
+the completedprocesss is held by process result and the diff text holds the string
+```
+
+EVALUATION:
+PASS. `process_result` references the `CompletedProcess`; `diff_text` references the stdout string
+extracted from that object. The learner correctly distinguishes the subprocess boundary value from
+the adapter's downstream return value.
+
+NEXT REQUIRED STEP:
+Show a realistic controlled test where `prepared` is a `CompletedProcess`, `patch` makes
+`subprocess.run` return it, and `capture_unstaged_diff` returns `prepared.stdout`. Ask for both return
+values before exposing this pattern in the implementation plan.
+
+REALISTIC CONTROLLED-TEST TRACE ATTEMPT 1 ANSWER (verbatim):
+
+```text
+it returns the diff text&#x20;
+it would get the diff for any unstaged files
+90
+```
+
+EVALUATION:
+PARTIAL. The second answer has the correct adapter-output intent; in this controlled example its
+exact value is `"DIFF TEXT"`. The first answer incorrectly skips the intermediate object. Patched
+`subprocess.run` returns `prepared`, which is the `CompletedProcess`; `capture_unstaged_diff` then
+extracts `prepared.stdout`.
+
+PRIMARY BLOCKER:
+Maintaining the two distinct return boundaries when both appear in realistic `patch` syntax.
+
+ADAPTATION:
+Remove the adapter call and ask only what `return_value=prepared` makes the patched function return.
+
+NEXT REQUIRED STEP:
+Show `prepared = CompletedProcess(...)` and `return_value=prepared`. Ask only what patched
+`subprocess.run(...)` returns.
+
+ISOLATED PATCHED-RETURN ANSWER (verbatim):
+
+```text
+the object from completedprocess
+```
+
+EVALUATION:
+PASS. The patched `subprocess.run(...)` returns the prepared `CompletedProcess` object.
+
+NEXT REQUIRED STEP:
+Rebuild the full trace once without answer labels: patched subprocess call → local `process_result`
+→ `.stdout` → adapter return. Ask for the type/value at each boundary.
+
+FULL CONTROLLED-RESULT TRACE ANSWER (verbatim):
+
+```text
+it hold the recordtype which has all the results from git diff if it were in a real git child process, the adapter returns "DIFF TEXT"
+```
+
+EVALUATION:
+PASS. `process_result` holds the prepared `CompletedProcess`, and the adapter returns its exact stdout
+string `"DIFF TEXT"`. The two-step remediation chain is closed.
+
+COMPLETEDPROCESS TYPE QUESTION (verbatim):
+
+```text
+but what type is completeed process
+```
+
+FACILITATOR CLARIFICATION:
+`CompletedProcess` is a class defined by Python's `subprocess` module. A value returned by
+`subprocess.run` is an instance of that class with named attributes including `args`, `returncode`,
+`stdout`, and `stderr`.
+
+RETURNCODE ATTRIBUTE TYPE ANSWER (verbatim):
+
+```text
+that makes returncode an integer object inside a processresult object, 90
+```
+
+EVALUATION:
+PASS WITH PRECISION. `process_result` is a `CompletedProcess` object, and its `returncode` attribute
+references an integer object. More precisely, attributes refer to objects rather than objects being
+physically nested “inside” one another.
+
+OBJECT-REFERENCE QUESTION (verbatim):
+
+```text
+so are they all objects? and they exst as objects inside of eachother?
+```
+
+FACILITATOR CLARIFICATION:
+Python values here are objects. The `CompletedProcess` has attributes that refer to the argument-list,
+integer, and string objects. `diff_text = process_result.stdout` makes `diff_text` refer to the stdout
+string, not to the surrounding `CompletedProcess`.
+
+STDOUT-REFERENCE ANSWER (verbatim):
+
+```text
+it refers to only its string
+```
+
+EVALUATION:
+PASS. `diff_text` refers only to the `.stdout` string. The object/attribute boundary is stable enough
+for the controlled-subprocess test plan.
+
+IMPLEMENTATION PLAN:
+`docs/superpowers/plans/2026-09-03-phase-7-git-boundary.md`
+
+PLAN SELF-REVIEW:
+The initial draft overreached into every remaining Phase 7 slice. It was narrowed to the learner-
+approved tracked-UNSTAGED patch only. The plan has exact interfaces, test code, implementation code,
+commands, expected RED/GREEN outcomes, a post-GREEN learner gate, transfer, evidence update, and
+commit boundary. Later Phase 7 requirements remain explicit but require fresh plans and gates.
+
+NEXT REQUIRED STEP:
+Ask the learner to review the first-slice plan, then choose subagent-driven or inline execution. Do
+not execute either approach until the learner explicitly chooses.
+
+SCOPE/OBJECT QUESTION (verbatim):
+
+```text
+so if you are referiung to an object that is inside a function that object is only able to be referered inside of that function and similarly if an object only exsts inside of a module you have to first refer/import to the module to then refer to that object
+```
+
+FACILITATOR CLARIFICATION:
+Scope controls where a name binding is available, not where an object may exist. A function-local
+name normally disappears after the function returns, but an object returned or stored elsewhere can
+remain reachable. A module-level name is available through an imported module attribute or through a
+direct import.
+
+FUNCTION-LOCAL/RETURNED-OBJECT ANSWER (verbatim):
+
+```text
+the object istelf is refered to but the name of the obkject goes from localname to now weh nthe caller refers to it it will be outsidename
+```
+
+EVALUATION:
+PASS WITH PRECISION. The caller's `outside_name` refers to the returned list object after the local
+binding is gone. The object is not itself renamed; `local_name` and `outside_name` are separate name
+bindings that exist in different scopes/times.
+
+NEXT REQUIRED STEP:
+Give one module access transfer: after `import git_adapter`, ask for the exact expression used to
+refer to the module-level `capture_unstaged_diff` function. Then return to the plan execution choice.
+
+OBJECT-BINDING PRECISION RESTATEMENT (verbatim):
+
+```text
+not renamed just refered to in a different way
+```
+
+EVALUATION:
+PASS. The learner now states the precise principle: the object is not renamed; another name binding
+refers to it.
+
+MODULE ACCESS TRANSFER ANSWER (verbatim):
+
+```text
+gitadapter.captureunstageddiff()
+```
+
+EVALUATION:
+PARTIAL. The module-qualified access structure is correct, but Python identifiers must match their
+declared spelling exactly. The actual module is `git_adapter` and the function is
+`capture_unstaged_diff`.
+
+PRIMARY BLOCKER:
+Exact underscore spelling in Python identifiers.
+
+NEXT REQUIRED STEP:
+Show `git_adapter.capture_unstaged_diff()` and ask the learner to reproduce that exact expression.
+
+EXACT IDENTIFIER ATTEMPT 1 ANSWER (verbatim):
+
+```text
+git\_adapter.capture\_unstaged\_diff()
+```
+
+EVALUATION:
+PARTIAL. Every underscore is now correctly placed, but the literal backslashes used to escape
+underscores in Markdown would be invalid Python syntax. The source expression contains `_` directly.
+
+NEXT REQUIRED STEP:
+Ask the learner to enter the expression inside a Python code block with no backslashes.
+
+EXACT IDENTIFIER ATTEMPT 2 ANSWER (verbatim):
+
+```text
+git\_adapter.capture\_unstaged\_diff()
+```
+
+EVALUATION:
+FORMATTING-AMBIGUOUS. The identifier structure and underscore placement remain correct, but the
+response again contains Markdown escapes. Do not infer continued Python misunderstanding from a
+formatting-sensitive input loop.
+
+ADAPTATION:
+Descend to one binary R0 syntax question: whether Python source contains a backslash before `_`.
+
+NEXT REQUIRED STEP:
+Ask only whether the backslash belongs in the Python source expression: yes or no.
+
+LEARNER SKIP REQUEST (verbatim):
+
+```text
+skip this it is a nitpick
+```
+
+EVALUATION:
+SKIPPED BY LEARNER REQUEST. The module-dot-function access structure and underscore positions were
+correct. The remaining ambiguity was Markdown presentation rather than a load-bearing Phase 7
+concept, so no further remediation is required.
+
+NEXT REQUIRED STEP:
+Return to the saved first-slice implementation plan and ask the learner to choose subagent-driven or
+inline execution. Do not implement until the choice is explicit.
+
+PLAN EXECUTION CHOICE (verbatim):
+
+```text
+1, i want to learn how it is done
+```
+
+EVALUATION:
+Inline execution selected. Preserve every RED/GREEN and learner checkpoint in this session; do not
+delegate implementation.
+
+WORKTREE SETUP REQUEST (verbatim):
+
+```text
+ok can you commit and push and then we will work on an isolated worktree
+```
+
+EVALUATION:
+Approved. Commit and publish the planning/evidence checkpoint, then create an isolated worktree on
+`codex/phase-7-unstaged-capture`. Verify the clean baseline before writing the failing test.
+
+NEXT REQUIRED STEP:
+Commit and push the documentation checkpoint, establish the isolated worktree safely, run the four
+existing suites there, then resume Step 2 of the first-slice plan: the learner predicts the controlled
+subprocess call before any test code is written.
