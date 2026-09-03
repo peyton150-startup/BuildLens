@@ -1785,14 +1785,72 @@ test_git_adapter_integration.py   8 real-Git tests, throwaway repositories, ~6 s
 Windows detail: Git marks `.git/objects` files read-only, so `tempfile.TemporaryDirectory` needs
 `ignore_cleanup_errors=True`.
 
+SESSION 2026-09-03 (continued) — ALL FOUR CAPTURE PATHS EXIST.
+
+`EV-P7-NOINDEX-DESIGN-304`: the predicted reversal test arrived. `--no-index` documents status 1 as
+"the files differ", a valid result, while every other caller treats 1 as failure. The learner chose
+to add `accepted_statuses` to `_capture` rather than split off a separate function, and answered the
+coherence question with a criterion they produced themselves:
+
 ```text
-phase                       Phase 7 — unstaged, staged, untracked discovery, decoding, root
-                            resolution, and real-Git integration tests complete
-last knowledge gate         test-scope division and root reporting (EV-P7-INTEGRATION-TEST-303,
-                            EV-P7-ENCODING-301)
+a parameter that varies HOW ONE RUN IS JUDGED keeps the job single
+a parameter that varies WHAT COMES BACK would split it
+```
+
+`_capture` therefore remains one coherent job at four parameters, three required. The default is the
+tuple `(0,)` rather than the set `{0}`, because a default is evaluated once at definition time and an
+immutable default closes the mutable-default trap by construction.
+
+`EV-P7-NOINDEX-REAL-GIT-305`: real Git was probed BEFORE the test was written, per the standing rule.
+Git 2.55 returns status 1 for both a nonempty and an empty new file, and `/dev/null` works on Windows.
+The 2026-09-02 requirement was verified end to end against the real summarizer:
+
+```text
+helper.py   files_changed=1, lines_added=1, lines_removed=0
+empty.py    files_changed=1, lines_added=0, lines_removed=0
+```
+
+A guard test asserts the default was not widened for everyone: status 1 still fails the tracked
+captures.
+
+### `git_adapter.py` (current)
+
+```text
+_capture(repository, args, label, accepted_statuses=(0,))
+    runs ["git"] + args, no shell, 10s timeout, capture_output, no text mode
+    status not accepted -> GitCaptureError with label, status, stderr detail
+    stdout decode fails -> GitCaptureError with label
+    otherwise           -> stdout decoded strictly as UTF-8
+
+_diff_args(extra)  ["diff", "--no-ext-diff", "--no-color"] + extra + ["--"]
+
+capture_unstaged_diff(repository)         -> str        _diff_args([])
+capture_staged_diff(repository)           -> str        _diff_args(["--cached"])
+capture_untracked_paths(repository)       -> list[str]  ls-files, splitlines()
+capture_new_file_diff(repository, path)   -> str        _diff_args(["--no-index"])
+                                                        + ["/dev/null", path],
+                                                        accepted_statuses=(0, 1)
+capture_repository_root(repository)       -> str        rev-parse --show-toplevel, stripped
+```
+
+### Test inventory
+
+```text
+test_git_adapter.py              14 controlled tests, bytes stand-ins, no Git required
+test_git_adapter_integration.py  10 real-Git tests, throwaway repositories
+test_classify.py / test_summarize.py / test_session.py / test_cli.py   unchanged
+```
+
+```text
+phase                       Phase 7 — all four capture paths, decoding, and root resolution complete
+last knowledge gate         per-caller status rule and cohesion criterion (EV-P7-NOINDEX-DESIGN-304,
+                            EV-P7-NOINDEX-TRACE-306)
 next retrieval due          delayed argparse parser-versus-Namespace retrieval on a fresh surface
 next architecture reset     complete; next by time or major transition
-next implementation step    CLI slice must print the resolved repository root before the sections.
+next implementation step    COMPOSITION — assemble UNSTAGED (tracked plus per-file untracked new-file
+                            diffs) and STAGED into one snapshot, rejecting the whole snapshot on any
+                            component failure. Then CLI integration, which must also print the
+                            resolved repository root.
                             Then the --no-index patch — one git diff --no-index -- /dev/null <path> per
                             discovered path, where status 0 AND status 1 are both valid. This forces
                             a per-caller accepted-status rule into _capture and directly tests the
@@ -1803,7 +1861,7 @@ next implementation step    CLI slice must print the resolved repository root be
 milestone owed              Phase 7 milestone transfer at phase close; the slice gates do not
                             substitute for it
 major/deep counter          Phase 7-15 counter has not started; Phase 7 is not yet complete
-last published commit       603bdde — merge: phase 7 strict utf-8 decoding at the git boundary
+last published commit       45c7e00 — merge: phase 7 real-git integration tests and root reporting
 ```
 
 Files the learner should currently be able to teach:

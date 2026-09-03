@@ -32356,3 +32356,118 @@ Git marks files under `.git/objects` read-only, so `tempfile.TemporaryDirectory`
 NEXT REQUIRED STEP:
 The `--no-index` new-file diff patch, where status 0 AND status 1 are both valid, forcing a
 per-caller accepted-status rule into `_capture`.
+
+## EV-P7-NOINDEX-DESIGN-304 — per-caller status rule, the predicted reversal test
+
+This is the pressure the learner predicted at EV-P7-STAGED-DESIGN-292: `--no-index` documents status
+1 as "the files differ", a valid result, while every other caller treats 1 as failure.
+
+FIRST ANSWER (verbatim):
+
+```text
+it seems like option a makes mroe sense and is less work, if we haveto wire the subprocess inot a
+completely different function, my question about option a is that if we have the status for a
+paramter does that mean that that is one more paprameter for every function to call?
+```
+
+EVALUATION:
+Option A chosen. The question is a genuine one and was answered by callback to the learner's own
+default-parameter work in EV-P7-DEFAULT-PARAMETERS-283 rather than by assertion.
+
+ANSWER (verbatim):
+
+```text
+. no, we can set it as a default and then if it is needed then we can change it to {0,1} ok that
+seems pretty handy, it holds {0}, that seems like less work than creating and wiring and testing an
+entierly new function
+```
+
+PASSED. Existing callers unchanged; the default supplies the value.
+
+PARAMETER COUNT: first given as 5, corrected unprompted to `its 4 and the fourth is optional`.
+
+COHERENCE JUDGEMENT (verbatim):
+
+```text
+. no it does not change what _capture does, only how it judges one run, it would make the input be
+sometimes a string and sometimes a list whic his changing the output, yes
+90
+```
+
+PASSED at confidence 90, and this is the strongest cohesion reasoning recorded. Given a contrast
+between `accepted_statuses` and a hypothetical `split_lines`, the learner produced the criterion
+themselves: a parameter that varies HOW ONE RUN IS JUDGED keeps the job single, while one that varies
+WHAT COMES BACK would split it. `_capture` remains one coherent job by that test.
+
+DECISION: Option A. `accepted_statuses: tuple[int, ...] = (0,)`. A tuple rather than a set, because a
+default is evaluated once at definition time and an immutable default closes the mutable-default trap
+by construction rather than by discipline.
+
+## EV-P7-NOINDEX-REAL-GIT-305 — real-Git probe BEFORE writing the test
+
+Per the standing rule adopted at EV-P7-MOCK-LIMIT-302, real Git was probed before any test was
+written, so the test could not encode a false belief. Git 2.55.0.windows.3:
+
+```text
+helper.py (nonempty)  status 1  new file mode, --- /dev/null, @@ -0,0 +1 @@, +print("ready")
+empty.py              status 1  diff --git, new file mode, index 0000000..e69de29, NO hunk
+```
+
+`/dev/null` works on Windows Git. Both cases return status 1.
+
+The requirement the learner defended on 2026-09-02 was then verified end to end against the real
+summarizer:
+
+```text
+helper.py   DiffSummary(files_changed=1, lines_added=1, lines_removed=0)
+empty.py    DiffSummary(files_changed=1, lines_added=0, lines_removed=0)
+```
+
+The empty untracked file reports as one changed file with zero lines, because the file header exists
+and no hunk does — exactly the completeness argument the learner made.
+
+RED: `ImportError: cannot import name 'capture_new_file_diff'`.
+GREEN: 14 controlled tests and 10 real-Git tests pass; all six suites pass.
+
+A guard test was added in the same patch: `test_status_1_still_fails_for_the_tracked_diff_captures`
+asserts the default was not widened for everyone.
+
+### EV-P7-NOINDEX-TRACE-306 — same status, two verdicts
+
+ANSWER (verbatim):
+
+```text
+.  call a will return status 1 for scuess
+call b will also be a sucess the status 1
+the if branch will be called
+the if branch will be not  called
+since accepted status is = to (0,1) b will not call the if
+b will return the untracked path
+the call a did not specify the accepted statueses but call b did
+90
+```
+
+EVALUATION:
+STRONG PARTIAL at confidence 90. Both branch verdicts correct, and the mechanism stated exactly: A
+never specified `accepted_statuses`, B did. Two errors: A's value was not given, and call B was said
+to return the untracked PATH rather than the diff TEXT — a recurrence of the returned-representation
+confusion, with the path being the argument going IN.
+
+NARROWED ANSWER (verbatim):
+
+```text
+. 0
+1 and a diff text for brand_new.py
+90
+```
+
+PASSED. Precision added: the value is the tuple `(0,)`, not the integer `0`, because
+`returncode not in 0` would raise `TypeError`.
+
+GATE STATUS:
+`--no-index` slice CLOSED. All four capture paths now exist.
+
+NEXT REQUIRED STEP:
+Composition — assemble UNSTAGED (tracked plus untracked new-file diffs) and STAGED into one snapshot,
+with whole-snapshot rejection on any component failure. Then CLI integration, which must also print
+the resolved repository root. Launch failure and timeout normalization remain a separate later slice.
