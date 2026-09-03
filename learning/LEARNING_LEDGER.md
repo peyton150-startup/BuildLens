@@ -31897,3 +31897,191 @@ first from the subcommand and argument shape instead.
 
 NEXT REQUIRED STEP:
 Re-present the prompt above verbatim. Do not implement before the learner's decision.
+
+## EV-P7-UNTRACKED-DESIGN-296 — RESUMED AND CLOSED
+
+FIRST ANSWER (verbatim):
+
+```text
+. yes, the arguemtns, not sure about the cost, it just makes sense to have the _capture be the
+subprocess responsiblity
+```
+
+EVALUATION:
+CHOICE AND REASON PASSED. The responsibility line was drawn well: `_capture` owns PROCESS MECHANICS
+(launch, capture, timeout, status check), not WHICH Git command. Cost unknown.
+
+The cost was posed concretely: with the full argument list pushed to callers, `_capture` no longer
+guarantees `--no-color` / `--no-ext-diff`.
+
+ANSWER (verbatim):
+
+```text
+no, if we need the arguemtns to be a certain way we have to input it that way or create soemthing
+that will take the arguemtns in and test to see which list fo arguemtns it should use to run the
+subprocesses
+```
+
+EVALUATION:
+The exposure was named correctly. The second proposal — inspecting arguments to select a list —
+would return command knowledge to `_capture` as a branch, undoing the extraction.
+
+Two resolutions were offered. Resolution 1 (each caller writes its own full list) and Resolution 2
+(`_diff_args` builds the shared diff flags; the ls-files caller bypasses it).
+
+The learner chose Resolution 1 without naming its cost, then restated its benefit twice when asked to
+count duplicate occurrences of `--no-color`. Descent to a literal counting task passed: 2 under
+Resolution 1, 1 under Resolution 2.
+
+The learner then said `but then why not just make it so that each of the 3 has their own` and
+`i am not seeing it`. FACILITATOR JUDGMENT: Resolution 1 is genuinely defensible at two callers, and
+this was stated plainly to the learner. The rubric requirement is naming the tradeoff, not choosing
+Resolution 2. The drift failure was therefore SUPPLIED as a worked scenario: adding `--no-textconv`
+to fix an external-diff-tool bug, editing one diff caller and missing the other, producing correct
+UNSTAGED counts and wrong STAGED counts under one snapshot heading, with no crash.
+
+The learner then answered `o fine lets do r2`, which was CHALLENGED as capitulation rather than a
+decision, per the rubric's rejection of "Claude chose it."
+
+RESOLVING ANSWER (verbatim):
+
+```text
+ok i read that incorrectly when you first presented them, do _diff_args would give the arguemtn that
+would change the list in _capture from unstaged to staged, i think that is a good idea and it will
+make it so if we need to make changes we have one place to llook instad of 3
+```
+
+EVALUATION:
+PASSED as an own decision — the earlier choice rested on a misreading of Resolution 2. Precision
+corrected: `_diff_args` is one place for the TWO diff callers; `capture_untracked_paths` never uses
+it.
+
+REVERSAL CONDITION (verbatim):
+
+```text
+. if we decided not to track unsatged or staged an only track one
+```
+
+EVALUATION:
+PASSED, unscaffolded. One diff caller means nothing is shared and the helper stops earning its place.
+
+DECISION: Resolution 2.
+
+## EV-P7-UNTRACKED-RED-GREEN-297 — untracked path discovery patch
+
+The untracked work was SPLIT because it carries two new ideas. This patch is path discovery only.
+
+RED (verbatim):
+
+```text
+ImportError: cannot import name 'capture_untracked_paths' from 'git_adapter'
+exit status 1
+```
+
+GREEN: seven adapter tests pass; all five suites pass. `_capture` was restructured to take the full
+argument list and prepend `"git"` itself, and the four PRE-EXISTING tests passed UNCHANGED — the
+second refactor-safety demonstration in this phase.
+
+### EV-P7-UNTRACKED-TRACE-298 — output representation trace
+
+FIRST ANSWER (verbatim):
+
+```text
+. so there is are 2 file in the notes folder new.py then the read.me
+the string for the stdout or the diff text, is a list that has been splitlined so every entry is a
+line of the output, wouldn't that mean there are no files in the repo?, not sure, 90
+```
+
+EVALUATION:
+PARTIAL. Corrections supplied: `readme.md` is at the repository root, not in `notes/`; empty output
+means no UNTRACKED files, not no files. The two return values were merged into one.
+
+ANSWER (verbatim):
+
+```text
+. it is a processcompleted object and splitlines produces a list that has all of the outputs/ results
+from the git subprocess, 90
+```
+
+EVALUATION:
+FAILED on the first field — a regression on the distinction closed at EV-P7-COMPLETEDPROCESS-285.
+`_capture` returns `process_result.stdout`, a string.
+
+RECOVERED (verbatim):
+
+```text
+so it gets  a string that could be a few lines and then the splitlines turns that string into a list
+with each \n seperating the entires, output is a string , 90
+```
+
+EXACT VALUES (verbatim):
+
+```text
+notes/new.py\nreadme.md\n
+notes/new.py
+readme.md
+""
+""
+90
+```
+
+EVALUATION:
+THREE OF FOUR PASSED, including the correct judgement that the trailing newline produces NO third
+empty entry. `"".splitlines()` was given as `""`; corrected on one narrowed prompt to `[]` at
+confidence 90.
+
+### EV-P7-REPRESENTATION-CHOICE-299 — why the adapter chooses a list
+
+ANSWER (verbatim):
+
+```text
+because ls-files returns a list of the files instead of a string
+```
+
+EVALUATION:
+FAILED, and the correction is load-bearing for the boundary: `ls-files` returns a STRING, exactly as
+`diff` does. No child process can hand Python a list. The list is BUILDLENS'S CHOICE, made by the
+`.splitlines()` call. The adapter decides what representation crosses the boundary; Git supplies only
+text.
+
+ADAPTATION:
+Descend to iteration shape — a loop over a list versus a loop over a string.
+
+MICRO ANSWER (verbatim):
+
+```text
+. 2 lines
+one line
+90
+```
+
+FAILED on the string case. After the rule was supplied that a `for` over a string visits one
+character at a time, the learner produced `a b c d` correctly.
+
+TRANSFER ANSWER (verbatim):
+
+```text
+.  it would run each character in the string but if we give it a list it would be each entry in the
+list
+```
+
+EVALUATION:
+PASSED. Principle stated to close the gate: the adapter converts Git's text into the representation
+the domain needs, ONCE, so no caller has to remember to split it — the duplication argument in a
+different form.
+
+WATCH ITEMS:
+
+```text
+process_result versus process_result.stdout regressed once after passing; retrieve again later
+answering with roles/generalities instead of the exact value on this call recurred again
+```
+
+GATE STATUS:
+Untracked path-discovery slice CLOSED.
+
+NEXT REQUIRED STEP:
+The second untracked patch — one `git diff --no-index -- /dev/null <path>` per discovered path, where
+status 0 AND status 1 are BOTH valid. This forces a per-caller accepted-status rule into `_capture`
+and is the direct test of the reversal condition in EV-P7-STAGED-DESIGN-292. The empty-untracked-file
+edge case approved on 2026-09-02 must be preserved: one changed file, zero added, zero removed.

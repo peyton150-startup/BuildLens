@@ -1657,23 +1657,63 @@ expression as unanswered.
 The describing-a-role-instead-of-this-call pattern occurred three times and has now been named
 explicitly to the learner.
 
+SESSION 2026-09-03 (continued) — UNTRACKED PATH DISCOVERY COMPLETE.
+
+The branch was merged into `main` with a merge commit rather than a rebase, because its three
+commits were already published and rebasing would have required a force-push. The two lines had
+touched no common file — docs on `main`, product code on the branch — so the three-way merge was
+clean with no conflict.
+
+Design decision `EV-P7-UNTRACKED-DESIGN-296`: `_capture` now takes the complete argument list and
+prepends `"git"` itself, and `_diff_args` builds the shared tracked-diff flags for the two diff
+callers. The learner drew the responsibility line well — `_capture` owns process mechanics, not which
+Git command — and supplied the reversal condition unscaffolded: collapse `_diff_args` when only one
+diff caller remains.
+
+Recorded honestly: the drift failure was SUPPLIED as a worked scenario, not generated. The learner's
+first choice rested on a misreading of the second option, and their initial acceptance was challenged
+as capitulation before they restated it as their own decision.
+
+### `git_adapter.py` (current)
+
 ```text
-phase                       Phase 7 — unstaged and staged capture complete
-last knowledge gate         staged trace and message assembly (EV-P7-STAGED-TRACE-294,
-                            EV-P7-MESSAGE-ASSEMBLY-295)
+_capture(repository, args, label)   runs ["git"] + args, no shell, 10s timeout,
+                                    raises GitCaptureError on any nonzero status,
+                                    returns stdout as text
+_diff_args(extra)                   ["diff", "--no-ext-diff", "--no-color"] + extra + ["--"]
+
+capture_unstaged_diff    -> str        _diff_args([])
+capture_staged_diff      -> str        _diff_args(["--cached"])
+capture_untracked_paths  -> list[str]  ["ls-files", "--others", "--exclude-standard"], splitlines()
+```
+
+`test_git_adapter.py` has seven tests. The four pre-existing tests passed unchanged through the
+`_capture` restructure — the second refactor-safety demonstration this phase.
+
+Boundary principle established: Git emits only text, so the LIST is BuildLens's choice. The adapter
+converts Git's output into the representation the domain needs, once, rather than making every
+caller remember to split it.
+
+Syntax closed this slice: iterating a string yields characters while iterating a list yields entries;
+`"".splitlines()` is `[]`; a trailing newline produces no extra empty entry.
+
+```text
+phase                       Phase 7 — unstaged, staged, and untracked discovery complete
+last knowledge gate         untracked representation and boundary (EV-P7-UNTRACKED-TRACE-298,
+                            EV-P7-REPRESENTATION-CHOICE-299)
 next retrieval due          delayed argparse parser-versus-Namespace retrieval on a fresh surface
 next architecture reset     complete; next by time or major transition
-next implementation step    RESUME AT EV-P7-UNTRACKED-DESIGN-296, presented and unanswered.
-                            The untracked work is SPLIT: patch one is path discovery with
-                            git ls-files --others --exclude-standard; patch two is the new-file
-                            diff with git diff --no-index -- /dev/null <path>, where status 0 AND
-                            status 1 are both valid. Re-present the saved prompt verbatim and do not
-                            reveal its answer. Then command composition, then CLI integration.
-                            Launch failure and timeout normalization remain a separate later slice.
+next implementation step    second untracked patch — one git diff --no-index -- /dev/null <path> per
+                            discovered path, where status 0 AND status 1 are both valid. This forces
+                            a per-caller accepted-status rule into _capture and directly tests the
+                            reversal condition in EV-P7-STAGED-DESIGN-292. Preserve the approved
+                            empty-untracked-file behavior: one changed file, zero added, zero removed.
+                            Then command composition, then CLI integration. Launch failure and
+                            timeout normalization remain a separate later slice.
 milestone owed              Phase 7 milestone transfer at phase close; the slice gates do not
                             substitute for it
 major/deep counter          Phase 7-15 counter has not started; Phase 7 is not yet complete
-last published commit       627f532 — docs: close phase 7 task 1 transfer and reversal gates
+last published commit       3a38583 — merge: phase 7 git adapter unstaged and staged capture
 ```
 
 Files the learner should currently be able to teach:
