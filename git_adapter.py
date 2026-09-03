@@ -8,10 +8,10 @@ class GitCaptureError(RuntimeError):
     """Report that one required Git snapshot component could not be captured."""
 
 
-def capture_unstaged_diff(repository: Path) -> str:
-    """Return tracked working-tree diff text for repository."""
+def _capture(repository: Path, extra_args: list[str], label: str) -> str:
+    """Run one read-only Git diff command and return its validated stdout."""
     process_result = subprocess.run(
-        ["git", "diff", "--no-ext-diff", "--no-color", "--"],
+        ["git", "diff", "--no-ext-diff", "--no-color"] + extra_args + ["--"],
         cwd=repository,
         capture_output=True,
         text=True,
@@ -22,7 +22,8 @@ def capture_unstaged_diff(repository: Path) -> str:
     if process_result.returncode != 0:
         detail = process_result.stderr.strip()
         message = (
-            "UNSTAGED tracked: Git failed with status "
+            label
+            + ": Git failed with status "
             + str(process_result.returncode)
         )
         if detail:
@@ -30,3 +31,13 @@ def capture_unstaged_diff(repository: Path) -> str:
         raise GitCaptureError(message)
 
     return process_result.stdout
+
+
+def capture_unstaged_diff(repository: Path) -> str:
+    """Return tracked working-tree diff text for repository."""
+    return _capture(repository, [], "UNSTAGED tracked")
+
+
+def capture_staged_diff(repository: Path) -> str:
+    """Return tracked staged diff text for repository."""
+    return _capture(repository, ["--cached"], "STAGED tracked")
