@@ -31618,3 +31618,239 @@ NEXT REQUIRED STEP:
 Commit the completed patch. The next Phase 7 slice is STAGED capture, then untracked discovery with
 `/dev/null` new-file diffs, then multi-command composition, then CLI integration. Launch failure and
 timeout normalization remain deferred to their own slice.
+
+## EV-P7-STAGED-DESIGN-292 — duplication versus parameterization at the adapter boundary
+
+PROMPT: choose between two full near-duplicate capture functions (Option A) and one shared `_capture`
+helper called by two thin public functions (Option B); state the cost accepted and the reversal
+condition.
+
+FIRST ANSWER (verbatim):
+
+```text
+. i like oiption b it makes iut so we call git one time and only then do we spilt the sanoshot into
+unstaged asnd staged, the cost would be we would have to difreretiate the 2 from eachother, not sure 80
+```
+
+EVALUATION:
+CHOICE PLAUSIBLE, REASON WRONG. Option B shares the Python function body, not the Git run. `_capture`
+is called twice and reaches `subprocess.run` twice. Sharing code reduces how many times something is
+WRITTEN, never how many times it RUNS.
+
+ADAPTATION:
+Isolate definition-versus-execution with `stamp()` called twice.
+
+MICRO ANSWER (verbatim):
+
+```text
+. ran is printed twice
+twice
+80
+```
+
+then, narrowed to the def-line count:
+
+```text
+1
+```
+
+EVALUATION:
+PASSED. One definition, two executions.
+
+REBUILT COUNT (verbatim):
+
+```text
+. option a is 2 git child ... and option b is the same
+90
+```
+
+EVALUATION:
+PASSED. Two Git children under both options. The original reason was voided and the decision reopened.
+
+LEARNER QUESTION (verbatim):
+
+```text
+. i am still leaning towards option a then because im not sure the purpsoe of capture then
+```
+
+EVALUATION:
+Legitimate. The purpose of an extracted helper only appears under CHANGE. Reframed as a concrete
+timeout change from 10 to 30 seconds affecting both captures.
+
+RESOLVING ANSWER (verbatim):
+
+```text
+wait, are you saying that the capture is the function that calls the git subporcess and the 2
+capturediff  functions call the capture and then differentiate based on unstaged and staged, if that
+is the case then b is the correct answer, if i want something to change in the subprocess i can then
+make one change instead of 2 it is more convienent
+```
+
+EVALUATION:
+PASSED. Structure understood and the correct benefit named. Sharpened beyond convenience: under
+Option A the two bodies can DRIFT, so UNSTAGED and STAGED could run under different contracts while
+both claiming to be one snapshot — a correctness risk, not a typing cost.
+
+COST AND REVERSAL (verbatim):
+
+```text
+. so leading underscore most likely means a helper function, it would have to not raise on certain
+status, if the number of changes to _capture and the paramters grow to much, but i assume for this
+project it will not
+90
+```
+
+EVALUATION:
+PASSED. The learner independently read the leading underscore as an internal-helper convention, and
+correctly predicted that the coming untracked slice forces `_capture` to stop raising on every
+nonzero status. Reversal condition stated as parameter and branch accumulation. Precision added: the
+underscore is convention, not enforcement — the same supported-API-versus-language-guarantee
+distinction already held for `_changes` in `session.py`.
+
+The indirection cost was SUPPLIED, not generated: a reader must follow one extra hop to learn what
+`capture_staged_diff` does.
+
+DECISION: Option B.
+
+## EV-P7-STAGED-RED-GREEN-293 — staged capture patch
+
+RED (verbatim):
+
+```text
+ImportError: cannot import name 'capture_staged_diff' from 'git_adapter'
+exit status 1
+```
+
+Distinguished from the previous slice's `ModuleNotFoundError`: the module now exists, the name inside
+it does not.
+
+GREEN: four adapter tests pass; all five suites pass. The two PRE-EXISTING unstaged tests passed
+unchanged after the body moved into `_capture`, which is the evidence the refactor preserved behavior.
+
+### EV-P7-STAGED-TRACE-294 — post-GREEN trace
+
+FIRST ANSWER (verbatim):
+
+```text
+. so the repository is the path/cwd, the etraargs is the differentiator for whether you are calling
+capture for unstaged or for staged, label is the string that will tell you what we are looking for/
+which function we are calling _capture from
+```
+
+EVALUATION:
+ROLES CORRECT, FIELDS UNANSWERED. Third occurrence this session of describing what something is FOR
+instead of what it IS on this call. Pattern named explicitly to the learner for self-correction.
+
+`extra_args` for the unstaged caller was then given exactly as `[]` at confidence 90.
+
+LIST CONCATENATION (new syntax) — FIRST ANSWER (verbatim):
+
+```text
+.["git", "diff", "--no-ext-diff", "--no-color"] + []+ ["--"]
+3
+90
+```
+
+EVALUATION:
+FAILED. The expression was restated with the variable substituted but never evaluated; the count was
+wrong.
+
+R0 ANSWER (verbatim):
+
+```text
+. [1,2,3,]
+3
+so for the git diff it would be 6 elements inside the list
+```
+
+EVALUATION:
+R0 PASSED. The generalization named the staged count while the line under discussion was the unstaged
+one. After the per-part element counts were laid out, the learner self-corrected:
+
+```text
+. ok so for the unstaged it is 5 and 6 is for the staged
+```
+
+FINAL LISTS (verbatim):
+
+```text
+["git", "diff", "--no-ext-diff", "--no-color", "--"]
+["git", "diff", "--no-ext-diff", "--no-color","--cached", "--"]
+```
+
+EVALUATION:
+PASSED, exactly matching both test assertions.
+
+### EV-P7-MESSAGE-ASSEMBLY-295 — error message construction
+
+FIRST ANSWER (verbatim):
+
+```text
+.  not a repository
+": Git failed with status "
+    + str(process_result.returncode) + not a repository
+not sure
+20
+```
+
+EVALUATION:
+FAILED at confidence 20, well calibrated. `detail` dropped the `fatal:` prefix, and the concatenation
+was restated rather than evaluated.
+
+`.strip()` isolated as syntax-only help. ANSWER (verbatim):
+
+```text
+.  fatal: not a repository
+no
+90
+```
+
+PASSED — strip removes surrounding whitespace only.
+
+String concatenation was restated unevaluated a second time. The learner then said:
+
+```text
+ok i know what it evaluates to i was being lazy
+```
+
+This claim was ACCEPTED and tested directly on the real target rather than drilled, because every
+reduced form had been evaluated correctly and immediately. Noted to the learner that an unevaluated
+expression is indistinguishable from not knowing, and costs turns.
+
+TARGET ANSWER (verbatim):
+
+```text
+. staged tracked: git failed with status 128
+90
+```
+
+EVALUATION:
+PARTIAL. First assignment exact; the `if detail:` body was not applied. Truthiness of a non-empty
+string was supplied as the one missing rule.
+
+FINAL ANSWER (verbatim):
+
+```text
+.staged tracked: git failed with status 128: fatal: not a repository
+```
+
+EVALUATION:
+PASSED, matching the test assertion. Capitalization treated as transcription noise.
+
+RECURRING PATTERN TO WATCH:
+
+```text
+restating an expression with variables substituted, instead of evaluating it to a value
+```
+
+Appeared on both list and string concatenation in the same session. Reduced forms were always
+evaluated correctly.
+
+GATE STATUS:
+Staged-capture slice CLOSED. This is a slice, not a phase milestone; the Phase 7 milestone transfer
+is owed at phase close.
+
+NEXT REQUIRED STEP:
+Untracked discovery slice: path discovery plus `git diff --no-index -- /dev/null <path>`, where
+status 0 and status 1 are BOTH valid. This forces `_capture` to accept a per-caller status rule and
+is the concrete test of the reversal condition recorded in EV-P7-STAGED-DESIGN-292.

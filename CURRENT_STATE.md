@@ -1612,17 +1612,67 @@ asserts the exact argument list and keywords, and asserts the exact rejection me
 No real Git child is launched, so the tests prove call construction and result interpretation, not
 operating-system launch or real Git behavior.
 
+SESSION 2026-09-03 (continued) — STAGED CAPTURE SLICE COMPLETE.
+
+The design decision was the learner's (`EV-P7-STAGED-DESIGN-292`). They chose the shared-helper
+option, but their first reason — that it would run Git once — was wrong and was repaired: sharing a
+body reduces how many times code is WRITTEN, never how many times it RUNS. Both options launch two
+Git children. The corrected benefit is a single edit site, so the two views cannot drift apart and
+report different contracts as one snapshot. The learner independently read the leading underscore as
+an internal-helper convention and predicted that the coming untracked slice will force `_capture` to
+stop raising on every nonzero status. The indirection cost was supplied, not generated.
+
+### `git_adapter.py` (updated)
+
+`_capture(repository, extra_args, label)` owns the Git call: it builds the argument list by joining
+three lists, runs Git with no shell and a 10-second timeout, raises `GitCaptureError` on any nonzero
+status with the component label and Git's stderr detail, and returns stdout.
+
 ```text
-phase                       Phase 7 — Task 1 complete; STAGED capture is the next slice
-last knowledge gate         transfer, shared principle, and unscaffolded reversal condition
-                            (EV-P7-ADAPTER-TRANSFER-290, EV-P7-ADAPTER-PRINCIPLE-291)
+capture_unstaged_diff → _capture(repository, [],            "UNSTAGED tracked")
+capture_staged_diff   → _capture(repository, ["--cached"],  "STAGED tracked")
+```
+
+```text
+git diff --no-ext-diff --no-color --            5 arguments
+git diff --no-ext-diff --no-color --cached --   6 arguments
+```
+
+`test_git_adapter.py` has four tests. The two pre-existing unstaged tests passed unchanged after the
+body moved into `_capture` — that is the evidence the refactor preserved behavior.
+
+Syntax closed this slice: list concatenation with `+`, `.strip()` as whitespace-ends-only, and
+non-empty-string truthiness in `if detail:`.
+
+WATCH ITEM — new recurring pattern:
+
+```text
+restating an expression with variables substituted, instead of evaluating it to a value
+```
+
+It appeared on both list and string concatenation. Every reduced form was evaluated correctly and
+immediately, and the learner attributes it to speed rather than a gap. Treat an unevaluated
+expression as unanswered.
+
+The describing-a-role-instead-of-this-call pattern occurred three times and has now been named
+explicitly to the learner.
+
+```text
+phase                       Phase 7 — unstaged and staged capture complete
+last knowledge gate         staged trace and message assembly (EV-P7-STAGED-TRACE-294,
+                            EV-P7-MESSAGE-ASSEMBLY-295)
 next retrieval due          delayed argparse parser-versus-Namespace retrieval on a fresh surface
 next architecture reset     complete; next by time or major transition
-next implementation step    STAGED capture slice; then untracked discovery with /dev/null new-file
-                            diffs; then multi-command composition; then CLI integration.
-                            Launch failure and timeout normalization remain a separate later slice.
+next implementation step    untracked discovery slice — path discovery plus
+                            git diff --no-index -- /dev/null <path>, where status 0 AND status 1 are
+                            both valid. This forces a per-caller status rule into _capture and is the
+                            concrete test of the reversal condition in EV-P7-STAGED-DESIGN-292.
+                            Then command composition, then CLI integration. Launch failure and
+                            timeout normalization remain a separate later slice.
+milestone owed              Phase 7 milestone transfer at phase close; the slice gates do not
+                            substitute for it
 major/deep counter          Phase 7-15 counter has not started; Phase 7 is not yet complete
-last published commit       ac103d8 — docs: record phase 7 first adapter patch and learning gates
+last published commit       627f532 — docs: close phase 7 task 1 transfer and reversal gates
 ```
 
 Files the learner should currently be able to teach:
