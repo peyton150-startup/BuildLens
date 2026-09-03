@@ -1,4 +1,4 @@
-"""Capture validated Git diff text without leaking Git into the core."""
+"""Capture validated Git snapshot components without leaking Git into the core."""
 
 import subprocess
 from pathlib import Path
@@ -8,10 +8,10 @@ class GitCaptureError(RuntimeError):
     """Report that one required Git snapshot component could not be captured."""
 
 
-def _capture(repository: Path, extra_args: list[str], label: str) -> str:
-    """Run one read-only Git diff command and return its validated stdout."""
+def _capture(repository: Path, args: list[str], label: str) -> str:
+    """Run one read-only Git command and return its validated stdout."""
     process_result = subprocess.run(
-        ["git", "diff", "--no-ext-diff", "--no-color"] + extra_args + ["--"],
+        ["git"] + args,
         cwd=repository,
         capture_output=True,
         text=True,
@@ -33,11 +33,26 @@ def _capture(repository: Path, extra_args: list[str], label: str) -> str:
     return process_result.stdout
 
 
+def _diff_args(extra: list[str]) -> list[str]:
+    """Build the shared tracked-diff argument list."""
+    return ["diff", "--no-ext-diff", "--no-color"] + extra + ["--"]
+
+
 def capture_unstaged_diff(repository: Path) -> str:
     """Return tracked working-tree diff text for repository."""
-    return _capture(repository, [], "UNSTAGED tracked")
+    return _capture(repository, _diff_args([]), "UNSTAGED tracked")
 
 
 def capture_staged_diff(repository: Path) -> str:
     """Return tracked staged diff text for repository."""
-    return _capture(repository, ["--cached"], "STAGED tracked")
+    return _capture(repository, _diff_args(["--cached"]), "STAGED tracked")
+
+
+def capture_untracked_paths(repository: Path) -> list[str]:
+    """Return repository-relative paths of untracked, non-ignored files."""
+    output = _capture(
+        repository,
+        ["ls-files", "--others", "--exclude-standard"],
+        "UNTRACKED discovery",
+    )
+    return output.splitlines()
