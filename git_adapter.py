@@ -8,8 +8,18 @@ class GitCaptureError(RuntimeError):
     """Report that one required Git snapshot component could not be captured."""
 
 
-def _capture(repository: Path, args: list[str], label: str) -> str:
-    """Run one read-only Git command and return its validated stdout."""
+def _capture(
+    repository: Path,
+    args: list[str],
+    label: str,
+    accepted_statuses: tuple[int, ...] = (0,),
+) -> str:
+    """Run one read-only Git command and return its validated stdout.
+
+    accepted_statuses varies how one run is judged, not what this function does.
+    Most Git commands treat any nonzero status as failure, but `diff --no-index`
+    documents status 1 as "the files differ", which is a valid result.
+    """
     process_result = subprocess.run(
         ["git"] + args,
         cwd=repository,
@@ -18,7 +28,7 @@ def _capture(repository: Path, args: list[str], label: str) -> str:
         shell=False,
     )
 
-    if process_result.returncode != 0:
+    if process_result.returncode not in accepted_statuses:
         # stderr is a human diagnostic, never counted data, so a lossy decode
         # is acceptable here where it would not be for stdout.
         detail = process_result.stderr.decode("utf-8", errors="replace").strip()
@@ -52,6 +62,22 @@ def capture_unstaged_diff(repository: Path) -> str:
 def capture_staged_diff(repository: Path) -> str:
     """Return tracked staged diff text for repository."""
     return _capture(repository, _diff_args(["--cached"]), "STAGED tracked")
+
+
+def capture_new_file_diff(repository: Path, path: str) -> str:
+    """Return diff text presenting one untracked file as entirely added content.
+
+    Git compares the file against /dev/null, the absent-before side, so the
+    result carries a file header and every line as an addition. An empty file
+    yields a header with no hunk, which reports as one changed file and zero
+    changed lines.
+    """
+    return _capture(
+        repository,
+        _diff_args(["--no-index"]) + ["/dev/null", path],
+        "UNTRACKED " + path,
+        accepted_statuses=(0, 1),
+    )
 
 
 def capture_repository_root(repository: Path) -> str:

@@ -18,6 +18,7 @@ from pathlib import Path
 
 from git_adapter import (
     GitCaptureError,
+    capture_new_file_diff,
     capture_repository_root,
     capture_staged_diff,
     capture_unstaged_diff,
@@ -125,6 +126,35 @@ def test_a_latin_1_working_tree_file_is_rejected_not_silently_mangled():
             )
 
 
+def test_new_file_diff_presents_an_untracked_file_as_added_content():
+    with temporary_directory() as directory:
+        repository = new_repository(directory)
+        (repository / "brand_new.py").write_bytes(b"print('ready')\n")
+
+        diff = capture_new_file_diff(repository, "brand_new.py")
+
+        assert "new file mode" in diff
+        assert "--- /dev/null" in diff
+        assert "+print('ready')" in diff
+
+
+def test_new_file_diff_of_an_empty_file_has_a_header_and_no_hunk():
+    """The approved requirement: an empty untracked file is a visible change.
+
+    Its creation changes repository state even though it contains no lines, so
+    it must report as one changed file with zero added and zero removed lines.
+    """
+    with temporary_directory() as directory:
+        repository = new_repository(directory)
+        (repository / "placeholder.py").write_bytes(b"")
+
+        diff = capture_new_file_diff(repository, "placeholder.py")
+
+        assert "diff --git" in diff
+        assert "new file mode" in diff
+        assert "@@" not in diff
+
+
 def test_repository_root_is_the_repository_directory_itself():
     with temporary_directory() as directory:
         repository = new_repository(directory)
@@ -157,6 +187,8 @@ test_staging_moves_the_change_from_unstaged_to_staged()
 test_untracked_discovery_finds_a_file_that_was_never_added()
 test_untracked_discovery_reports_an_empty_new_file()
 test_a_latin_1_working_tree_file_is_rejected_not_silently_mangled()
+test_new_file_diff_presents_an_untracked_file_as_added_content()
+test_new_file_diff_of_an_empty_file_has_a_header_and_no_hunk()
 test_repository_root_is_the_repository_directory_itself()
 test_repository_root_reveals_an_ancestor_when_git_searches_upward()
 print("test passed")
