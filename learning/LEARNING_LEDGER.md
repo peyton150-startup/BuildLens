@@ -32471,3 +32471,139 @@ NEXT REQUIRED STEP:
 Composition — assemble UNSTAGED (tracked plus untracked new-file diffs) and STAGED into one snapshot,
 with whole-snapshot rejection on any component failure. Then CLI integration, which must also print
 the resolved repository root. Launch failure and timeout normalization remain a separate later slice.
+
+## EV-P7-COMPOSITION-DESIGN-307 — where orchestration lives
+
+PLACEMENT. Three options offered: composition inside `git_adapter` (A), a new `snapshot.py` (B), or
+inside `cli.py` (C). The distinction put at the centre was the learner's own decision history:
+
+```text
+POLICY     untracked content belongs inside the UNSTAGED view
+           the two views are never summed
+           any component failing rejects the whole snapshot
+
+MECHANISM  /dev/null comparison, --no-index, ls-files, status rules
+```
+
+FIRST ANSWER (verbatim):
+
+```text
+i am leaning towards git_adatpor but want tot alk further
+```
+
+Then (verbatim):
+
+```text
+c would have to make you re-implemnt the policy, i was thinking option A becasue the git adapter i
+was giving it the git boundary responsilbity and all of the captures are already in there so we
+would not need to import anything to call the snapshot function,
+```
+
+EVALUATION:
+C correctly rejected for forcing every future front end to re-implement policy. The stated reason for
+A was CHALLENGED: B also avoids duplication, and "no import needed" is nearly free — `summarize.py`
+already imports `classify`, a dependency the learner previously called healthy.
+
+COHESION TEST APPLIED: `git_adapter`'s one-sentence job today covers all five functions exactly.
+Adding `capture_snapshot` forces an "and also" into that sentence — the same signal the learner used
+to reject a hypothetical `split_lines`.
+
+DECISION (verbatim):
+
+```text
+B, it seems like we would be adding too much to the responsilbity of git adapter, 90
+```
+
+PASSED at confidence 90. Noted as CONSISTENT with the Phase 4 refusal to split without evidence:
+there was no observed problem then; here there are two — the "and also" in the sentence, and the
+testing cost of mocking four Git commands to test one policy rule.
+
+RETURN REPRESENTATION. Two options: a Snapshot carrying diff TEXT (front ends summarize), or a
+Snapshot carrying SUMMARIES (front ends only present).
+
+FIRST ANSWER (verbatim):
+
+```text
+for option 1 it seems like more compute but for option 2 it seems like more could go wrong
+```
+
+EVALUATION:
+BOTH PREMISES CORRECTED. Compute is identical — both call `summarize_diff` exactly twice on the same
+two strings; only the call site differs, and the learner's own measurement puts `summarize_diff` at
+about 1 ms against 59 ms per Git process. "More could go wrong" was not made concrete.
+
+Then (verbatim):
+
+```text
+i cant see any reason one way or the other
+```
+
+ADAPTATION:
+Made concrete with the Phase 12 API scenario, transferring the learner's own successful rejection of
+Option C: under Option 1 a second front end re-implements both the summarizing and the never-sum rule.
+
+DECISION (verbatim):
+
+```text
+ok lets go with option 2
+```
+
+REASON, on request (verbatim):
+
+```text
+there are less hoops for the data to jump through, the serializing at the end and the must know not
+to sum them seems like another test we would need to run
+```
+
+PASSED on the second clause, which is the load-bearing one: the never-sum rule is stated and tested
+ONCE, in `snapshot.py`, rather than once per front end.
+
+## EV-P7-COMPOSITION-RED-GREEN-308 — snapshot.py
+
+RED (verbatim):
+
+```text
+ModuleNotFoundError: No module named 'snapshot'
+```
+
+GREEN: six snapshot tests pass; all seven suites pass. `snapshot.py` runs no Git command, so its
+tests patch the five capture functions rather than subprocess — mechanism is tested in
+`test_git_adapter*`, policy here.
+
+Verified against a real repository as well as the patched tests.
+
+FACILITATOR ERROR RECORDED:
+The real-repository result was PRINTED BEFORE the learner was asked to predict it, violating the rule
+that the answer is never revealed before the learner commits. That scenario is spent. A fresh
+scenario was substituted.
+
+### EV-P7-SNAPSHOT-TRACE-309 — PRESENTED, NOT ANSWERED
+
+SESSION PAUSE: the learner stopped for the night before answering. UNATTEMPTED — must not be graded,
+and its answer must not be revealed on resumption.
+
+EXACT PROMPT. Repository built from a base commit containing `a.txt` with three lines `1`, `2`, `3`:
+
+```text
+a.txt      tracked, edited in the working tree, now reads  1 / x / 3
+b.txt      brand new, added to the index with  git add,  contains  p / q
+c.py       created, never added, contains three lines
+d.py       created, never added, completely empty
+```
+
+```text
+Number of Git child processes this snapshot launches =
+UNSTAGED  files_changed, lines_added, lines_removed =
+STAGED    files_changed, lines_added, lines_removed =
+Which of the four files contribute to UNSTAGED =
+Confidence =
+```
+
+The learner asked to see `capture_snapshot` before answering, which was granted — this is a trace,
+not a memory test.
+
+NEXT REQUIRED STEP:
+Re-present the prompt above verbatim, then build the real repository and compare. After it passes,
+the CLI slice: wire `capture_snapshot` into `main`, print the resolved repository root followed by
+separately labelled UNSTAGED and STAGED sections, status 0 on success, and on any GitCaptureError
+write the message to stderr with a rerun instruction and return 1.

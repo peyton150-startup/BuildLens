@@ -1841,13 +1841,62 @@ test_git_adapter_integration.py  10 real-Git tests, throwaway repositories
 test_classify.py / test_summarize.py / test_session.py / test_cli.py   unchanged
 ```
 
+SESSION 2026-09-03 (continued) — COMPOSITION EXISTS; ITS TRACE GATE IS OPEN.
+
+`EV-P7-COMPOSITION-DESIGN-307`: the learner placed composition in a new `snapshot.py` rather than in
+`git_adapter` or `cli`, after the cohesion test showed that adding it to `git_adapter` forces an
+"and also" into that module's one-sentence job. Recorded as consistent with the Phase 4 refusal to
+split without evidence — there is evidence here, and there was none then.
+
+The Snapshot carries SUMMARIES rather than diff text, so the never-sum rule is stated and tested once
+instead of once per front end. Two of the learner's premises were corrected along the way: compute is
+identical between the options, and "more could go wrong" was replaced with the concrete Phase 12 API
+duplication argument.
+
+FACILITATOR ERROR: the real-repository snapshot result was printed BEFORE the learner was asked to
+predict it. That scenario is spent; a fresh one replaces it.
+
+### `snapshot.py`
+
 ```text
-phase                       Phase 7 — all four capture paths, decoding, and root resolution complete
-last knowledge gate         per-caller status rule and cohesion criterion (EV-P7-NOINDEX-DESIGN-304,
-                            EV-P7-NOINDEX-TRACE-306)
+Snapshot(repository_root, unstaged, staged)   frozen dataclass, two DiffSummary fields
+
+capture_snapshot(repository) -> Snapshot
+    runs NO Git command itself
+    root      = capture_repository_root
+    unstaged  = capture_unstaged_diff + one capture_new_file_diff per untracked path,
+                joined, then summarized once
+    staged    = capture_staged_diff, summarized separately
+    any GitCaptureError propagates; no partial snapshot is returned
+```
+
+`test_snapshot.py` has six tests and patches the five capture functions rather than subprocess:
+mechanism is tested in the adapter suites, policy here.
+
+### Test inventory
+
+```text
+test_git_adapter.py              14 controlled
+test_git_adapter_integration.py  10 real-Git
+test_snapshot.py                  6 policy, capture functions patched
+test_classify.py / test_summarize.py / test_session.py / test_cli.py   unchanged
+```
+
+Seven suites, all passing.
+
+```text
+phase                       Phase 7 — capture, decoding, root resolution, and composition complete
+last knowledge gate         composition placement and representation (EV-P7-COMPOSITION-DESIGN-307);
+                            snapshot trace EV-P7-SNAPSHOT-309 is OPEN and UNATTEMPTED
 next retrieval due          delayed argparse parser-versus-Namespace retrieval on a fresh surface
 next architecture reset     complete; next by time or major transition
-next implementation step    COMPOSITION — assemble UNSTAGED (tracked plus per-file untracked new-file
+next implementation step    RESUME AT EV-P7-SNAPSHOT-TRACE-309, presented and unanswered. Re-present
+                            it verbatim, do not reveal the answer, then build the real repository
+                            and compare. After it passes: the CLI slice — wire capture_snapshot into
+                            main, print the resolved root then separately labelled UNSTAGED and
+                            STAGED sections, status 0 on success, and on GitCaptureError write the
+                            message to stderr with a rerun instruction and return 1.
+                            OLD NOTE (done): assemble UNSTAGED (tracked plus per-file untracked new-file
                             diffs) and STAGED into one snapshot, rejecting the whole snapshot on any
                             component failure. Then CLI integration, which must also print the
                             resolved repository root.
@@ -1861,7 +1910,7 @@ next implementation step    COMPOSITION — assemble UNSTAGED (tracked plus per-
 milestone owed              Phase 7 milestone transfer at phase close; the slice gates do not
                             substitute for it
 major/deep counter          Phase 7-15 counter has not started; Phase 7 is not yet complete
-last published commit       45c7e00 — merge: phase 7 real-git integration tests and root reporting
+last published commit       48d2910 — merge: phase 7 per-file new-file diffs
 ```
 
 Files the learner should currently be able to teach:
