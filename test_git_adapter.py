@@ -14,6 +14,7 @@ from unittest.mock import patch
 
 from git_adapter import (
     GitCaptureError,
+    capture_repository_root,
     capture_staged_diff,
     capture_unstaged_diff,
     capture_untracked_paths,
@@ -167,8 +168,41 @@ def test_capture_untracked_paths_rejects_unexpected_status():
             raise AssertionError("capture_untracked_paths did not reject status 129")
 
 
+def test_capture_repository_root_runs_expected_command_and_strips_newline():
+    prepared = completed(stdout=b"C:/projects/example\n")
+
+    with patch("git_adapter.subprocess.run", return_value=prepared) as fake_run:
+        result = capture_repository_root(REPOSITORY)
+
+    assert result == "C:/projects/example"
+    fake_run.assert_called_once_with(
+        ["git", "rev-parse", "--show-toplevel"],
+        cwd=REPOSITORY,
+        capture_output=True,
+        timeout=10,
+        shell=False,
+    )
+
+
+def test_capture_repository_root_rejects_unexpected_status():
+    prepared = completed(returncode=128, stderr=b"fatal: not a git repository")
+
+    with patch("git_adapter.subprocess.run", return_value=prepared):
+        try:
+            capture_repository_root(REPOSITORY)
+        except GitCaptureError as error:
+            assert str(error) == (
+                "ROOT resolution: Git failed with status 128: "
+                "fatal: not a git repository"
+            )
+        else:
+            raise AssertionError("capture_repository_root did not reject status 128")
+
+
 test_capture_unstaged_diff_runs_expected_command_and_returns_stdout()
 test_capture_unstaged_diff_rejects_unexpected_status()
+test_capture_repository_root_runs_expected_command_and_strips_newline()
+test_capture_repository_root_rejects_unexpected_status()
 test_capture_rejects_undecodable_output_with_its_component_label()
 test_capture_staged_diff_runs_expected_command_and_returns_stdout()
 test_capture_staged_diff_rejects_unexpected_status_with_its_own_label()
