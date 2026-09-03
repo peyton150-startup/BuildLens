@@ -32263,3 +32263,96 @@ paths now exist, and this bug is exactly what such a test would have caught. Pro
 NEXT REQUIRED STEP:
 The `--no-index` new-file diff patch, where status 0 AND status 1 are both valid, forcing a
 per-caller accepted-status rule into `_capture`.
+
+## EV-P7-INTEGRATION-TEST-303 — real-Git test file, and a repository-resolution finding
+
+TEST-SCOPE SORT. The learner sorted five candidate assertions between the controlled and real-Git
+files. ANSWER (verbatim):
+
+```text
+3, 4, 1
+2,5
+20
+```
+
+EVALUATION:
+FOUR OF FIVE at confidence 20 — underconfident, a recurring calibration note. Item 4 (a latin-1 file
+in a real working tree) was placed with the controlled tests. Distinguished for the learner:
+
+```text
+controlled  prepared BYTES produce a GitCaptureError
+item 4      a real latin-1 FILE causes Git to emit those bytes
+```
+
+CORRECTED ANSWER (verbatim):
+
+```text
+the git test, we need the real latin1 file inside git to actually test thsi
+90
+```
+
+PASSED. Final division: controlled owns exact call construction and interpretation of prepared
+results; real-Git owns whether Git accepts the arguments and what it actually outputs.
+
+### FINDING — repository resolution reaches an unintended ancestor
+
+The `not a repository` integration case FAILED, and investigation showed why: `C:/Users/nicol` is
+itself a Git repository, so every temp directory under `AppData/Local/Temp` resolves to it.
+`git rev-parse --show-toplevel` from a temp directory returned `C:/Users/nicol`. Running
+`git ls-files --others --exclude-standard` there had to be killed after two minutes as it walked the
+entire home directory.
+
+Product implication: `buildlens analyze` run anywhere under the home directory would inspect the home
+repository. The approved 10-second timeout means it fails rather than printing wrong numbers, but the
+user is given no indication which repository was chosen. In a smaller ancestor repository it would
+silently produce plausible counts for the wrong project.
+
+DECISIONS (verbatim):
+
+```text
+no
+yes, i think the repo root should be a directory and it should report it on analyze, if this is a big
+bug we need to make sure we are on top of it, this could affect anyone and we would never know
+otherwisse, 90
+```
+
+The answer combined two options with very different costs, which were separated for the learner:
+REPORT the resolved root costs one line of output; REQUIRE the directory to be the root rejects the
+normal and legitimate practice of running from a subdirectory.
+
+FINAL DECISION (verbatim):
+
+```text
+ok reprot only then and if they do not like the results then they will change where they run analyze
+```
+
+PASSED. Visibility over restriction, with control left to the user — consistent with every other
+failure decision in this phase.
+
+IMPLEMENTED: `capture_repository_root(repository) -> str` runs `git rev-parse --show-toplevel`
+through `_capture` with label `ROOT resolution` and strips the trailing newline. Two controlled tests
+and two real-Git tests, including one that deliberately demonstrates upward resolution from a nested
+directory.
+
+The learner declined to drop the not-a-repository case. It cannot be constructed anywhere under this
+home directory, so it was REPLACED rather than deleted, by a constructible test of the behavior the
+learner actually cares about: that a nested directory resolves to an ancestor root that is not itself.
+
+TEST INVENTORY:
+
+```text
+test_git_adapter.py              10 controlled tests, bytes stand-ins, no Git required
+test_git_adapter_integration.py   8 real-Git tests, throwaway repositories, ~6 s
+```
+
+CARRIED FORWARD TO THE CLI SLICE:
+`buildlens analyze` must print the resolved repository root before the UNSTAGED and STAGED sections.
+The adapter capability exists; the display does not.
+
+WINDOWS DETAIL RECORDED:
+Git marks files under `.git/objects` read-only, so `tempfile.TemporaryDirectory` needs
+`ignore_cleanup_errors=True` or cleanup fails.
+
+NEXT REQUIRED STEP:
+The `--no-index` new-file diff patch, where status 0 AND status 1 are both valid, forcing a
+per-caller accepted-status rule into `_capture`.

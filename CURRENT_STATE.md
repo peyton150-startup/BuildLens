@@ -1755,13 +1755,44 @@ diagnostic; `stdout` is strict because it is counted data.
 `test_git_adapter.py` has eight tests, and its stand-ins now return BYTES because the adapter performs
 the decode itself.
 
+SESSION 2026-09-03 (continued) — REAL-GIT INTEGRATION TESTS, AND A RESOLUTION FINDING.
+
+`EV-P7-INTEGRATION-TEST-303`: the learner sorted candidate assertions between the two test files,
+four of five correct at confidence 20 (underconfident). Division settled: controlled tests own exact
+call construction and interpretation of prepared results; real-Git tests own whether Git accepts the
+arguments and what it actually outputs.
+
+FINDING: `C:/Users/nicol` is itself a Git repository. Every temp directory under
+`AppData/Local/Temp` therefore resolves to it, and `git ls-files --others --exclude-standard` there
+had to be killed after two minutes while walking the whole home directory. `buildlens analyze` run
+anywhere under the home directory would inspect the home repository. The 10-second timeout means it
+fails rather than printing wrong numbers, but nothing tells the user which repository was chosen; in
+a smaller ancestor repository it would silently print plausible counts for the wrong project.
+
+The learner chose to REPORT the resolved root rather than REQUIRE the directory to be the root, after
+the two options were separated: requiring the root would reject running from a subdirectory, which is
+normal and legitimate. `capture_repository_root` now exists in the adapter; the CLI display does not.
+
+### Test inventory
+
 ```text
-phase                       Phase 7 — unstaged, staged, untracked discovery, and decoding complete
-last knowledge gate         encoding policy and mock limitation (EV-P7-ENCODING-301,
-                            EV-P7-MOCK-LIMIT-302)
+test_git_adapter.py              10 controlled tests, bytes stand-ins, no Git required
+test_git_adapter_integration.py   8 real-Git tests, throwaway repositories, ~6 s
+```
+
+`test_classify.py`, `test_summarize.py`, `test_session.py`, `test_cli.py` unchanged. Six suites total.
+
+Windows detail: Git marks `.git/objects` files read-only, so `tempfile.TemporaryDirectory` needs
+`ignore_cleanup_errors=True`.
+
+```text
+phase                       Phase 7 — unstaged, staged, untracked discovery, decoding, root
+                            resolution, and real-Git integration tests complete
+last knowledge gate         test-scope division and root reporting (EV-P7-INTEGRATION-TEST-303,
+                            EV-P7-ENCODING-301)
 next retrieval due          delayed argparse parser-versus-Namespace retrieval on a fresh surface
 next architecture reset     complete; next by time or major transition
-next implementation step    RECOMMENDED FIRST: a real-Git integration test (see EV-P7-MOCK-LIMIT-302).
+next implementation step    CLI slice must print the resolved repository root before the sections.
                             Then the --no-index patch — one git diff --no-index -- /dev/null <path> per
                             discovered path, where status 0 AND status 1 are both valid. This forces
                             a per-caller accepted-status rule into _capture and directly tests the
@@ -1772,7 +1803,7 @@ next implementation step    RECOMMENDED FIRST: a real-Git integration test (see 
 milestone owed              Phase 7 milestone transfer at phase close; the slice gates do not
                             substitute for it
 major/deep counter          Phase 7-15 counter has not started; Phase 7 is not yet complete
-last published commit       0190ebe — merge: phase 7 untracked path discovery
+last published commit       603bdde — merge: phase 7 strict utf-8 decoding at the git boundary
 ```
 
 Files the learner should currently be able to teach:
