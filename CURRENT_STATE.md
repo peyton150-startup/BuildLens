@@ -1565,15 +1565,64 @@ carrying a previous scenario's names into the current program
 answering what code CAN accept instead of what THIS call does
 ```
 
+SESSION 2026-09-03 (continued) — TASK 1 OF THE FIRST SLICE IS COMPLETE.
+
+The non-Git formatter-child transfer (`EV-P7-ADAPTER-TRANSFER-290`) passed six of seven fields
+unaided on an unseen surface, and was clean on both procedural patterns flagged earlier: no
+carry-over of prior-program names, and the branch field answered the specific run rather than
+restating the rule. The learner then named the return code as the field the caller cannot read —
+the exact field their own reversal condition depends on.
+
+The shared principle and reversal condition closed in `EV-P7-ADAPTER-PRINCIPLE-291`. The principle
+was restated without naming Git, `cli`, or `summarize`. The reversal condition was produced WITHOUT
+the World A / World B scaffolding, closing the item carried forward from the previous session. It
+needed one correction: the learner first proposed a second call to obtain the return code, then
+self-corrected to one call returning a structured object whose fields the caller reads — the
+`ImageResult` shape from the original design decision. Not a clean first-attempt pass.
+
+Phase 7 Task 1 is complete in every required dimension:
+
 ```text
-phase                       Phase 7 — first product patch implemented, milestone NOT complete
-last knowledge gate         adapter boundary defense closed with scaffolding (EV-P7-ADAPTER-BOUNDARY-289)
-next retrieval due          adapter reversal condition, unscaffolded; delayed argparse
-                            parser-versus-Namespace retrieval on a fresh surface
+implementation       complete — git_adapter.py
+automated tests      complete — five suites pass
+learner trace        complete — EV-P7-ADAPTER-TRACE-288
+learner explanation  complete — EV-P7-ADAPTER-BOUNDARY-289
+transfer variant     complete — EV-P7-ADAPTER-TRANSFER-290, EV-P7-ADAPTER-PRINCIPLE-291
+```
+
+### `git_adapter.py`
+
+`GitCaptureError(RuntimeError)` reports that one required snapshot component could not be captured.
+
+`capture_unstaged_diff(repository: Path) -> str` runs Git as a child process with an argument list
+and no shell, captures stdout and stderr as text with a 10-second timeout, rejects any nonzero
+status with a `GitCaptureError` naming the component and preserving Git's stderr detail, and returns
+`process_result.stdout`.
+
+Only validated plain diff text crosses the boundary. Path, return code, and stderr stay inside the
+adapter's validation work.
+
+```text
+Path → capture_unstaged_diff → git child in that directory
+→ CompletedProcess → status check → stdout string → caller
+```
+
+`test_git_adapter.py` patches `git_adapter.subprocess.run` with a prepared `CompletedProcess`. It
+asserts the exact argument list and keywords, and asserts the exact rejection message for status 2.
+No real Git child is launched, so the tests prove call construction and result interpretation, not
+operating-system launch or real Git behavior.
+
+```text
+phase                       Phase 7 — Task 1 complete; STAGED capture is the next slice
+last knowledge gate         transfer, shared principle, and unscaffolded reversal condition
+                            (EV-P7-ADAPTER-TRANSFER-290, EV-P7-ADAPTER-PRINCIPLE-291)
+next retrieval due          delayed argparse parser-versus-Namespace retrieval on a fresh surface
 next architecture reset     complete; next by time or major transition
-next implementation step    plan Step 9 — non-Git formatter-child transfer; then Step 10 evidence,
-                            then Step 11 commit of the product patch
-last published commit       f44316a — docs: plan phase 7 unstaged capture
+next implementation step    STAGED capture slice; then untracked discovery with /dev/null new-file
+                            diffs; then multi-command composition; then CLI integration.
+                            Launch failure and timeout normalization remain a separate later slice.
+major/deep counter          Phase 7-15 counter has not started; Phase 7 is not yet complete
+last published commit       ac103d8 — docs: record phase 7 first adapter patch and learning gates
 ```
 
 Files the learner should currently be able to teach:

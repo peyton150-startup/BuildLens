@@ -31503,3 +31503,118 @@ NEXT REQUIRED STEP:
 Plan Step 9 — one non-Git transfer: a parent program running a formatter child, receiving a completed
 result, rejecting an unexpected status, and returning stdout text. The learner must distinguish the
 subprocess result object from the adapter's returned string. Commit only after it passes.
+
+### EV-P7-ADAPTER-TRANSFER-290 — non-Git formatter-child transfer
+
+SURFACE: `format_source(project_dir)` running a `blackline` formatter child, raising `FormatError`
+on nonzero status and returning `outcome.stdout`. No Git, new names, timeout 20.
+
+ANSWER (verbatim):
+
+```text
+blackline
+"--stdout", "--quiet", "src"
+project_dir
+completedprocess object
+no
+it returns outcome.stdout it is a string "FORMATTED SORUCE"
+i do not know
+80
+```
+
+EVALUATION:
+SIX OF SEVEN PASSED UNAIDED at confidence 80 on an unseen surface. Program, arguments, child
+directory, returned class, this-run branch outcome, and returned value/type all correct. Notably
+clean on both procedural patterns flagged the previous session: no carry-over from the Git program,
+and the branch field answered THIS run rather than restating the rule.
+
+Field 7 — what the function does NOT hand back — unknown.
+
+NARROWED ANSWER (verbatim):
+
+```text
+. it is only handed back the string that is the stdout not the entire outcome object
+```
+
+EVALUATION:
+PASSED. One further field requested.
+
+ANSWER (verbatim):
+
+```text
+. the return code
+70
+```
+
+EVALUATION:
+PASSED. The learner independently named the exact field their own approved reversal condition
+depends on.
+
+### EV-P7-ADAPTER-PRINCIPLE-291 — shared principle and unscaffolded reversal condition
+
+FIRST ANSWER (verbatim):
+
+```text
+. they both run a subprocess using arguemtns that are similar they both have a returncode that tells
+you if the subprocess was succesful or a failure
+they both only give the string that is neededd for cli to then pass the string and get the count from
+summarize
+i am not sure
+70
+```
+
+EVALUATION:
+PARTIAL. The first clause described surface similarity rather than the deep principle, and the
+second stated the principle in BuildLens-specific terms that do not survive the surface change.
+Reversal condition unknown despite having produced its key ingredient one turn earlier.
+
+NARROWED ANSWER (verbatim):
+
+```text
+. they run a program using arguements and then return a string, they do not return the returncode
+whic h could be a later issue if the user requires the exact exti status of git, the change that
+would be needed would be that we would need to retunr more than just the string and the functuion
+call would then have to be called again to get the string and the return code
+90
+```
+
+EVALUATION:
+PRINCIPLE PASSED — stated without naming Git, cli, or summarize. Reversal trigger and change
+direction correct. One clause wrong: a second call to obtain the return code.
+
+SELF-CORRECTION (verbatim):
+
+```text
+no the function the callers object so it would be top = format_source(Path("D:/work/reports")) and
+then we would need to run top.returncode and top.returnedstring
+```
+
+EVALUATION:
+PASSED, self-corrected without being told the answer. One call returning a structured object whose
+fields the caller reads — the `ImageResult` shape from the original design decision. Field naming
+refined: a declared field such as `diff_text`, not `returnedstring`.
+
+Precision supplied after the learner had already moved past it: two calls launch Git twice, so a
+displayed return code could belong to a different run than the counted diff — two snapshots reported
+as one.
+
+CARRIED-FORWARD ITEM CLOSED:
+The adapter reversal condition was generated WITHOUT the World A / World B scaffolding, satisfying
+the debt recorded against EV-P7-ADAPTER-BOUNDARY-289. It required one correction, so it is not a
+clean first-attempt pass.
+
+GATE STATUS:
+Plan Step 9 CLOSED. Task 1 of the first-slice plan is complete in every required dimension:
+
+```text
+implementation       complete
+automated tests      complete — five suites pass
+learner trace        complete — EV-P7-ADAPTER-TRACE-288
+learner explanation  complete — EV-P7-ADAPTER-BOUNDARY-289
+transfer variant     complete — EV-P7-ADAPTER-TRANSFER-290, EV-P7-ADAPTER-PRINCIPLE-291
+```
+
+NEXT REQUIRED STEP:
+Commit the completed patch. The next Phase 7 slice is STAGED capture, then untracked discovery with
+`/dev/null` new-file diffs, then multi-command composition, then CLI integration. Launch failure and
+timeout normalization remain deferred to their own slice.
