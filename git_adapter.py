@@ -5,7 +5,14 @@ from pathlib import Path
 
 
 class GitCaptureError(RuntimeError):
-    """Report that one required Git snapshot component could not be captured."""
+    """Report that one required Git snapshot component could not be captured.
+
+    repository_root is the root Git resolved before the failure, when one was
+    resolved at all. It stays None when root resolution is itself what failed,
+    so a caller can tell "inspecting the wrong repository" from "no repository".
+    """
+
+    repository_root: str | None = None
 
 
 def _capture(
