@@ -32988,3 +32988,80 @@ called held.
 NEXT REQUIRED STEP:
 The owed argparse retrieval, then Phase 7 close. The major/deep Phase 7-15 counter starts at 1/2 once
 Phase 7 closes.
+
+## EV-P7-ARGPARSE-DELAYED-316 — owed delayed retrieval, parser versus Namespace
+
+Fresh surface, no scaffolding: an archive tool with `mode` and `target` positionals.
+
+ANSWER (verbatim):
+
+```text
+. parser
+args
+target
+args = Namespaec(mode = retore , target = vault.tar)
+it prints usage and error text
+90
+```
+
+EVALUATION:
+FOUR OF FIVE. Parser-versus-Namespace — the item actually owed since Phase 6 — PASSED cleanly:
+`parser` holds the rules, `args` holds the parsed values, and the representation included the
+`Namespace(...)` wrapper with both fields. Spelling and quotes treated as typing noise per the
+learner's standing request.
+
+Field 3 gave the field NAME rather than the retrieval expression; narrowed once, answered
+`args.target` correctly.
+
+Field 5 described what the user sees but not the effect on the running program.
+
+DELAYED RETRIEVAL OF SystemExit(2): FAILED (verbatim `not sure`), then recovered by reading the
+learner's own `expect_system_exit_2` helper in `test_cli.py`. Recovery by lookup, not retrieval.
+
+This fact has now needed support three times: EV-P6-ARGPARSE-SYNTAX-278 (taught),
+EV-P6-ARGPARSE-REVIEW-279 (recalled as "returns 1", corrected), and here.
+
+IMPORTANT DISTINCTION, recorded so the record stays accurate:
+
+```text
+HELD      the concept — malformed syntax should carry a status distinct from other
+          user errors. The learner chose this policy themselves in
+          EV-P6-ARGPARSE-POLICY-280 and defended it against returning 1.
+
+NOT HELD  the specific values SystemExit and 2, as a recalled fact.
+```
+
+The concept is the load-bearing part; the values are looked up in one line of their own test suite.
+Treat this as a lookup-able fact, not a mental model gap, and do not re-teach the policy.
+
+CARRIED FORWARD: one more delayed retrieval of SystemExit(2) on a fresh surface, unprompted. If it
+lapses again, stop re-testing it — the fact is documented in `cli.py` and `test_cli.py`, and the
+concept it serves is held.
+
+## PHASE 7 CLOSED
+
+```text
+implementation       complete — git_adapter, snapshot, cli vertical slice
+automated tests      complete — seven suites, controlled and real-Git
+learner trace        complete — EV-P7-SNAPSHOT-TRACE-309, EV-P7-CLI-BOUNDARY-313
+learner explanation  complete — EV-P7-CLI-BOUNDARY-313, EV-P7-GIT-IS-A-REQUIREMENT-314
+transfer variant     complete — EV-P7-MILESTONE-TRANSFER-315
+owed retrieval       complete — EV-P7-ARGPARSE-DELAYED-316
+```
+
+The major/deep Phase 7-15 counter now stands at 1/2. A cumulative review is due after the second
+completed major phase, so it is NOT due before Phase 8.
+
+STILL OPEN, carried into Phase 8:
+
+```text
+SystemExit(2) delayed retrieval, one more attempt on a fresh surface
+the Git model taught 2026-09-04 was SUPPLIED, not retrieved; needs one delayed retrieval
+launch failure (FileNotFoundError) and timeout (TimeoutExpired) normalization, a deferred slice
+session.py is not wired to the snapshot path and holds no snapshot state
+```
+
+NEXT REQUIRED STEP:
+Phase 8 — the Claude Code adapter. A second external system entering through the same layering the
+learner just defended, with hook payloads introducing JSON and the trust boundary
+`MODEL OUTPUT != AUTHORITATIVE APPLICATION STATE`.

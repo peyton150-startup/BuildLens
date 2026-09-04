@@ -2003,22 +2003,41 @@ ONE ITEM BLOCKS THE PHASE CLOSE: the delayed argparse parser-versus-Namespace re
 Phase 6. Separately, the Git model taught this session was SUPPLIED rather than retrieved and needs
 one delayed retrieval before being called held.
 
+SESSION 2026-09-04 (continued) — PHASE 7 IS CLOSED.
+
+The owed argparse retrieval ran on a fresh archive-tool surface (`EV-P7-ARGPARSE-DELAYED-316`). The
+item actually owed — parser holds the rules, args holds the parsed values, `args.target` retrieves,
+`Namespace(...)` is the representation — PASSED cleanly with no scaffolding.
+
+`SystemExit(2)` lapsed for the third time and was recovered by reading the learner's own
+`expect_system_exit_2` helper. Recorded with the distinction that matters:
+
 ```text
-phase                       Phase 7 — milestone passed; close blocked on the owed argparse retrieval
-last knowledge gate         Phase 7 milestone transfer, passed unaided
-                            (EV-P7-MILESTONE-TRANSFER-315)
-next retrieval due          argparse parser-versus-Namespace on a fresh surface (blocks phase close);
-                            then the Git model taught 2026-09-04, which was supplied not retrieved
+HELD      the concept — malformed syntax deserves a status distinct from other user
+          errors. The learner chose and defended this policy themselves.
+NOT HELD  the values SystemExit and 2 as a recalled fact.
+```
+
+That is a lookup-able fact living in one line of their own tests, not a mental-model gap. Do not
+re-teach the policy. One more delayed retrieval; if it lapses again, stop testing it.
+
+```text
+phase                       Phase 7 CLOSED
+last knowledge gate         owed argparse delayed retrieval (EV-P7-ARGPARSE-DELAYED-316)
+next retrieval due          SystemExit(2) once more on a fresh surface; and the Git model taught
+                            2026-09-04 (tracked/untracked, the index, which diff compares which
+                            pair), which was supplied rather than retrieved
 next architecture reset     complete; next by time or major transition
-next implementation step    none for Phase 7. After the owed retrieval and phase close, Phase 8
-                            begins: the Claude Code adapter, a SECOND external system entering
-                            through the same layering.
+next implementation step    PHASE 8 — the Claude Code adapter. A second external system entering
+                            through the same layering, with hook payloads introducing JSON and the
+                            trust boundary MODEL OUTPUT != AUTHORITATIVE APPLICATION STATE.
+                            Read the Phase 8 plan section before proposing any patch.
 deferred to a later slice   launch failure (FileNotFoundError) and timeout (TimeoutExpired)
                             normalization; neither is handled by _capture today
 milestone owed              none; Phase 7 milestone is complete
-major/deep counter          Phase 7-15 counter reaches 1/2 when Phase 7 closes; review is due
-                            after two completed major phases
-last published commit       827ea4e — docs: record cli slice, boundary trace, and git-as-requirement
+major/deep counter          1/2. Cumulative review due after the SECOND completed major phase,
+                            so NOT due before Phase 8.
+last published commit       4941a8b — docs: record phase 7 milestone transfer
 ```
 
 Files the learner should currently be able to teach:
