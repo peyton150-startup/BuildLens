@@ -23,9 +23,9 @@ The project itself is intentionally built in the same order those ideas should b
 
 ## Current status
 
-**Phase 3 — State and the State Movie (implementation and knowledge gate complete; transition milestones pending).**
+**Phase 8 — Claude boundary (specification in progress; no Phase 8 product code yet).**
 
-Phase 2 is closed and Phase 4 has not started. The remaining Phase 3 transition work is the `session.py` teach-aloud plus a different-domain aliasing/copying transfer; `CURRENT_STATE.md` is authoritative for the exact completed code, retrieval commitments, and next step.
+Phase 7's Git-backed CLI vertical slice is complete. Phase 8 is defining how Claude Code hook events enter BuildLens, what information can be trusted, and what must be verified against authoritative repository state. `CURRENT_STATE.md` is authoritative for the exact completed code, retrieval commitments, and next step.
 
 The curriculum uses selected CMU and MIT material as an academic backbone while BuildLens implementation continues to determine when each concept is introduced.
 
@@ -43,6 +43,33 @@ predict
 ```
 
 Tests passing are necessary, but not sufficient.
+
+## What you learn while building BuildLens
+
+The implementation and curriculum advance together. Each phase adds only the software needed to make the next ideas concrete.
+
+| Phase | What you implement | Main ideas you learn |
+|---|---|---|
+| 0 — Specification | Define behavior before writing product code | Read syntax, trace execution, turn requirements into precise examples, and record evidence of understanding |
+| 1 — Pure functions | Diff-line classification and small transformations | Assignment, expressions, strings, branches, function calls, local scope, return values, and control-flow order |
+| 2 — Representation and tests | Explicit result records and systematic tests | Dataclasses, collection choice, contracts, invariants, boundary/invalid cases, and shallow versus deep immutability |
+| 3 — State | In-memory sessions and change history | State versus value, object identity, mutation, aliasing, ownership, snapshots, and legal state transitions |
+| 4 — Decomposition | Refactor behavior into focused modules | Cohesion, coupling, imports, dependency direction, code reading, and evidence-driven debugging |
+| 5 — Contracts | Explicit interfaces between components | Preconditions, postconditions, abstraction boundaries, type hints versus runtime validation, and representation independence |
+| 6 — CLI vertical slice | A complete command-line workflow | Argument parsing, entry points, stdout versus stderr, exit status, user-facing errors, and end-to-end testing |
+| 7 — Git boundary | Capture and summarize staged, unstaged, and untracked changes | Parent/child processes, Git's working tree/index/history model, bytes versus text, return codes, timeouts, paths, and all-or-nothing snapshots |
+| 8 — Claude boundary | Observe Claude Code through hooks | JSON representation, untrusted input, hashes, provenance, signal versus authority, and why model or hook output is not authoritative application state |
+| 9 — Event reliability | Project events into dependable state | Ordering, duplicate delivery, idempotence, optimistic concurrency, retries, partial failure, reconciliation, and the basic agent loop |
+| 10 — Learning engine | Generate and evaluate knowledge gates | Authoritative evidence versus generated content, task-level success criteria, representative evaluation sets, and human versus automated evaluation |
+| 11 — Persistence | Store sessions, events, evidence, and decisions | Schemas, SQL parameters, indexes, constraints, transactions, commit/rollback, recovery, and embeddings as a representation |
+| 12 — Local API | Expose BuildLens through a process/network boundary | HTTP and JSON, client/server contracts, serialization, transport validation versus domain validation, and the retrieval/RAG mental model |
+| 13 — Collaborative editing | Reconcile isolated learner and Claude worktrees | Multiple writers, version hashes, stale writes, three-way merge, explicit conflicts, atomic publication, crash recovery, and no-silent-overwrite guarantees |
+| 14 — Architecture views | Visualize runtime, data, failure, and decision flows | Quality scenarios, architectural drivers, measurable evidence, tradeoffs, risks, ADRs, and reversal conditions |
+| 15 — Oral defense | Explain and defend the completed system | Cumulative line-to-system reasoning, unfamiliar-code review, agentic-AI architecture, guardrails, observability, and conditional design judgment |
+
+Several skills recur at increasing depth throughout the phases: choosing algorithms and data structures for real operations, writing tests as executable contracts, debugging from evidence, reasoning about performance, identifying trust and security boundaries, using logs and runtime state as evidence, and explaining design decisions with honest tradeoffs.
+
+The full curriculum, including promotion tests, academic source mappings, transfer exercises, and the mastery model, lives in `docs/CURRICULUM.md`.
 
 ## Practice domains
 
