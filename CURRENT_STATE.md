@@ -2066,26 +2066,106 @@ assumption, or something BuildLens must tolerate being violated? The plan forbid
 arbitrary external processes cannot bypass the workflow.
 
 No Phase 8 code exists and none is authorized.
+SESSION 2026-09-05 — PHASE 8 TRUST BOUNDARY SPECIFIED.
+
+`EV-P8-TRUST-BOUNDARY-319` through `EV-P8-TRANSFER-326`. Payload fields were deliberately withheld
+for the whole session; the boundary was derived, not read off a schema.
+
+THE RULE, now established and derived by the learner:
 
 ```text
-phase                       Phase 8 — specification opened, no code
-last knowledge gate         hooks as signal versus authority, and provenance
-                            (EV-P8-HOOKS-SPEC-317)
-next retrieval due          SystemExit(2) once more on a fresh surface; and the Git model taught
-                            2026-09-04 (tracked/untracked, the index, which diff compares which
-                            pair), which was supplied rather than retrieved
+CONTENT       what the files say        Git can settle it       VERIFY
+PROVENANCE    who / when / which turn   Git has no record       BELIEVE or reject
+```
+
+The learner's own formulation, which is the one to keep:
+
+```text
+git cannot see who did what, it just states what was done
+```
+
+DECIDED, and binding on every Phase 8 patch:
+
+```text
+CONTENT claims     the adapter verifies them against Git; on disagreement GIT WINS
+PROVENANCE claims  the adapter records them AS CLAIMS, attributed to the hook, never as facts
+never             strip or lose the claim label, so that a later reader can mistake it for fact
+```
+
+The learner eliminated the two wrong policies themselves. `verify provenance first` fails because
+nothing exists to verify it against — re-asking Claude is asking the same source twice, which the
+learner identified unprompted. `discard unverifiable data` fails because it deletes the only question
+BuildLens exists to answer.
+
+CONSEQUENCE THE LEARNER SHOULD BE ABLE TO STATE:
+
+```text
+the claims BuildLens CAN check are the ones it needs the hook for least
+the claim BuildLens CANNOT check is the only reason the hook exists at all
+```
+
+TRANSFER PASSED on a CI-webhook surface (`EV-P8-TRANSFER-326`): the commit and branch state are
+content-like; the pushing user and timestamp are provenance. The learner also confirmed that a Git
+author name does not verify the author, since it is self-declared config — another claim.
+
+FOUND EARLY BY THE LEARNER, deferred to Phase 9: hook and file write are separate operations, so
+BuildLens can be asked to look before a change lands or after it is overwritten. This is the ordering
+and duplication concern Phase 9 exists for. Do not solve it in Phase 8.
+
+GIT MODEL — FAILED THEN REBUILT THIS SESSION. The owed delayed retrieval lapsed: `git diff HEAD` was
+answered as HEAD versus the index. The root cause was NOT operand recall but a misconception about
+what the operation returns.
+
+```text
+BELIEVED   a diff prints the contents of one side
+ACTUAL     a diff prints the difference between two sides
+```
+
+Rebuilt via an R0 non-Git list surface, one worked example, then a clean climb. The model now stands:
+
+```text
+git diff          index <-> working tree
+git diff --cached HEAD  <-> index
+git diff HEAD     HEAD  <-> working tree
+```
+
+The Phase 7 design rationale is restored with it: `git diff HEAD` skips the index, so staged and
+unstaged work both appear in one call.
+
+No Phase 8 code exists and none is authorized.
+
+```text
+phase                       Phase 8 — trust boundary specified, no code
+last knowledge gate         content versus provenance, and provenance stored as a claim
+                            (EV-P8-TRUST-RULE-325, transfer EV-P8-TRANSFER-326)
+next retrieval due          THREE items, all on fresh surfaces in a LATER session:
+                            1. the three-place diff model — rebuilt with scaffolding in the same
+                               session it failed, so NOT held
+                            2. SystemExit(2) — third lapse already spent; if it lapses again, stop
+                               testing it
+                            3. the believe/verify rule, unaided, on a surface that is neither hooks
+                               nor CI webhooks
 next architecture reset     complete; next by time or major transition
-next implementation step    CONTINUE PHASE 8 SPECIFICATION. Next question: the trust boundary — a
-                            hook payload is JSON produced by another program, so decide what
-                            BuildLens may believe from it versus what it must verify itself. Do NOT
-                            show a payload's fields before that decision is made. Then: what is
-                            recorded per observed file version, and whether session.py is its home.
+next implementation step    CONTINUE PHASE 8 SPECIFICATION. Next question: what is recorded per
+                            observed file version, and whether session.py is its home. The plan
+                            lists session/worktree id, repo-relative path, base commit/blob, content
+                            hash, observed-at, provenance. Do NOT show that list; make the learner
+                            derive the fields from the believe/verify rule they just established,
+                            then compare. Content hashing introduces hashlib and the
+                            file bytes -> SHA-256 -> fingerprint chain; a hash is not authorization,
+                            authorship, or semantic equivalence.
+                            Still open from last session: is "the learner edits only through
+                            BuildLens" a stated product assumption or something BuildLens must
+                            tolerate being violated?
 deferred to a later slice   launch failure (FileNotFoundError) and timeout (TimeoutExpired)
-                            normalization; neither is handled by _capture today
+                            normalization; neither is handled by _capture today.
+                            Also owed: show the learner the state where git diff HEAD is empty while
+                            git diff --cached is not. They guessed such a state exists and were right
+                            for the wrong reason; they have not seen it.
 milestone owed              none; Phase 7 milestone is complete
 major/deep counter          1/2. Cumulative review due after the SECOND completed major phase,
                             so NOT due before Phase 8.
-last published commit       f678350 — docs: record phase 8 actor scoping decision
+last published commit       see git log; this session published the trust-boundary specification
 ```
 
 Files the learner should currently be able to teach:

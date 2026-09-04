@@ -33195,3 +33195,367 @@ OPEN QUESTION FOR NEXT SESSION:
 Is "the learner edits only through BuildLens" a stated product assumption, or something
 BuildLens must tolerate being violated =
 ```
+
+### EV-P8-TRUST-BOUNDARY-319 — believe versus verify, first attempt
+
+EXERCISE TYPE: apply/derive. Phase 8 specification. Payload fields deliberately withheld.
+
+PROMPT (verbatim):
+
+```text
+A hook script sends BuildLens a JSON object. json.loads() returns a dict with no error.
+BuildLens is about to act on it.
+
+Believable claim = one thing the payload could tell BuildLens that BuildLens has no other way to learn
+Why unobtainable = why Git alone cannot supply it
+Verifiable claim = one thing the payload could tell BuildLens that BuildLens can check for itself
+How verified = the mechanism BuildLens would use to check it
+General rule = the property that separates the two categories
+On disagreement = what BuildLens does when the payload and Git contradict each other
+Confidence =
+```
+
+LEARNER FIRST COMMITTED ANSWER (verbatim):
+
+```text
+.  that claude has stopped coding, git has no way of tracking what claude is doing, if it is
+posttooluse then it can then check the code that has been added we can get that through git, we
+would use cpature unstaged diff and see the file change, git is the verson control and claude is the
+ai eidtor that changes those versons, that is something we will have to delve further into, 90
+```
+
+EVALUATION: PARTIAL.
+
+```text
+Believable claim   CORRECT   "claude has stopped coding" — the turn boundary. Strong choice.
+Why unobtainable   PARTIAL   directionally right; states Git cannot track Claude, does not say
+                             that Git records content states and has no notion of actor or turn
+Verifiable claim   CORRECT   the file change / what was added
+How verified       CORRECT   capture the unstaged diff and compare
+General rule       NOT GIVEN  answer describes the two systems' roles; does not name the property
+                             that separates believable from verifiable claims
+On disagreement    NOT GIVEN  deferred by the learner
+Confidence         90         miscalibrated against two unanswered fields
+```
+
+PRIMARY BLOCKER: abstraction, not knowledge. The learner produced a correct instance of each
+category but did not extract the property the instances differ on. This is one rung, not a rebuild.
+
+REMEDIATION SELECTED: sorting before generating. Give concrete claims to classify, then ask what the
+verifiable ones share. Sorting is a lower rung than rule-generation and uses evidence the learner has
+already produced correctly.
+
+### EV-P8-TRUST-SORT-320 — believe/verify sort, after prompt repair
+
+PROMPT AMBIGUITY (mine, not a learner miss): the first sort was attempted under the belief that the
+five claims were Git output. They are lines in the hook payload. The learner named the ambiguity
+themselves ("its the way you are asking it that is throwing me off"). First sort discarded unscored.
+
+Repaired framing given: the hook asserts something; can BuildLens go ask Git whether it is true?
+
+LEARNER ANSWER (verbatim):
+
+```text
+verify
+believe
+verify
+beleive
+verify
+git can confirm or deny any of these claims, they have the possiblity of verification through git
+there is no way to verify we would need to maybe send a hook to claude to send a hook history or
+last hook snet command
+90
+```
+
+EVALUATION: 4/5. A, B, C, D correct. E wrong.
+
+The learner unprompted identified that re-asking the source is not verification. That is the correct
+instinct and is the reason a hook's own claim about provenance can never be self-certifying.
+
+E SELF-CORRECTED without being told the answer, when asked what "session" means to Git:
+
+```text
+i was thinking along the loines of looking at the tome the code was changerd but i do not think git
+can do that in our current scope
+```
+
+Accepted. Git has no session concept; commit timestamps do not exist for uncommitted worktree
+changes, and file mtime belongs to the filesystem, not Git.
+
+RULE NAMING:
+
+```text
+BELIEVE group   "provenance"   CORRECT, retrieved unaided, confidence 40 (well calibrated)
+VERIFY group    "no idea"      not retrieved; scaffolding descended
+```
+
+### EV-P8-GIT-DIFF-HEAD-DELAYED-321 — owed Git-model retrieval, LAPSED
+
+This is the delayed retrieval owed from 2026-09-04, where the Git model was SUPPLIED rather than
+retrieved. Surfaced inside the trust-boundary remediation rather than as a separate quiz.
+
+PROMPT (verbatim):
+
+```text
+git diff HEAD compares two things. Name both =
+Confidence =
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+the current committed code and the staged, 90
+```
+
+EVALUATION: WRONG, at high confidence.
+
+```text
+CORRECT    first operand — the commit HEAD points at
+WRONG      second operand — named the index/staging area
+ACTUAL     git diff HEAD compares HEAD against the WORKING TREE (files on disk)
+           git diff --cached is the one that compares HEAD against the index
+```
+
+WHY THIS MATTERS AND IS NOT A TRIVIA MISS: in Phase 7 the learner chose `git diff HEAD` precisely
+BECAUSE it captures combined staged-plus-unstaged worktree state. The reason for their own design
+decision is not currently held.
+
+PRIMARY BLOCKER: the three-place model (HEAD / index / working tree) is not stable. The learner is
+operating with two places.
+
+REMEDIATION SELECTED: concrete trace with a staged edit and an unstaged edit, asking what each of the
+three diff commands reports. Forces all three locations to be distinguished before any rule is
+restated.
+
+### EV-P8-DIFF-PAIRS-322 — diff as comparison, WRONG, root misconception found
+
+TRACE SETUP: cli.py committed and clean; AAA added then `git add`; BBB added and not added.
+
+The learner FIRST answered the storage question correctly and unaided:
+
+```text
+unstaged AAA and BBB
+staged  AAA
+head nothing yet
+```
+
+All three correct. The three-place model IS present as storage. Count of places also answered
+correctly as 3.
+
+Then asked to map each command to the PAIR it compares.
+
+LEARNER ANSWER (verbatim):
+
+```text
+empty to working tree and shows working ttree
+working tree to staged shows staged
+head compares staged to committed shows comitted (or none because nothing was commited)
+90
+```
+
+EVALUATION: WRONG, all three, at confidence 90.
+
+ROOT MISCONCEPTION IDENTIFIED — this is the real finding of the session:
+
+```text
+the learner believes a diff OUTPUTS THE CONTENTS OF ONE SIDE
+the truth is a diff outputs THE DIFFERENCE BETWEEN TWO SIDES
+```
+
+Every one of the three answers ends "shows <name of one side>". This is consistent, not careless.
+It also explains EV-P8-GIT-DIFF-HEAD-DELAYED-321: naming operands is not the gap; understanding what
+the operation RETURNS is.
+
+SECONDARY, not the primary blocker: the answer says "nothing was commited" though the scenario states
+cli.py is committed and clean. Not remediated now; one blocker at a time.
+
+PRIMARY BLOCKER SELECTED: what a diff returns.
+
+REMEDIATION: descend to R0 on a NON-GIT surface (two lists) so no Git vocabulary can carry the
+misconception, establish that a diff returns the delta, then climb back to the three-place mapping.
+
+### EV-P8-DIFF-REBUILD-323 — climb back after the R0 rescue
+
+R0 NON-GIT SURFACE (two lists, no Git vocabulary):
+
+```text
+diff(["a","b"], ["a","b","c"]) prints =
+```
+
+First attempt WRONG — learner printed both inputs (`[a,b] [a,b,c]`), confidence 60. The dropped
+confidence was itself correct calibration.
+
+WORKED-EXAMPLE RESCUE used once, per rule 14.6, on neighboring data:
+
+```text
+diff(["x","y"], ["x"])  ->  removed: y
+```
+
+Learner then explained the solved example unaided ("because both have it") and solved the original
+(`c`). One rung up, both directions at once, unaided:
+
+```text
+diff(["p","q","r"], ["p","s","r"])   ->   learner: [q,s]     CORRECT
+rule stated:  "the differences in the two lists or strings, not the whole file"   CORRECT
+```
+
+CLIMB BACK TO GIT: learner produced the correct SET of three outputs but rotated across the three
+commands, and again skipped the pair field, while asserting "the comparisons were correct" — they
+were not. Blocker isolated to the pairs alone and presented as a matching problem.
+
+```text
+git diff          index <-> working tree     CORRECT unaided
+git diff --cached HEAD  <-> index            CORRECT unaided
+git diff HEAD     ...                        stuck; learner assumed all pairs must be adjacent
+```
+
+One reframe supplied — three places yield three pairs, and the unused pair skips the middle. Learner
+then answered "working tree to head" CORRECT.
+
+MODEL NOW COMPLETE:
+
+```text
+git diff          index <-> working tree      BBB
+git diff --cached HEAD  <-> index             AAA
+git diff HEAD     HEAD  <-> working tree      AAA + BBB
+```
+
+The Phase 7 design rationale is restored: `git diff HEAD` skips the index, so staged and unstaged
+work both appear in one call.
+
+STATUS: NOT YET HELD. Rebuilt with scaffolding in the same session it failed. Recovery check issued
+on a fresh case (staged-only, no unstaged edit, one command must print empty). Independent success on
+a LATER session is required before this is called held.
+
+### EV-P8-DIFF-RECOVERY-324 — fresh-case recovery check, PASSED
+
+```text
+notes.md committed and clean; add ZZZ; git add; no further edits
+learner: git diff = []   git diff --cached = [ZZZ]   git diff HEAD = [ZZZ]     ALL CORRECT
+```
+
+Unaided, on a case not previously seen, including the empty-output case. Rebuild successful.
+
+NOT MARKED HELD: rebuilt with scaffolding in the same session it failed. One clean retrieval on a
+fresh surface in a LATER session is required.
+
+### EV-P8-TRUST-RULE-325 — the believe/verify rule, completed
+
+INTERMEDIATE ERROR AND SELF-CORRECTION, worth preserving. Asked what BuildLens does when the payload
+and Git disagree, the learner proposed checking `git diff --cached` because "index is ignored there
+and it could have just been git added". That mechanism contradicted their own correct answer from two
+messages earlier. Challenged with their own answer rather than told:
+
+```text
+Does git add alone ever make git diff HEAD empty =
+learner: "no, i guess the changes would still be in the working tree"        CORRECT
+```
+
+The INSTINCT was right and is worth keeping: investigate before concluding. A state does exist where
+`git diff HEAD` is empty while `--cached` is not; the learner has not been shown it yet. FLAGGED as a
+future exercise.
+
+NOUN NAMING: the learner reached for "chain of custody" — a provenance synonym, i.e. the half already
+held. One rung down, pointed at claims A and C themselves.
+
+FINAL ANSWER (verbatim):
+
+```text
+they are about the contents of the files which git can confirm for us
+```
+
+CORRECT. The rule now stands complete:
+
+```text
+CONTENT       what the files say        Git can settle it       VERIFY
+PROVENANCE    who / when / which turn   Git has no record       BELIEVE or reject
+```
+
+Consequence stated to the learner, and the gate question for the phase: the claims BuildLens CAN
+check are the ones it needs the hook for least, and the claim it CANNOT check is the only reason the
+hook exists.
+
+### EV-P8-PROVENANCE-POLICY-325B — what the adapter does with an unverifiable claim
+
+Asked what the adapter does with CONTENT claims, PROVENANCE claims, on disagreement, and what it must
+never do.
+
+LEARNER ANSWER (verbatim):
+
+```text
+checks git to verify
+not sure
+first check git diff --cached and then we will check again and then go with git on this one, i feel
+like it will be a timing thing, like claude has to change the file and then we wait for it to load
+into the worktree, not sure , i have never handeled provanance before so i want to learn more
+```
+
+EVALUATION: content handling CORRECT. Disagreement policy CORRECT — GIT WINS. Provenance handling not
+yet formed, stated honestly.
+
+FOUND UNPROMPTED AND CORRECT: the hook and the file write are separate operations, so BuildLens can be
+asked to look before a change lands. That is the Phase 9 ordering/duplication concern, discovered a
+phase early. Deferred, not solved.
+
+FORCED CHOICE offered (A verify first / B store as fact / C store as labelled claim / D discard):
+
+```text
+learner first picked A, confidence 90 — WRONG
+```
+
+A contradicts the premise the learner had already accepted: nothing exists to verify provenance
+against, and "try again" is re-asking the same source. Remediated by running their own policy forward
+rather than by correction — "later the learner asks who changed cli.py; what can BuildLens answer?"
+
+```text
+learner: "so none of the 2 i picked work"
+```
+
+A and D eliminated by the learner. Then, unaided:
+
+```text
+c is the only option left
+it is not a fact because we can never verify it
+```
+
+CORRECT, with the correct reason.
+
+INVARIANT, learner's own words:
+
+```text
+forget to put a label on it so everything that reads it understands it is a claim not fact
+```
+
+ACCEPTED. This is the guard on every Phase 8 patch.
+
+### EV-P8-TRANSFER-326 — trust boundary transferred to a CI webhook
+
+PROMPT: a CI webhook posts `"the user alice pushed commit abc123 to main at 14:02"`.
+
+LEARNER ANSWER (verbatim):
+
+```text
+the user pushed commit abc123 to main
+alice and the time
+it checks the commit and runs git diff head
+```
+
+EVALUATION: PASS on the rule, PARTIAL on mechanism.
+
+```text
+CORRECT    commit + branch state classified as content-like
+CORRECT    alice + timestamp classified as provenance
+WRONG      mechanism — git diff HEAD compares worktree to HEAD and says nothing about whether a
+           commit exists on a remote branch. Tool copied from the previous surface rather than
+           re-derived. Supplied: git cat-file -e <sha>, git rev-parse main.
+```
+
+CLOSING CHECK, unaided:
+
+```text
+git log shows an author name on every commit. Does that verify alice =
+learner: no, 90                                                          CORRECT
+```
+
+The author field is self-declared config — a claim wearing a fact's clothes. The rule holds on a
+surface with no hooks and no Claude in it.
