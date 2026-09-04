@@ -4,7 +4,7 @@
 > obsolete statements whenever state changes. Preserve historical prompts, answers, remediation, and
 > rationale in `learning/LEARNING_LEDGER.md`, `QUIZZES.md`, and Git history.
 
-Last updated: 2026-09-02
+Last updated: 2026-09-05
 
 ## Lifecycle
 
@@ -2085,7 +2085,7 @@ deferred to a later slice   launch failure (FileNotFoundError) and timeout (Time
 milestone owed              none; Phase 7 milestone is complete
 major/deep counter          1/2. Cumulative review due after the SECOND completed major phase,
                             so NOT due before Phase 8.
-last published commit       4941a8b — docs: record phase 7 milestone transfer
+last published commit       f678350 — docs: record phase 8 actor scoping decision
 ```
 
 Files the learner should currently be able to teach:
