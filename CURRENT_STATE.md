@@ -1975,20 +1975,50 @@ session       STATE       in-memory change history, not yet wired to the snapsho
 cli           BOUNDARY    arguments, formatting, streams, exit status
 ```
 
+SESSION 2026-09-04 (continued) — PHASE 7 MILESTONE TRANSFER PASSED.
+
+`EV-P7-MILESTONE-TRANSFER-315` on a linter surface, with no code on screen and no file lookups.
+Module placement, the per-caller status mechanism, representation, reversal condition, and the limits
+of a stand-in test all transferred. The surface was built to tempt the wrong representation answer —
+pylint's exit code looks meaningful — and the learner still reasoned that stdout alone suffices. Their
+reversal condition was sharper than the one they set for BuildLens.
+
+Two facilitator errors recorded: the transfer was first set in an unfamiliar lab-assay domain, which
+the learner correctly rejected as vocabulary noise; and the prompt under-specified how the TRACKED
+section was produced, leaving the process count ambiguous.
+
+RULE ADOPTED: choose transfer surfaces from domains the learner already knows.
+
+Phase 7 is complete in every required dimension:
+
 ```text
-phase                       Phase 7 — vertical slice complete; milestone transfer still owed
-last knowledge gate         end-to-end boundary trace (EV-P7-CLI-BOUNDARY-313) and the
-                            Git-is-a-requirement decision (EV-P7-GIT-IS-A-REQUIREMENT-314)
-next retrieval due          delayed argparse parser-versus-Namespace retrieval on a fresh surface
+implementation       complete — git_adapter, snapshot, cli vertical slice
+automated tests      complete — seven suites, controlled and real-Git
+learner trace        complete — EV-P7-SNAPSHOT-TRACE-309, EV-P7-CLI-BOUNDARY-313
+learner explanation  complete — EV-P7-CLI-BOUNDARY-313, EV-P7-GIT-IS-A-REQUIREMENT-314
+transfer variant     complete — EV-P7-MILESTONE-TRANSFER-315
+```
+
+ONE ITEM BLOCKS THE PHASE CLOSE: the delayed argparse parser-versus-Namespace retrieval, owed since
+Phase 6. Separately, the Git model taught this session was SUPPLIED rather than retrieved and needs
+one delayed retrieval before being called held.
+
+```text
+phase                       Phase 7 — milestone passed; close blocked on the owed argparse retrieval
+last knowledge gate         Phase 7 milestone transfer, passed unaided
+                            (EV-P7-MILESTONE-TRANSFER-315)
+next retrieval due          argparse parser-versus-Namespace on a fresh surface (blocks phase close);
+                            then the Git model taught 2026-09-04, which was supplied not retrieved
 next architecture reset     complete; next by time or major transition
-next implementation step    PHASE 7 MILESTONE TRANSFER on a different surface, then phase close.
-                            No further Phase 7 product code is required for the milestone.
+next implementation step    none for Phase 7. After the owed retrieval and phase close, Phase 8
+                            begins: the Claude Code adapter, a SECOND external system entering
+                            through the same layering.
 deferred to a later slice   launch failure (FileNotFoundError) and timeout (TimeoutExpired)
                             normalization; neither is handled by _capture today
-milestone owed              Phase 7 milestone transfer at phase close; the slice gates do not
-                            substitute for it
-major/deep counter          Phase 7-15 counter has not started; Phase 7 is not yet complete
-last published commit       5f7eb61 — merge: phase 7 cli analyzes the current repository
+milestone owed              none; Phase 7 milestone is complete
+major/deep counter          Phase 7-15 counter reaches 1/2 when Phase 7 closes; review is due
+                            after two completed major phases
+last published commit       827ea4e — docs: record cli slice, boundary trace, and git-as-requirement
 ```
 
 Files the learner should currently be able to teach:

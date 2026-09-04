@@ -32868,3 +32868,123 @@ Naming Git in module and type names is therefore accurate, not a boundary leak.
 NEXT REQUIRED STEP:
 Phase 7 milestone transfer variant on a different surface, then the phase-close review. The delayed
 argparse parser-versus-Namespace retrieval is also still owed.
+
+## EV-P7-MILESTONE-TRANSFER-315 — Phase 7 milestone transfer, PASSED
+
+FACILITATOR ERROR 1: the transfer was first set in a lab-assay domain. The learner objected
+(verbatim):
+
+```text
+but assay spectra in geneeral?
+```
+
+UPHELD. A transfer changes surface features; it must not add domain vocabulary the learner has to
+decode first, which would hide the concept being tested. Re-set in a linter domain the learner works
+in daily. RULE ADOPTED: choose transfer surfaces from domains the learner already knows.
+
+The learner also asked why the transfer was needed. Answered concretely rather than by citing the
+contract: several correct answers this session arrived with code on screen, after narrowing, or by
+looking up which file a line lived in, and Phase 8 adds a second external system that asks the same
+layering question immediately.
+
+SURFACE: a Lint Report tool shelling out to pylint, which really does exit 1 when it finds problems.
+Required report has TRACKED and NEW sections, counted separately, never combined, whole-report
+rejection on any component failure. No code written; design and reasoning only.
+
+MODULE PLACEMENT (verbatim):
+
+```text
+lint_adater.py
+filter.py
+```
+
+PASSED. The process owner was separated from the module deciding which section a file lands in — the
+git_adapter/snapshot split, transferred. Note offered without drilling: `filter` implies removal,
+while that module composes sections and enforces all-or-nothing.
+
+STATUS RULE (verbatim):
+
+```text
+it would be in lint adapter
+```
+
+then, on the mechanism:
+
+```text
+could you write in the accepted statuses tuple so that is normally stored as (0,) and when it is a
+new file scan you have to input (0, 1, ) 90
+```
+
+PASSED UNAIDED at confidence 90. The exact mechanism from EV-P7-NOINDEX-DESIGN-304, reproduced on a
+new surface: a default that keeps strict callers strict, overridden only by the caller that needs it.
+
+PROCESS COUNT (verbatim):
+
+```text
+n + 2 with n = 4 so it would be 6
+30
+```
+
+FACILITATOR ERROR 2: the prompt never specified how the TRACKED section was produced, leaving the
+count genuinely underdetermined. The learner inferred one tracked-report command plus
+`--list-unchecked` plus one scan per new file, which is the sensible reading, and their confidence of
+30 was well calibrated to the ambiguity. Graded as CORRECT under that reading; the ambiguity was
+mine.
+
+REPRESENTATION (verbatim):
+
+```text
+it would not need it becasue the probelsm are printed to stdout , 90
+```
+
+PASSED. The surface was deliberately chosen so the exit code LOOKED meaningful (0 clean, 1 problems).
+The learner correctly reasoned that empty stdout already distinguishes those cases, so the return
+code is redundant for this consumer — the same conclusion they reached for BuildLens, on a surface
+built to tempt the opposite answer.
+
+REVERSAL CONDITION (verbatim):
+
+```text
+if the probelsm were not printed out to stdout
+90
+```
+
+PASSED, and SHARPER than the BuildLens version. Theirs is falsifiable by observing the tool: if the
+evidence source disappears from stdout, the exit code becomes the only signal.
+
+TEST LIMITS (verbatim):
+
+```text
+it rpoves the subprocess will be called it does not prove that pylint will work yet
+90
+```
+
+PASSED. Precision supplied: a stand-in proves the code ATTEMPTED the expected call and interpreted a
+prepared result; nothing is launched at all.
+
+OVERALL: PASSED with fading assistance — no code on screen, no file lookups, no scaffolding beyond
+restating fields. This is the strongest independent performance recorded in the project.
+
+PHASE 7 MILESTONE STATUS:
+
+```text
+implementation       complete — git_adapter, snapshot, cli vertical slice
+automated tests      complete — seven suites, controlled and real-Git
+learner trace        complete — EV-P7-SNAPSHOT-TRACE-309, EV-P7-CLI-BOUNDARY-313
+learner explanation  complete — EV-P7-CLI-BOUNDARY-313, EV-P7-GIT-IS-A-REQUIREMENT-314
+transfer variant     complete — EV-P7-MILESTONE-TRANSFER-315
+```
+
+STILL OWED BEFORE PHASE 7 CLOSES:
+
+```text
+delayed argparse parser-versus-Namespace retrieval on a fresh surface
+```
+
+The Git model taught this session (tracked vs untracked, the index as a third place, which diff
+compares which pair) was SUPPLIED, not retrieved, and needs one delayed retrieval before it can be
+called held.
+
+NEXT REQUIRED STEP:
+The owed argparse retrieval, then Phase 7 close. The major/deep Phase 7-15 counter starts at 1/2 once
+Phase 7 closes.
