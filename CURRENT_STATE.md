@@ -2051,6 +2051,20 @@ PostToolUse fires only for Claude's file tools — Bash edits, learner edits, an
 therefore Stop must re-inspect actual Git state, not trust the event stream
 ```
 
+ACTOR SCOPE (`EV-P8-ACTOR-SCOPE-318`): the learner scoped the product to TWO actors — the learner
+editing through BuildLens, and Claude. Codex is a fact about how BuildLens is built today, not about
+what it ships. Accepted; it matches the plan's collaborative-editing section.
+
+That scoping closes two no-event paths but NOT this one, which alone justifies the Stop sweep:
+
+```text
+Claude runs sed -i or git checkout through Bash -> no PostToolUse fires
+```
+
+OPEN, flagged for the spec: is "the learner edits only through BuildLens" a stated product
+assumption, or something BuildLens must tolerate being violated? The plan forbids claiming that
+arbitrary external processes cannot bypass the workflow.
+
 No Phase 8 code exists and none is authorized.
 
 ```text

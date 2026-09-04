@@ -33150,3 +33150,48 @@ Continue the Phase 8 specification. The next question is the trust boundary: a h
 produced by another program, so decide what BuildLens may believe from it versus what it must verify
 itself. Do not look at a payload's fields before that decision is made. After that: what BuildLens
 records per observed file version, and whether `session.py` is the right home for it.
+
+### EV-P8-ACTOR-SCOPE-318 — learner scopes the actor list
+
+LEARNER DECISION (verbatim):
+
+```text
+i do not beleve that will happen since the buildlens will be able to make changes to the code and
+claude will be the other left side of the screen
+```
+
+EVALUATION:
+ACCEPTED as a product scoping decision, which is the learner's to make and consistent with the plan's
+collaborative-editing section describing exactly two actors. Codex is a fact about how BuildLens is
+being BUILT today, not about what BuildLens ships.
+
+Under this scoping, two of the four no-event paths close:
+
+```text
+another tool such as Codex edits   -> out of scope; not an actor in the product
+the learner edits in own editor    -> closed by design IF editing goes through BuildLens,
+                                      since BuildLens knows its own writes
+```
+
+ONE PATH SURVIVES REGARDLESS:
+
+```text
+Claude runs sed -i or git checkout through Bash -> no PostToolUse fires
+```
+
+Claude has a shell, and the two-actor model does not prevent shell-based file mutation. This single
+path is sufficient to require the `Stop` reconciliation sweep; it cannot be dropped on the grounds
+that the actor list is short.
+
+FLAGGED FOR THE SPECIFICATION, not yet decided:
+The "learner edits only through BuildLens" assumption is a PRODUCT CONSTRAINT, not a guarantee. The
+plan is explicit that BuildLens must never claim arbitrary external processes cannot bypass the
+workflow. This should be stated explicitly in the spec, the same way "Git is a requirement" was made
+explicit in EV-P7-GIT-IS-A-REQUIREMENT-314.
+
+OPEN QUESTION FOR NEXT SESSION:
+
+```text
+Is "the learner edits only through BuildLens" a stated product assumption, or something
+BuildLens must tolerate being violated =
+```
