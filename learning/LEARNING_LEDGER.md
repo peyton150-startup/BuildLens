@@ -32607,3 +32607,123 @@ Re-present the prompt above verbatim, then build the real repository and compare
 the CLI slice: wire `capture_snapshot` into `main`, print the resolved repository root followed by
 separately labelled UNSTAGED and STAGED sections, status 0 on success, and on any GitCaptureError
 write the message to stderr with a rerun instruction and return 1.
+
+## EV-P7-SNAPSHOT-TRACE-309 — RESUMED AND CLOSED
+
+The trace required a long detour through Git vocabulary before the counting could begin.
+
+GIT MODEL PREREQUISITE. The learner asked (verbatim):
+
+```text
+the wording is throwing me off, tracked is unstaged but in the worktree and added is staged but not
+committed and then never added means unstaged?
+```
+
+Two independent axes were supplied: tracked-versus-untracked (does Git know the file at all) and
+staged-versus-unstaged (for tracked files, is the change in the index or only the working tree). The
+trap named: `git add` on a brand-new file makes it TRACKED.
+
+Further vocabulary questions, all answered and all legitimate:
+
+```text
+recorded in the index means you git added it or is it you git committed it?
+```
+
+Answered with the three-place model: working tree -> git add -> index -> git commit -> history.
+
+The learner then generalized correctly and unprompted (verbatim):
+
+```text
+so i need to be careful about where the most recent verson of the file is becasue there could be a
+staged verson but you could make a small change to that and now you have an unstaged verson of a file
+that one verson ago is currently staged
+```
+
+PASSED — three versions coexist (HEAD, index, working tree) and the two diffs compare adjacent pairs.
+This is also the concrete reason the two views cannot be summed: they measure different gaps.
+
+VIEW MEMBERSHIP (verbatim):
+
+```text
+unstaged
+staged
+unstaged
+unstaged
+90
+```
+
+PASSED. a.txt, c.py, d.py to UNSTAGED; b.txt to STAGED.
+
+PROCESS COUNT required several narrowings. The learner correctly recalled the earlier `3 + n` formula
+and was told it predated `capture_repository_root`. They first counted 5 call SITES, then correctly
+separated sites from executions (their own lesson from the staged slice), then identified 4 fixed
+calls. They initially listed a.txt among the untracked files; corrected by showing the three real Git
+commands and their actual output, which is what finally resolved it.
+
+FINAL ANSWER (verbatim):
+
+```text
+6
+3
+4
+1
+100
+```
+
+VERIFIED against a real repository built to the exact scenario. Every field matched, including the
+six child processes in issue order.
+
+## EV-P7-NAMING-DETOUR-310 — FACILITATOR ERROR, learner-corrected
+
+The learner objected (verbatim):
+
+```text
+but the label is still unstaged_parts that is what is throwing me off
+```
+
+This was treated as a naming DEFECT and escalated into a rename: `unstaged_parts` ->
+`unstaged_view_parts` -> a full rename of the view to WORKING, agreed with the learner, applied, and
+all suites re-run green.
+
+The learner then reverted the decision (verbatim):
+
+```text
+ok so go back and undo all the renaming changes, i think the better expliation wouqld have been to
+tell me to look at the function that git adater was running to catagorize whAT IS WHERE
+```
+
+UPHELD. The question was comprehension — which command emits which file — and it was in fact resolved
+by showing the three commands' real output, not by renaming anything. All rename changes were
+reverted; the worktree returned to ab2206d with all seven suites passing.
+
+SECOND FACILITATOR ERROR, also learner-corrected (verbatim):
+
+```text
+so then working and unstaged would be the same thin in buildlens please be more specific next time
+instead of a blanekt statment especially when this affects so much
+```
+
+UPHELD. The statement "working and unstaged are not synonyms" was made without saying WHOSE
+vocabulary was meant. Inside BuildLens they name the same view; the real contrast is against GIT's
+term:
+
+```text
+GIT unstaged          a.txt              tracked, changed in working tree, not in index
+BUILDLENS UNSTAGED    a.txt, c.py, d.py  Git's unstaged plus untracked files
+BUILDLENS WORKING     a.txt, c.py, d.py  rejected alternative name for the same view
+```
+
+STANDING INSTRUCTIONS ADOPTED:
+
+```text
+qualify every ambiguous term with whose vocabulary it belongs to — Git's or BuildLens's
+answer a comprehension question by showing what the code or command actually produces,
+    before considering whether a name should change
+do not escalate a learner's confusion into a design change without first checking that
+    the confusion is not simply unanswered
+```
+
+NEXT REQUIRED STEP:
+The CLI slice — wire `capture_snapshot` into `main`, print the resolved repository root followed by
+separately labelled UNSTAGED and STAGED sections, status 0 on success, and on any GitCaptureError
+write the message to stderr with a rerun instruction and return 1.

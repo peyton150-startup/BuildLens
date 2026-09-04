@@ -1884,33 +1884,63 @@ test_classify.py / test_summarize.py / test_session.py / test_cli.py   unchanged
 
 Seven suites, all passing.
 
+SESSION 2026-09-04 — SNAPSHOT TRACE CLOSED.
+
+`EV-P7-SNAPSHOT-TRACE-309` passed, verified against a real repository built to the exact scenario:
+6 child processes, UNSTAGED 3/4/1, STAGED 1/2/0, every field matching.
+
+Getting there required supplying the Git model as a prerequisite, and it should be treated as newly
+taught rather than known:
+
+```text
+tracked vs untracked     does Git know the file at all; git add makes a new file TRACKED
+staged vs unstaged       for tracked files, is the change in the index or only the working tree
+three places             working tree -> git add -> index -> git commit -> history
+two diffs                git diff = working tree vs index; git diff --cached = index vs HEAD
+```
+
+The learner independently derived that three versions of a file coexist and that this is why the two
+views cannot be summed — they measure adjacent gaps.
+
+TWO FACILITATOR ERRORS, both caught by the learner and both upheld (`EV-P7-NAMING-DETOUR-310`):
+
+1. Their confusion about `unstaged_parts` was escalated into a rename of the whole view to WORKING,
+   agreed and applied, then reverted at the learner's instruction. The question was comprehension —
+   which Git command emits which file — and was resolved by showing the three commands' real output.
+   The worktree was returned to ab2206d; no rename survives.
+2. "Working and unstaged are not synonyms" was stated without naming whose vocabulary was meant.
+   Inside BuildLens they name the same view; the contrast is only against GIT's term.
+
+STANDING INSTRUCTIONS ADOPTED:
+
+```text
+qualify every ambiguous term as Git's or BuildLens's
+answer a comprehension question by showing what the code or command actually produces,
+    before considering whether a name should change
+do not escalate confusion into a design change without first checking the confusion
+    is not simply unanswered
+```
+
+OPEN ITEM, deliberately not acted on: `unstaged_parts` in `snapshot.py` holds untracked files, which
+are not unstaged in Git's vocabulary. The learner rejected renaming it for now. Revisit only if it
+causes a real misreading in code, not in conversation.
+
 ```text
 phase                       Phase 7 — capture, decoding, root resolution, and composition complete
-last knowledge gate         composition placement and representation (EV-P7-COMPOSITION-DESIGN-307);
-                            snapshot trace EV-P7-SNAPSHOT-309 is OPEN and UNATTEMPTED
+last knowledge gate         snapshot trace verified against a real repository
+                            (EV-P7-SNAPSHOT-TRACE-309)
 next retrieval due          delayed argparse parser-versus-Namespace retrieval on a fresh surface
 next architecture reset     complete; next by time or major transition
-next implementation step    RESUME AT EV-P7-SNAPSHOT-TRACE-309, presented and unanswered. Re-present
-                            it verbatim, do not reveal the answer, then build the real repository
-                            and compare. After it passes: the CLI slice — wire capture_snapshot into
-                            main, print the resolved root then separately labelled UNSTAGED and
-                            STAGED sections, status 0 on success, and on GitCaptureError write the
-                            message to stderr with a rerun instruction and return 1.
-                            OLD NOTE (done): assemble UNSTAGED (tracked plus per-file untracked new-file
-                            diffs) and STAGED into one snapshot, rejecting the whole snapshot on any
-                            component failure. Then CLI integration, which must also print the
-                            resolved repository root.
-                            Then the --no-index patch — one git diff --no-index -- /dev/null <path> per
-                            discovered path, where status 0 AND status 1 are both valid. This forces
-                            a per-caller accepted-status rule into _capture and directly tests the
-                            reversal condition in EV-P7-STAGED-DESIGN-292. Preserve the approved
-                            empty-untracked-file behavior: one changed file, zero added, zero removed.
-                            Then command composition, then CLI integration. Launch failure and
-                            timeout normalization remain a separate later slice.
+next implementation step    CLI SLICE — wire capture_snapshot into main, print the resolved
+                            repository root, then separately labelled UNSTAGED and STAGED sections.
+                            Status 0 on success. On any GitCaptureError write the message to stderr
+                            with a rerun instruction and return 1.
+deferred to a later slice   launch failure (FileNotFoundError) and timeout (TimeoutExpired)
+                            normalization; neither is handled by _capture today
 milestone owed              Phase 7 milestone transfer at phase close; the slice gates do not
                             substitute for it
 major/deep counter          Phase 7-15 counter has not started; Phase 7 is not yet complete
-last published commit       48d2910 — merge: phase 7 per-file new-file diffs
+last published commit       c59b622 — merge: phase 7 snapshot composition
 ```
 
 Files the learner should currently be able to teach:
