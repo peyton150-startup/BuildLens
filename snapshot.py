@@ -15,6 +15,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 import git_adapter
+from git_adapter import GitCaptureError
 from summarize import DiffSummary, summarize_diff
 
 
@@ -29,11 +30,19 @@ def capture_snapshot(repository: Path) -> Snapshot:
     """Return one snapshot, or raise GitCaptureError without a partial result."""
     repository_root = git_adapter.capture_repository_root(repository)
 
-    unstaged_parts = [git_adapter.capture_unstaged_diff(repository)]
-    for path in git_adapter.capture_untracked_paths(repository):
-        unstaged_parts.append(git_adapter.capture_new_file_diff(repository, path))
+    try:
+        unstaged_parts = [git_adapter.capture_unstaged_diff(repository)]
+        for path in git_adapter.capture_untracked_paths(repository):
+            unstaged_parts.append(
+                git_adapter.capture_new_file_diff(repository, path)
+            )
 
-    staged_text = git_adapter.capture_staged_diff(repository)
+        staged_text = git_adapter.capture_staged_diff(repository)
+    except GitCaptureError as error:
+        # Report which repository was being inspected. A failure inside the
+        # root resolution above leaves this None, because none was resolved.
+        error.repository_root = repository_root
+        raise
 
     return Snapshot(
         repository_root=repository_root,

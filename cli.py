@@ -1,28 +1,27 @@
 """Run BuildLens from a shell.
 
 Contract:
-    in        a command line: analyze <path-to-diff-file>
-    out       three labelled counts on stdout, one per line
-    status    0 when the summary was produced
-              1 when the file cannot be read
+    in        a command line: analyze
+              the repository is resolved from the current working directory
+    out       the resolved repository root, then separately labelled UNSTAGED
+              and STAGED sections, three counts each
+    status    0 when the whole snapshot was produced
+              1 when any snapshot component failed
               2 when argparse rejects the command line
-    errors    reported on stderr as a readable line; never a raw traceback
+    errors    reported on stderr as readable lines; never a raw traceback
+              no partial summary is ever printed
 
-This module owns the process boundary only. Counting stays in summarize.py,
-which knows nothing about files, arguments, or exit status.
+This module owns the process boundary only. Counting stays in summarize.py and
+the snapshot policy stays in snapshot.py; neither knows about arguments,
+streams, or exit status.
 """
 
 import argparse
 import sys
+from pathlib import Path
 
-from summarize import summarize_diff
-
-def read_diff(path: str) -> str:
-    """Return the whole text stored in the file named by path."""
-    with open(path, encoding="utf-8") as handle:
-        diff_text = handle.read()
-
-    return diff_text
+import snapshot
+from git_adapter import GitCaptureError
 
 
 def format_summary(summary) -> str:
@@ -36,21 +35,43 @@ def format_summary(summary) -> str:
     return "\n".join(lines)
 
 
+def format_snapshot(result) -> str:
+    """Return the whole snapshot as the block a user reads."""
+    sections = [
+        "Repository: " + result.repository_root,
+        "",
+        "UNSTAGED",
+        format_summary(result.unstaged),
+        "",
+        "STAGED",
+        format_summary(result.staged),
+    ]
+
+    return "\n".join(sections)
+
+
+def report_failure(error: GitCaptureError) -> None:
+    """Explain which component failed, and where, without any counts."""
+    if error.repository_root is not None:
+        print("Repository: " + error.repository_root, file=sys.stderr)
+
+    print(str(error), file=sys.stderr)
+    print("Run buildlens analyze again.", file=sys.stderr)
+
+
 def main(argv: list[str]) -> int:
     """Run one command, allowing argparse to exit for malformed syntax."""
     parser = argparse.ArgumentParser(prog=argv[0])
     parser.add_argument("action", choices=["analyze"])
-    parser.add_argument("path")
-    args = parser.parse_args(argv[1:])
+    parser.parse_args(argv[1:])
 
     try:
-        diff_text = read_diff(args.path)
-    except FileNotFoundError:
-        print("no such file: " + args.path, file=sys.stderr)
+        result = snapshot.capture_snapshot(Path.cwd())
+    except GitCaptureError as error:
+        report_failure(error)
         return 1
 
-    summary = summarize_diff(diff_text)
-    print(format_summary(summary))
+    print(format_snapshot(result))
 
     return 0
 
