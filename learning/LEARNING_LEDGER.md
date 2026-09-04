@@ -33065,3 +33065,88 @@ NEXT REQUIRED STEP:
 Phase 8 — the Claude Code adapter. A second external system entering through the same layering the
 learner just defended, with hook payloads introducing JSON and the trust boundary
 `MODEL OUTPUT != AUTHORITATIVE APPLICATION STATE`.
+
+## EV-P8-HOOKS-SPEC-317 — Phase 8 specification opened
+
+Phase 8 begins. Assistance level VERY LOW for design.
+
+EVIDENCE FIRST: rather than describing hooks, the real configuration on this machine was shown. Three
+of the four hooks the plan names are already wired and firing in this session:
+
+```text
+PreToolUse    matcher Bash                  -> hook-handler.cjs pre-bash
+PostToolUse   matcher Write|Edit|MultiEdit  -> hook-handler.cjs post-edit
+Stop                                        -> auto-memory-hook.mjs sync
+SessionStart / SessionEnd
+```
+
+The `UserPromptSubmit` hook's stdout is visible in this transcript on every learner message, which is
+a live child process the learner can see.
+
+PREREQUISITE SUPPLIED at the learner's request (verbatim):
+
+```text
+can you explain the hooks with mroe context as to how they are used i am not sure
+```
+
+Taught by transfer from Phase 7 rather than as new machinery:
+
+```text
+PHASE 7   BuildLens (parent)   -> git (child)          args in, stdout/exit out
+PHASE 8   Claude Code (parent) -> hook script (child)  JSON on stdin, stdout/exit out
+```
+
+Same parent/child model, roles reversed. The four hooks were framed by PURPOSE: PostToolUse as
+observation, PreToolUse as authority, Stop as a reconciliation moment, SessionStart as recovery.
+
+WHAT A HOOK ADDS OVER POLLING (verbatim):
+
+```text
+it gives the exact time immidatly after a successful edit of a file instead of a timer we have to put
+on to then run the git diff
+90
+```
+
+PASSED at confidence 90. This restates unaided the position the learner took on 2026-09-02: events
+signal that something MAY have changed; Git inspection remains authoritative.
+
+PROVENANCE (verbatim):
+
+```text
+which change you made vs whaich change claude made
+the postetooluse we could also run the stop hook later down the road to signify that claude is done
+chanigng the file so now what you see is what the file is
+```
+
+PASSED, unaided, and the learner independently anticipated Stop's role as the turn boundary. The term
+`provenance` was supplied as the name for what they had already described. Git records WHAT changed
+and cannot record WHO among actors sharing a working tree.
+
+INCOMPLETE PROVENANCE (verbatim):
+
+```text
+if we get another posttooluse fire from a different ai coder like codex, 10
+```
+
+PARTIAL at confidence 10, honestly calibrated. The mechanism is inverted — Codex would fire NOTHING,
+since those hooks live in Claude Code's settings — but the underlying insight is correct and
+immediately relevant to this project, which the learner develops with both tools. Completed for them:
+
+```text
+Claude edits with the Edit tool      -> PostToolUse fires -> provenance recorded
+Claude runs sed -i via Bash          -> no event          -> change with no record
+the learner edits in their editor    -> no event          -> change with no record
+another tool such as Codex edits     -> no event          -> change with no record
+```
+
+Same gap, four ways in. This is why the plan requires `Stop` to re-inspect actual Git state rather
+than trusting the event stream.
+
+SESSION STOP — 2026-09-04, time-boxed at the learner's request. No Phase 8 code exists and none is
+authorized.
+
+NEXT REQUIRED STEP:
+Continue the Phase 8 specification. The next question is the trust boundary: a hook payload is JSON
+produced by another program, so decide what BuildLens may believe from it versus what it must verify
+itself. Do not look at a payload's fields before that decision is made. After that: what BuildLens
+records per observed file version, and whether `session.py` is the right home for it.

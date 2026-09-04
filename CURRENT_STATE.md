@@ -2021,17 +2021,51 @@ NOT HELD  the values SystemExit and 2 as a recalled fact.
 That is a lookup-able fact living in one line of their own tests, not a mental-model gap. Do not
 re-teach the policy. One more delayed retrieval; if it lapses again, stop testing it.
 
+SESSION 2026-09-04 (continued) — PHASE 8 SPECIFICATION OPENED.
+
+`EV-P8-HOOKS-SPEC-317`. Hooks were introduced from real evidence: three of the four hooks the plan
+names are already configured on this machine and firing in this session, and the UserPromptSubmit
+hook's stdout is visible in the transcript on every learner message.
+
+Hooks were taught as a transfer from Phase 7 rather than as new machinery:
+
 ```text
-phase                       Phase 7 CLOSED
-last knowledge gate         owed argparse delayed retrieval (EV-P7-ARGPARSE-DELAYED-316)
+PHASE 7   BuildLens (parent)   -> git (child)          args in, stdout/exit out
+PHASE 8   Claude Code (parent) -> hook script (child)  JSON on stdin, stdout/exit out
+```
+
+The learner unaided identified both things hooks add over polling — timing, and provenance — and
+anticipated Stop's role as the turn boundary. `provenance` was supplied as the name for what they had
+already described.
+
+They were partially right that another tool could corrupt provenance; the mechanism is inverted
+(Codex fires nothing, rather than firing Claude's hook), but the gap is real and applies to this
+project, which is developed with both tools.
+
+ESTABLISHED THIS SESSION, to carry into every Phase 8 patch:
+
+```text
+events are a fast signal that something MAY have changed; Git inspection stays authoritative
+PostToolUse fires only for Claude's file tools — Bash edits, learner edits, and other tools
+    produce changes with no event at all
+therefore Stop must re-inspect actual Git state, not trust the event stream
+```
+
+No Phase 8 code exists and none is authorized.
+
+```text
+phase                       Phase 8 — specification opened, no code
+last knowledge gate         hooks as signal versus authority, and provenance
+                            (EV-P8-HOOKS-SPEC-317)
 next retrieval due          SystemExit(2) once more on a fresh surface; and the Git model taught
                             2026-09-04 (tracked/untracked, the index, which diff compares which
                             pair), which was supplied rather than retrieved
 next architecture reset     complete; next by time or major transition
-next implementation step    PHASE 8 — the Claude Code adapter. A second external system entering
-                            through the same layering, with hook payloads introducing JSON and the
-                            trust boundary MODEL OUTPUT != AUTHORITATIVE APPLICATION STATE.
-                            Read the Phase 8 plan section before proposing any patch.
+next implementation step    CONTINUE PHASE 8 SPECIFICATION. Next question: the trust boundary — a
+                            hook payload is JSON produced by another program, so decide what
+                            BuildLens may believe from it versus what it must verify itself. Do NOT
+                            show a payload's fields before that decision is made. Then: what is
+                            recorded per observed file version, and whether session.py is its home.
 deferred to a later slice   launch failure (FileNotFoundError) and timeout (TimeoutExpired)
                             normalization; neither is handled by _capture today
 milestone owed              none; Phase 7 milestone is complete
