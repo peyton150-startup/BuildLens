@@ -32727,3 +32727,144 @@ NEXT REQUIRED STEP:
 The CLI slice — wire `capture_snapshot` into `main`, print the resolved repository root followed by
 separately labelled UNSTAGED and STAGED sections, status 0 on success, and on any GitCaptureError
 write the message to stderr with a rerun instruction and return 1.
+
+## EV-P7-CLI-DESIGN-311 — replacing the CLI contract
+
+DECISION 1 — the orphaned `read_diff`. Verified unused first: its only caller was the line being
+removed, plus one test existing solely to cover it.
+
+ANSWER (verbatim):
+
+```text
+for d1 i am leaning towards a if it is truely unsued and we could think about restating it later that
+seems like the best move because keeping dead code might confuse soeone later who is reading this back
+```
+
+PASSED. Deleted. The learner's condition — "if it is truly unused" — was checked rather than assumed.
+
+DECISION 2 — output format. The learner approved the proposal and then asked for one reasonable
+objection to consider. Supplied: the `Repository:` line existed to expose the wrong-repository hazard,
+but appeared only on success, while the hazard bites hardest on failure (the home-directory case ends
+in a timeout).
+
+ANSWER (verbatim):
+
+```text
+i think it si a good idea to add it to the failure output as well , when the root resolution is the
+failure itself it makes sense to have the error message reflect that and then the user can go back
+and check to see if the bug is happeneing, i do not think this is a huge issue
+```
+
+PASSED and ADOPTED into the contract. The plumbing choice followed: `GitCaptureError` carries the
+resolved root, rather than the CLI resolving it separately.
+
+ANSWER (verbatim):
+
+```text
+option b is the one i was thinking of before you even wrote it
+```
+
+and, on the reasoning:
+
+```text
+no extra git call and the optional None is the tell for the user that something went wrong as well as
+the raise and the error message
+```
+
+PASSED on the mechanism. Precision supplied: `None` is not a signal to the USER, who never sees it;
+it is how `cli.py` knows there is no repository line to print.
+
+## EV-P7-CLI-RED-GREEN-312 — first complete vertical slice with real Git
+
+RED (verbatim):
+
+```text
+cli.py: error: the following arguments are required: path
+SystemExit code: 2
+```
+
+GREEN: all seven suites pass. Verified END TO END against real repositories, both paths:
+
+```text
+SUCCESS   Repository: <root>
+          UNSTAGED 3/4/1, STAGED 1/2/0, exit 0
+          matching the learner's own prediction in EV-P7-SNAPSHOT-TRACE-309
+
+FAILURE   Repository: <root>
+          UNSTAGED tracked: Git output was not valid UTF-8 text
+          Run buildlens analyze again.
+          exit 1, stdout empty
+```
+
+Every clause of the contract the learner specified across prior sessions is now demonstrated in
+running code: whole-snapshot rejection, the component named, the rerun instruction, status 1, no
+partial output, and the repository line present in both outcomes.
+
+### EV-P7-CLI-BOUNDARY-313 — end-to-end responsibility trace
+
+ANSWER (verbatim):
+
+```text
+the repository
+git adapter
+git adapter
+summarize
+how we ingest the diff string if the other verson control tool was giving strings a different way or
+as a list
+90
+```
+
+EVALUATION:
+PARTIAL. The `--no-index` status rule was correctly placed in `git_adapter`. Two fields misplaced a
+decision: the untracked-goes-in-UNSTAGED policy belongs to `snapshot`, and the "Files changed: 3"
+formatting belongs to `cli`.
+
+ADAPTATION:
+Rather than explaining, the learner was asked which FILE contains two specific lines. Both answered
+correctly (`snapshot`, `cli`), which settled the boundary without a lecture — applying the standing
+instruction adopted earlier this session.
+
+FACILITATOR CLAIM WITHDRAWN:
+The two misplacements were described as a pattern of "moving a decision toward the data producer".
+The learner asked for the reasoning. On inspection, two instances is thin evidence, and the simpler
+explanation is that the learner had not read `snapshot.py` or the new `cli.py`, both written minutes
+earlier by Claude. The claim was withdrawn rather than recorded as a finding about the learner.
+
+FINAL FIELD — what changes in `cli.py` if Git were replaced (verbatim):
+
+```text
+you would also need to change the imports becasue we would need to write another adapter so we would
+neeed to have a function that accoiunts for git and the other verson control tool
+```
+
+PASSED on the import, which is the exact answer: `from git_adapter import GitCaptureError` names Git
+in the boundary module, while `import snapshot` would not change. The dispatcher idea was flagged as
+speculative generality, the same thing the learner correctly refused in Phase 4.
+
+## EV-P7-GIT-IS-A-REQUIREMENT-314 — learner overturns a facilitator premise
+
+The Git-named exception in `cli.py` was offered as a leak, with three options including a rename.
+
+ANSWER (verbatim):
+
+```text
+ther will never be another tool so why rename for no reason
+```
+
+UPHELD, and the reasoning is stronger than the question. Phase 13 depends on Git worktrees, and
+Claude Code itself uses them. Git is an architectural REQUIREMENT of BuildLens, not a swappable
+implementation choice, so naming it at the boundary is accurate rather than leaky.
+
+FACILITATOR ERROR: a generic principle — boundaries should not name the outside tool — was applied
+without checking whether it held for this system.
+
+ARCHITECTURAL ASSUMPTION NOW STATED EXPLICITLY:
+
+```text
+Git is a requirement of BuildLens, not a choice.
+Naming Git in module and type names is therefore accurate, not a boundary leak.
+```
+
+NEXT REQUIRED STEP:
+Phase 7 milestone transfer variant on a different surface, then the phase-close review. The delayed
+argparse parser-versus-Namespace retrieval is also still owed.

@@ -1925,27 +1925,80 @@ OPEN ITEM, deliberately not acted on: `unstaged_parts` in `snapshot.py` holds un
 are not unstaged in Git's vocabulary. The learner rejected renaming it for now. Revisit only if it
 causes a real misreading in code, not in conversation.
 
+SESSION 2026-09-04 (continued) — THE VERTICAL SLICE IS COMPLETE AND RUNS.
+
+`buildlens analyze` now inspects the repository resolved from the current directory and prints the
+root followed by separately labelled UNSTAGED and STAGED sections. Verified end to end against real
+repositories on both paths; the success numbers matched the learner's own prediction from
+`EV-P7-SNAPSHOT-TRACE-309`.
+
 ```text
-phase                       Phase 7 — capture, decoding, root resolution, and composition complete
-last knowledge gate         snapshot trace verified against a real repository
-                            (EV-P7-SNAPSHOT-TRACE-309)
+SUCCESS   Repository: <root>
+          UNSTAGED  Files changed: 3 / Lines added: 4 / Lines removed: 1
+          STAGED    Files changed: 1 / Lines added: 2 / Lines removed: 0
+          exit 0
+
+FAILURE   Repository: <root>
+          UNSTAGED tracked: Git output was not valid UTF-8 text
+          Run buildlens analyze again.
+          exit 1, stdout empty
+```
+
+Learner decisions this slice: `read_diff` deleted after its disuse was verified rather than assumed;
+the repository line added to the FAILURE output too, because the wrong-repository hazard bites
+hardest when the run fails; and `GitCaptureError` carries the resolved root so no extra Git call is
+needed.
+
+`EV-P7-GIT-IS-A-REQUIREMENT-314` — the learner overturned a facilitator premise. A Git-named
+exception in `cli.py` was offered as a boundary leak; they pointed out there will never be another
+tool. Correct: Phase 13 depends on Git worktrees and Claude Code uses them.
+
+ARCHITECTURAL ASSUMPTION, now explicit:
+
+```text
+Git is a requirement of BuildLens, not a swappable choice.
+Naming Git in module and type names is accurate, not a leak.
+```
+
+A second facilitator claim was WITHDRAWN: two misplaced responsibilities were described as a
+reasoning pattern, when the simpler cause was that the learner had not read `snapshot.py` or the new
+`cli.py`, both written minutes earlier by Claude.
+
+### Module map, as it now stands
+
+```text
+git_adapter   MECHANISM   which Git command, which statuses are valid, decoding
+snapshot      POLICY      which view a change lands in, never summing, all-or-nothing
+summarize     COUNTING    diff text -> three numbers
+classify      COUNTING    one diff line -> one label
+session       STATE       in-memory change history, not yet wired to the snapshot path
+cli           BOUNDARY    arguments, formatting, streams, exit status
+```
+
+```text
+phase                       Phase 7 — vertical slice complete; milestone transfer still owed
+last knowledge gate         end-to-end boundary trace (EV-P7-CLI-BOUNDARY-313) and the
+                            Git-is-a-requirement decision (EV-P7-GIT-IS-A-REQUIREMENT-314)
 next retrieval due          delayed argparse parser-versus-Namespace retrieval on a fresh surface
 next architecture reset     complete; next by time or major transition
-next implementation step    CLI SLICE — wire capture_snapshot into main, print the resolved
-                            repository root, then separately labelled UNSTAGED and STAGED sections.
-                            Status 0 on success. On any GitCaptureError write the message to stderr
-                            with a rerun instruction and return 1.
+next implementation step    PHASE 7 MILESTONE TRANSFER on a different surface, then phase close.
+                            No further Phase 7 product code is required for the milestone.
 deferred to a later slice   launch failure (FileNotFoundError) and timeout (TimeoutExpired)
                             normalization; neither is handled by _capture today
 milestone owed              Phase 7 milestone transfer at phase close; the slice gates do not
                             substitute for it
 major/deep counter          Phase 7-15 counter has not started; Phase 7 is not yet complete
-last published commit       c59b622 — merge: phase 7 snapshot composition
+last published commit       5f7eb61 — merge: phase 7 cli analyzes the current repository
 ```
 
 Files the learner should currently be able to teach:
 
 - `cli.py`
+- `git_adapter.py`
+- `snapshot.py`
+- `test_git_adapter.py`
+- `test_git_adapter_integration.py`
+- `test_snapshot.py`
 - `test_cli.py`
 - `classify.py`
 - `summarize.py`
