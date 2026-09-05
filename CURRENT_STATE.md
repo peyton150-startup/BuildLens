@@ -2133,39 +2133,97 @@ The Phase 7 design rationale is restored with it: `git diff HEAD` skips the inde
 unstaged work both appear in one call.
 
 No Phase 8 code exists and none is authorized.
+SESSION 2026-09-05 (second sitting) — OBSERVED-VERSION RECORD DERIVED.
+
+TWO OWED RETRIEVALS CLEARED.
+
+The three-place diff model is now HELD (`EV-P8-DIFF-INVERSE-327`). It was retrieved unaided on a new
+surface and in the reverse direction — given diff output, reconstruct the cause. One wrong field was
+notation only (`-` read as an addition), corrected in a single exchange.
+
+The deferred adversarial state was constructed by the learner (`EV-P8-STAGED-ONLY-STATE-328`):
 
 ```text
-phase                       Phase 8 — trust boundary specified, no code
-last knowledge gate         content versus provenance, and provenance stored as a claim
-                            (EV-P8-TRUST-RULE-325, transfer EV-P8-TRANSFER-326)
-next retrieval due          THREE items, all on fresh surfaces in a LATER session:
-                            1. the three-place diff model — rebuilt with scaffolding in the same
-                               session it failed, so NOT held
-                            2. SystemExit(2) — third lapse already spent; if it lapses again, stop
-                               testing it
-                            3. the believe/verify rule, unaided, on a surface that is neither hooks
-                               nor CI webhooks
+1  edit api.py
+2  git add api.py
+3  edit api.py back to its original content
+   -> git diff HEAD prints nothing while git diff --cached prints something
+```
+
+Consequence flagged for the adapter, NOT yet decided: the choice of comparison bounds what BuildLens
+can observe at all.
+
+THE PRODUCT JUSTIFICATION IS NOW DERIVED, NOT ASSERTED (`EV-P8-WHY-BUILDLENS-329`). The learner
+objected that Git can answer content questions too. That objection was tested rather than waved away,
+and the learner traced their way to:
+
+```text
+Git answers questions about states it was handed — commits and the index
+BuildLens answers questions about states nobody ever handed Git, which exist
+    for minutes and are then overwritten forever
+```
+
+Two corrections were needed on the way, both recorded in the ledger: tracked-versus-untracked is not
+the reason a lost version is unrecoverable, and a hook preserves nothing — it is a signal that
+arrives and is gone.
+
+TRUST BOUNDARY SHARPENED by the learner's own question ("I thought we were storing them as a claim
+not a fact?"). Both halves now stated:
+
+```text
+what the hook told BuildLens     claim, labelled, unverifiable
+what BuildLens saw for itself    observation, first-hand
+```
+
+Storing provenance as a claim does not mean declining to store observed content.
+
+RECORD FIELDS DERIVED BACKWARDS FROM QUERIES (`EV-P8-RECORD-FIELDS-330`), with the plan's list
+withheld until after commitment. Four of six derived:
+
+```text
+repository-relative path   derived, and reused the Phase 7 boundary unprompted
+base commit                derived by asking where a diff chain starts
+observed-at time           derived
+provenance                 derived, correctly hedged as a claim
+content hash               NOT derived — needs hashlib
+session/worktree id        NOT derived — needs the isolated-worktree fact
+```
+
+The learner chose to store FULL CONTENT rather than diffs, and after one wrong defense produced the
+correct one: replaying a chain of diffs costs more than a single read. Noted that Git does both.
+
+No Phase 8 code exists and none is authorized.
+
+```text
+phase                       Phase 8 — record model derived, no code
+last knowledge gate         observed-version record derived from its queries
+                            (EV-P8-RECORD-FIELDS-330)
+next retrieval due          TWO items, fresh surfaces, later sessions:
+                            1. SystemExit(2) — third lapse already spent; if it lapses again,
+                               stop testing it
+                            2. the believe/verify rule, unaided, on a surface that is neither
+                               hooks nor CI webhooks
+                            CLEARED this session: the three-place diff model, now HELD
 next architecture reset     complete; next by time or major transition
-next implementation step    CONTINUE PHASE 8 SPECIFICATION. Next question: what is recorded per
-                            observed file version, and whether session.py is its home. The plan
-                            lists session/worktree id, repo-relative path, base commit/blob, content
-                            hash, observed-at, provenance. Do NOT show that list; make the learner
-                            derive the fields from the believe/verify rule they just established,
-                            then compare. Content hashing introduces hashlib and the
-                            file bytes -> SHA-256 -> fingerprint chain; a hash is not authorization,
-                            authorship, or semantic equivalence.
-                            Still open from last session: is "the learner edits only through
-                            BuildLens" a stated product assumption or something BuildLens must
+next implementation step    ADJACENT-LEARNING LOOP FOR HASHING, opened by the learner's own
+                            question: "how would you know what fingerprint of the file to store".
+                            Teach file bytes -> SHA-256 digest -> equality fingerprint. The
+                            non-negotiable: a hash is NOT authorization, authorship, or semantic
+                            equivalence. Then the sixth field, session/worktree id, which requires
+                            showing that Claude Code Desktop uses an isolated worktree.
+                            Then: is session.py the right home for these records?
+                            Still open from 2026-09-04: is "the learner edits only through
+                            BuildLens" a stated product assumption, or something BuildLens must
                             tolerate being violated?
 deferred to a later slice   launch failure (FileNotFoundError) and timeout (TimeoutExpired)
                             normalization; neither is handled by _capture today.
-                            Also owed: show the learner the state where git diff HEAD is empty while
-                            git diff --cached is not. They guessed such a state exists and were right
-                            for the wrong reason; they have not seen it.
+                            Storage mechanism for records (SQLite vs file) — Phase 10.
+                            Hook-versus-write ordering and duplication — Phase 9; found early by
+                            the learner and deliberately not solved here.
 milestone owed              none; Phase 7 milestone is complete
 major/deep counter          1/2. Cumulative review due after the SECOND completed major phase,
                             so NOT due before Phase 8.
-last published commit       see git log; this session published the trust-boundary specification
+last published commit       see git log
 ```
 
 Files the learner should currently be able to teach:

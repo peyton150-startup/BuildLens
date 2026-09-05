@@ -33559,3 +33559,207 @@ learner: no, 90                                                          CORRECT
 
 The author field is self-declared config — a claim wearing a fact's clothes. The rule holds on a
 surface with no hooks and no Claude in it.
+
+## SESSION 2026-09-05 (second sitting)
+
+### EV-P8-DIFF-INVERSE-327 — three-place model, owed retrieval, PASSED
+
+Fresh surface, and a spiral step up: the model run BACKWARDS. Learner given diff output and asked to
+reconstruct the cause.
+
+PROMPT (verbatim):
+
+```text
+someone worked on api.py, which was committed and clean beforehand.
+
+git diff           prints   -def old_helper():
+git diff --cached  prints   nothing
+
+What did they do to api.py =
+Did they run git add =
+How you know that from --cached being empty =
+git diff HEAD will print =
+Confidence =
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+they did not git add they added def old_helper()
+because that is the head compared to the index which are the same at this point
+-def old_helper()
+100
+```
+
+EVALUATION: MODEL HELD. Pair identification, inference from the empty diff, and predicted output all
+correct and unaided.
+
+One field wrong, and it is NOT the model: the learner read `-` as an addition. Notation, not
+structure. Corrected in one exchange:
+
+```text
+What does the leading - mean =
+learner: "you removed it / so removed old_helper"   CORRECT, 90
+```
+
+CONFIDENCE NOTE: 100 was given on an answer containing a wrong field. Flagged. 100 must mean every
+field would be bet on.
+
+STATUS: the three-place diff model is now HELD. It failed 2026-09-04, was rebuilt with scaffolding
+the same day, and has now been retrieved unaided on a new surface in a later session.
+
+### EV-P8-STAGED-ONLY-STATE-328 — constructing an adversarial Git state
+
+Closes the item deferred yesterday. The learner had guessed such a state exists, for the wrong
+reason; here they derived it.
+
+PROMPT: produce a state where `git diff HEAD` prints nothing while `git diff --cached` prints
+something.
+
+LEARNER ANSWER, first two fields (verbatim):
+
+```text
+the working tree must be the same as head and staged must be the changes to the file,
+```
+
+Both CORRECT, derived from the pairs.
+
+Third field stalled, but the stall was well-reasoned rather than blank (verbatim):
+
+```text
+not sure, i was thinking that maybe you can git add but then the working tree and the index would be
+the same and head would not be
+```
+
+That trace is itself correct — edit plus `git add` leaves tree == index, both != HEAD. One nudge
+given: the index is already correct, only the working tree must move, and step 3 needs no Git
+command.
+
+LEARNER ANSWER (verbatim):
+
+```text
+you could git add and then revert thos changes while still keeping the git add staged
+```
+
+CORRECT.
+
+```text
+1  edit api.py
+2  git add api.py
+3  edit api.py back to its original content
+```
+
+CONSEQUENCE FLAGGED FOR THE ADAPTER, not yet decided: in this state `git diff HEAD` reports nothing
+while a real change sits in the index. The choice of comparison bounds what BuildLens can observe.
+
+### EV-P8-WHY-BUILDLENS-329 — the learner's own objection, and its answer
+
+The learner raised the central objection of the phase, unprompted:
+
+```text
+ok so i need to ask more content related questions, my only concern is that git can answer these as
+well
+```
+
+This is the right challenge and was NOT answered by assertion. A discriminating scenario was given:
+cli.py committed at 09:00, Claude edits at 09:10, learner saves over it at 09:20, nothing committed;
+at 09:30 ask for the 09:10 version.
+
+Learner answered correctly that Git cannot reconstruct it. The MECHANISM was initially wrong:
+
+```text
+learner: "it has the ability to see the untracked files that have not been put on gits radar yet"
+```
+
+MISCONCEPTION: tracked-versus-untracked treated as the reason. cli.py IS tracked. Learner then
+defended it as "but the changes were not" — tracking treated as a property of changes rather than of
+files.
+
+Remediated on a no-Git surface (notes.txt containing `hello`, overwritten with `goodbye`). Learner
+concluded correctly that `hello` is gone, but still justified it via `git add`. Corrected explicitly:
+saving overwrote the only copy; that is a filesystem fact, and Git's role is the inverse — it
+preserves only what it is explicitly handed.
+
+Learner then reached, with one nudge each:
+
+```text
+"so claudes verson is overwrittedn adn then the record of claude changes is only saved with the hooks"
+```
+
+PARTIAL — the hook is a signal that arrives and is gone; it preserves nothing. Pressed with: hook
+received, nothing else done, is 09:10 recoverable?
+
+The learner then asked an EXCELLENT question, applying yesterday's rule:
+
+```text
+I thought we were storing them as a claim not a fact?
+```
+
+This forced a genuine sharpening of the trust boundary, now recorded as doctrine:
+
+```text
+what the hook told BuildLens     claim, labelled, unverifiable
+what BuildLens saw for itself    observation, first-hand
+```
+
+Storing provenance as a claim does not mean declining to store observed content.
+
+FINAL ANSWER (verbatim): `we save the 9:10 changes and it has to go to a db`
+
+CORRECT. Storage mechanism (SQLite/file) deferred to Phase 10; the NEED is now derived rather than
+asserted:
+
+```text
+Git answers questions about states it was handed — commits and the index
+BuildLens answers questions about states nobody ever handed Git, which exist
+    for minutes and are then overwritten forever
+```
+
+### EV-P8-RECORD-FIELDS-330 — deriving the observed-version record
+
+Method: fields derived BACKWARDS from queries. The plan's list was withheld until after commitment.
+
+First attempt at "questions the records must answer" produced system concerns rather than user
+questions ("can git verify the change", "how can we record when something happens"). Reframed as
+"what do you type into BuildLens". Second attempt produced three real questions, but ALL THREE were
+temporal — none mentioned a file. Surfaced to the learner directly.
+
+FIELDS DERIVED, with the decisions behind them:
+
+```text
+content            learner chose FULL CONTENT over storing a diff
+                   first defense was WRONG — "you cant make a file based on the difference"; patch
+                   and git apply do exactly that. Corrected, learner produced the real defense:
+                   "if yuo have the diff then you would need to string every recorded diff to get
+                   the verson you wanted"  -> replay cost versus single read. Correct trade-off;
+                   noted that Git does both (snapshots plus packfile deltas).
+base commit        "the last confirmed commit" — derived from asking where a diff chain starts
+observed-at time   derived in the first pass
+provenance         derived in the first pass and correctly hedged as "if possible"
+path               NOT derived until records were shown accumulating with no way to tell which file
+                   they described. Learner then chose repository-relative over absolute, reusing the
+                   Phase 7 boundary unprompted: the repo root is context the caller already holds.
+                   Refined to include subdirectories: "ok folder and filneame but not all the way
+                   down to user"
+```
+
+SCORE AGAINST THE PLAN: four of six fields derived (path, base commit, observed-at, provenance).
+
+NOT DERIVED, and correctly so — both need machinery not yet met:
+
+```text
+content hash        needs hashlib
+session/worktree id needs the fact that Claude Code uses an isolated worktree
+```
+
+HASH TRIGGER OPENED, not taught. Asked how to tell whether a newly observed version equals one
+already recorded, the learner answered "cmpare the 2" (correct), named size as the cost (correct),
+and then asked the exact right question:
+
+```text
+but how would you know what fingerprint of the file to store
+```
+
+That question is the entry point for the next session's adjacent-learning loop:
+`file bytes -> SHA-256 digest -> equality/version fingerprint`, with the plan's non-negotiable that a
+hash is not authorization, authorship, or semantic equivalence.
