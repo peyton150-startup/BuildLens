@@ -2133,6 +2133,7 @@ The Phase 7 design rationale is restored with it: `git diff HEAD` skips the inde
 unstaged work both appear in one call.
 
 No Phase 8 code exists and none is authorized.
+
 SESSION 2026-09-05 (second sitting) — OBSERVED-VERSION RECORD DERIVED.
 
 TWO OWED RETRIEVALS CLEARED.
