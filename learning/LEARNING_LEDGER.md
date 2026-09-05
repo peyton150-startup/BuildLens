@@ -33848,3 +33848,112 @@ the hashlib prediction exercise (determinism, avalanche, fixed length, and the b
 the non-negotiable trap: a hash is NOT authorization, authorship, or semantic equivalence
 a transfer variant
 ```
+
+### EV-P8-HASH-DETERMINISM-333 — syntax-only rescue, then both directions held
+
+The learner stopped the design question with an explicit syntax request:
+
+```text
+what is hashing, i have no idea how hashlib works
+```
+
+Handled under CLAUDE.md syntax-only help mode: surrounding problem abandoned, one concept explained,
+R0 example given.
+
+TOY: `toyhash(word) = sum of alphabet positions, mod 10`.
+
+```text
+learner: toyhash("bad") = 2+1+4 = 7 % 10 = 7           CORRECT, computed unaided
+         same tomorrow on another computer = "the same"
+         anything that could change it = "no"           CORRECT — determinism held
+```
+
+DIRECTIONALITY, the actual blocker. The learner had been applying the collision rule backwards,
+answering "probably but not confirmed" when TOLD the bytes were identical. Two collision examples
+supplied in the toy (`toyhash("ad") = toyhash("e") = 5`), then:
+
+```text
+same word  -> same digit  = "guarantee"      CORRECT
+same digit -> same word   = "proabability"   CORRECT
+```
+
+Flipped again one exchange later on the real scenario, and the learner then asked the question that
+shows the model arriving rather than the answer being guessed:
+
+```text
+so they are both guarenteed but how would i know they are same bytes just by looking at the haash
+```
+
+That question IS the backward direction. Named as such, then held cleanly:
+
+```text
+identical bytes   -> identical digests    GUARANTEE
+identical digests -> identical bytes      overwhelmingly likely, NOT proven
+```
+
+THE NON-NEGOTIABLE, reached by the learner on the Claude-versus-learner identical-bytes scenario:
+
+```text
+"nothing it proves nothing about hwo wrote the file"
+```
+
+Note the trap had appeared spontaneously one exchange earlier — asked what the fingerprint is for,
+the learner first answered "to archive a files history and provanace". Corrected by scenario, not by
+assertion.
+
+### EV-P8-HASH-TRANSFER-334 — checksum on a download page
+
+Transfer surface with no Git, no Claude, no BuildLens.
+
+First pass PARTIAL: "that the hashes match" (circular), "they are the same file" (that is what it
+DOES prove), and "no idea" on the attacker case. Scaffolded with the concrete attack — attacker
+replaces the installer AND republishes the matching digest.
+
+```text
+learner: "yes" the check still passes                  CORRECT
+```
+
+CONCLUSION ESTABLISHED:
+
+```text
+useful for    detecting accidental corruption
+useless for   proving origin — file and digest come from the same source
+```
+
+Same shape as the Phase 8 trust rule: verifying content against a claim is not verifying the claim.
+
+APPLIED BACK, learner unaided (verbatim):
+
+```text
+no, but we could use it to see if a hook for postusetool actually is truthful or is bugged
+to see if a file verson has actually changed
+```
+
+CORRECT, and a genuine extension the learner produced themselves — the digest can FALSIFY the hook's
+CONTENT claim while remaining silent on its PROVENANCE claim. The boundary held under transfer.
+
+### EV-P8-BYTES-PREFIX-335 — the b"" prefix and why encoding must be explicit
+
+```text
+learner: b makes it "bytes"                                        CORRECT
+         refusal reason: "becasue they are not the same type of data"   shallow but true
+```
+
+Probed with the same text in UTF-8 versus Latin-1:
+
+```text
+same text two encodings -> "different" digests                     CORRECT
+why Python refuses to guess -> "because it should be explicitly explained"   CORRECT
+```
+
+IMPLEMENTATION CONSEQUENCE, stated for the future patch: BuildLens must read file bytes, not decoded
+text, or the digest describes a decoding rather than the bytes on disk.
+
+LOOP COMPLETE: trigger -> smallest concept -> prediction -> apply -> transfer -> evidence.
+
+The sixth record field now has a derivation behind it:
+
+```text
+content_hash   OBSERVED   cheap equality check over bytes BuildLens read itself;
+                          proves difference, not authorship, not authority
+```

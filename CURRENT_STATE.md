@@ -2186,7 +2186,7 @@ repository-relative path   derived, and reused the Phase 7 boundary unprompted
 base commit                derived by asking where a diff chain starts
 observed-at time           derived
 provenance                 derived, correctly hedged as a claim
-content hash               NOT derived — needs hashlib
+content hash               derived in the third sitting, after the hashlib loop
 session/worktree id        NOT derived — needs the isolated-worktree fact
 ```
 
@@ -2196,29 +2196,24 @@ correct one: replaying a chain of diffs costs more than a single read. Noted tha
 No Phase 8 code exists and none is authorized.
 
 ```text
-phase                       Phase 8 — record model derived; hashing loop open, no code
-last knowledge gate         observed-version record derived from its queries
-                            (EV-P8-RECORD-FIELDS-330)
-next retrieval due          TWO items, fresh surfaces, later sessions:
+phase                       Phase 8 — five of six record fields derived, no code
+last knowledge gate         hashing: both directions of the guarantee, and that a digest
+                            proves neither authorship nor authority
+                            (EV-P8-HASH-DETERMINISM-333, transfer EV-P8-HASH-TRANSFER-334)
+next retrieval due          THREE items, fresh surfaces, later sessions:
                             1. SystemExit(2) — third lapse already spent; if it lapses again,
                                stop testing it
                             2. the believe/verify rule, unaided, on a surface that is neither
                                hooks nor CI webhooks
-                            CLEARED this session: the three-place diff model, now HELD
+                            3. the hash asymmetry — held only after repeated flipping between the
+                               forward and backward directions; retrieve it cold on a new surface
+                            CLEARED: the three-place diff model, now HELD
 next architecture reset     complete; next by time or major transition
-next implementation step    RESUME THE HASHING LOOP MID-EXERCISE. Held so far: collisions are
-                            forced by counting, and the asymmetry — differing digests GUARANTEE
-                            different content, matching digests only make sameness probable.
-                            The learner then spotted unprompted that Git uses SHA-1 over a header
-                            plus content, so BuildLens's own SHA-256 can never agree with a Git
-                            blob id. The open question, already put to them, is whether that
-                            disagreement matters and what BuildLens's fingerprint is FOR.
-                            Then still owed in this loop: the hashlib prediction exercise
-                            (determinism, avalanche, fixed length, and the b"" bytes prefix), the
-                            non-negotiable that a hash is NOT authorization, authorship, or
-                            semantic equivalence, and a transfer variant.
-                            Then the sixth field, session/worktree id, which requires
-                            showing that Claude Code Desktop uses an isolated worktree.
+next implementation step    THE SIXTH RECORD FIELD: session/worktree id. This requires showing
+                            that Claude Code Desktop uses an ISOLATED WORKTREE for Git-backed
+                            sessions — a fact the learner has not been given. Do not present the
+                            record model as finished until they can say why a worktree id is not
+                            redundant with a repository path.
                             Then: is session.py the right home for these records?
                             Still open from 2026-09-04: is "the learner edits only through
                             BuildLens" a stated product assumption, or something BuildLens must
