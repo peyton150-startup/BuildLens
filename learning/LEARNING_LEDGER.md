@@ -33957,3 +33957,87 @@ The sixth record field now has a derivation behind it:
 content_hash   OBSERVED   cheap equality check over bytes BuildLens read itself;
                           proves difference, not authorship, not authority
 ```
+
+### EV-P8-WORKTREE-ID-336 — the sixth field, and physical isolation
+
+GROUNDED IN REAL EVIDENCE FIRST. `git worktree list` was run on this repository and shows ONE
+worktree. The plan's assumption that Claude Code Desktop supplies an isolated worktree is NOT in
+effect here; this session edits the learner's own checkout. Stated to the learner before designing
+around it.
+
+COLLISION TRACE — both writers in one folder. Learner answered correctly that each side's work is
+overwritten, and that BuildLens's stored records recover them. Probed on the limit:
+
+```text
+Did BuildLens ever see your unsaved 09:00 editor buffer = "no"
+Does recording prevent the collision or only document it = "only document it"
+```
+
+Both CORRECT. This is the motivation for physical isolation.
+
+TERMINOLOGY SUPPLIED ON REQUEST ("what is pyhsical isolation"), from the learner's own
+COLLABORATIVE_EDITING invariants. Learner then produced the trade unaided:
+
+```text
+"is seperate places to write, collision impossible, when it is time to git add how do you go
+about that"
+```
+
+CORRECT AND IMPORTANT: physical isolation does not remove the problem, it CONVERTS a lost edit into
+a reconciliation. The learner found the conversion themselves.
+
+WORKTREE MECHANISM — learner predicted WRONG on both directions (said a worktree commit would NOT be
+visible from the other folder, and a copied folder's WOULD be). Settled by RUNNING IT in a throwaway
+repo in the scratchpad rather than by assertion:
+
+```text
+worktree commit      visible from the other checkout      YES
+copied-folder commit visible from the other checkout      NO
+```
+
+```text
+a worktree      one repository, shared objects and refs, separate working tree and index
+a copied folder a second independent repository; histories diverge with no connection
+```
+
+FIELD DERIVATION. Shown two worktrees both yielding `path = "cli.py"`, the learner correctly called
+identical paths CORRECT rather than a bug — repo-relative by design. Asked what the five fields could
+not answer, the learner twice said "provenance", which is already a field. The distinction that had
+to be drawn:
+
+```text
+provenance   who is CLAIMED to have made the change
+worktree     where BuildLens actually READ the bytes
+```
+
+Sharpened with a case where they disagree (Claude running sed inside the human worktree). The learner
+also proposed merging before observing; blocked by asking how many versions survive a merge:
+
+```text
+learner: "one" / "they were merged"    -> merging first destroys what you wanted to compare
+```
+
+Learner then named the field as the worktree read from, and tagged it OBSERVED. CORRECT.
+
+IDENTITY VERSUS LOCATION — absolute path (A) versus stable id (B). Learner first chose A, defending it
+on readability (legitimate) and on record size (not a real factor; corrected). Challenged with a
+rename of a folder behind 400 existing records:
+
+```text
+Under A, what do the 400 records say = "the same thing"          CORRECT
+Under B, what changes on rename       = "nothing chanfes"        CORRECT
+```
+
+Learner reversed to B. Principle stated once they had committed: B separates IDENTITY from LOCATION,
+which is the same principle already applied to repo-relative `path`.
+
+RECORD MODEL NOW COMPLETE, all six derived rather than supplied:
+
+```text
+path              OBSERVED   repository-relative
+base commit       OBSERVED   what the content is a change relative to
+observed-at       OBSERVED   when BuildLens looked
+content hash      OBSERVED   cheap equality over bytes BuildLens read itself
+session/worktree  OBSERVED   which checkout it was read from — identity, not location
+provenance        CLAIMED    what the hook asserts; unverifiable, labelled
+```

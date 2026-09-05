@@ -2187,8 +2187,37 @@ base commit                derived by asking where a diff chain starts
 observed-at time           derived
 provenance                 derived, correctly hedged as a claim
 content hash               derived in the third sitting, after the hashlib loop
-session/worktree id        NOT derived — needs the isolated-worktree fact
+session/worktree id        derived in the fourth sitting, after the worktree demonstration
 ```
+
+ALL SIX FIELDS ARE NOW DERIVED RATHER THAN SUPPLIED:
+
+```text
+path              OBSERVED   repository-relative
+base commit       OBSERVED   what the content is a change relative to
+observed-at       OBSERVED   when BuildLens looked
+content hash      OBSERVED   cheap equality over bytes BuildLens read itself
+session/worktree  OBSERVED   which checkout it was read from — identity, not location
+provenance        CLAIMED    what the hook asserts; unverifiable, labelled
+```
+
+Five observed, one claimed. The trust boundary is visible in a single row.
+
+PHYSICAL ISOLATION established, with the trade the learner found themselves: separate working
+directories do not remove the problem, they CONVERT a lost edit into a reconciliation. A lost edit is
+unrecoverable; a reconciliation is merely work.
+
+WORKTREE VERSUS COPIED FOLDER was settled by RUNNING IT in a scratch repository after the learner
+predicted both directions wrongly:
+
+```text
+worktree commit       visible from the other checkout     YES
+copied-folder commit  visible from the other checkout     NO
+```
+
+IDENTITY VERSUS LOCATION: the learner reversed from storing absolute paths to storing a stable
+worktree id after tracing what a folder rename does to 400 existing records. Same principle as
+repo-relative `path`, now applied twice.
 
 The learner chose to store FULL CONTENT rather than diffs, and after one wrong defense produced the
 correct one: replaying a chain of diffs costs more than a single read. Noted that Git does both.
@@ -2196,10 +2225,9 @@ correct one: replaying a chain of diffs costs more than a single read. Noted tha
 No Phase 8 code exists and none is authorized.
 
 ```text
-phase                       Phase 8 — five of six record fields derived, no code
-last knowledge gate         hashing: both directions of the guarantee, and that a digest
-                            proves neither authorship nor authority
-                            (EV-P8-HASH-DETERMINISM-333, transfer EV-P8-HASH-TRANSFER-334)
+phase                       Phase 8 — observed-version record complete, no code
+last knowledge gate         physical isolation, worktree versus copied folder, and identity
+                            versus location (EV-P8-WORKTREE-ID-336)
 next retrieval due          THREE items, fresh surfaces, later sessions:
                             1. SystemExit(2) — third lapse already spent; if it lapses again,
                                stop testing it
@@ -2209,15 +2237,18 @@ next retrieval due          THREE items, fresh surfaces, later sessions:
                                forward and backward directions; retrieve it cold on a new surface
                             CLEARED: the three-place diff model, now HELD
 next architecture reset     complete; next by time or major transition
-next implementation step    THE SIXTH RECORD FIELD: session/worktree id. This requires showing
-                            that Claude Code Desktop uses an ISOLATED WORKTREE for Git-backed
-                            sessions — a fact the learner has not been given. Do not present the
-                            record model as finished until they can say why a worktree id is not
-                            redundant with a repository path.
-                            Then: is session.py the right home for these records?
+next implementation step    IS session.py THE RIGHT HOME for observed-version records? Make the
+                            learner argue it from what session.py already owns before showing them
+                            the file. Then the Phase 8 knowledge gate: given an unfamiliar hook
+                            payload, what belongs to the Claude adapter, what internal
+                            representation leaves it, and which parts of the system are new versus
+                            unchanged.
                             Still open from 2026-09-04: is "the learner edits only through
                             BuildLens" a stated product assumption, or something BuildLens must
                             tolerate being violated?
+                            NOTE FOR HONESTY: `git worktree list` shows ONE worktree here. The
+                            plan's isolated-Claude-worktree assumption is not in effect in this
+                            repository today; do not describe it as observed fact.
 deferred to a later slice   launch failure (FileNotFoundError) and timeout (TimeoutExpired)
                             normalization; neither is handled by _capture today.
                             Storage mechanism for records (SQLite vs file) — Phase 10.
