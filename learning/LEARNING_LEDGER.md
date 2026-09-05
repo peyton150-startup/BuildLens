@@ -34041,3 +34041,75 @@ content hash      OBSERVED   cheap equality over bytes BuildLens read itself
 session/worktree  OBSERVED   which checkout it was read from — identity, not location
 provenance        CLAIMED    what the hook asserts; unverifiable, labelled
 ```
+
+### EV-P8-SESSION-HOME-337 — is session.py the right home for observed-version records
+
+RECALL FIRST, file unopened. Learner from memory (verbatim):
+
+```text
+the session instance which is th e self .changes list whic h is  the lsit of chanres to the code
+when the code is running that is a session once it stops running the session is done
+no
+```
+
+ACCURATE. `_changes` list of diff-text strings, appended in order, no Git knowledge. Learner had also
+retained that `history()` returns a copy, defended back in Phase 6.
+
+STRUCTURAL MISMATCH, learner unaided:
+
+```text
+Can record(diff_text) accept a six-field record = "no"
+Records must = "persist"
+```
+
+NAME COLLISION. Two different things are called "session":
+
+```text
+Session()            one run of BuildLens
+session/worktree id  the Claude session the bytes were read from
+```
+
+Lifetime trace given (Claude session spanning two BuildLens runs). Learner first answered 2 and 2;
+corrected to 2 Sessions and 1 Claude session by counting the start lines. The lifetimes are
+independent.
+
+DECISION, learner's own words (verbatim):
+
+```text
+ok so session is not the correct place, the session object owns everything and when the session is
+destroyed there go the records along with it
+so no
+```
+
+CORRECT, and for the RIGHT REASON — lifetimes, not tidiness. Records must outlive the object, so the
+object cannot own them. The learner also asked the right follow-up (does persistence change this?)
+and answered it themselves: with a store, the store owns them.
+
+Learner correctly rejected deleting Session: "it keeps its same resopinsiblity".
+
+NAMING. Learner chose B (rename the field, not the class) — CORRECT, since inside BuildLens's own
+code "session" unambiguously means BuildLens's run. They then contradicted the choice by proposing to
+rename the class to `Existence`; rejected on Code Complete grounds — every object is created and
+destroyed, so the name distinguishes nothing.
+
+SCAFFOLDING ERROR BY CLAUDE, recorded: the learner was pushed toward `claude_______`, which is WRONG.
+Records are produced from BOTH worktrees, including the human one, so a Claude-specific prefix cannot
+name a field that also holds `wt-human-01`. The learner's own repeated instinct — "worktree" — was
+the better answer.
+
+RESOLVED:
+
+```text
+worktree_id = "wt-claude-7f3c"
+```
+
+Dropping the word "session" from the field removes the collision at its source: only one thing in the
+codebase is then called a session, and it is BuildLens's own run.
+
+DESIGN POSITION AT CLOSE:
+
+```text
+session.py    keeps its contract; NOT the home for observed-version records
+records       belong in a store that outlives any Session object   (Phase 10)
+worktree_id   names which checkout the bytes were read from
+```

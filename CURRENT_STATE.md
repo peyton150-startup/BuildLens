@@ -2203,6 +2203,21 @@ provenance        CLAIMED    what the hook asserts; unverifiable, labelled
 
 Five observed, one claimed. The trust boundary is visible in a single row.
 
+HOME DECIDED (`EV-P8-SESSION-HOME-337`). `session.py` is NOT the home for these records, and the
+learner reached that from lifetimes rather than tidiness: a Claude session can span several BuildLens
+runs, so records must outlive any `Session` object and therefore cannot be owned by one. `Session`
+keeps its existing contract unchanged. The store itself is Phase 10.
+
+The name collision is resolved by dropping the word "session" from the field:
+
+```text
+worktree_id = "wt-claude-7f3c"
+```
+
+Only one thing in the codebase is then called a session, and it is BuildLens's own run. Note the
+correction recorded in the ledger: a `claude_` prefix would be WRONG, because records are produced
+from both worktrees, the human one included.
+
 PHYSICAL ISOLATION established, with the trade the learner found themselves: separate working
 directories do not remove the problem, they CONVERT a lost edit into a reconciliation. A lost edit is
 unrecoverable; a reconciliation is merely work.
@@ -2225,9 +2240,9 @@ correct one: replaying a chain of diffs costs more than a single read. Noted tha
 No Phase 8 code exists and none is authorized.
 
 ```text
-phase                       Phase 8 — observed-version record complete, no code
-last knowledge gate         physical isolation, worktree versus copied folder, and identity
-                            versus location (EV-P8-WORKTREE-ID-336)
+phase                       Phase 8 — record complete and homed, no code
+last knowledge gate         lifetimes decide ownership: records must outlive the object,
+                            so Session cannot own them (EV-P8-SESSION-HOME-337)
 next retrieval due          THREE items, fresh surfaces, later sessions:
                             1. SystemExit(2) — third lapse already spent; if it lapses again,
                                stop testing it
@@ -2237,12 +2252,15 @@ next retrieval due          THREE items, fresh surfaces, later sessions:
                                forward and backward directions; retrieve it cold on a new surface
                             CLEARED: the three-place diff model, now HELD
 next architecture reset     complete; next by time or major transition
-next implementation step    IS session.py THE RIGHT HOME for observed-version records? Make the
-                            learner argue it from what session.py already owns before showing them
-                            the file. Then the Phase 8 knowledge gate: given an unfamiliar hook
-                            payload, what belongs to the Claude adapter, what internal
-                            representation leaves it, and which parts of the system are new versus
-                            unchanged.
+next implementation step    THE PHASE 8 KNOWLEDGE GATE. Given an unfamiliar hook payload:
+                            what belongs to the Claude adapter, what internal representation
+                            leaves it, and which parts of the system are new versus unchanged.
+                            The payload's real fields may finally be shown — the boundary is
+                            decided, so seeing them can no longer short-circuit the derivation.
+                            Also owed before any code: the plan's adjacent additions for this
+                            phase — text -> tokens -> model -> output, and the non-negotiable
+                            MODEL OUTPUT != AUTHORITATIVE APPLICATION STATE, with the
+                            suggest/validate/execute/truth split.
                             Still open from 2026-09-04: is "the learner edits only through
                             BuildLens" a stated product assumption, or something BuildLens must
                             tolerate being violated?
