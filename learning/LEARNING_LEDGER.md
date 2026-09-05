@@ -34304,3 +34304,84 @@ STATUS: the concept is held on the BuildLens surface; the TRANSFER IS NOT. Retes
 learner knows well — not finance.
 
 SITTING STOPPED HERE at four consecutive non-answers.
+
+### EV-P8-GATE-RETEST-341 — gate retested cold on a PreToolUse Bash payload
+
+Fresh payload, different event, different shape. Record model deliberately not mentioned.
+
+LEARNER FIRST ANSWER (verbatim):
+
+```text
+the session id is added and snaptshot.py is checked by build lens with git
+sesssion id and maybe cwd
+the records have to notice this change becasue a session id that is blank is a huge issue
+tool name
+```
+
+All four fields off, because ONE word was missed: `PreToolUse`. Nothing has run yet.
+
+Once pointed at that single word, everything else came unaided:
+
+```text
+has the sed command run yet          "ni" / nothing changed on disk        CORRECT
+can an ObservedVersion be built      "no"                                  CORRECT
+which hook will NOT fire for Bash    "posttooluse"                         CORRECT
+what eventually notices              "when we call git diff head"          CORRECT
+which hook triggers the sweep        "the stop"                            CORRECT
+```
+
+`tool_name` as the unverifiable field was accepted — CLAUDE'S QUESTION WAS UNDERSPECIFIED, since
+`tool_name`, `hook_event_name` and `session_id` are all unverifiable. Only `session_id` becomes a
+stored field, which is why it is the one that matters.
+
+NAMING THE ADAPTER OUTPUT FAILED A SECOND TIME:
+
+```text
+"it is a verification of the claude change"     describes it, does not name it
+"the payload"                                    the payload is the INPUT
+```
+
+DIAGNOSIS AND DECISION: this is a VOCABULARY gap, not a concept gap. The learner derived all six
+fields, classified each as observed or claimed, decided the record's home on lifetime grounds, and
+described the output's role correctly. What is missing is a name they have never written down.
+Drilling for it was stopped; the name `ObservedVersion` was supplied, to be bound by typing it into a
+file rather than recalled from air.
+
+GATE RESULT: reasoning PASSED, most of it cold. Vocabulary did not. Not re-testing the name again.
+
+### EV-P8-ADAPTER-CONTRACT-342 — the learner specifies the adapter's three cases
+
+Asked to decide the contract before any code was written.
+
+LEARNER FIRST ANSWER (verbatim):
+
+```text
+throw an error
+throw an error becasue stop will not be coming
+throw an error
+90
+```
+
+Cases 1 and 3 (missing `session_id`; `file_path` outside the repository) ACCEPTED as defensible.
+
+Case 2 CHALLENGED. The stated reason was wrong — `Stop` does come; that is precisely why the Bash gap
+is survivable, which the learner themselves established in EV-P8-HOOKS-SPEC-317. And a Bash tool call
+is normal traffic, not broken input.
+
+The learner recovered the principle ("so bash is valid then it should wait for the stop") but then
+added "and capture the posttooluse", which does not exist for Bash. Corrected.
+
+The return value was not reached. Answers cycled: `session_id`, then `A` (an ObservedVersion), then
+back to raising — an option already eliminated two exchanges earlier. Cycling to a ruled-out option
+was taken as the fatigue signal and the sitting was stopped.
+
+CONTRACT SUPPLIED, to be implemented and tested next sitting:
+
+```text
+Bash payload   -> return None            valid input, nothing observed
+Edit payload   -> ObservedVersion        something was observed
+malformed      -> raise                  the input itself is broken
+```
+
+No Phase 8 code was written. The learner's own three-case decision is preserved above and the first
+patch must implement exactly it.
