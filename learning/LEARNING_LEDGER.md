@@ -34180,3 +34180,34 @@ implementation begins.
 new         the Claude adapter, and the hook relay feeding it
 unchanged   Git inspection, the record model, reconciliation, storage
 ```
+
+### EV-P8-GATE-338B — learner challenges the boundary, and repairs half the gate
+
+Immediately after the gate was recorded PARTIAL, the learner raised (verbatim):
+
+```text
+but if it never leaves the adapter then how will we know if we have 2 other authors
+```
+
+This is the correct objection, and it is the exact confusion the gate exists to expose. Resolved by
+separating two things that both "stop at the adapter" in loose speech:
+
+```text
+STOPS     permission_mode, model, tool_name, transcript_path — vendor detail
+CROSSES   provenance = CLAUDE — normalized into BuildLens's own vocabulary
+```
+
+Three actors become three VALUES in one field — CLAUDE, CODEX, HUMAN — read by one comparison
+routine that never learns Claude Code has a concept called `permission_mode`.
+
+CHECK QUESTIONS, both answered CORRECTLY and unaided:
+
+```text
+which user question breaks if provenance stopped at the adapter = "who made the change"
+which payload key could be dropped entirely                     = "transcript path"
+```
+
+REVISED GATE STATUS: still PARTIAL, but the deficit is narrower than recorded in EV-P8-GATE-338. The
+learner now distinguishes what crosses from what stops, and did so by challenging the boundary rather
+than by being told. What remains untested cold is NAMING the adapter's output representation without
+being pointed at it.
