@@ -34113,3 +34113,70 @@ session.py    keeps its contract; NOT the home for observed-version records
 records       belong in a store that outlives any Session object   (Phase 10)
 worktree_id   names which checkout the bytes were read from
 ```
+
+### EV-P8-GATE-338 — Phase 8 knowledge gate, unfamiliar hook payload
+
+EVIDENCE GATHERED FIRST. `~/.claude/settings.json` on this machine configures the hooks the plan
+names, including `PostToolUse` with matcher `Write|Edit|MultiEdit` and `PreToolUse` on `Bash`. This
+CONFIRMS the gap the learner identified in EV-P8-HOOKS-SPEC-317: Bash edits fire no PostToolUse.
+
+The local handler reads a single environment variable rather than parsing the payload, so no verified
+payload schema could be obtained from this machine. An ILLUSTRATIVE payload was used instead and
+labelled as such to the learner; the gate calls for an unfamiliar payload in any case.
+
+LEARNER ANSWER (verbatim):
+
+```text
+event name, tool input, session id, cwd,
+model, tool name, permision mode
+verify tool input and cwd and session id, beleive event name
+```
+
+EVALUATION:
+
+```text
+READ/IGNORE      good. model, permission_mode, transcript_path correctly excluded.
+BELIEVE/VERIFY   one error — session_id placed in VERIFY. Nothing can confirm a session id.
+                 Corrected by the learner in one exchange ("or so we believe the sesion id").
+FOURTH FIELD     not answered.
+```
+
+THE FOURTH FIELD — what leaves the adapter — WAS NOT REACHED. The learner answered "tool input",
+then "idk" at confidence 10 after two prompts pointing at the six-field record they had themselves
+derived. SUPPLIED per rule 14.6:
+
+```text
+hook JSON                 Claude's vocabulary — tool_name, tool_input, session_id
+   -> adapter
+observed-version record   BuildLens's vocabulary — the six derived fields
+   -> the rest of BuildLens, which has never heard of Claude
+```
+
+DIAGNOSIS: the learner holds the record model and holds the trust boundary, but has not yet connected
+them into the adapter's job as a TRANSLATION. The pieces are held; the assembly is not. This is the
+gate's core and it was not passed unaided.
+
+RECOVERED AFTER SUPPLY:
+
+```text
+payload keys that must never pass    "permission_mode and model"      CORRECT unaided
+reconciler needs to know Codex?      "no"                             CORRECT
+```
+
+A confusion surfaced and was resolved: the learner thought carrying `provenance = CODEX` in the
+record implied downstream code changes. The distinction drawn:
+
+```text
+the RECORD carries provenance      data
+the RECONCILER never branches on it  code
+a new actor is a new VALUE in an existing field, not a new CODE PATH
+```
+
+GATE STATUS: PARTIAL. Believe/verify and the new-versus-unchanged split are held. The adapter's
+output representation had to be supplied and must be RE-TESTED COLD on a fresh payload before Phase 8
+implementation begins.
+
+```text
+new         the Claude adapter, and the hook relay feeding it
+unchanged   Git inspection, the record model, reconciliation, storage
+```

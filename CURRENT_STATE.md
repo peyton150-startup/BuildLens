@@ -2240,33 +2240,35 @@ correct one: replaying a chain of diffs costs more than a single read. Noted tha
 No Phase 8 code exists and none is authorized.
 
 ```text
-phase                       Phase 8 — record complete and homed, no code
-last knowledge gate         lifetimes decide ownership: records must outlive the object,
-                            so Session cannot own them (EV-P8-SESSION-HOME-337)
-next retrieval due          THREE items, fresh surfaces, later sessions:
+phase                       Phase 8 — gate attempted, PARTIAL; no code
+last knowledge gate         Phase 8 gate, PARTIAL (EV-P8-GATE-338). Believe/verify and
+                            new-versus-unchanged held; the adapter's output representation had
+                            to be supplied and is owed a cold retest.
+next retrieval due          FOUR items, fresh surfaces, later sessions:
                             1. SystemExit(2) — third lapse already spent; if it lapses again,
                                stop testing it
                             2. the believe/verify rule, unaided, on a surface that is neither
                                hooks nor CI webhooks
                             3. the hash asymmetry — held only after repeated flipping between the
                                forward and backward directions; retrieve it cold on a new surface
+                            4. what leaves the adapter — supplied, not derived; retest cold
                             CLEARED: the three-place diff model, now HELD
 next architecture reset     complete; next by time or major transition
-next implementation step    THE PHASE 8 KNOWLEDGE GATE. Given an unfamiliar hook payload:
-                            what belongs to the Claude adapter, what internal representation
-                            leaves it, and which parts of the system are new versus unchanged.
-                            The payload's real fields may finally be shown — the boundary is
-                            decided, so seeing them can no longer short-circuit the derivation.
-                            Also owed before any code: the plan's adjacent additions for this
-                            phase — text -> tokens -> model -> output, and the non-negotiable
+next implementation step    RE-TEST THE GATE COLD before any Phase 8 code. The failed half is
+                            specific: given a payload, name what LEAVES the adapter. Use a fresh
+                            payload of a different shape and do not mention the record model in
+                            the prompt. The learner holds the record and holds the trust boundary
+                            but has not yet assembled them into "the adapter TRANSLATES".
+                            Then, still owed before code: the plan's adjacent additions —
+                            text -> tokens -> model -> output, and the non-negotiable
                             MODEL OUTPUT != AUTHORITATIVE APPLICATION STATE, with the
-                            suggest/validate/execute/truth split.
+                            suggest / validate / execute / truth split.
                             Still open from 2026-09-04: is "the learner edits only through
                             BuildLens" a stated product assumption, or something BuildLens must
                             tolerate being violated?
-                            NOTE FOR HONESTY: `git worktree list` shows ONE worktree here. The
-                            plan's isolated-Claude-worktree assumption is not in effect in this
-                            repository today; do not describe it as observed fact.
+                            NOTE FOR HONESTY: `git worktree list` shows ONE worktree here, and the
+                            local hook handler does not parse payloads, so no verified payload
+                            schema has been observed. Do not present either as fact.
 deferred to a later slice   launch failure (FileNotFoundError) and timeout (TimeoutExpired)
                             normalization; neither is handled by _capture today.
                             Storage mechanism for records (SQLite vs file) — Phase 10.
