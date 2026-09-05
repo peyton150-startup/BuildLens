@@ -34385,3 +34385,20 @@ malformed      -> raise                  the input itself is broken
 
 No Phase 8 code was written. The learner's own three-case decision is preserved above and the first
 patch must implement exactly it.
+
+POST-SITTING CONSOLIDATION, after the Bash return value had been supplied. Learner, unprompted:
+
+```text
+ok so we treat it as something but it has nothing to report so we do not act on it
+```
+
+CORRECT, and it repairs the item they had cycled on. Confirmed with the one addition that matters —
+the event is deferred, not dropped:
+
+```text
+adapter  returns None        nothing observed, nothing to report
+caller   does nothing        no record written
+Stop     sweeps Git later    the sed change is found there
+```
+
+This is "events are a signal, Git is authority" appearing as a return value.
