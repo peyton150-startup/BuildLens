@@ -34402,3 +34402,34 @@ Stop     sweeps Git later    the sed change is found there
 ```
 
 This is "events are a signal, Git is authority" appearing as a return value.
+
+### OPEN QUESTION FOR NEXT SITTING — what the parse step returns
+
+Raised by Claude before writing any code, because the contract the learner specified in
+EV-P8-ADAPTER-CONTRACT-342 cannot be satisfied as literally stated:
+
+```text
+from the payload      file_path, session_id, tool_name
+needs Git             base_commit
+needs reading bytes   content_hash
+needs a clock         observed_at
+```
+
+Git inspection and hashing are OUT OF SCOPE for the first patch, so the parse step cannot build a
+complete `ObservedVersion`. The plan's own chain has four stages, not three:
+
+```text
+hook JSON  ->  Python JSON values  ->  validated adapter input  ->  domain event
+```
+
+PUT TO THE LEARNER, NOT YET ANSWERED — this is a design call and design is theirs:
+
+```text
+What should the parse function return for a valid Edit payload =
+Its fields =
+Where do the other three fields get filled in =
+Confidence =
+```
+
+The three-case contract itself still stands and is unchanged: valid-but-nothing-observed returns
+None, malformed raises, and an observed edit returns the value named above.

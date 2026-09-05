@@ -2257,7 +2257,15 @@ next retrieval due          FIVE items, fresh surfaces, later sessions:
                                unfamiliar domain; retest on a surface the learner knows
                             CLEARED: the three-place diff model, now HELD
 next architecture reset     complete; next by time or major transition
-next implementation step    FIRST PHASE 8 PATCH — the adapter's parse/normalize step only.
+next implementation step    ANSWER THE OPEN DESIGN QUESTION FIRST, then write the patch. The
+                            learner's contract cannot be met literally: a payload alone cannot
+                            fill base_commit, content_hash or observed_at, which need Git, the
+                            file bytes, and a clock. The plan's chain has four stages —
+                            hook JSON -> Python values -> validated adapter input -> domain event.
+                            Ask what the parse step returns for a valid Edit payload before
+                            implementing. Design is the learner's call.
+
+                            FIRST PHASE 8 PATCH — the adapter's parse/normalize step only.
                             The learner has already specified the contract; implement exactly it:
 
                             ```
