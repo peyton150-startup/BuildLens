@@ -33763,3 +33763,88 @@ but how would you know what fingerprint of the file to store
 That question is the entry point for the next session's adjacent-learning loop:
 `file bytes -> SHA-256 digest -> equality/version fingerprint`, with the plan's non-negotiable that a
 hash is not authorization, authorship, or semantic equivalence.
+
+## SESSION 2026-09-05 (third sitting) — hashing, IN PROGRESS
+
+### EV-P8-HASH-PROPERTIES-331 — specifying a fingerprint before meeting hashlib
+
+Adjacent-learning loop opened by the learner's own question from the previous sitting: "how would you
+know what fingerprint of the file to store". Requirements were derived before any library appeared.
+
+CLARIFYING QUESTION FROM THE LEARNER, resolved from their own prior decision:
+
+```text
+if the fingerprints do tell you that they are different than how would you confirm the actaul
+changes instead of just saying they are different
+```
+
+Answered by asking what the record already stores. Learner:
+
+```text
+ohhhh, so the fingerprint is a quick way of telling us they are different and then if we feel
+enclined to compare we can
+```
+
+CORRECT. The fingerprint is a cheap guard, not a replacement for stored content.
+
+PROPERTIES, learner answers (verbatim): `be identical` / `be not identical` / `both are possible` /
+`not sure` / `90`. First three CORRECT. The collision consequence was not reachable, so the scaffold
+descended to a countable toy.
+
+TOY: fingerprint yields a single digit 0-9; eleven files are fingerprinted.
+
+```text
+first attempt   "11" values, and "they have to have a 2 digit fingerprint"
+```
+
+WRONG on both. The learner altered the constraint rather than accepting it — a fixed-size output is
+the whole premise. Constraint restated explicitly, then:
+
+```text
+learner: "10" / "you will have duplicates"        CORRECT
+```
+
+Collisions established as FORCED BY COUNTING, not as a weakness of a particular algorithm.
+
+THE ASYMMETRY:
+
+```text
+learner: differ -> "differetn"; match -> "are the saem"; guarantee -> "the top one"
+```
+
+Field 3 CORRECT and it is the load-bearing one. Field 2 contradicted it. Asked to restate, the
+learner first overcorrected to "different", then on a forced choice answered C — "probably the same,
+but it is not proven". CORRECT.
+
+```text
+fingerprints differ  ->  files are definitely different      GUARANTEE
+fingerprints match   ->  files are probably the same         NOT a guarantee
+```
+
+### EV-P8-HASH-VS-GIT-332 — learner spots the algorithm mismatch, OPEN
+
+Shown a `hashlib.sha256(...).hexdigest()` prediction exercise, the learner did not predict but raised
+an unprompted design observation:
+
+```text
+so we are suing a different thing than git because sha 256
+```
+
+CORRECT AND SHARP. Git object ids are SHA-1 (SHA-256 mode arriving slowly), and Git hashes a header
+plus the content rather than raw file bytes, so the two digests can never agree.
+
+QUESTION PUT TO THE LEARNER, NOT YET ANSWERED — resume here:
+
+```text
+Does it matter that BuildLens's fingerprint disagrees with Git's =
+What is BuildLens's fingerprint actually used for =
+Confidence =
+```
+
+STILL OWED IN THIS LOOP, none delivered yet:
+
+```text
+the hashlib prediction exercise (determinism, avalanche, fixed length, and the b"" bytes prefix)
+the non-negotiable trap: a hash is NOT authorization, authorship, or semantic equivalence
+a transfer variant
+```

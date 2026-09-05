@@ -2196,7 +2196,7 @@ correct one: replaying a chain of diffs costs more than a single read. Noted tha
 No Phase 8 code exists and none is authorized.
 
 ```text
-phase                       Phase 8 — record model derived, no code
+phase                       Phase 8 — record model derived; hashing loop open, no code
 last knowledge gate         observed-version record derived from its queries
                             (EV-P8-RECORD-FIELDS-330)
 next retrieval due          TWO items, fresh surfaces, later sessions:
@@ -2206,11 +2206,18 @@ next retrieval due          TWO items, fresh surfaces, later sessions:
                                hooks nor CI webhooks
                             CLEARED this session: the three-place diff model, now HELD
 next architecture reset     complete; next by time or major transition
-next implementation step    ADJACENT-LEARNING LOOP FOR HASHING, opened by the learner's own
-                            question: "how would you know what fingerprint of the file to store".
-                            Teach file bytes -> SHA-256 digest -> equality fingerprint. The
-                            non-negotiable: a hash is NOT authorization, authorship, or semantic
-                            equivalence. Then the sixth field, session/worktree id, which requires
+next implementation step    RESUME THE HASHING LOOP MID-EXERCISE. Held so far: collisions are
+                            forced by counting, and the asymmetry — differing digests GUARANTEE
+                            different content, matching digests only make sameness probable.
+                            The learner then spotted unprompted that Git uses SHA-1 over a header
+                            plus content, so BuildLens's own SHA-256 can never agree with a Git
+                            blob id. The open question, already put to them, is whether that
+                            disagreement matters and what BuildLens's fingerprint is FOR.
+                            Then still owed in this loop: the hashlib prediction exercise
+                            (determinism, avalanche, fixed length, and the b"" bytes prefix), the
+                            non-negotiable that a hash is NOT authorization, authorship, or
+                            semantic equivalence, and a transfer variant.
+                            Then the sixth field, session/worktree id, which requires
                             showing that Claude Code Desktop uses an isolated worktree.
                             Then: is session.py the right home for these records?
                             Still open from 2026-09-04: is "the learner edits only through
