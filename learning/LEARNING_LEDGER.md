@@ -34211,3 +34211,96 @@ REVISED GATE STATUS: still PARTIAL, but the deficit is narrower than recorded in
 learner now distinguishes what crosses from what stops, and did so by challenging the boundary rather
 than by being told. What remains untested cold is NAMING the adapter's output representation without
 being pointed at it.
+
+### EV-P8-MODEL-OUTPUT-339 — model output is not authoritative state
+
+Plan-mandated adjacent concept for Phase 8. Taught from live evidence: the learner's own configured
+`PreToolUse` hook and the approval prompt, both of which can only exist if something OTHER than the
+model performs the write.
+
+CONTRADICTION USED AS THE LEVER. The learner answered that nothing could approve or block a model
+that wrote files directly (CORRECT), and then that there is no gap between output and disk. Both
+cannot hold, since PreToolUse demonstrably runs. Pointed out rather than corrected.
+
+Learner then guessed the gap was "the hook". It is not — the hook is a bystander that gets to look.
+CHAIN SUPPLIED:
+
+```text
+1  the model produces TEXT — a proposal
+2  the harness parses it
+3  hooks and permission checks look
+4  the HARNESS executes the tool — ordinary open() and write()
+5  bytes change on disk
+```
+
+```text
+probabilistic / deterministic split   learner said 1,2 probabilistic — WRONG on 2
+                                      corrected unaided once asked whether parsing the same text
+                                      twice can differ: "so it is deterministic since it is simply
+                                      taking values and putting them in another place"   CORRECT
+```
+
+DENIED-PROPOSAL TRACE. The learner initially thought a denied proposal produces no output. The
+distinction drawn:
+
+```text
+the model's OUTPUT   still exists, fully formed, describing a change that never happened
+the TOOL RESULT      an error — nothing ran
+```
+
+Learner answered CORRECTLY that the file does not change and that a proposal can never count as a
+record of a change.
+
+ORDERING CHALLENGE FROM THE LEARNER (verbatim):
+
+```text
+but if the models output is denied then no output is sent that still means the output has to be
+accepted before it is outputted
+```
+
+Settled from evidence rather than assertion — the approval prompt DISPLAYS the command, so the text
+must already exist. Learner then answered output-before-approval correctly on all three fields.
+
+NON-NEGOTIABLE ESTABLISHED:
+
+```text
+MODEL OUTPUT != AUTHORITATIVE APPLICATION STATE
+a proposal describes an INTENTION; only execution produces an EFFECT;
+only the bytes on disk are the TRUTH
+```
+
+### EV-P8-MODEL-TRANSFER-340 — trading transfer, PARTIAL, poor surface choice by Claude
+
+Transfer attempted on a trading-bot surface.
+
+```text
+deterministic part                "everything after the models output"        CORRECT
+output after rejection            "sell 1-- shares of acme at market"         CORRECT — the key one
+what must be validated            "the code has to be accepted"               vague
+where truth lives                 "in git"                                    WRONG
+```
+
+RECURRING FAILURE MODE, now seen twice — also in EV-P8-TRANSFER-326, where the learner reached for
+`git diff HEAD` to verify a remote push. The learner transfers the RULE correctly and then COPIES THE
+MECHANISM from the previous surface. Named explicitly to them: the rule says truth lives in the
+authoritative store; which store that is changes with the domain.
+
+Second attempt gave "local fiel" — still wrong. The learner then asked "what is the brokers sysytem",
+revealing the blocker was DOMAIN UNFAMILIARITY, not the concept.
+
+CLAUDE'S PROCESS ERROR, recorded so it is not repeated: the trading surface required the learner to
+learn brokerage mechanics in order to answer a question about trust boundaries. Transfer surfaces
+must be drawn from domains the learner already knows. Choose surfaces the learner has lived in.
+
+The mapping was SUPPLIED after four consecutive "not sure" answers:
+
+```text
+the model emitting "SELL 100"     the model proposing an Edit
+the broker's ledger               the bytes on disk
+your app's local copy             the hook's claim about what changed
+```
+
+STATUS: the concept is held on the BuildLens surface; the TRANSFER IS NOT. Retest on a surface the
+learner knows well — not finance.
+
+SITTING STOPPED HERE at four consecutive non-answers.

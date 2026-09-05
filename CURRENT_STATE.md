@@ -2240,11 +2240,10 @@ correct one: replaying a chain of diffs costs more than a single read. Noted tha
 No Phase 8 code exists and none is authorized.
 
 ```text
-phase                       Phase 8 — gate attempted, PARTIAL; no code
-last knowledge gate         Phase 8 gate, PARTIAL (EV-P8-GATE-338). Believe/verify and
-                            new-versus-unchanged held; the adapter's output representation had
-                            to be supplied and is owed a cold retest.
-next retrieval due          FOUR items, fresh surfaces, later sessions:
+phase                       Phase 8 — specification complete; two retests owed, no code
+last knowledge gate         MODEL OUTPUT != AUTHORITATIVE APPLICATION STATE, held on the
+                            BuildLens surface; transfer FAILED (EV-P8-MODEL-TRANSFER-340)
+next retrieval due          FIVE items, fresh surfaces, later sessions:
                             1. SystemExit(2) — third lapse already spent; if it lapses again,
                                stop testing it
                             2. the believe/verify rule, unaided, on a surface that is neither
@@ -2252,23 +2251,26 @@ next retrieval due          FOUR items, fresh surfaces, later sessions:
                             3. the hash asymmetry — held only after repeated flipping between the
                                forward and backward directions; retrieve it cold on a new surface
                             4. what leaves the adapter — supplied, not derived; retest cold
+                            5. model output versus application state — transfer failed on an
+                               unfamiliar domain; retest on a surface the learner knows
                             CLEARED: the three-place diff model, now HELD
 next architecture reset     complete; next by time or major transition
-next implementation step    RE-TEST THE GATE COLD before any Phase 8 code. The failed half is
-                            specific: given a payload, name what LEAVES the adapter. Use a fresh
-                            payload of a different shape and do not mention the record model in
-                            the prompt. The learner holds the record and holds the trust boundary
-                            but has not yet assembled them into "the adapter TRANSLATES".
-                            Then, still owed before code: the plan's adjacent additions —
-                            text -> tokens -> model -> output, and the non-negotiable
-                            MODEL OUTPUT != AUTHORITATIVE APPLICATION STATE, with the
-                            suggest / validate / execute / truth split.
+next implementation step    TWO COLD RETESTS OWED BEFORE ANY PHASE 8 CODE:
+                            1. the gate half that failed — given a fresh payload of a different
+                               shape, name what LEAVES the adapter. Do not mention the record
+                               model in the prompt.
+                            2. model-output-is-not-state, transferred to a NON-FINANCE surface
+                               the learner already knows.
+                            Then Phase 8 implementation may open.
                             Still open from 2026-09-04: is "the learner edits only through
                             BuildLens" a stated product assumption, or something BuildLens must
                             tolerate being violated?
                             NOTE FOR HONESTY: `git worktree list` shows ONE worktree here, and the
                             local hook handler does not parse payloads, so no verified payload
                             schema has been observed. Do not present either as fact.
+                            PROCESS NOTE: transfer surfaces must come from domains the learner
+                            already knows. The trading surface failed because it required
+                            brokerage knowledge to answer a trust-boundary question.
 deferred to a later slice   launch failure (FileNotFoundError) and timeout (TimeoutExpired)
                             normalization; neither is handled by _capture today.
                             Storage mechanism for records (SQLite vs file) — Phase 10.
