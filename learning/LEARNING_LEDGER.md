@@ -36607,3 +36607,235 @@ This also explains the shape of the whole helper family: `_required_value` prove
 carries the extra emptiness guard.
 
 Blocks remaining in the review: `parse_post_tool_use`.
+
+## EV-P8-PARSE-OUTCOMES-352 — three endings of parse_post_tool_use
+
+OUTCOME-SHAPE PROMPT (exact):
+
+```text
+What are the distinct ways a call to this function can end, and what kind of payload produces each?
+
+Fill in every field:
+
+Outcome 1, and the payload that produces it =
+Outcome 2, and the payload that produces it =
+Outcome 3, and the payload that produces it =
+Confidence =
+
+Describe each payload by what makes it different from the others.
+```
+
+LEARNER FIRST ANSWER (verbatim):
+
+```text
+well this one calls the other blocks to verify, it check to see if the tool name is bash it looks to see if the toolname is anything other than edit  then it returns the ClamedEdit dataclass instance
+```
+
+PARTIAL. The learner traced WHERE the code looks rather than HOW the call ends. All three branches
+were touched, but only the `ClaimedEdit` ending was stated as an ending; the Bash and non-Edit
+branches were described as checks. The distinction drawn for them: "it checks whether tool_name is
+Bash" names a branch, "the call returns None" names an outcome. Descend to three concrete
+well-formed payloads differing only in `tool_name`.
+
+CONCRETE-PAYLOAD PROMPT (exact):
+
+```text
+How does each call end?
+
+parse_post_tool_use({... "tool_name": "Edit", "tool_input": {"file_path": "app.py"}})
+parse_post_tool_use({... "tool_name": "Bash", "tool_input": {"command": "pytest"}})
+parse_post_tool_use({... "tool_name": "Write", "tool_input": {"file_path": "app.py"}})
+
+Fill in every field:
+
+How the Edit call ends =
+How the Bash call ends =
+How the Write call ends =
+Confidence =
+
+Answer each with what the caller ends up holding, or with the fact that it holds nothing.
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+with the returnung the clamededit
+returns None
+raises a valueerror
+90
+```
+
+PASS, three of three. The learner now names outcomes rather than branches and applied the
+completion-versus-abandonment distinction correctly across all three. Next: probe whether the Bash
+`None` is read as a success or as a failure. This is the conceptually loaded case for the block.
+
+BASH-BRANCH MEANING PROMPT (exact):
+
+```text
+Is the Bash outcome a failure?
+
+Fill in every field:
+
+Is the Bash outcome a failure, yes or no =
+What None is telling the caller about the world =
+Why a ClaimedEdit cannot be built for this payload =
+Why the command check runs even though nothing is returned =
+Confidence =
+```
+
+LEARNER FIRST ANSWER (verbatim):
+
+```text
+no
+that we cannot verify the code change here
+it was stated before but i forgot
+not usre 
+70
+```
+
+PARTIAL. The learner correctly denied that Bash is a failure. Field two was close and was sharpened:
+`None` does not mean "we could not verify"; it means the event was real and well-formed and simply
+names no file, so there is nothing to observe. Fields three and four were open.
+
+SCOPING DETOUR. Asked which `ClaimedEdit` field cannot be filled from a Bash payload, the learner
+answered (verbatim):
+
+```text
+for the bash there are no file paths or session ids or tool names it is the command for the bash 
+it offers the command that was run
+would need to ask claude dircetly to see waht it touches
+90
+```
+
+Two errors. First, a scoping error: `session_id` and `tool_name` are read from the top-level
+`payload`, not from `tool_input`; only `file_path` comes from `tool_input`. Second, "ask claude
+directly" points verification back at the claimer; this is deferred and revisited below.
+
+The learner then produced, unprompted (verbatim):
+
+```text
+ok so the bash the purpose of the payload was to signify a pytest was run which we do not know if it changes any files,
+```
+
+CORRECT and important: the payload records that a command ran, and whether `pytest` touched the
+working tree is unknowable from the payload alone.
+
+ARGUMENT-POSITION REMEDIATION. On the re-posed scoping question the learner answered `payload` for
+both lookups and concluded the Bash payload "seems to have all of the fields". Isolating the single
+line `_required_string(tool_input, "file_path")` produced (verbatim):
+
+```text
+toolinput
+toolinput
+toolinput
+40
+```
+
+Confidence dropped honestly to 40. Blocker identified as positional-argument reading. Syntax-only
+help was activated: arguments map to parameters left to right by position. The `greet("Ada", "hello")`
+micro-example passed cleanly.
+
+Returning to the real line, the learner answered `dict[str, object]` and `field` for the two received
+values, reading the `def` line rather than the call. Second blocker identified: TYPE ANNOTATIONS READ
+AS VALUES. Syntax-only help given: `: str` and `: dict[str, object]` are annotations describing the
+expected type; they hold no value, and stripping them leaves the same shape as `greet`. The learner
+then self-corrected on the real line without needing the annotated micro-example (verbatim):
+
+```text
+toolinput dicotnary 
+filepath
+```
+
+PASS. `values` receives the `tool_input` dictionary, `field` receives `"file_path"`. Recovery occurred
+on the harder surface, so the scaffold was dropped rather than completed.
+
+RETURN TO TARGET (exact):
+
+```text
+ClaimedEdit fields that could be filled from a Bash payload =
+The field that could not =
+Why the parser returns None instead of raising a ValueError =
+Confidence =
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+session id tool name
+filepath
+becasue it will then return None and we skip it instead of stopping execution to fix it, we ignore it for now, although i am pretty sure it is recorded when we add persisitnece
+```
+
+TWO OF THREE. The field availability is now correct, resolving the scoping error. Field three remains
+partial: the learner senses correctly that this is not something to fix, but frames it as deferral
+("we ignore it for now") rather than as a permanent and correct classification of a valid event.
+Sharpen next by asking what a `ValueError` would assert to whoever reads it, and whether that
+assertion would be true of a Bash event.
+
+FAILURE-VERSUS-CLASSIFICATION PROMPT (exact):
+
+```text
+Every ValueError in this module asserts: this payload is broken, and whoever produced it needs
+fixing.
+
+Would that assertion be true of a Bash event, yes or no =
+What would happen to your error log if every Bash event raised =
+Is returning None a temporary workaround or a permanent classification =
+Confidence =
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+ok so the payload is not broken when we have a bash command it is just different
+None is a temp workaround
+```
+
+PARTIAL. The first field is correct and is the important one: a Bash payload is not malformed, merely
+different in kind. The learner held to "temporary" for a second time. Rather than repeat the
+question, the ambiguity underneath it was separated: two different things could be temporary, the
+FACT about the event or BUILDLENS'S RESPONSE to that fact.
+
+PERMANENCE DISCRIMINATION PROMPT (exact):
+
+```text
+Could a later phase of BuildLens cause a Bash payload to contain a file_path, yes or no =
+Is "this event names no file" true of Bash events forever, yes or no =
+Which of the two could change later: the fact, or BuildLens's response to it =
+Confidence =
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+no
+ok so this is the permanaet soluiotn
+```
+
+PASS on the substance. Refined for precision: the CLASSIFICATION is permanent, since a Bash event
+will never name a file and `None` is therefore the correct answer forever. BuildLens's RESPONSE may
+still grow; a later phase could record the event or diff the repository anyway to catch what a
+command such as `pytest` touched. `None` is not a placeholder awaiting replacement; it is the correct
+reading of a real event.
+
+PRINCIPLE ESTABLISHED: absence of an observation is not an error. A well-formed event that carries no
+file to observe is classified, not rejected. Raising would assert a falsehood about the payload and
+would flood the error log with entries for ordinary test runs.
+
+OPEN QUESTION AT SESSION PAUSE (exact, already posed, not yet answered):
+
+```text
+    if tool_name == "Bash":
+        _required_string(tool_input, "command")
+        return None
+
+That middle line does nothing with its result. Deleting it would leave the branch behaving
+identically for every well-formed payload.
+
+What the line proves before None is returned =
+What could reach the caller as None if the line were deleted =
+Why a caller should be able to trust a None =
+Confidence =
+
+For the second field, imagine a payload that says "tool_name": "Bash" but whose tool_input is {}.
+```

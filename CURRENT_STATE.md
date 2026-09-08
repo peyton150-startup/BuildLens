@@ -2435,43 +2435,60 @@ architecture reset remains due only by time or major transition. The next implem
 still blocked on completion of the adapter code review; do not add Phase 8 behavior yet.
 
 The `@dataclass` restart point is superseded. The block-by-block review of `claude_adapter.py` has
-completed `ClaimedEdit`, `_required_value`, `_required_string`, and `_required_object`. Only
-`parse_post_tool_use` remains.
+completed `ClaimedEdit`, `_required_value`, `_required_string`, and `_required_object`, and is now
+partway through `parse_post_tool_use`.
 
-Concepts now held: control flow through guard clauses, the difference between evaluating an `if`
-condition and running its body, `isinstance` and `not` as separate steps, and completion versus
-abandonment. A call that completes always hands something back, possibly `None`; a call abandoned by
-`raise` hands back nothing and leaves the assignment target unbound. The empty string is a string
-value with no characters and is distinct from `None`, which is the absence of a value.
+Concepts held: guard-clause control flow, the difference between evaluating an `if` condition and
+running its body, `isinstance` and `not` as separate steps, completion versus abandonment, and the
+empty string as a value distinct from `None`. Newly held this session: the three outcomes of
+`parse_post_tool_use` stated as outcomes rather than as branches, and the scoping of each lookup -
+`session_id` and `tool_name` are read from the top-level payload, only `file_path` from `tool_input`.
 
-Two design principles are held in the learner's own words. ERROR LOCALITY: validate where untrusted
-data enters, so the message indicts the cause rather than a downstream victim; `not a valid pathspec`
-sends the reader to investigate Git when the real fault was a malformed payload. GUARD PLACEMENT:
-guard at the boundary only where no later, more specific check exists. The empty dictionary meets one
-further rejecting check inside the module and is refused there with a better message; the empty
-string meets none, flowing into `ClaimedEdit` and out of the module, so the boundary is its only
-opportunity for rejection.
+Two syntax gaps surfaced and were remediated in place. Positional argument mapping: arguments fill
+parameters left to right, and the names inside the call have nothing to do with the parameter names
+in the `def`. Type annotations as non-values: `: str` and `: dict[str, object]` describe an expected
+type and hold nothing, so reading them as received values is an error. The learner recovered the
+second directly on the real line without needing the prepared micro-example. Both are recent and
+unstable; re-probe them cold on a different function.
 
-Two corrected misconceptions to re-probe cold on a new surface, since both were confidently held at
-90 before correction: that an assignment target is bound regardless of how the call terminated, and
-that an empty string is the same as absence. Also owed as genuine retrieval: the conditions under
-which boundary validation stops being worth it. The learner independently produced the maintenance-
-cost condition; the precise-consumer-error, trusted-source, and false-confidence conditions were
-supplied and then echoed back within the same exchange, which is not evidence of retention.
+Three design principles are now held in the learner's own words. ERROR LOCALITY: validate where
+untrusted data enters so the message indicts the cause rather than a downstream victim. GUARD
+PLACEMENT: guard at the boundary only where no later, more specific check exists. ABSENCE IS NOT
+ERROR: a well-formed event carrying no file to observe is classified, not rejected; `None` is the
+permanent correct reading of a Bash event, and only BuildLens's response to that fact may grow in
+later phases. The learner reached the last of these after twice calling `None` a temporary
+workaround, so it is fresh and should be re-probed.
 
-Identifier transcription slips in learner answers are no longer graded, by the learner's explicit
-ruling. The only retained exception is test-assertion work, where a message literal must match the
-source exactly.
+Still owed as genuine retrieval: the two misconceptions corrected last session, both confidently held
+at 90 beforehand - that an assignment target is bound regardless of how the call terminated, and that
+an empty string is the same as absence. Also owed: the conditions under which boundary validation
+stops being worth it. The learner independently produced the maintenance-cost condition; the
+precise-consumer-error, trusted-source, and false-confidence conditions were supplied and echoed back
+within the same exchange, which is not evidence of retention.
 
-Last knowledge gate: guard-placement asymmetry PASS at confidence 90, three of three. The major/deep
-counter remains 1/2, so no cumulative review is due. The next architecture reset remains due only by
-time or major transition. Implementation is still blocked on completion of the adapter code review;
-do not add Phase 8 behavior yet.
+Identifier transcription slips in learner answers are not graded, by the learner's explicit ruling.
+The only retained exception is test-assertion work, where a message literal must match the source
+exactly.
 
-EXACT RESTART POINT: begin the `parse_post_tool_use` block. It is the first block in the module with
-branching beyond a single guard, so open by having the learner name its three distinct outcomes -
-`ClaimedEdit`, `None`, and `ValueError` - and say which payload shape produces each, before tracing
-any one path. The `Bash` branch returning `None` is the conceptually loaded case: it is a real,
-successful parse of an event that directly observes no file, not a failure. Do not let it be read as
-an error path. Files the learner should be able to teach remain the previously listed Phase 0-7
-files; `claude_adapter.py` is still under review.
+Last knowledge gate: permanence of the Bash classification PASS. The major/deep counter remains 1/2,
+so no cumulative review is due. The next architecture reset remains due only by time or major
+transition. Implementation is still blocked on completion of the adapter code review; do not add
+Phase 8 behavior yet.
+
+EXACT RESTART POINT: one question is posed and unanswered. It concerns the discarded-result call in
+the Bash branch:
+
+```python
+    if tool_name == "Bash":
+        _required_string(tool_input, "command")
+        return None
+```
+
+The fields are recorded verbatim at the end of `learning/LEARNING_LEDGER.md`. The learner must say
+what that line proves before `None` is returned, what could reach the caller as `None` if the line
+were deleted, and why a caller should be able to trust a `None`. The target idea is that the `None`
+is only trustworthy because the payload was proven well-formed first; without the check, a malformed
+Bash payload with `tool_input` of `{}` would be silently indistinguishable from a legitimate no-file
+event. After that, the remaining review items are the `hook_event_name` guard, the top-level
+`isinstance(payload, dict)` guard, and the ordering of the checks; then the review closes and Phase 8
+implementation may resume.
