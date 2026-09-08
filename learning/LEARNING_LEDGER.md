@@ -35447,3 +35447,38 @@ observed failing, and `frozen=True` was restored.
 Fresh full verification on 2026-09-08 ran all eight `test_*.py` scripts successfully. This is
 automated evidence only. Learner code review, trace, explanation, and transfer remain required before
 milestone or phase completion.
+
+### EV-P8-ADAPTER-CODE-REVIEW-350 — block-by-block teach-aloud
+
+EXERCISE TYPE: code reading/teach-aloud. Post-commit review of `claude_adapter.py`.
+
+The file was divided into eleven blocks: module purpose/import, `ClaimedEdit`, three validation
+helpers, parser boundary, event validation, common extraction, Bash branch, unsupported-tool branch,
+and Edit construction/return.
+
+BLOCK 1 PROMPT (exact):
+
+```text
+"""Translate Claude PostToolUse payloads into BuildLens representations."""
+
+from dataclasses import dataclass
+
+In your own words:
+
+- Why does this module exist?
+- What enters it?
+- What leaves it?
+- Why does it import dataclass?
+
+Confidence: 0–100.
+```
+
+LEARNER FIRST ANSWER (verbatim):
+
+```text
+it imports dataclass from dataclasses, because we use dataclasses,&#x20;
+```
+
+PARTIAL. The import action is read correctly, but its purpose is restated tautologically and the
+module contract is unanswered. Descend to the module docstring alone and ask for a one-sentence
+input-to-output restatement before returning to `dataclass`.
