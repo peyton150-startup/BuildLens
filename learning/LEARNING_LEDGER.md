@@ -35626,3 +35626,984 @@ PARTIAL. The learner correctly recognized `point` as an instance, but conflated 
 name with `self`, the local parameter name used inside an instance method. The missing concept is that
 the decorator generates constructor behavior. Descend to a one-field dataclass and trace assignment
 through the constructor before returning to `ClaimedEdit`.
+
+ONE-FIELD DATACLASS TRACE PROMPT (exact):
+
+```text
+The push is still pending because “let’s continue” wasn’t accepted as explicit approval to export the learning ledger. We can continue locally now.
+
+@dataclass reads the declared fields and generates an __init__ method for them.
+
+from dataclasses import dataclass
+
+@dataclass
+class Box:
+    size: int
+
+box = Box(size=4)
+
+What does box.size return, and how did the generated constructor store that value?
+
+Confidence: 0–100.
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+4, as a Box class instance called box
+```
+
+PARTIAL. `box.size` was traced correctly to `4`, and `box` was correctly identified as the caller's
+name for the `Box` instance. The storage mechanism remains unstated: the generated constructor
+assigns the argument to an attribute on the new instance. Show only the equivalent assignment and
+ask which line performs the storage before returning to the decorator.
+
+GENERATED ASSIGNMENT PROMPT (exact):
+
+```text
+Here is the constructor behavior that @dataclass generated for that field:
+
+def __init__(self, size):
+    self.size = size
+
+For Box(size=4), which exact line stores 4 on the new object?
+
+Confidence: 0–100.
+```
+
+The learner first recognized that the preceding answer had described the same idea one abstraction
+level too high, then supplied the requested mechanism.
+
+LEARNER ANSWER (verbatim):
+
+```text
+self.size = size
+```
+
+PASS. The learner identified the exact attribute assignment generated for the declared field.
+Require a one-field near-transfer before returning to why `claude_adapter.py` imports `dataclass`.
+
+DATACLASS CONSTRUCTOR NEAR-TRANSFER PROMPT (exact):
+
+```text
+Near-transfer:
+
+from dataclasses import dataclass
+
+@dataclass
+class Ticket:
+    priority: int
+
+ticket = Ticket(priority=3)
+
+What assignment would the generated __init__ perform, and what value does ticket.priority return?
+
+Confidence: 0–100.
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+self.priority = priority
+it returns 3
+```
+
+PASS. The learner independently transferred both the generated attribute assignment and its resulting
+value to a different one-field class. Climb back to the original `ClaimedEdit` import question.
+
+DATACLASS TARGET RETURN PROMPT (exact):
+
+```text
+Back to the real module:
+
+from dataclasses import dataclass
+
+@dataclass(frozen=True)
+class ClaimedEdit:
+    file_path: str
+    session_id: str
+    tool_name: str
+
+Why does claude_adapter.py import dataclass?
+
+Confidence: 0–100.
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+becasue we want every payload to be an instnace of that data class, so we can have sepreate payloads, 60
+```
+
+PARTIAL. The learner named the usefulness of distinct record instances but again answered the class's
+domain purpose instead of the import/decorator mechanism. The statement also overgeneralized the
+contract: only a valid Edit becomes `ClaimedEdit`; Bash returns `None` and malformed input raises.
+The generated-constructor trace succeeded twice, so use a one-blank retrieval cue rather than
+repeating the full explanation.
+
+GENERATED-METHOD NAME CUE (exact):
+
+```text
+Complete this sentence with the method name:
+
+claude_adapter.py imports dataclass so @dataclass can automatically generate the ______ method for ClaimedEdit from its declared fields.
+
+Confidence: 0–100.
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+class methos
+```
+
+INCORRECT. `class method` is a broad category rather than the exact constructor method name. The
+learner already traced the method's behavior successfully, so the blocker is now syntax/vocabulary,
+not execution. Enter syntax-only help at R0: show one `def` line and ask the learner to copy only the
+identifier between `def` and `(` before returning to the import question.
+
+METHOD-NAME SYNTAX PROMPT (exact):
+
+```text
+In Python syntax:
+
+def method_name(parameters):
+
+The word between def and ( is the method's exact name.
+
+def __init__(self, size):
+
+Copy only the method name between def and (.
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+so we can automatically genenrate the init method
+```
+
+PARTIAL. The learner now has the correct concept: `@dataclass` generates the initializer method.
+The exact identifier requested was not reproduced; Python spells it `__init__`, with two underscores
+on each side. Require literal reproduction once, then return to the full import-purpose sentence.
+
+LEARNER PROCESS REQUEST (verbatim):
+
+```text
+nitpick move on
+```
+
+HONORED. The learner had demonstrated the constructor mechanism on the original example and a
+near-transfer. Exact underscore reproduction was not architecturally important, so it remains
+untested vocabulary rather than blocking the code review.
+
+CLAIMED-EDIT BLOCK PROMPT (exact):
+
+```text
+Next block:
+
+@dataclass(frozen=True)
+class ClaimedEdit:
+    """Hold the edit details claimed by one Claude hook payload."""
+
+    file_path: str
+    session_id: str
+    tool_name: str
+
+Why is this named ClaimedEdit rather than VerifiedEdit, and what does frozen=True prevent?
+
+Confidence: 0–100.
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+becasue these are claims from the hook not all can be verified and frozen prevents them from chanigng after the inital input from the payload
+```
+
+PASS. The learner independently recovered both the provenance boundary and field immutability after
+construction. Continue to the first validation helper.
+
+REQUIRED-VALUE HELPER TRACE PROMPT (exact):
+
+```text
+Next block:
+
+def _required_value(values: dict[str, object], field: str) -> object:
+    if field not in values:
+        raise ValueError("missing required field: " + field)
+
+    return values[field]
+
+Given:
+
+values = {"session_id": "session-7"}
+
+Trace both calls:
+
+_required_value(values, "session_id")
+_required_value(values, "tool_name")
+
+What happens in each case, and why?
+
+Confidence: 0–100.
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+this checks for the required values for each input so for the session id it retunrs a list with session-7 in it but for tool name it throws a value error and says missing required field which is session id
+```
+
+PARTIAL. The learner correctly recognized that the present field returns and the absent field raises,
+but made two trace errors: dictionary indexing was treated as returning a list, and the error's
+dynamic `field` value was taken from the present call rather than the failing `"tool_name"` call.
+Primary blocker: reading `mapping[key_variable]`. Descend to a branch-free R0 dictionary lookup,
+then reintroduce the missing-key branch.
+
+VARIABLE-KEY DICTIONARY MICRO-PROMPT (exact):
+
+```text
+Smaller dictionary-only trace:
+
+colors = {"sky": "blue", "grass": "green"}
+key = "sky"
+result = colors[key]
+
+What exact value is stored in result? Is that value a string, list, or dictionary?
+
+Confidence: 0–100.
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+dictionary
+```
+
+INCORRECT. The learner classified the container rather than the result of indexing it. The key
+variable adds unnecessary indirection at the current rung. Explain that dictionary indexing returns
+the value associated with the selected key, then remove the variable and use one literal-key lookup.
+
+LITERAL-KEY DICTIONARY MICRO-PROMPT (exact):
+
+```text
+Try the same operation without a key variable:
+
+ages = {"Maya": 12}
+result = ages["Maya"]
+
+What exact value is stored in result? Is it an integer, list, or dictionary?
+
+Confidence: 0–100.
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+it would have result = 12, integer
+```
+
+PASS. The learner correctly retrieved the value associated with a literal dictionary key and
+classified the retrieved value rather than the container. Reintroduce one variable key on a fresh
+surface before returning to `_required_value`.
+
+VARIABLE-KEY NEAR-TRANSFER PROMPT (exact):
+
+```text
+Now reintroduce the variable:
+
+scores = {"Ana": 8, "Leo": 6}
+student = "Ana"
+score = scores[student]
+
+What exact value is stored in score, and how does student determine which dictionary entry is selected?
+
+Confidence: 0–100.
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+so it would be 8 and it is the key that matches the dictionary whic hgive the lookup value
+```
+
+PASS. The learner correctly used the string held by the variable as the dictionary key and returned
+the associated value. Return to `_required_value` with only the present-field branch first.
+
+REQUIRED-VALUE SUCCESS-PATH PROMPT (exact):
+
+```text
+Apply that back to the helper's successful path:
+
+values = {"session_id": "session-7"}
+field = "session_id"
+
+return_value = values[field]
+
+What exact value is stored in return_value, and what is its type?
+
+Confidence: 0–100.
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+session-7 and it is a string
+```
+
+PASS. The learner correctly traced the real helper's variable-key lookup to the string
+`"session-7"`. Restore the missing-field branch and require the exact dynamic error message.
+
+REQUIRED-VALUE MISSING-PATH PROMPT (exact):
+
+```text
+Now restore the branch:
+
+values = {"session_id": "session-7"}
+field = "tool_name"
+
+if field not in values:
+    raise ValueError("missing required field: " + field)
+
+return values[field]
+
+Does execution reach the return line? What exact error message is produced?
+
+Confidence: 0–100.
+```
+
+LEARNER ANSWER AND SYNTAX QUESTION (verbatim):
+
+```text
+it does not, i am still confused about the + field in the error messaage would it be "tool\_name"?
+```
+
+PARTIAL. The learner correctly stopped execution at `raise` and tentatively selected the current
+field value, but explicitly reported that string concatenation syntax is unreadable. Enter syntax-only
+help: stop the helper trace, explain only string `+`, and require one R0 concatenation prediction
+before returning to the error message.
+
+STRING-CONCATENATION MICRO-PROMPT (exact):
+
+```text
+When both sides are strings, + joins them into one string:
+
+left_text + right_text
+
+Micro-example:
+
+prefix = "missing: "
+name = "email"
+message = prefix + name
+
+What exact string is stored in message?
+
+Confidence: 0–100.
+```
+
+Rather than answer the micro-example, the learner clarified that the uncertainty concerned the
+diagnostic's purpose rather than the `+` operation.
+
+LEARNER CLARIFYING QUESTION (verbatim):
+
+```text
+i was more confused becasue why would it say the misssing required field and then name the filed that is invalid?
+```
+
+The distinction was explained: the named field is absent, not invalid, and including its dynamic
+name tells the developer which required input must be investigated. The learner then stated
+verbatim:
+
+```text
+now i understand what the purpose of that was
+```
+
+A fresh retrieval check was issued rather than treating explanation as mastery.
+
+MISSING-FIELD DIAGNOSTIC FRESH CHECK (exact):
+
+```text
+values = {"tool_name": "Edit"}
+field = "session_id"
+
+if field not in values:
+    raise ValueError("missing required field: " + field)
+
+What exact error message is produced, and what useful information does it add beyond just "missing required field"?
+
+Confidence: 0–100.
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+missing required filed: sessionid, it tells you which field is empty or msiing so you got back and check to see why it is missing
+```
+
+PASS on control flow and diagnostic purpose. The learner independently recovered that the message
+names the field to investigate. Precision corrections: the literal code says `field`, not `filed`,
+and the field value is `session_id` with an underscore. More importantly, `_required_value` detects
+absence; empty-string validation belongs to `_required_string`, which is the next review block.
+
+REQUIRED-STRING VALID-CASE PROMPT (exact):
+
+```text
+Next block:
+
+def _required_string(values: dict[str, object], field: str) -> str:
+    value = _required_value(values, field)
+
+    if not isinstance(value, str):
+        raise ValueError("field must be a string: " + field)
+
+    if value == "":
+        raise ValueError("empty required field: " + field)
+
+    return value
+
+Start with one valid case:
+
+values = {"tool_name": "Edit"}
+_required_string(values, "tool_name")
+
+What does _required_value put into value? Do either if branches raise? What is returned?
+
+Confidence: 0–100.
+```
+
+LEARNER FIRST ANSWER (verbatim):
+
+```text
+thisis a helper that makes sure the input for tool name (not always tool name just the inputs from the payload) have the correct string refered to so for tool name it is edit, it also checks for an empty lookup value and if the field is not a string 
+```
+
+The general contract was correct, including that the helper is reusable across fields, but the exact
+trace was not stated. A four-line trace scaffold was requested.
+
+LEARNER SCAFFOLDED ANSWER (verbatim):
+
+```text
+so field is toolname and Edit&#x20;
+not run&#x20;
+not run&#x20;
+Edit
+90
+```
+
+PARTIAL. The learner correctly tracked `field` as `"tool_name"`, `value` as `"Edit"`, skipped both
+raise bodies, and returned `"Edit"`. However, `not run` conflates the `if` condition with its body:
+each condition is evaluated and becomes `False`; only the body is skipped. Descend to one unrelated
+false branch and separate condition evaluation from body execution before returning here.
+
+LEARNER CLARIFICATION (verbatim):
+
+```text
+sorry they do not raise an error
+```
+
+ACCEPTED. The learner distinguished the evaluated conditions from the skipped raise bodies. The
+valid-string path returns `"Edit"`.
+
+REQUIRED-STRING WRONG-TYPE PROMPT (exact):
+
+```text
+values = {"tool_name": 7}
+_required_string(values, "tool_name")
+
+What goes into value? What does not isinstance(value, str) evaluate to? What happens next?
+
+Confidence: 0–100.
+```
+
+LEARNER FIRST ANSWER (verbatim):
+
+```text
+that would raise the vsalueerror and print the error message
+```
+
+The exception outcome was correct. It was clarified that `raise` creates an exception rather than
+printing; an uncaught exception is displayed by Python. A four-line trace scaffold followed.
+
+LEARNER SCAFFOLDED ANSWER (verbatim):
+
+```text
+value does nto get returned&#x20;
+raise
+field must be a string: toolname
+no
+```
+
+PARTIAL. The learner correctly predicted `ValueError` and that execution does not reach the second
+condition or return. Trace errors: `value` is assigned `7` even though it is not returned; the
+condition itself is Boolean `True`, with `raise` as its body; and the exact dynamic field value is
+`tool_name`. Primary blocker: `isinstance` evaluation. Isolate one expression before rebuilding the
+branch.
+
+ISINSTANCE MICRO-PROMPT (exact):
+
+```text
+Isolate the type check:
+
+value = 7
+is_text = isinstance(value, str)
+
+What Boolean value is stored in is_text, and why?
+
+Confidence: 0–100.
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+false, it is not a string 
+```
+
+PASS. The learner correctly evaluated `isinstance(7, str)` as `False` and explained the type
+mismatch. Add only the `not` from the real helper next.
+
+SESSION HANDOFF: the Codex session ended here, immediately after the `isinstance` micro-check PASS
+and before the `not` rung was issued. No learner answer is missing from this record. Resumed in a
+Claude session at the `not_text = not is_text` rung.
+
+NOT-OPERATOR MICRO-PROMPT (exact):
+
+```text
+What Boolean is stored, one operator at a time?
+
+Call:
+
+value = 7
+is_text = isinstance(value, str)
+not_text = not is_text
+
+Fill in every field:
+
+is_text =
+not_text =
+What "not" does to a Boolean =
+Confidence =
+
+Answer not_text as a literal Boolean value, not as a description of what happens next.
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+false
+true
+it flips it from true to false or vice versa
+90
+```
+
+PASS. All three fields correct, and `not` was stated as a general inversion rule rather than as a
+description of this single case. The learner now holds `isinstance` evaluation and negation as
+separate steps. Climb back to the full `if not isinstance(value, str):` line and re-run the
+wrong-type trace of `_required_string`, closing the three open slips: `value` is assigned, the
+condition is a Boolean, and the field value is `tool_name`.
+
+REQUIRED-STRING WRONG-TYPE RETRACE PROMPT (exact):
+
+```text
+Trace _required_string when the payload carries a number where a string belongs.
+
+Call:
+
+values = {"tool_name": 7}
+_required_string(values, "tool_name")
+
+Fill in every field:
+
+field =
+value after the _required_value call =
+isinstance(value, str) =
+not isinstance(value, str) =
+Does the raise body run =
+Exact message text of the raised ValueError =
+Is the value == "" condition ever evaluated =
+Is anything returned =
+Confidence =
+
+Give the message as the exact runtime string, including whatever the + field contributes.
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+never print the full code again while we are just focing on one block, fielf is toolname 
+7
+false 
+true
+yes
+field must be a string: toolname 
+no
+7
+90
+```
+
+SIX OF EIGHT. Two of the three previously open slips are now closed: `value` is correctly assigned
+`7` even though it is never returned, and the condition is correctly reported as the Boolean `True`
+rather than as the word `raise`. Control flow through the raise and past the second condition is
+held.
+
+Two errors remain. First, the literal field name is still transcribed as `toolname`; the code and the
+runtime message both carry the underscore, so the message is `field must be a string: tool_name`.
+This is a reading-precision miss, recorded but not remediated separately. Second, and the primary
+blocker, the learner reported `7` as returned. Nothing is returned: `raise` terminates the call, so
+the caller receives an exception instead of a value. The learner previously stated this correctly,
+so the concept is unstable rather than absent. Descend to one micro-example separating `raise` from
+`return`.
+
+LEARNER PROCESS FEEDBACK (verbatim, recorded): "never print the full code again while we are just
+focing on one block". Honor block-scoped display for the remainder of the review.
+
+RAISE-VERSUS-RETURN MICRO-PROMPT (exact):
+
+```text
+What does the caller receive?
+
+Call:
+
+def check(n):
+    if n > 5:
+        raise ValueError("too big")
+
+    return n
+
+result = check(9)
+
+Fill in every field:
+
+Does the raise body run =
+Does the line "return n" ever execute =
+What value is stored in result =
+What the caller receives instead =
+Confidence =
+
+Answer the result field with what is actually bound to that name after this code runs, not with
+what n held.
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+yes
+no
+9
+9 or an intieger
+90
+```
+
+FAIL, with an internally contradictory trace. The learner correctly reported that the raise body runs
+and that `return n` never executes, then reported `result` as `9`. Both cannot hold: if the only
+statement that hands a value back never runs, no value can arrive to be bound.
+
+MISCONCEPTION RECORDED: the learner believes the assignment target is bound regardless of how the
+call terminated, treating `raise` as a side effect layered on top of a normal return rather than as
+an abort of the entire assignment statement. Confidence was high at 90, so this is a confidently held
+wrong model, not a guess.
+
+Descend one further rung. Avoid try/except, which would introduce a second unknown concept. Use
+statement-ordering with `print` to make non-execution observable.
+
+LEARNER RECOVERY (verbatim): "so then nothing returns"
+
+Accepted. The learner then asked a productive question (verbatim): "so what is result then other than
+an error being raised, is it None???". Answered directly: `None` is the value handed back by a call
+that FINISHES without hitting `return`; `raise` abandons the call, so no value of any kind exists and
+the assignment target is never created. Referencing it afterward raises `NameError`. "No value" and
+"the value None" are distinct states.
+
+UNBOUND-VERSUS-NONE DISCRIMINATION PROMPT (exact):
+
+```text
+Which one ends with a usable name?
+
+Call:
+
+def quiet():
+    x = 1
+
+def loud():
+    raise ValueError("stop")
+
+a = quiet()
+b = loud()
+
+Fill in every field:
+
+What quiet() hands back =
+What a holds =
+Does the name b ever get created =
+Reason the two lines differ =
+Confidence =
+
+Answer the last field in one sentence, naming what quiet does that loud does not.
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+None
+None
+no
+loud is an error getting raised and queit is no return so it is None
+90
+```
+
+PASS, four of four. The learner distinguished an implicit `None` return from an abandoned call and
+correctly denied that `b` is ever created. The stated reason is correct but shallow; it was sharpened
+to the deep principle of completion versus abandonment: a call that completes always hands something
+back, possibly `None`, while an abandoned call hands back nothing, leaving the assignment target
+unbound. The misconception recorded at the `check(9)` rung is now corrected. Climb to a fresh
+target-level problem in the real block.
+
+REQUIRED-STRING EMPTY-STRING PROMPT (exact):
+
+```text
+Trace _required_string when the payload carries an empty string.
+
+Call:
+
+values = {"file_path": ""}
+_required_string(values, "file_path")
+
+Fill in every field:
+
+value after the _required_value call =
+not isinstance(value, str) =
+Does the first raise body run =
+Is the value == "" condition evaluated =
+value == "" =
+Exact message text of the raised ValueError =
+Does the caller receive a value =
+Confidence =
+
+Copy the field name into the message character by character, and answer the last field using the
+completion-versus-abandonment idea you just stated.
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+None
+false
+no
+yes
+filepath it is empty  
+"empty required field:  filepath"
+no it is abandoned 
+90
+```
+
+FOUR OF SEVEN. Control flow is now held end to end: the first raise is correctly skipped, the second
+condition is correctly reached, and the abandonment answer correctly applies the concept established
+at the previous rung, in the learner's own words. That transfer is the significant gain.
+
+Two errors, one of them the same internal-contradiction shape as the earlier failure.
+
+MISCONCEPTION RECORDED (primary blocker): the learner reported `value` as `None` when the payload
+holds `""`, treating an empty string as absence. This contradicts their own next field: if `value`
+were `None`, `not isinstance(value, str)` would be `True` and the first raise would fire. Fields two
+through five all describe a string. Descend to one micro-example separating the empty string from
+`None`.
+
+RECURRING PRECISION MISS (third occurrence): the literal field name was transcribed as `filepath`.
+The code spells it `file_path`, and the message is assembled by `+ field`, so the runtime string is
+`empty required field: file_path` with one space. Previous occurrences were `toolname` for
+`tool_name`, twice. A standing requirement was issued to copy identifiers character by character
+before composing any message. Not remediated as a separate exercise; tracked as a habit, and any
+future test-assertion work must be checked against it.
+
+LEARNER RULING (verbatim): "do not evaluate the underscore that is a nitpick"
+
+ACCEPTED and binding. Identifier transcription slips in learner answers are no longer graded or
+counted as errors. The recurring-precision note above stands as history only; it is not to be revived
+as an exercise. The single retained exception is test-assertion work, where a message literal must
+match the source exactly for the test to be meaningful; flag it there and nowhere else.
+
+EMPTY-STRING-VERSUS-NONE MICRO-PROMPT (exact):
+
+```text
+What comes out of each lookup?
+
+Call:
+
+values = {"a": "", "b": None}
+x = values["a"]
+y = values["b"]
+
+Fill in every field:
+
+x =
+Is x the same thing as None =
+isinstance(x, str) =
+y =
+isinstance(y, str) =
+Confidence =
+
+Answer x with a literal you could type into code, and treat "same thing as None" as a yes/no.
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+""
+no
+true
+None
+false 
+100
+```
+
+PASS, five of five at confidence 100. The learner separated the empty string from `None`: `""` is a
+string value with no characters and satisfies `isinstance(x, str)`; `None` is the absence of a value
+and fails that check. The misconception recorded at the empty-string trace is corrected. This also
+supplies the reason the two guards in `_required_string` cannot be collapsed: they detect different
+states, and only the type guard can be expressed as an `isinstance` check.
+
+Trace-level work on `_required_string` is complete. Control flow, condition evaluation, raise
+semantics, abandonment, and the empty-versus-absent distinction are all held. Fade the scaffolding
+and move to design rationale for the same block before advancing to `_required_object`.
+
+EMPTY-GUARD RATIONALE SEQUENCE (design, scaffolding faded to free answers)
+
+PROMPT 1 (exact): "Why is an empty string an error rather than a value the parser passes along?"
+grounded in `parse_post_tool_use` accepting `{"file_path": ""}` and building a `ClaimedEdit`.
+
+LEARNER FIRST ANSWER (verbatim):
+
+```text
+becasue we need a value that will not be empty for something like the tool name or the session id
+```
+
+CIRCULAR. The answer restates the guard rather than justifying it, and names which fields matter
+without naming what breaks. Descend to a concrete downstream action: BuildLens hands `file_path` to
+Git and asks whether that file changed.
+
+LEARNER ANSWER (verbatim):
+
+```text
+but when it hands git the empty filepath it will throw an error, it cannot tell you anytthing
+```
+
+CORRECT consequence. An empty path is unusable; Git cannot answer a question about a file with no
+name. Advance to the design comparison: both designs fail, so why prefer failing at the parse
+boundary?
+
+LEARNER ANSWER (verbatim):
+
+```text
+becasue it is earlier and will stop ypou from calling an extra git subprocess and going thgouth that
+```
+
+PARTIAL. Avoiding the subprocess is a real but secondary benefit; cost was not the motivation. The
+learner did not engage the error-message half of the prompt. Scaffolded by placing the two concrete
+messages side by side, `fatal: empty string is not a valid pathspec` against
+`ValueError: empty required field: file_path`, with the underlying bug identical in both.
+
+LEARNER ANSWER (verbatim):
+
+```text
+ok so the bug is also a lot more clear as to where we failed and how to fix it
+```
+
+PASS. The learner identified diagnosability. The principle was named for them as ERROR LOCALITY: the
+failure is reported at the boundary where the bad data entered, so the message indicts the cause
+rather than a downstream victim. Connected to the trust boundary already established for this module:
+`claude_adapter` is where untrusted external payload data becomes a BuildLens value, so it is where
+that data is proven. Challenge to follow, per the design-review rubric; a design claim is not
+accepted unchallenged.
+
+CHALLENGE PROMPT (exact): "What would have to be true about BuildLens for the thinner design, letting
+data through and letting the consumer fail, to be the better choice? Argue the other side honestly."
+
+LEARNER ANSWER (verbatim):
+
+```text
+when the number of boundaries get too big then it takes a lot more time to validate other than that i have no idea
+```
+
+PARTIAL, with honest acknowledgement of the limit. The maintenance/cost condition is legitimate: each
+guard is code to maintain and test, and that cost scales with the number of boundaries. The learner
+could not produce further conditions, so the remaining three were supplied directly as a worked
+rescue:
+
+1. the consumer's own error is already precise, making the boundary guard a duplicated check that
+   buys no diagnosability;
+2. the source is already trusted and validated upstream, so re-checking duplicates a rule in two
+   places and invites drift. This is the condition that does NOT hold for `claude_adapter`, whose
+   entire purpose is the untrusted-input boundary;
+3. the guard supplies false confidence. `_required_string` proves `file_path` is a non-empty string;
+   it does not prove the file exists or that Claude edited it. A guard catching only the shallowest
+   defect can invite misplaced trust in a still-unverified record.
+
+Condition 3 was linked forward to the central Phase 8 distinction between the payload's CLAIM and the
+repository's OBSERVED state, and to the naming of `ClaimedEdit`. Retrieval owed later: ask the
+learner to reproduce conditions 1 and 3 unaided on a new surface, since they were supplied rather
+than generated.
+
+`_required_string` review complete: trace behavior, raise semantics, empty-versus-absent, design
+rationale, and challenge. Next block is `_required_object`.
+
+## EV-P8-REQUIRED-OBJECT-351 — asymmetric emptiness guards
+
+REQUIRED-OBJECT COMPARISON PROMPT (exact):
+
+```text
+What this block guarantees about its return value =
+The one guard _required_string has that this block does not =
+Why that guard is absent here =
+Confidence =
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+it guarenttes that the return value is an object 
+the empty string block 
+i do not know
+```
+
+TWO OF THREE. The guarantee and the missing guard were identified. The rationale was unknown, so the
+`{}` analogue was supplied and the caller's next line was shown.
+
+LEARNER ANSWER (verbatim):
+
+```text
+i did not even see that it called required value so it does not need the "" because if it is misisng anything requiredvalue will raise the error and tell you the field that is absent
+```
+
+PASS, and stronger than the trace that was requested: the learner produced the design reason directly.
+Emptiness is not the defect for a dictionary; presence of the SPECIFIC required keys is, and the very
+next `_required_value` lookup checks exactly that while naming the absent field. A `{}` guard would
+fire earlier and say less.
+
+ASYMMETRY PROMPT (exact): "Why does the empty string need a guard when the empty dict does not?"
+
+LEARNER ANSWER (verbatim):
+
+```text
+i cannot tell
+```
+
+Scaffolded by showing both post-helper paths and asking for a count of further rejecting checks.
+
+LEARNER ANSWER (verbatim):
+
+```text
+1
+none
+the string 
+90
+```
+
+PASS, three of three. PRINCIPLE ESTABLISHED: guard at the boundary only where no later, more specific
+check exists. The empty dict is examined once more inside the module and rejected there with a better
+message. The empty string is examined nowhere else; it flows into `ClaimedEdit` and out of the
+module, so the boundary is its only opportunity for rejection.
+
+This also explains the shape of the whole helper family: `_required_value` proves presence,
+`_required_string` and `_required_object` prove type, and only the value that escapes unexamined
+carries the extra emptiness guard.
+
+Blocks remaining in the review: `parse_post_tool_use`.

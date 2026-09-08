@@ -4,7 +4,7 @@
 > obsolete statements whenever state changes. Preserve historical prompts, answers, remediation, and
 > rationale in `learning/LEARNING_LEDGER.md`, `QUIZZES.md`, and Git history.
 
-Last updated: 2026-09-05
+Last updated: 2026-09-08
 
 ## Lifecycle
 
@@ -2434,20 +2434,44 @@ constructor PARTIAL. The major/deep counter remains 1/2, so no cumulative review
 architecture reset remains due only by time or major transition. The next implementation step is
 still blocked on completion of the adapter code review; do not add Phase 8 behavior yet.
 
-EXACT RESTART POINT: explain only that `@dataclass` generates an `__init__` from the declared fields,
-then ask the learner to trace this one-field example before returning to `ClaimedEdit`:
+The `@dataclass` restart point is superseded. The block-by-block review of `claude_adapter.py` has
+completed `ClaimedEdit`, `_required_value`, `_required_string`, and `_required_object`. Only
+`parse_post_tool_use` remains.
 
-```python
-from dataclasses import dataclass
+Concepts now held: control flow through guard clauses, the difference between evaluating an `if`
+condition and running its body, `isinstance` and `not` as separate steps, and completion versus
+abandonment. A call that completes always hands something back, possibly `None`; a call abandoned by
+`raise` hands back nothing and leaves the assignment target unbound. The empty string is a string
+value with no characters and is distinct from `None`, which is the absence of a value.
 
-@dataclass
-class Box:
-    size: int
+Two design principles are held in the learner's own words. ERROR LOCALITY: validate where untrusted
+data enters, so the message indicts the cause rather than a downstream victim; `not a valid pathspec`
+sends the reader to investigate Git when the real fault was a malformed payload. GUARD PLACEMENT:
+guard at the boundary only where no later, more specific check exists. The empty dictionary meets one
+further rejecting check inside the module and is refused there with a better message; the empty
+string meets none, flowing into `ClaimedEdit` and out of the module, so the boundary is its only
+opportunity for rejection.
 
-box = Box(size=4)
-```
+Two corrected misconceptions to re-probe cold on a new surface, since both were confidently held at
+90 before correction: that an assignment target is bound regardless of how the call terminated, and
+that an empty string is the same as absence. Also owed as genuine retrieval: the conditions under
+which boundary validation stops being worth it. The learner independently produced the maintenance-
+cost condition; the precise-consumer-error, trusted-source, and false-confidence conditions were
+supplied and then echoed back within the same exchange, which is not evidence of retention.
 
-Ask what value `box.size` returns and how the constructor caused that value to be stored. Then use a
-near-transfer with a different one-field class, climb back to why `claude_adapter.py` imports
-`dataclass`, and continue the remaining block-by-block review. Files the learner should be able to
-teach remain the previously listed Phase 0–7 files; `claude_adapter.py` is still under review.
+Identifier transcription slips in learner answers are no longer graded, by the learner's explicit
+ruling. The only retained exception is test-assertion work, where a message literal must match the
+source exactly.
+
+Last knowledge gate: guard-placement asymmetry PASS at confidence 90, three of three. The major/deep
+counter remains 1/2, so no cumulative review is due. The next architecture reset remains due only by
+time or major transition. Implementation is still blocked on completion of the adapter code review;
+do not add Phase 8 behavior yet.
+
+EXACT RESTART POINT: begin the `parse_post_tool_use` block. It is the first block in the module with
+branching beyond a single guard, so open by having the learner name its three distinct outcomes -
+`ClaimedEdit`, `None`, and `ValueError` - and say which payload shape produces each, before tracing
+any one path. The `Bash` branch returning `None` is the conceptually loaded case: it is a real,
+successful parse of an event that directly observes no file, not a failure. Do not let it be read as
+an error path. Files the learner should be able to teach remain the previously listed Phase 0-7
+files; `claude_adapter.py` is still under review.
