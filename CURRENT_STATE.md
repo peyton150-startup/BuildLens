@@ -2405,3 +2405,49 @@ Historical evidence lives in:
 - `learning/LEARNING_LEDGER.md` — exact prompts, committed answers, evaluation, and remediation;
 - `QUIZZES.md` — readable transcript;
 - Git history — prior full versions of this snapshot and all published state.
+
+SESSION 2026-09-08 — PHASE 8 ADAPTER CODE REVIEW PAUSED FOR LOCATION CHANGE.
+
+The learner requested an immediate pause so the session could be committed and pushed. No product
+code changed. The existing execution path remains:
+
+```text
+decoded Claude PostToolUse Python mapping
+-> parse_post_tool_use(payload)
+   -> valid Edit: ClaimedEdit(file_path, session_id, tool_name)
+   -> valid Bash: None
+   -> malformed input: ValueError
+```
+
+The module-docstring boundary is now held: a decoded PostToolUse payload enters
+`claude_adapter`, and a BuildLens representation leaves. The learner also recovered that
+`json.loads(...)` performs JSON decoding and the assignment target receives the resulting Python
+value. Do not describe the dictionary as decoding itself.
+
+The current uncertain concept is `@dataclass`. The learner can explain what `ClaimedEdit` stores and
+correctly predicted that a decorated class can be instantiated without a handwritten `__init__`, but
+could not explain why. They also partially conflated the caller's instance name with `self` inside an
+instance method. This is not yet held.
+
+Last knowledge gate: module input/output PASS; JSON decoder operation PASS; dataclass-generated
+constructor PARTIAL. The major/deep counter remains 1/2, so no cumulative review is due. The next
+architecture reset remains due only by time or major transition. The next implementation step is
+still blocked on completion of the adapter code review; do not add Phase 8 behavior yet.
+
+EXACT RESTART POINT: explain only that `@dataclass` generates an `__init__` from the declared fields,
+then ask the learner to trace this one-field example before returning to `ClaimedEdit`:
+
+```python
+from dataclasses import dataclass
+
+@dataclass
+class Box:
+    size: int
+
+box = Box(size=4)
+```
+
+Ask what value `box.size` returns and how the constructor caused that value to be stored. Then use a
+near-transfer with a different one-field class, climb back to why `claude_adapter.py` imports
+`dataclass`, and continue the remaining block-by-block review. Files the learner should be able to
+teach remain the previously listed Phase 0–7 files; `claude_adapter.py` is still under review.
