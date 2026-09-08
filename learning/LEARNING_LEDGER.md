@@ -34433,3 +34433,85 @@ Confidence =
 
 The three-case contract itself still stands and is unchanged: valid-but-nothing-observed returns
 None, malformed raises, and an observed edit returns the value named above.
+
+## EV-P8-PARSE-PREREQ-343 — payload versus observed file bytes
+
+EXERCISE TYPE: prerequisite trace. Phase 8 parse-boundary design resumed after a two-day delay.
+
+PROMPT (exact):
+
+```text
+If the payload contains a file path but not the file's bytes, can the parse step truthfully calculate
+the file's content hash from the payload alone? Why or why not?
+
+Confidence: 0–100.
+```
+
+LEARNER FIRST ANSWER (verbatim):
+
+```text
+no, i thinkk we talked about this but we would verify everything with git as much as possible
+```
+
+PARTIAL. The learner correctly answered that the parse step cannot calculate the content hash from
+the payload alone. The explanation overgeneralized Git's authority: Git can establish Git-backed
+content facts, but parsing has not consulted Git, and Git cannot supply every missing observation
+such as BuildLens's observation time. Descend to one source/claim classification before returning
+to the parse-return design question.
+
+LEARNER CLARIFICATION (verbatim):
+
+```text
+for content facts we can verify with git
+```
+
+CORRECT. The established content-versus-provenance rule is recovered. Preserve the narrower stage
+boundary: Git verification is a later observation/enrichment operation, not something accomplished
+by JSON parsing alone. Check one non-Git field next.
+
+## EV-P8-OBSERVED-AT-344 — claimed event time versus observation time
+
+EXERCISE TYPE: prerequisite classification. Phase 8 parse-boundary remediation.
+
+PROMPT (exact):
+
+```text
+Can Git tell BuildLens the time when BuildLens observed the file—observed_at? Why or why not?
+
+Confidence: 0–100.
+```
+
+LEARNER FIRST ANSWER (verbatim):
+
+```text
+no it cannot, so we would observe that from the hook and treat it as a claim not fact
+```
+
+PARTIAL. The learner correctly ruled out Git but confused a hook-claimed event time with
+BuildLens's own observation time. `observed_at` means when BuildLens looked and is supplied by
+BuildLens's clock; a timestamp reported by the hook would remain a separately labelled claim.
+Descend to a two-timestamp timeline and ask only which value belongs in `observed_at`.
+
+FOLLOW-UP PROMPT (exact):
+
+```text
+Consider this timeline:
+
+Hook claims the edit happened at:  10:00
+BuildLens reads the file at:        10:03, according to its own clock
+
+Which time belongs in observed_at, and how should BuildLens classify the hook's 10:00 timestamp?
+
+Confidence: 0–100.
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+ok i like that so when the hook arrives is the recorded time
+```
+
+PARTIAL. The learner accepted a locally recorded time but conflated signal arrival with the later
+file observation. `observed_at` records when BuildLens actually observes the file using its own
+clock. Hook arrival may trigger that work but does not itself prove the file was read. Descend to a
+familiar message-arrival versus message-reading timeline.

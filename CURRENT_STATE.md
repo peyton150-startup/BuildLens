@@ -2308,6 +2308,38 @@ Files the learner should currently be able to teach:
 - `test_git_adapter_integration.py`
 - `test_snapshot.py`
 - `test_cli.py`
+
+SESSION 2026-09-08 — PHASE 8 PARSE-BOUNDARY CONTEXT REBUILD PAUSED.
+
+No product code changed. The learner correctly recovered that a payload without file bytes cannot
+itself supply `content_hash`, and that content facts should be verified against Git where Git can
+settle them. Timestamp remediation remains open: the learner correctly ruled out Git as the source
+of `observed_at`, but then conflated the hook's claimed event time and hook arrival with the later
+time when BuildLens actually reads the file.
+
+Exact restart point: continue the R0 email analogy already asked in `EV-P8-OBSERVED-AT-344`:
+
+```text
+Email arrives:       10:00
+You open and read it: 10:03
+
+If the field means "when I observed the email's contents," which time belongs there?
+Confidence: 0–100.
+```
+
+Record the learner's answer verbatim. If correct, use one near-transfer that separates hook arrival
+from file observation, then return to the still-unanswered parse-return design question. The major/
+deep counter remains 1/2; no Phase 8 implementation exists.
+
+SESSION 2026-09-08 — PHASE 8 PARSE-BOUNDARY CONTEXT REBUILD STARTED.
+
+After a two-day delay, the learner asked to back up before answering the open design question. On
+the first prerequisite (`EV-P8-PARSE-PREREQ-343`), the learner correctly said a payload containing
+only a path cannot itself produce the file's content hash. The explanation broadened the established
+rule to "verify everything with git as much as possible." Primary blocker: source scope. Git can
+settle Git-backed content facts, but the parse step has not consulted Git and Git cannot establish
+every missing observation. Continue with one simpler source/claim classification before returning
+to the parse-return design question. No Phase 8 code exists.
 - `classify.py`
 - `summarize.py`
 - `session.py`
