@@ -2340,6 +2340,51 @@ rule to "verify everything with git as much as possible." Primary blocker: sourc
 settle Git-backed content facts, but the parse step has not consulted Git and Git cannot establish
 every missing observation. Continue with one simpler source/claim classification before returning
 to the parse-return design question. No Phase 8 code exists.
+
+SESSION 2026-09-08 — PHASE 8 PARSE BOUNDARY RESOLVED AND APPROVED.
+
+The learner recovered the three enrichment dependencies after remediation: `base_commit` from Git,
+`content_hash` from file bytes, and `observed_at` from a program clock. They also recovered that
+`session_id` remains useful claimed provenance after enrichment.
+
+The previously open parse-return design now has names:
+
+```text
+parse_hook_payload(payload) -> ClaimedEdit | None
+
+ClaimedEdit:
+    file_path
+    session_id
+    tool_name
+
+capture_observed_version(ClaimedEdit, Git, file reader, clock) -> ObservedVersion
+```
+
+`ClaimedEdit` was chosen because payload values can satisfy validation while their hook-only truth
+remains claimed. `capture_observed_version` replaced the ambiguous/overstated names
+`EditHookInput` and `PayloadVerifier`; it adds direct observations without implying every claim is
+verified. The learner approved the exact two-stage contract at confidence 90. No Phase 8 code exists.
+
+The mandatory Phase 8 test-design pause has started (`EV-P8-PARSE-TEST-DESIGN-346`). The official
+Claude hook reference was checked: `session_id`, `hook_event_name`, and `tool_name` are top-level;
+file-tool `file_path` is nested under `tool_input`. This is documented schema evidence, not a locally
+captured fixture. The learner correctly predicted that a valid Edit returns the session id, tool
+name, and file path inside `ClaimedEdit` at confidence 90.
+
+Exact restart question, already asked but unanswered:
+
+```text
+The documented payload stores file_path inside tool_input, not at the top level.
+
+If the parser mistakenly looks for a top-level file_path, what would happen to this valid Edit case,
+and how would our test expose the bug?
+
+Confidence: 0–100.
+```
+
+Record the learner's answer verbatim. Then rebuild the Bash and malformed test cases as needed. Only
+after the test-design pause passes, implement test-first: `ClaimedEdit` and `parse_hook_payload`
+only. Keep `capture_observed_version` and all Git/file/hash/clock behavior out of the patch.
 - `classify.py`
 - `summarize.py`
 - `session.py`

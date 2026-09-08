@@ -34515,3 +34515,529 @@ PARTIAL. The learner accepted a locally recorded time but conflated signal arriv
 file observation. `observed_at` records when BuildLens actually observes the file using its own
 clock. Hook arrival may trigger that work but does not itself prove the file was read. Descend to a
 familiar message-arrival versus message-reading timeline.
+
+R0 PROMPT (exact):
+
+```text
+Email arrives:       10:00
+You open and read it: 10:03
+
+If the field means "when I observed the email's contents," which time belongs there?
+Confidence: 0–100.
+```
+
+LEARNER RESPONSE (verbatim):
+
+```text
+ok fair but wouldn't we want to know the exact time the changes were made not the time you read the changrs were made
+```
+
+The learner did not answer the classification and instead raised a valid product requirement. The
+desired edit time and the knowable observation time are distinct. Git does not establish the time of
+an individual working-tree edit; a hook-reported edit time would be a provenance claim. BuildLens's
+own clock can establish when BuildLens read the resulting bytes. Explain the need for both concepts,
+without adding a new field to the first patch, then ask the learner to classify the two timestamps by
+authority.
+
+CLASSIFICATION PROMPT (exact):
+
+```text
+Suppose:
+
+Hook says edit occurred:     10:00
+BuildLens reads the version: 10:03
+
+Which timestamp is CLAIMED, which is OBSERVED, and why must BuildLens retain the observed one even
+if the claimed edit time is useful?
+
+Confidence: 0–100.
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+no it does not, observed is a much more reliable way to do it
+```
+
+PASS on the central distinction. The learner rejected substituting the desired edit time for the
+locally observed time and identified observation as the more reliable basis. The answer did not
+explicitly label both example timestamps, so use one compact near-transfer without a table before
+returning to the parse-return design question.
+
+NEAR-TRANSFER PROMPT (exact):
+
+```text
+A delivery service reports that a package was left at 2:00. You personally see the package on the
+porch at 2:10.
+
+Which time is claimed, which is observed, and which can you personally establish as fact?
+
+Confidence: 0–100.
+```
+
+LEARNER RESPONSE (verbatim):
+
+```text
+i know what time they claimed, the issue with that is now they sned a picture, i understand what you are saying can we move on
+```
+
+NOT SCORED. The learner asked to stop the transfer after stating that the distinction was understood.
+Do not mark the transfer or timestamp concept mastered. Respect the request and return to the open
+Phase 8 parse-return design decision.
+
+## EV-P8-PARSE-RETURN-DESIGN-345 — first intermediate representation proposal
+
+EXERCISE TYPE: design/contract. Phase 8 parse boundary.
+
+PROMPT (exact):
+
+```text
+The parser has validated:
+
+file_path
+session_id
+tool_name
+
+It cannot yet produce:
+
+base_commit
+content_hash
+observed_at
+
+What should the parser return for a valid Edit payload, what should that smaller value be called,
+and which later component should turn it into a complete ObservedVersion?
+
+Confidence: 0–100.
+```
+
+LEARNER FIRST ANSWER (verbatim):
+
+```text
+confirmed payload for the valid objects and for the others claimed payload
+```
+
+NEEDS CLARIFICATION before assessment. The learner proposed `ConfirmedPayload` for "valid objects"
+and `ClaimedPayload` for "the others," but did not identify which return case or fields each phrase
+means. Challenge `confirmed` because successful shape/path validation must not imply that payload
+claims were independently verified. Ask for an explicit case-to-type and field mapping without
+supplying the design.
+
+CLARIFICATION PROMPT (exact):
+
+```text
+Valid Edit returns =
+Its exact fields =
+Why "confirmed" does not overstate what was verified =
+"ClaimedPayload" applies to =
+Component that creates ObservedVersion =
+Confidence =
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+a field trhat git can verify or is already valid&#x20;
+file\_path session\_id tool\_name
+ok maybe confirmed was not the correct word, i am just getting back into the swing of things, maybe valid\_payolad would be another option, i am open to other ideas for naming
+claimedpayload applies to fields that the payload includes but we cannot immidatly validate it using git
+no idea
+90
+```
+
+PARTIAL. The learner identified the intended three intermediate fields and withdrew `confirmed`
+because it overstates authority. `ValidPayload` is directionally closer, but the explanation still
+conflates schema/value validation with Git verification. `session_id` and `tool_name` can satisfy an
+input contract while remaining hook claims. The component that creates `ObservedVersion` was
+unknown. Descend to dependencies: ask what external capabilities a later step needs, without asking
+for its name. After that, return to naming the parsed representation and observation operation.
+
+DEPENDENCY PROMPT (exact):
+
+```text
+Forget component names for now.
+
+A later function must fill these fields:
+
+base_commit
+content_hash
+observed_at
+
+What external source or capability must that function access for each field?
+
+base_commit  =
+content_hash =
+observed_at  =
+Confidence   =
+```
+
+LEARNER FIRST ANSWER (verbatim):
+
+```text
+not sure&#x20;
+```
+
+NOT YET DEMONSTRATED. Primary blocker: retrieving the source-to-field mapping while holding three
+items at once. Descend to one field and ask only which system BuildLens consults for the base commit.
+
+R0 BASE-COMMIT PROMPT (exact):
+
+```text
+For base_commit alone: what system should BuildLens ask to learn the repository's current base
+commit?
+
+Confidence: 0–100.
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+git&#x20;
+20
+```
+
+PASS at confidence 20. `base_commit` maps to Git. Keep the scaffold at one field and ask what input
+BuildLens must read before it can calculate `content_hash`.
+
+R0 CONTENT-HASH PROMPT (exact):
+
+```text
+For content_hash alone: what must BuildLens read before it can calculate the hash?
+
+Confidence: 0–100.
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+the bytes for the file
+30
+```
+
+PASS at confidence 30. `content_hash` maps to the bytes BuildLens reads from the file. Keep the
+scaffold at one field and ask which BuildLens-owned capability supplies `observed_at`.
+
+R0 OBSERVED-AT PROMPT (exact):
+
+```text
+For observed_at alone: what BuildLens-owned capability supplies the time when BuildLens reads the
+file?
+
+Confidence: 0–100.
+```
+
+LEARNER FIRST ANSWER (verbatim):
+
+```text
+i have no idea what that means
+```
+
+VOCABULARY BLOCKER, not a conceptual failure. Pause the field-mapping exercise. Explain only that a
+"BuildLens-owned capability" means something the program invokes itself rather than accepting from
+the hook, and that a clock/time function returns the computer's current time. Give one R0 clock
+example and ask the learner to read its result before recombining fields.
+
+R0 CLOCK EXAMPLE (exact):
+
+```text
+BuildLens reads the file.
+BuildLens calls its clock.
+The clock returns 10:03.
+
+What value should BuildLens store in observed_at?
+
+Confidence: 0–100.
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+10:03, my sonfusion was calling the clock because i did not know you could do that\\
+```
+
+PASS. The learner correctly stores `10:03`. The blocker was API vocabulary/behavior: they did not
+know software can call a time function to read the computer's current clock. Explain that "call the
+clock" is shorthand for invoking such a function; defer the exact Python API until implementation.
+Remove the one-field scaffold and recombine the three source mappings.
+
+RECOMBINED PROMPT (exact):
+
+```text
+Now recombine the three:
+
+base_commit  =
+content_hash =
+observed_at  =
+Confidence   =
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+git
+bytes from the file
+clock function
+90
+```
+
+PASS at confidence 90. All three dependencies were independently recovered after the scaffold was
+removed: Git supplies `base_commit`, file bytes supply `content_hash`, and a clock function supplies
+`observed_at`. Climb one rung: ask for the plain-language responsibility and a possible function name
+for the later operation that has these dependencies and creates `ObservedVersion`.
+
+OPERATION-RESPONSIBILITY PROMPT (exact):
+
+```text
+The parser returns the three validated payload fields. A later operation has access to Git, the file,
+and a clock, and produces the complete ObservedVersion.
+
+In plain language, what is that later operation's job? Then suggest a possible function name for it.
+
+Confidence: 0–100.
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+to take the payload data and validate/ run the function that will make it trusted data
+```
+
+PARTIAL. The learner recovered the pipeline direction but described the complete output as uniformly
+trusted. The later operation can verify content facts and add BuildLens-observed facts, but it cannot
+convert hook provenance into independently verified truth. An `ObservedVersion` intentionally keeps
+observed facts and labelled claims together without erasing the distinction. Ask only whether
+`session_id` changes authority after Git/file/clock enrichment, then return to the responsibility and
+name.
+
+AUTHORITY CHECK PROMPT (exact):
+
+```text
+After the later function consults Git, reads the file, and calls the clock, session_id still came
+only from the hook.
+
+Does session_id become a verified fact, or does it remain a labeled claim? Why?
+
+Confidence: 0–100.
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+it stays a labeld claim, we never can versiy it but it will still be usefu l in the recorsd
+```
+
+PASS. `session_id` remains a labelled claim because the enrichment dependencies cannot independently
+verify it, and it remains useful when its authority is preserved. Return to a fresh statement of the
+later operation's responsibility and require a candidate function name.
+
+FRESH RESPONSIBILITY PROMPT (exact):
+
+```text
+Now restate the later operation's job without saying it makes everything trusted.
+
+Include:
+
+- what it receives;
+- what it independently observes or verifies;
+- what remains claimed;
+- what it returns;
+- a possible function name.
+
+Confidence: 0–100.
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+it revieces the payload data, it observes the fields that cannot be verified and verifies the rest, session\_id remains claimed, it returns all the fields that needed to be verified now freshly verified, payload verifier
+60
+```
+
+PARTIAL. The learner correctly preserved `session_id` as claimed and identified a completed return
+record, but treated observation and verification as opposing classifications and again described all
+returned fields as verified. Observation means BuildLens directly reads or measures a value;
+verification means comparing a prior claim with an independent authority. `PayloadVerifier`
+therefore overstates the responsibility. Descend to `observed_at`, where no incoming value is being
+compared, and ask whether the clock-produced value is observed or verified.
+
+OBSERVE-VERSUS-VERIFY PROMPT (exact):
+
+```text
+The hook provides no value for observed_at. BuildLens calls its own clock and creates that value.
+
+Is observed_at being observed or verified here? Explain using the difference between measuring a
+value and comparing a claim.
+
+Confidence: 0–100.
+```
+
+LEARNER RESPONSE (verbatim):
+
+```text
+i was just looking for another word for not verifiable, technically observed at is verefied, would a better word me recieved from the payload
+```
+
+PARTIAL WITH A VALID TERMINOLOGY PROPOSAL. `received from the payload` usefully describes source
+lineage, but it is not a synonym for unverifiable: a payload-derived value may be shape-valid,
+independently verified, or retained as a claim. The learner used `verified` colloquially to mean
+reliable. Preserve the design's narrower mechanism vocabulary: observation directly reads/measures a
+value; verification compares an existing claim with independent evidence. `observed_at` is created
+by direct clock observation because there is no incoming `observed_at` claim to compare. Use one
+thermometer micro-example to check the operation distinction.
+
+NAMING GUIDANCE GIVEN AFTER COMMITMENT:
+
+```text
+claimed         field/value whose truth comes only from the hook
+payload-derived describes source lineage, not authority
+EditHookInput   proposed as a neutral intermediate type name
+```
+
+LEARNER OBJECTION (verbatim):
+
+```text
+so that would then claim that we will edit the hook input&#x20;
+```
+
+VALID NAMING OBJECTION. `EditHookInput` was intended as "input produced by an Edit hook," but it can
+also read as an instruction to edit `HookInput`. Reject the ambiguous name. Proposed refinement:
+`ClaimedEdit`, meaning that the hook claims an edit occurred without implying independent
+verification. Require learner acceptance or revision before the contract is considered decided.
+
+LEARNER NAMING DECISION (verbatim):
+
+```text
+ok i like claimededit, because some of the fields will stay claimed and others will be validated
+```
+
+ACCEPTED. The intermediate representation is named `ClaimedEdit`. The reason is substantially
+correct with one vocabulary refinement already taught: some payload fields satisfy validation while
+remaining claimed, and the later operation adds directly observed facts rather than turning the
+whole object into verified truth.
+
+The proposed later operation was initially named `observe_edit`. The learner asked (verbatim):
+
+```text
+is boserve edit the function that valiades those things
+```
+
+Clarified that the operation obtains missing facts from Git, file bytes, and a clock; those values
+are created by direct observation rather than validated against incoming values. The clearer name
+`capture_observed_version` was proposed.
+
+LEARNER RESPONSE (verbatim):
+
+```text
+yeah that name was my issue, i like the new one
+```
+
+ACCEPTED. Use `capture_observed_version` for the later enrichment/observation operation. Before code,
+present the complete two-stage contract once more and obtain confidence.
+
+FINAL CONTRACT PRESENTED:
+
+```text
+parse_hook_payload(payload)
+    Bash payload   -> None
+    valid Edit     -> ClaimedEdit(file_path, session_id, tool_name)
+    malformed      -> raise
+
+capture_observed_version(ClaimedEdit, Git, file reader, clock)
+    -> ObservedVersion
+```
+
+The first patch is limited to `ClaimedEdit` and `parse_hook_payload`; capture, Git inspection, file
+reading, hashing, and clock access remain later work.
+
+LEARNER APPROVAL (verbatim):
+
+```text
+yes, 90
+```
+
+PASSED AND AUTHORIZED at confidence 90. The parse boundary is decided. Proceed test-first with only
+the three-case parse contract; do not implement `capture_observed_version` in this patch.
+
+## EV-P8-PARSE-TEST-DESIGN-346 — pre-implementation test categories
+
+EXERCISE TYPE: test/contract. Phase 8 mandatory write-tests-before-seeing-tests pause.
+
+Official Claude hook documentation was checked before the prompt. For a `PostToolUse` payload,
+`session_id`, `hook_event_name`, and `tool_name` are top-level fields; file-tool `file_path` is nested
+under `tool_input`. No local fixture has yet been observed, so tests will encode only this documented
+boundary and will not be described as locally captured payload evidence.
+
+PROMPT (exact):
+
+```text
+Before I write the tests, the project's Phase 8 test-design pause requires your prediction. For each
+contract branch, propose one test and state what mistake it would catch:
+
+Valid Edit test =
+Mistake caught =
+
+Valid Bash test =
+Mistake caught =
+
+Malformed payload test =
+Mistake caught =
+
+Confidence =
+```
+
+LEARNER FIRST ANSWER (verbatim):
+
+```text
+not sure for any of these,&#x20;
+```
+
+NOT YET DEMONSTRATED. Primary blocker: translating a contract branch into a concrete input/output
+example while holding three cases at once. Descend to the valid Edit branch only, omit Python syntax,
+and ask for the expected return value and the one wrong behavior the example would catch.
+
+R1 VALID-EDIT PROMPT (exact):
+
+```text
+Start with one concrete payload:
+
+session_id      = "session-7"
+hook_event_name = "PostToolUse"
+tool_name       = "Edit"
+file_path       = "C:/repo/app.py"
+
+According to the contract, what should parse_hook_payload return for this valid Edit?
+
+You can answer in plain English—no Python syntax needed.
+
+Confidence: 0–100.
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+it should return sesion id toolname and filepath, 90
+```
+
+PASS at confidence 90. The learner identified all three returned values; bind them to the already
+chosen `ClaimedEdit` representation. Next isolate the schema assumption: `file_path` is nested under
+`tool_input`, not at the payload top level.
+
+LEARNER CLARIFYING QUESTION (verbatim):
+
+```text
+and these are all fileds that will be verified in the next function or they will stay claimed
+```
+
+Clarified that the next operation does not convert every claim into fact. `file_path` is validated
+and used to locate an observed file, while the historical attribution remains claimed; `session_id`
+and `tool_name` remain hook claims even when their values satisfy the input contract. Git, file bytes,
+and the clock add independent observations rather than verifying all provenance.
+
+LEARNER NAMING DECISION (verbatim):
+
+```text
+ok i like claimededit, because some of the fields will stay claimed and others will be validated
+```
+
+ACCEPTED. Adopt `ClaimedEdit` for the valid parsed Edit representation. The rationale preserves the
+difference between contract validation and factual authority. Present the complete two-stage
+contract for explicit approval before implementation.
