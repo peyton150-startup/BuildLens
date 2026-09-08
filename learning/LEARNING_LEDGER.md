@@ -35021,6 +35021,228 @@ PASS at confidence 90. The learner identified all three returned values; bind th
 chosen `ClaimedEdit` representation. Next isolate the schema assumption: `file_path` is nested under
 `tool_input`, not at the payload top level.
 
+FOLLOW-UP PROMPT (exact):
+
+```text
+The documented payload stores file_path inside tool_input, not at the top level.
+
+If the parser mistakenly looks for a top-level file_path, what would happen to this valid Edit case,
+and how would our test expose the bug?
+
+Confidence: 0–100.
+```
+
+LEARNER RESPONSE (verbatim):
+
+```text
+it would fins the tool input instead, but how was i supposed to know this befoer you asked me
+```
+
+QUESTION WITHDRAWN; DO NOT SCORE. The learner correctly challenged missing evidence. The preceding
+"concrete payload" displayed `file_path` at the same indentation as top-level fields, contradicting
+the documented nested shape later relied upon. The learner could know the shape only from official
+documentation or a captured fixture, not from first principles. Correct the representation, show
+`tool_input` as an inner mapping, and descend to one nested-lookup reading exercise before asking
+what bug the valid test catches.
+
+NESTED-MAPPING EXPLANATION AND PROMPT:
+
+```python
+payload = {
+    "session_id": "session-7",
+    "hook_event_name": "PostToolUse",
+    "tool_name": "Edit",
+    "tool_input": {
+        "file_path": "C:/repo/app.py",
+    },
+}
+```
+
+Explained that `payload["tool_input"]` returns the inner mapping and
+`payload["tool_input"]["file_path"]` retrieves a value from that mapping. Asked what value the
+second expression returns.
+
+LEARNER RESPONSE (verbatim):
+
+```text
+so you have toi first gett the top level -> tool input-> and then the next level down -> filepath?
+```
+
+CONCEPT PASS. The learner correctly traced the outer mapping to `tool_input` and then the inner
+mapping to `file_path`. Require only the exact returned string before restoring test design.
+
+EXACT-VALUE PROMPT (exact):
+
+```text
+Yes. What exact string does this return?
+
+payload["tool_input"]["file_path"]
+
+Confidence: 0–100.
+```
+
+LEARNER ANSWER (verbatim):
+
+```yaml
+C:/repo/app.py 90
+```
+
+PASS at confidence 90. The two-level lookup returns the documented file path. Restore the valid-Edit
+test-design question with the corrected nested fixture.
+
+RESTORED VALID-EDIT TEST PROMPT (exact):
+
+```text
+Our test supplies that nested payload and expects:
+
+ClaimedEdit("C:/repo/app.py", "session-7", "Edit")
+
+If the parser incorrectly looks for file_path at the top level, would the test receive that
+ClaimedEdit, or would parsing fail? Why?
+
+Confidence: 0–100.
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+the parsing would fail because it would get tool inpout instead of file path
+```
+
+PARTIAL. The failure outcome is correct: the expected `ClaimedEdit` would not be returned, so the
+test catches the wrong lookup. Refine the mechanism: asking the outer mapping for `file_path` does
+not return `tool_input`; it finds no top-level key named `file_path`. Ask only whether that lookup
+returns the inner mapping or encounters a missing key.
+
+MISSING-KEY PROMPT (exact):
+
+```text
+The outer payload has a key named tool_input, but no key named file_path.
+
+If the parser asks the outer payload directly for file_path, does it receive the inner mapping or
+encounter a missing key?
+
+Confidence: 0–100.
+```
+
+LEARNER RESPONSE (verbatim):
+
+```text
+so for parsing you have to be looking for an explicit object to parse
+```
+
+VOCABULARY PARTIAL. The learner recognized that the operation targets an explicit structure but
+conflated JSON parsing with dictionary lookup. Clarify only: JSON parsing converts the whole JSON
+document into nested Python mappings; a lookup then asks the current mapping for one explicit key.
+Repeat the outer-key check without product vocabulary.
+
+LEARNER CORRECTION (verbatim):
+
+```text
+it would encounter a miising key
+```
+
+PASS. A lookup for `file_path` on the outer mapping encounters a missing key. The valid-Edit test now
+has a concrete purpose: it expects a `ClaimedEdit` from the documented nested payload and fails if
+the parser reads `file_path` from the wrong mapping. Move to the Bash branch at the same rung.
+
+BASH-BRANCH PROMPT (exact):
+
+```text
+A valid Bash payload contains:
+
+tool_name = "Bash"
+tool_input.command = "sed -i ..."
+
+According to our contract, what should parse_hook_payload return, and why is that not an error?
+
+Confidence: 0–100.
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+parse\_hook\_payload(payload)
+&#x20;   Bash payload   -> None
+&#x20;   valid Edit     -> ClaimedEdit(file\_path, session\_id, tool\_name)
+&#x20;   malformed      -> raise
+
+capture\_observed\_version(ClaimedEdit, Git, file reader, clock)
+&#x20;   -> ObservedVersion
+
+
+isn't it because bash means that there is another hook coming this would be for the pretooluse hook and signifies that when claude is done we will get a stop hook
+```
+
+PARTIAL. The learner correctly returned `None` and connected Bash changes to later sweeping, but
+misclassified the input as `PreToolUse` and treated a later `Stop` as guaranteed. This is a valid
+`PostToolUse` Bash event. Arbitrary Bash may edit zero, one, or many paths, so the parse step cannot
+truthfully emit one claimed file edit and returns `None`; normal `Stop` later sweeps Git, while an
+interrupted turn may require startup/resume reconciliation instead. Ask for the `None` rationale
+without relying on hook timing.
+
+BASH RATIONALE PROMPT (exact):
+
+```text
+Consider two valid Bash events:
+
+Bash command A: echo hello
+Bash command B: sed edits two files
+
+Why should parse_hook_payload return None for both, without relying on whether a later Stop hook
+arrives?
+
+Confidence: 0–100.
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+because for the contract a bash payload will always retunr none
+```
+
+PARTIAL. The learner recalled the rule but did not justify it. The parser's result can represent at
+most one claimed file edit, while arbitrary Bash may change zero, one, or many files. Treating every
+Bash event as one edit would invent or omit file information. Ask which false record would result
+from treating the no-file command as a file edit.
+
+R1 FALSE-RECORD PROMPT (exact):
+
+```text
+echo hello changes no file.
+
+If the parser returned a ClaimedEdit for that Bash event anyway, what false claim would the record
+make?
+
+Confidence: 0–100.
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+it might make a false claim that a file has been changed
+```
+
+PASS. Treating a no-file Bash command as a claimed edit would falsely record that a file changed.
+The complementary multi-file case would omit changes if forced into one `ClaimedEdit`. Return to the
+Bash test purpose: it must fail if valid Bash is rejected or converted into a file-edit record rather
+than returning `None`.
+
+LEARNER FAILURE-BOUNDARY CHALLENGE (verbatim):
+
+```text
+but then if a bash command does change a file with no stop commant or post tool use hook after how would we kne
+```
+
+VALID CHALLENGE. If all later observation signals are absent, BuildLens cannot know immediately.
+Parsing arbitrary shell text is not an authoritative substitute because Bash may change files
+indirectly, conditionally, or through another program. The reliability design uses actual Git-state
+sweeps: normal `Stop` is the fast completeness backstop, and BuildLens start/session resume must
+reconcile after an interrupted or missed `Stop`. If BuildLens never receives another lifecycle
+opportunity to inspect Git, it cannot discover the change; do not claim otherwise. This is Phase 9
+reliability work, not permission to expand the first Phase 8 parser patch. Require the learner to
+state why command-text inference cannot replace inspection, then resume the malformed test case.
+
 LEARNER CLARIFYING QUESTION (verbatim):
 
 ```text
@@ -35041,3 +35263,187 @@ ok i like claimededit, because some of the fields will stay claimed and others w
 ACCEPTED. Adopt `ClaimedEdit` for the valid parsed Edit representation. The rationale preserves the
 difference between contract validation and factual authority. Present the complete two-stage
 contract for explicit approval before implementation.
+
+### EV-P8-FAILURE-EVENT-SCOPE-347 — failure hooks and parser scope
+
+The learner asked whether the missed-observation case can occur in Claude Code and whether BuildLens
+should account for `PostToolUseFailure` or `StopFailure`. Current official documentation was checked:
+successful tools emit `PostToolUse`; failed tools emit `PostToolUseFailure`; API errors emit
+`StopFailure`; and normal `Stop` does not run on user interrupt. A failed Bash command may leave
+partial file side effects, so failure events cannot establish a clean working tree.
+
+DESIGN CONSEQUENCE PRESENTED: BuildLens should eventually use failure lifecycle events to trigger or
+schedule authoritative Git reconciliation, but adding those event shapes to the first parse patch
+would introduce a second major idea. The generic name `parse_hook_payload` also overclaimed its
+scope because the approved contract handles only `PostToolUse`.
+
+PROPOSED REVISION:
+
+```text
+parse_post_tool_use(payload)
+    Bash       -> None
+    valid Edit -> ClaimedEdit
+    malformed  -> raise
+```
+
+Later slices handle `PostToolUseFailure`, `Stop`, and `StopFailure` separately.
+
+LEARNER APPROVAL (verbatim):
+
+```text
+yes
+```
+
+APPROVED. Rename the first parser to `parse_post_tool_use`. Failure-event reconciliation remains
+required later work. Resume the malformed PostToolUse test case.
+
+MALFORMED-BRANCH PROMPT (exact):
+
+```text
+hook_event_name = "PostToolUse"
+tool_name       = "Edit"
+tool_input      = {"file_path": "C:/repo/app.py"}
+session_id      = missing
+
+What should parse_post_tool_use do, and what bad behavior would this test catch?
+
+Confidence: 0–100.
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+check to see if any of the fields are missing, if they are raise an error
+```
+
+PASS on the required behavior: missing required fields must raise. The answer did not yet identify
+the invariant protected by the test. Ask only what incomplete or misleading record could be created
+if an Edit without `session_id` were accepted.
+
+INVARIANT PROMPT (exact):
+
+```text
+If an Edit payload without session_id were accepted, what incomplete or misleading ClaimedEdit
+could BuildLens create?
+
+Confidence: 0–100.
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+that there was no session id or it could make one up (probably not)
+```
+
+PASS. Acceptance could create an incomplete record or fabricate provenance through a default. The
+test must require rejection instead. The learner then requested a reusable test-category reference;
+the normal, boundary, empty/missing, invalid, failure, and invariant behavior categories were taught
+separately from unit, integration, and end-to-end scope.
+
+MINIMUM FIRST-SLICE TEST DESIGN COMPLETE:
+
+```text
+valid Edit      -> returns the three-field ClaimedEdit
+valid Bash      -> returns None without inventing a file observation
+missing field   -> raises rather than creating incomplete or fabricated provenance
+```
+
+Each test has a named break. Proceed with one TDD red/green cycle at a time.
+
+### EV-P8-CLAIMED-EDIT-DATACLASS-348 — immutable record prerequisite
+
+The first valid-Edit test was written before production code. Running
+`python test_claude_adapter.py` produced exit code 1 with the intended failure:
+
+```text
+AssertionError: claude_adapter is not implemented
+```
+
+The test exercises the documented nested `tool_input.file_path` shape and expects the three literal
+values inside `ClaimedEdit`. The production breaks it protects against are a top-level file-path
+lookup, an omitted field, or the wrong returned representation.
+
+DATACLASS PROMPT (exact):
+
+```text
+Given:
+
+@dataclass(frozen=True)
+class ClaimedEdit:
+    file_path: str
+    session_id: str
+    tool_name: str
+
+and:
+
+edit = ClaimedEdit(
+    file_path="C:/repo/app.py",
+    session_id="session-7",
+    tool_name="Edit",
+)
+
+What value does edit.session_id return, and what do you think frozen=True prevents?
+
+Confidence: 0–100.
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+once they are set they cannot be chanfed and edit.sessionid retunrs the session id or session-7
+```
+
+PASS. `edit.session_id` returns `"session-7"`; `frozen=True` prevents field reassignment after
+construction. The smallest production implementation for the valid-Edit branch is authorized.
+
+### EV-P8-POST-TOOL-PARSER-349 — first implementation slice
+
+IMPLEMENTED test-first:
+
+```text
+claude_adapter.py
+    frozen ClaimedEdit(file_path, session_id, tool_name)
+    parse_post_tool_use(payload) -> ClaimedEdit | None
+
+test_claude_adapter.py
+    valid nested Edit -> ClaimedEdit
+    valid Bash -> None
+    missing/empty/wrong-type required fields -> readable ValueError
+    wrong event and unsupported tool -> readable ValueError
+    malformed Bash command -> readable ValueError
+    ClaimedEdit field reassignment -> FrozenInstanceError
+```
+
+TDD EVIDENCE:
+
+```text
+RED 1   missing module                    AssertionError: claude_adapter is not implemented
+GREEN 1 valid Edit                        passed after one import-line transcription correction
+RED 2   Bash assumed file_path            AssertionError: valid Bash must return None
+GREEN 2 Bash None                         passed
+RED 3   raw missing session key           AssertionError: adapter leaked a raw missing-key error
+GREEN 3 readable missing session error    passed
+RED 4   missing hook event accepted       AssertionError: missing hook_event_name was accepted
+GREEN 4 required hook event               passed
+RED 5   missing tool fields leaked        AssertionError: adapter leaked a raw lookup error
+GREEN 5 remaining presence guards         passed
+RED 6   empty required string accepted    AssertionError: malformed payload was accepted
+GREEN 6 empty-value guards                passed
+RED 7   wrong representation error        expected-message assertion failed
+GREEN 7 string/object type guards         passed
+RED 8   wrong event accepted              AssertionError: malformed payload was accepted
+GREEN 8 event/tool value guards           passed
+RED 9   malformed Bash accepted           AssertionError: malformed payload was accepted
+GREEN 9 Bash command validation           passed
+RED 10  immutability mutation             AssertionError: ClaimedEdit allowed provenance reassignment
+GREEN 10 restored frozen dataclass        passed
+```
+
+The learner caught that `session_id` was not the only required field that could be absent or empty,
+which expanded the malformed partition before completion. A final mutation check caught that
+`frozen=True` lacked an executable assertion; immutability was temporarily removed, the new test was
+observed failing, and `frozen=True` was restored.
+
+Fresh full verification on 2026-09-08 ran all eight `test_*.py` scripts successfully. This is
+automated evidence only. Learner code review, trace, explanation, and transfer remain required before
+milestone or phase completion.

@@ -2350,7 +2350,7 @@ The learner recovered the three enrichment dependencies after remediation: `base
 The previously open parse-return design now has names:
 
 ```text
-parse_hook_payload(payload) -> ClaimedEdit | None
+parse_post_tool_use(payload) -> ClaimedEdit | None
 
 ClaimedEdit:
     file_path
@@ -2363,28 +2363,36 @@ capture_observed_version(ClaimedEdit, Git, file reader, clock) -> ObservedVersio
 `ClaimedEdit` was chosen because payload values can satisfy validation while their hook-only truth
 remains claimed. `capture_observed_version` replaced the ambiguous/overstated names
 `EditHookInput` and `PayloadVerifier`; it adds direct observations without implying every claim is
-verified. The learner approved the exact two-stage contract at confidence 90. No Phase 8 code exists.
+verified. The learner approved the exact two-stage contract at confidence 90.
 
-The mandatory Phase 8 test-design pause has started (`EV-P8-PARSE-TEST-DESIGN-346`). The official
-Claude hook reference was checked: `session_id`, `hook_event_name`, and `tool_name` are top-level;
-file-tool `file_path` is nested under `tool_input`. This is documented schema evidence, not a locally
-captured fixture. The learner correctly predicted that a valid Edit returns the session id, tool
-name, and file path inside `ClaimedEdit` at confidence 90.
-
-Exact restart question, already asked but unanswered:
+FIRST PHASE 8 IMPLEMENTATION SLICE EXISTS, awaiting learner code review after commit:
 
 ```text
-The documented payload stores file_path inside tool_input, not at the top level.
-
-If the parser mistakenly looks for a top-level file_path, what would happen to this valid Edit case,
-and how would our test expose the bug?
-
-Confidence: 0–100.
+Claude PostToolUse Python mapping
+-> parse_post_tool_use
+   -> valid Edit: immutable ClaimedEdit(file_path, session_id, tool_name)
+   -> valid Bash: None
+   -> malformed/wrong event/unsupported tool: readable ValueError
 ```
 
-Record the learner's answer verbatim. Then rebuild the Bash and malformed test cases as needed. Only
-after the test-design pause passes, implement test-first: `ClaimedEdit` and `parse_hook_payload`
-only. Keep `capture_observed_version` and all Git/file/hash/clock behavior out of the patch.
+`claude_adapter.py` validates the documented top-level `session_id`, `hook_event_name`, `tool_name`,
+and nested `tool_input`; it validates `tool_input.file_path` for Edit and `tool_input.command` for
+Bash. Required strings may not be empty and JSON representations must have the expected Python
+types. `ClaimedEdit` is frozen so provenance cannot be reassigned in place.
+
+`test_claude_adapter.py` covers the two valid branches, missing/empty/wrong-type fields, wrong event,
+unsupported tool, malformed Bash input, documented nested path lookup, and immutability. Every new
+behavior went through an observed RED/GREEN cycle. Fresh verification on 2026-09-08 ran all eight
+repository test scripts successfully.
+
+Still out of scope: `capture_observed_version`, Git/file/hash/clock access, repository-containment
+validation, `Write`, `PostToolUseFailure`, `Stop`, `StopFailure`, and reconciliation. The learner's
+failure-event challenge remains required later work: failure events/start/resume must trigger or
+schedule authoritative Git inspection.
+
+STOP after commit/push. Next interaction is learner review of `claude_adapter.py`: answer their code
+questions, then require a valid Edit trace, Bash trace, malformed trace, explanation, and transfer
+before treating this slice or Phase 8 as complete.
 - `classify.py`
 - `summarize.py`
 - `session.py`
