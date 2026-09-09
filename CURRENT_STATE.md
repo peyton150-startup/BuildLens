@@ -4,7 +4,7 @@
 > obsolete statements whenever state changes. Preserve historical prompts, answers, remediation, and
 > rationale in `learning/LEARNING_LEDGER.md`, `QUIZZES.md`, and Git history.
 
-Last updated: 2026-09-08
+Last updated: 2026-09-09
 
 ## Lifecycle
 
@@ -3122,3 +3122,63 @@ selected measured `74` and identified the sensor reading as the source of observ
 Exact restart point: climb to the R1 observed-value assignment appended to the ledger. Ask which of
 validated proposed content and bytes returned by a file read populates the observed-version field,
 and why successful input validation does not alter the source choice.
+
+The R1 observed-value assignment PASSED, and so did its near-transfer. The learner selected the
+bytes returned by the file read in both cases and stated that a schema/validation check establishes
+only well-formedness. One wording correction was issued: a disk read does not validate a payload;
+checking and observing are independent operations over different byte sequences.
+
+The climb to R2 was PARTIAL across two surfaces. Record assignment and operation naming are now
+reliable — claimed values to the claimed record, read bytes to the observed record, with the
+producing operation named correctly each time. What does not yet hold is the consequence half: when
+asked what a comparison reports, or what becomes unreportable if both fields are filled from the
+claim, the learner names a value, a schema property, or a general loss rather than the relation.
+
+The learner then stated directly that the abstract surfaces felt identical and that the purpose was
+not visible. This was treated as saturation rather than confusion, and abstract rehearsal for this
+objective was ended. The objective was applied to real code instead: `claude_adapter.py`
+`ClaimedEdit` / `parse_post_tool_use`, where a Write payload's `tool_input["content"]` is the
+tempting wrong source for post-write observed state.
+
+The applied prompt PASSED at confidence 90 on both load-bearing parts: `tool_input["content"]` may
+never stand as observed post-write state, and a disk read — absent from `claude_adapter.py` today —
+is required to obtain it.
+
+The learner initially answered that `ClaimedEdit` should not store the claimed content at all, was
+challenged, and conceded without a reason. The concession was rejected under
+`docs/DESIGN_REVIEW_RUBRIC.md` and re-put. On the second attempt the learner produced a genuine,
+self-generated reversal condition: if Git version history with timestamps already supplied the same
+information, storing `claimed_content` would be redundant. That reversal condition PASSED.
+
+The two-value design decision is therefore RECORDED BUT NOT APPROVED. The learner has a valid
+reason to reverse it and has not yet stated a valid reason to adopt it.
+
+One worked example was spent (the only one permitted for this objective): claimed `b"hello"` versus
+observed `b""`, with the conclusion that the reported write did not land. Follow-up results:
+part 1 MISS (the learner attributed the conclusion to Step 4, a single input, rather than to the
+comparison in Steps 1-2); part 2 PASS with an unprompted precision gain — the learner time-scoped
+the agreement with "at the moment", the first temporal qualifier volunteered without prompting;
+part 3 PASS on the decisive negative half — divergence never establishes attribution, so BuildLens
+cannot say who wrote extra bytes.
+
+PERSISTENT BLOCKER, NARROWED:
+`DETECTION_BY_SCHEMA_PRESENCE_VERSUS_DETECTION_BY_COMPARISON`. The learner now applies comparison
+correctly when both values are handed to them, but locates explanatory force in one value rather
+than in the relation between two. Do not open next session with a fresh isomorph; the surfaces have
+saturated and the learner said so. Open on the relation-versus-value distinction directly.
+
+Concepts known cold this session: claimed versus observed record assignment; naming the operation
+that produced each value; refusing `tool_input["content"]` as observed state; comparison establishes
+divergence, never attribution.
+
+Uncertain: what a comparison licenses BuildLens to *state*, as distinct from what the compared
+values *are*.
+
+PHASE 8 GATE REMAINS OPEN. No adapter behavior was implemented this session and none may be until
+the Write trace, the learner explanation, and the transfer are closed. `claude_adapter.py` is
+unchanged; `ClaimedEdit` still carries only `file_path`, `session_id`, and `tool_name`.
+
+Exact restart point: the worked-example follow-up is closed. Next session opens by asking the
+learner to state, without a supplied example, what a comparison of two values licenses BuildLens to
+report and why neither value alone licenses it — then returns to the open `claimed_content` design
+decision for an adoption reason of the learner's own. Only after that does the Write trace begin.
