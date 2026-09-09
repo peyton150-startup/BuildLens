@@ -39550,3 +39550,902 @@ Confidence =
 
 RECOVERY STATUS:
 resume with denied-proposal existence versus authorized effect; Write implementation remains complete
+
+LEARNER ANSWER (verbatim):
+
+```text
+yes
+no
+no
+the permission check is after the model generated text so it exstis but in terms of it actually executing it did not get permission so it will not make the change
+```
+
+PASS; confidence omitted. The learner correctly distinguishes an already-existing model proposal
+from later authorization, tool execution, and authoritative file effect. Denial does not erase the
+proposal; it prevents execution, so `app.py` does not change.
+
+FAMILIAR-DOMAIN NEAR-TRANSFER (exact):
+
+```text
+An email assistant generates a proposed message to send to a friend.
+Before sending, an approval check rejects it.
+
+1. Did the proposed message exist?
+2. Was the email sent?
+3. Did the friend's inbox change?
+4. What relationship does this share with the denied Edit proposal?
+5. Confidence =
+```
+
+RECOVERY STATUS:
+familiar-domain proposal/authorization/effect transfer due
+
+LEARNER ANSWER (verbatim):
+
+```text
+yes
+no
+no
+it was composed and then the propsal to send was densied
+90
+```
+
+STRONG PARTIAL at confidence 90. The learner correctly traces the email surface: the proposed
+message exists, approval denial prevents sending, and the friend's inbox does not change. The final
+sentence restates that concrete sequence but does not yet abstract the principle shared with the
+denied Edit case.
+
+PRIMARY BLOCKER:
+CONCRETE_SEQUENCE_VERSUS_SHARED_PRINCIPLE
+
+SHARED-PRINCIPLE MICRO-PROMPT (exact):
+
+```text
+Ignore the words "Edit," "email," "file," and "inbox."
+
+In one sentence, what general rule about a proposal, a later control check, and a real-world effect
+is true in both examples?
+
+Confidence =
+```
+
+RECOVERY STATUS:
+shared proposal/control/effect principle due
+
+LEARNER ANSWER (verbatim):
+
+```text
+the text was generated but before it could change anything in the inbox or file it was denied so the chagnes are not applied but they did exsit at one point
+90
+```
+
+PASS at confidence 90. The learner states the shared principle across both surfaces: generation
+creates a proposal that exists, while a later denial prevents the proposal from being executed and
+prevents any authoritative external effect. The remaining example nouns do not obscure the
+domain-independent ordering and authority rule.
+
+LLM PIPELINE SIDE-LESSON RESULT:
+The learner can order text -> tokens -> model/context -> generation -> deterministic control -> tool
+execution -> external effect; distinguish probabilistic generation from later deterministic steps;
+and explain why model output is not authoritative application state. Delayed cumulative retrieval is
+still required before mastery.
+
+NEXT OBLIGATION:
+Resume the `POST-IMPLEMENTATION WRITE TRACE PROMPT` recorded above. The Write implementation works,
+but its learner trace, explanation, and transfer remain required before that slice can close.
+
+POST-IMPLEMENTATION WRITE TRACE — LEARNER ANSWER (verbatim):
+
+```text
+Fasle&#x20;
+Fasle&#x20;
+session id&#x20;
+ClaimedEdit(filepath = outline.md, session id = session-22, toolname= Wrtie)
+90
+```
+
+STRONG PARTIAL at confidence 90. The learner correctly evaluates both guard conditions as false.
+The returned-record attempt also selects the intended path, session, and tool values; identifier and
+spelling transcription are not graded for this trace. The substantive miss is point 3: `session_id`
+was already read before the Bash and supported-tool guards. The next lookup reads from `tool_input`.
+
+PRIMARY BLOCKER:
+NEXT_FIELD_LOOKUP
+
+ONE-LINE LOOKUP MICRO-PROMPT (exact):
+
+```text
+tool_input = {"file_path": "outline.md", "content": "v1"}
+file_path = _required_string(tool_input, "file_path")
+
+1. Which mapping is passed into `_required_string`?
+2. What exact field name does it request from that mapping?
+3. What exact value is returned and stored in `file_path`?
+4. Confidence =
+```
+
+RECOVERY STATUS:
+next-field lookup remediation due
+
+LEARNER ANSWER (verbatim):
+
+```text
+toolinput on the top level and filepath on the lower level
+filepath
+outline.md
+90
+```
+
+PASS at confidence 90. The learner identifies the mapping stored in `tool_input`, the nested
+`file_path` field, and the returned value `outline.md`. Precision clarification: the top-level
+payload contains the `tool_input` key; the value passed to `_required_string` is the nested mapping
+stored under that key.
+
+FRESH WRITE TRACE (exact):
+
+```text
+tool_name = "Write"
+tool_input = {"content": "hello", "file_path": "chapter.txt"}
+session_id = "session-31"
+
+Trace these four points through parse_post_tool_use:
+
+1. Is `tool_name == "Bash"` True or False?
+2. Is `tool_name not in ("Edit", "Write")` True or False?
+3. Which field does `_required_string` read next, and from which mapping?
+4. What ClaimedEdit(...) value is returned?
+
+Confidence =
+```
+
+RECOVERY STATUS:
+fresh target-level Write trace due
+
+LEARNER ANSWER (verbatim):
+
+```text
+Fasle&#x20;
+False&#x20;
+toolinput and then to filepath adn then it reads chapter.txt
+ClaimedEdit(filepath=chapter.txt, session id= session 31, toolname= Write)
+80
+```
+
+PASS at confidence 80. The learner evaluates both guards as false, follows the lookup from the
+`tool_input` mapping to `file_path`, obtains `chapter.txt`, and constructs a `ClaimedEdit` containing
+the intended path, session, and tool values. Identifier spelling and executable formatting remain
+ungraded for this trace.
+
+WRITE REPRESENTATION EXPLANATION PROMPT (exact):
+
+```text
+The Write payload also contained:
+
+content = "hello"
+
+But ClaimedEdit stores only:
+
+file_path
+session_id
+tool_name
+
+Why does `parse_post_tool_use` leave `content` out of ClaimedEdit?
+What does the returned ClaimedEdit claim, and what does it not yet prove about the file?
+Confidence =
+```
+
+RECOVERY STATUS:
+Write representation-boundary explanation due
+
+LEARNER ANSWER (verbatim):
+
+```text
+i forgot&#x20;
+that these are claims some can be verified and some cannot but as of where they are in the pipeline claimededit is only claims so far
+90
+```
+
+PARTIAL at confidence 90. The learner correctly recovers that `ClaimedEdit` contains hook claims and
+does not yet represent verified file truth. They do not answer why the payload's `content` claim is
+excluded from this particular record.
+
+PRIMARY BLOCKER:
+BOUNDARY_CONCEPT — proposed content versus directly observed file bytes
+
+SCAFFOLD RUNG:
+R1 — one claimed value, one observed value, one authority choice
+
+CONTENT SOURCE R1 PROMPT (exact):
+
+```text
+The hook payload says:
+
+proposed_content = "hello"
+
+A later file read returns:
+
+actual_file_content = "goodbye"
+
+Which value can establish what bytes are currently in the file?
+Why can't the other value establish that fact by itself?
+Confidence =
+```
+
+RECOVERY STATUS:
+content source-of-truth choice due
+
+LEARNER ANSWER (verbatim):
+
+```text
+the actual file contenct because we actually read the file instead of acting on a claim
+it is a claim so we would need to validate it using git&#x20;
+90
+```
+
+PASS at confidence 90. The learner chooses the direct file read because it observes the current
+file rather than repeating the hook's claim. Precision clarification: the file read supplies the
+working-file bytes in this example; Git can supply Git-backed context and comparisons, but the
+payload's proposed content cannot establish current bytes by itself.
+
+CONTENT-AUTHORITY NEAR-TRANSFER (exact):
+
+```text
+A thermostat command says:
+
+target_temperature = 68
+
+The thermostat's sensor then reads:
+
+current_temperature = 74
+
+Which value establishes the currently observed room temperature?
+Why can't the command's value establish that fact?
+Confidence =
+```
+
+RECOVERY STATUS:
+same-rung content/observation near-transfer due
+
+LEARNER ANSWER (verbatim):
+
+```text
+74
+the command value is what we want to work towards by cooling the space, or it is just a claim for now which needs to be validated by the file bytes
+90
+```
+
+PASS at confidence 90. The learner selects the sensor's `74` as the currently observed temperature
+and distinguishes the command's `68` as a requested target rather than evidence of achieved state.
+Precision clarification: the thermostat uses its sensor; file-byte validation belongs to the
+BuildLens instance of the shared command/observation principle.
+
+SCAFFOLD RUNG:
+R2 — two sequential representations, no branch or function tracing
+
+CLAIM-TO-OBSERVATION SEQUENCE PROMPT (exact):
+
+```text
+Step 1: the hook reports proposed_content = "hello".
+Step 2: BuildLens later reads actual_file_bytes = b"goodbye".
+
+BuildLens now needs a hash that fingerprints the file version it actually observed.
+
+Which value should be hashed?
+Why?
+Confidence =
+```
+
+RECOVERY STATUS:
+R2 claimed-content versus observed-bytes sequence due
+
+LEARNER ANSWER (verbatim):
+
+```text
+step 2&#x20;
+because it is in bytes already&#x20;
+90
+```
+
+PARTIAL at confidence 90. The learner selects `actual_file_bytes`, but bases the choice on its data
+format rather than its evidentiary role. Proposed content could also be encoded as bytes; byte format
+alone does not make a value authoritative evidence of observed file state.
+
+PRIMARY BLOCKER:
+DATA_FORMAT_VERSUS_OBSERVATION_AUTHORITY
+
+SCAFFOLD RUNG:
+R1 — both candidates use the same byte representation
+
+EQUAL-FORMAT AUTHORITY PROMPT (exact):
+
+```text
+proposed_content_bytes = b"hello"
+actual_file_bytes = b"goodbye"
+
+Both values are bytes.
+
+Which value should BuildLens hash to fingerprint the file version it actually observed?
+Why is that choice based on the value's source rather than its bytes type?
+Confidence =
+```
+
+RECOVERY STATUS:
+source authority with equal data formats due
+
+LEARNER ANSWER (verbatim):
+
+```text
+ok so the actual file bytes makes mroe sense because we are still using the files bytes instead of a hook claim
+now that they are both bytes i see that that was not the reason for this it was the source one validated and the other not validated
+90
+```
+
+PASS at confidence 90. With representation held constant, the learner identifies source as the
+deciding property: hook content is proposed, while the file bytes were directly observed. Precision
+adjustment: direct observation establishes what BuildLens saw at that moment; it does not alone prove
+authorization, authorship, or permanence, so "observed" is more precise than "fully validated."
+
+EQUAL-FORMAT SOURCE NEAR-TRANSFER (exact):
+
+```text
+An email assistant proposed:
+
+proposed_subject = "Hello"
+
+The saved draft was reopened and read as:
+
+observed_subject = "Hi"
+
+Both values are Python strings.
+
+Which value establishes the subject currently observed in the saved draft?
+Why is the shared `str` type irrelevant to that choice?
+Confidence =
+```
+
+RECOVERY STATUS:
+fresh equal-format source-authority transfer due
+
+LEARNER ANSWER (verbatim):
+
+```text
+Hi is the current observed string so we trust that mroe than we trust the proposed subject&#x20;
+the type is irrelevant if the source is unvalidated&#x20;
+90
+```
+
+PASS at confidence 90. The learner selects the subject read from the saved draft and explains that
+the shared string type does not establish provenance. The observed source, rather than the value's
+type, supports the current-state claim.
+
+SCAFFOLD RUNG:
+R2 — three sequential representations, no branch or nested call tracing
+
+OBSERVED-BYTES-TO-HASH PROMPT (exact):
+
+```text
+Step 1: a hook supplies proposed_content_bytes = b"draft".
+Step 2: a file read supplies observed_file_bytes = b"published".
+Step 3: BuildLens computes content_hash from one of those values.
+
+Which value must flow into the hash operation?
+What fact would that hash fingerprint?
+Would that hash prove that the hook's proposed content was applied? Why or why not?
+Confidence =
+```
+
+RECOVERY STATUS:
+fresh R2 observation-to-fingerprint sequence due
+
+LEARNER ANSWER (verbatim):
+
+```text
+2
+published
+it would becasue we are pulling from an observed source so at that moment that is what buildlens observed the files bytes as being&#x20;
+90
+```
+
+PARTIAL at confidence 90. The learner correctly routes `observed_file_bytes` into the hash and ties
+the fingerprint to the bytes BuildLens observed at that moment. They incorrectly conclude that this
+proves the hook's proposed content was applied, even though proposed `b"draft"` and observed
+`b"published"` differ. Direct observation establishes state, not authorship or causal attribution.
+
+PRIMARY BLOCKER:
+OBSERVED_STATE_VERSUS_CAUSAL_ATTRIBUTION
+
+SCAFFOLD RUNG:
+R1 — one equality operation before any hash reasoning
+
+CONTENT-EQUALITY MICRO-PROMPT (exact):
+
+```text
+proposed_content_bytes = b"draft"
+observed_file_bytes = b"published"
+
+Evaluate only this expression:
+
+proposed_content_bytes == observed_file_bytes
+
+Is the result True or False?
+What does that result say about whether the observed content matches the proposal?
+Confidence =
+```
+
+RECOVERY STATUS:
+content equality before attribution due
+
+LEARNER ANSWER (verbatim):
+
+```text
+false&#x20;
+the hook is saying something different than what buildlens is actually oberving&#x20;
+90
+```
+
+PASS at confidence 90. The learner evaluates the unequal byte values correctly and concludes that
+the hook proposal does not match the content BuildLens observed.
+
+EQUAL-CONTENT ATTRIBUTION TRANSFER (exact):
+
+```text
+proposed_content_bytes = b"ready"
+observed_file_bytes = b"ready"
+
+1. Is `proposed_content_bytes == observed_file_bytes` True or False?
+2. What does that equality prove about the two contents?
+3. Does equality alone prove that this hook caused the observed bytes to be written? Why or why not?
+4. Confidence =
+```
+
+RECOVERY STATUS:
+fresh same-rung equality-versus-causation transfer due
+
+LEARNER ANSWER (verbatim):
+
+```text
+True
+that the hook is validated now&#x20;
+i would say no but it dose prove that the observed and the hook match at this very moment
+60
+```
+
+PARTIAL at confidence 60. The learner correctly evaluates equality as true and correctly says it
+does not prove causation. Their final clause accurately limits the evidence to a momentary content
+match, but "the hook is validated" overstates what one compared field can establish. Equality does
+not validate the whole event, its provenance, authorization, or authorship.
+
+PRIMARY BLOCKER:
+EVIDENCE_SCOPE — one field comparison versus whole-event validation
+
+SCAFFOLD RUNG:
+R0 — recognize the single proposition established by equality
+
+EQUALITY-SCOPE RECOGNITION PROMPT (exact):
+
+```text
+proposed_content_bytes == observed_file_bytes evaluates to True.
+
+Which statement follows from that result alone?
+
+A. The two byte values are equal.
+B. The entire hook event is valid and the hook caused the write.
+
+Choose A or B.
+Why does the other statement claim more than the comparison checked?
+Confidence =
+```
+
+RECOVERY STATUS:
+byte-equality evidence scope due
+
+LEARNER ANSWER (verbatim):
+
+```text
+A
+i would say becasue we did not check the other fields in the hook but for the two bytes alone we can concur they are the same for the moment
+```
+
+PASS; confidence omitted. The learner limits the conclusion to equality of the two compared byte
+values and correctly notes that other hook fields were not checked.
+
+EQUALITY-SCOPE NEAR-TRANSFER (exact):
+
+```text
+proposed_recipient = "sam@example.com"
+saved_draft_recipient = "sam@example.com"
+
+The comparison `proposed_recipient == saved_draft_recipient` is True.
+
+Which statement follows from that comparison alone?
+
+A. The two recipient values match.
+B. The email was sent and Sam received it.
+
+Choose A or B.
+Why?
+Confidence =
+```
+
+RECOVERY STATUS:
+fresh R0 equality-scope near-transfer due
+
+LEARNER ANSWER CONTINUATION (verbatim):
+
+```text
+it is a draft...
+A
+```
+
+PASS; confidence omitted. The learner recognizes that equal recipient values establish only a match
+between the proposal and saved draft. Their observation that it remains a draft correctly rejects
+the unsupported inference that the email was sent or received.
+
+SCAFFOLD RUNG:
+R1 — one equality result, no supplied answer choices
+
+FADED EQUALITY-SCOPE PROMPT (exact):
+
+```text
+claimed_file_path = "notes.txt"
+observed_file_path = "notes.txt"
+
+`claimed_file_path == observed_file_path` evaluates to True.
+
+State the exact fact this comparison establishes.
+Then name one fact about the file or hook that this comparison does not establish.
+Confidence =
+```
+
+RECOVERY STATUS:
+R1 equality evidence scope without choices due
+
+LEARNER OBJECTION (verbatim):
+
+```text
+not a good parallel example
+the hook was sent
+```
+
+OBJECTION SUSTAINED. The email-draft analogy conflated delivery of the reporting message with the
+external action reported by that message. In the BuildLens case, receipt of a hook payload is itself
+an observed event: it establishes that the report reached BuildLens. It does not by itself establish
+that the reported file effect occurred. Do not use the email-send example as evidence for or against
+this concept. The pending file-path equality prompt is withdrawn before answer because it continues
+away from the learner's actual distinction.
+
+REPLACEMENT R1 EVENT-SEPARATION PROMPT (exact):
+
+```text
+BuildLens receives a hook payload that reports a Write to notes.txt.
+
+From receiving that payload alone:
+
+1. What event has BuildLens directly observed?
+2. What separate file-state fact has BuildLens not yet directly observed?
+3. What must BuildLens read to observe that file-state fact?
+4. Confidence =
+```
+
+RECOVERY STATUS:
+hook-delivery versus reported-file-effect distinction due
+
+LEARNER ANSWER (verbatim):
+
+```text
+that a hook has been recieved
+it is a claim for now
+the observed local file bytes&#x20;
+```
+
+PASS; confidence omitted. The learner distinguishes direct observation of hook receipt from the
+still-claimed file effect and identifies local file bytes as the source BuildLens must read. Precision
+clarification: the unobserved file-state fact is whether `notes.txt` actually has the reported bytes.
+
+FRESH TARGET-LEVEL CLAIMED-EDIT BOUNDARY PROMPT (exact):
+
+```text
+A received Write payload reports:
+
+session_id = "session-44"
+file_path = "guide.md"
+content = "new version"
+
+`parse_post_tool_use` returns a ClaimedEdit containing session_id, file_path, and tool_name, but not
+content.
+
+1. Why is content deliberately left out of this record?
+2. What does the returned ClaimedEdit claim?
+3. What does it not yet prove about guide.md?
+4. What later observation is needed?
+5. Confidence =
+```
+
+RECOVERY STATUS:
+fresh target-level ClaimedEdit boundary explanation due
+
+LEARNER ANSWER (verbatim):
+
+```text
+becasue we can validate it later&#x20;
+```
+session_id, file_path, and tool_name
+```
+
+the file bytes being observed yet&#x20;
+
+to look at the local file bytes
+
+90
+```
+
+STRONG PARTIAL at confidence 90. The learner correctly says later local-file observation is needed
+and that `ClaimedEdit` does not yet establish observed bytes. "We can validate it later" captures
+timing but not why this intermediate representation deliberately excludes proposed content. Listing
+the three field names also does not yet state the semantic claim they jointly encode.
+
+PRIMARY BLOCKER:
+FIELD_LIST_VERSUS_RECORD_MEANING
+
+CLAIMED-EDIT MEANING MICRO-PROMPT (exact):
+
+```text
+ClaimedEdit(
+    session_id="session-44",
+    file_path="guide.md",
+    tool_name="Write",
+)
+
+Complete these in your own words:
+
+The hook claims that session ______ used tool ______ on path ______.
+This record does not claim that guide.md currently contains ______.
+
+Why is that second fact left for the later file read?
+Confidence =
+```
+
+RECOVERY STATUS:
+record fields to semantic claim due
+
+LEARNER ANSWER (verbatim):
+
+```text
+session-44     Write      guide.md
+the new changes
+because we can validate it and the hook is just a claim
+90
+```
+
+PASS at confidence 90. The learner translates the fields into the claim that session `session-44`
+used `Write` on `guide.md`, and correctly states that the record does not establish the proposed
+changes as current file content. Precision clarification: the later read observes the bytes; it does
+not validate the hook as a whole.
+
+NON-CLAUDE LLM ADAPTER TRANSFER (exact):
+
+```text
+A different coding assistant sends a Save proposal containing:
+
+run_id = "run-8"
+path = "todo.txt"
+proposed_content = "done"
+
+Its adapter returns:
+
+ClaimedSave(run_id="run-8", path="todo.txt", tool_name="Save")
+
+1. What does ClaimedSave claim?
+2. Why should it not represent proposed_content as observed file truth?
+3. What must happen before this system can create an observed version of todo.txt?
+4. What deep boundary is shared with BuildLens's ClaimedEdit?
+5. Confidence =
+```
+
+RECOVERY STATUS:
+non-Claude LLM adapter transfer due before Write slice closure
+
+LEARNER ANSWER (verbatim):
+
+```text
+a run id a path and a toolname
+because it is a claim and not validated
+it has to read the bytes of the hook
+it reads the claims and then validates the file based on the local file bytes
+```
+
+PARTIAL; confidence omitted. The learner retains that adapter output contains claimed metadata and
+that direct local-file observation is eventually required. The answer to point 3 confuses bytes of
+the hook message with bytes of the target file. Reading the hook bytes observes the serialized
+report, not `todo.txt`.
+
+PRIMARY BLOCKER:
+MESSAGE_BYTES_VERSUS_TARGET_FILE_BYTES
+
+SCAFFOLD RUNG:
+R1 — choose between two byte sources
+
+BYTE-SOURCE MICRO-PROMPT (exact):
+
+```text
+The system has two byte sequences:
+
+hook_message_bytes = bytes representing the assistant's report
+todo_file_bytes = bytes read from todo.txt
+
+Which byte sequence can be used to create an observed version of todo.txt?
+What does reading the other byte sequence actually observe?
+Confidence =
+```
+
+RECOVERY STATUS:
+message bytes versus target-file bytes due
+
+LEARNER ANSWER (verbatim):
+
+```text
+the todofilebytes
+it is the representation of the assistants report but not the actaual repot
+90
+```
+
+PASS at confidence 90. The learner selects the bytes read from `todo.txt` for the observed file
+version and identifies the other sequence as the assistant report's representation. Precision
+clarification: those are real message bytes, but they represent the report rather than the target
+file.
+
+BYTE-SOURCE NEAR-TRANSFER (exact):
+
+```text
+An update request reports a change to config.json.
+
+request_message_bytes = bytes of the update request
+config_file_bytes = bytes read from config.json
+
+Which bytes directly represent the currently observed config.json file?
+What do the other bytes directly represent?
+Confidence =
+```
+
+RECOVERY STATUS:
+fresh same-rung message-versus-target byte transfer due
+
+LEARNER ANSWER (verbatim):
+
+````text
+```arduino
+config_file_bytes = bytes read from config.json
+```
+
+anupdate request
+
+90
+````
+
+PASS at confidence 90. The learner identifies `config_file_bytes` as the representation read from
+the target file and the other byte sequence as representing the update request. Markdown fence
+formatting is not graded.
+
+SCAFFOLD RUNG:
+R2 — two sources assigned to two representations
+
+CLAIM-AND-OBSERVATION RECORD PROMPT (exact):
+
+```text
+Step 1: an adapter reads an update request and creates:
+
+ClaimedUpdate(request_id="req-5", path="config.json", action="Update")
+
+Step 2: a file reader reads config.json and creates:
+
+ObservedConfig(path="config.json", file_bytes=b"current")
+
+Which record contains facts reported by the request?
+Which record contains bytes directly read from config.json?
+Why should the request's proposed body not be placed into ObservedConfig as observed file truth?
+Confidence =
+```
+
+RECOVERY STATUS:
+R2 claimed-record versus observed-record assignment due
+
+LEARNER ANSWER (verbatim):
+
+````text
+```lua
+ClaimedUpdate(request_id="req-5", path="config.json", action="Update")
+```
+
+
+```lua
+ObservedConfig(path="config.json", file_bytes=b"current")
+```
+
+because it has not been validated yet
+````
+
+STRONG PARTIAL; confidence omitted. The learner correctly assigns request-reported facts to
+`ClaimedUpdate` and directly read file bytes to `ObservedConfig`. The explanation again uses
+"validated" where the deciding requirement is "directly observed." A proposed body may pass schema
+and domain validation without being the bytes currently stored in `config.json`.
+
+PRIMARY BLOCKER:
+VALIDATION_VERSUS_OBSERVATION_OPERATION
+
+SCAFFOLD RUNG:
+R0 — select the operation that establishes observation
+
+OBSERVATION-OPERATION PROMPT (exact):
+
+```text
+Which operation can supply `ObservedConfig.file_bytes`?
+
+A. Copy `proposed_body` from the valid update request.
+B. Read the bytes currently stored in config.json.
+
+Choose A or B.
+What makes that operation an observation rather than input validation?
+Confidence =
+```
+
+RECOVERY STATUS:
+operation that establishes observed file bytes due
+
+LEARNER ANSWER (verbatim):
+
+```text
+B
+it is read from the source&#x20;
+90
+```
+
+PASS at confidence 90. The learner selects the direct `config.json` read and identifies reading
+from the source as the mechanism that makes the value an observation rather than validation of an
+incoming request.
+
+OBSERVATION-OPERATION NEAR-TRANSFER (exact):
+
+```text
+A thermostat accepts a command after validating that target_temperature=68 is within the allowed
+range. Its sensor then measures current_temperature=74.
+
+Which value can populate an ObservedTemperature record?
+What operation makes it observed rather than merely validated input?
+Confidence =
+```
+
+RECOVERY STATUS:
+fresh observation-operation near-transfer due
+
+LEARNER ANSWER (verbatim):
+
+````text
+```
+74
+```
+
+the sensor is reading that it is 74
+````
+
+PASS; confidence omitted. The learner assigns measured `74` to the observed-temperature record and
+identifies the sensor reading as the operation that makes it an observation rather than validated
+command input.
+
+SCAFFOLD RUNG:
+R1 — one assignment from two candidate values
+
+OBSERVED-VALUE ASSIGNMENT PROMPT (exact):
+
+```text
+validated_proposed_content = b"new"
+bytes_returned_by_file_read = b"old"
+
+observed_version_file_bytes = ______
+
+Which variable fills the blank?
+Why does successful validation of the proposed content not change your choice?
+Confidence =
+```
+
+RECOVERY STATUS:
+R1 observed-value assignment due

@@ -2894,3 +2894,231 @@ Phase 8 Write support is implemented and pushed; resume the LLM-pipeline side le
 denied-proposal micro-prompt at the end of `learning/LEARNING_LEDGER.md`, where the remaining blocker
 is distinguishing an existing model proposal from permission, execution, and authoritative file
 effect.
+
+SESSION 2026-09-09 CONTINUED — DENIED-PROPOSAL DISTINCTION RECOVERED.
+
+The learner passed the denied-proposal micro-problem: the model-generated text already exists before
+the later permission denial; denial prevents tool execution, so `app.py` does not change. Confidence
+was omitted. This recovers proposal existence versus authorized execution on the BuildLens surface.
+
+Exact restart point: the familiar email-domain near-transfer appended to the ledger. Require the
+learner to distinguish the proposed message, sending, and the recipient inbox effect, then state the
+relationship shared with the denied Edit proposal. The Write implementation remains complete and
+Phase 8 remains open; do not expand the adapter during this side lesson.
+
+The learner passed the concrete email trace at confidence 90: the proposed message exists, denial
+prevents sending, and the friend's inbox does not change. Their relationship statement remained a
+restatement of the email sequence rather than a domain-independent principle.
+
+Exact restart point: the one-sentence shared-principle micro-prompt appended to the ledger. Ask for
+the rule using only proposal, later control check, and real-world effect. If recovered, close this
+LLM proposal/control/effect gate and determine the next Phase 8 learning obligation before any code.
+
+LLM PIPELINE SIDE LESSON COMPLETE at confidence 90, with delayed cumulative retrieval still owed
+before mastery. The learner generalized across BuildLens Edit and email: generated text constitutes
+an existing proposal, but a later denial prevents execution and authoritative external change. They
+can distinguish tokenized/context input, probabilistic generation, deterministic control and tool
+execution, and the final state effect.
+
+Exact restart point: resume the suspended `POST-IMPLEMENTATION WRITE TRACE PROMPT` in
+`learning/LEARNING_LEDGER.md`. Ask the four questions for Write/`outline.md`/`session-22` exactly as
+recorded. After a correct trace, require explanation and transfer before closing the Write slice.
+Phase 8 observability and the cadence-based unfamiliar-code/design-review obligations remain later;
+do not implement another adapter behavior yet.
+
+The first post-implementation Write trace was STRONG PARTIAL at confidence 90. Both guard
+conditions were evaluated correctly as false, and the intended three returned values were
+recognizable. The substantive miss was naming `session_id` as the next `_required_string` field;
+that field had already been read before the guards.
+
+Exact restart point: the one-line `tool_input` / `_required_string` lookup micro-prompt appended to
+the ledger. After a correct answer, return to a fresh Write trace with the same control flow and then
+require explanation and transfer. Continue treating identifier transcription as ungraded outside
+executable test assertions.
+
+The learner passed the reduced next-field lookup at confidence 90: the nested mapping stored in
+`tool_input` is passed to `_required_string`, which requests `file_path` and returns `outline.md`.
+Clarified that `tool_input` is a key in the top-level payload while its value is the nested mapping.
+
+Exact restart point: the fresh target-level Write trace appended to the ledger, using
+`chapter.txt` and `session-31`. If correct, require the learner's explanation of why `content` is not
+part of `ClaimedEdit`, then use a non-identical transfer before closing the Write slice.
+
+The learner passed the fresh Write trace at confidence 80. Both guards were false; they followed
+`tool_input` to `file_path`, obtained `chapter.txt`, and returned the intended path/session/tool
+values in `ClaimedEdit`. Identifier spelling and executable formatting were not graded.
+
+Exact restart point: the Write representation-boundary explanation appended to the ledger. Ask why
+payload `content` is excluded, what `ClaimedEdit` claims, and what it does not prove about file
+state. After recovery, require a non-identical transfer before closing the Write slice.
+
+The Write representation explanation was PARTIAL at confidence 90. The learner recovered that
+`ClaimedEdit` contains claims rather than verified file truth, but could not explain why payload
+`content` is excluded. Primary blocker: proposed content versus directly observed file bytes.
+
+Exact restart point: the R1 content-source prompt appended to the ledger. Ask which of a hook's
+`proposed_content` and a later `actual_file_content` read can establish current bytes, and why the
+other cannot. Follow the adaptive-remediation climb one rung at a time after recovery.
+
+The learner passed the R1 content-source choice at confidence 90: a direct file read observes the
+current file, whereas hook-proposed content remains a claim. Clarified that Git supplies Git-backed
+context/comparisons while the file read supplies the working-file bytes in this example.
+
+Exact restart point: the same-rung thermostat command-versus-sensor near-transfer appended to the
+ledger. After a correct prediction and explanation, climb exactly one rung toward the original
+`ClaimedEdit` representation question.
+
+The learner passed the thermostat near-transfer at confidence 90: sensor value `74` establishes the
+current observation, while command value `68` is a requested target. Clarified that sensors belong
+to the thermostat surface and file-byte reads to BuildLens.
+
+Exact restart point: the R2 two-step claim-to-observation sequence appended to the ledger. Ask which
+value should be hashed to fingerprint the version BuildLens actually observed and why. Continue the
+adaptive climb after recovery; do not jump to implementation.
+
+The R2 hash-source answer was PARTIAL at confidence 90. The learner selected the actual file bytes
+but justified the choice because they were already bytes. Primary blocker: data format versus
+observation authority; proposed content can also be encoded as bytes.
+
+Exact restart point: descend to the equal-format R1 prompt appended to the ledger, where both the
+proposed content and actual file content are byte values. Require the learner to choose based on
+source/evidence rather than type, then repeat a fresh equal-rung transfer before climbing again.
+
+The learner passed the equal-format R1 prompt at confidence 90 and explicitly corrected their prior
+reasoning: byte type does not decide authority; the source distinguishes a hook proposal from
+directly observed file content. Clarified that observation is not proof of authorization, authorship,
+or permanence.
+
+Exact restart point: the fresh email-draft near-transfer appended to the ledger. Both candidate
+subjects are strings, so require a source-based choice. If correct, climb back to R2 with a fresh
+two-stage BuildLens sequence.
+
+The learner passed the fresh equal-format email transfer at confidence 90. They selected the subject
+read from the saved draft and explained that shared type does not establish provenance; source does.
+
+Exact restart point: the fresh R2 observed-bytes-to-hash sequence appended to the ledger. Require
+the learner to route observed bytes into the fingerprint and limit the claim that fingerprint can
+support. If correct, return to a fresh target-level `ClaimedEdit` boundary explanation.
+
+The R2 observation-to-hash answer was PARTIAL at confidence 90. The learner correctly selected the
+observed bytes and tied the hash to that momentary observation, but incorrectly treated the
+observation as proof that the hook proposal was applied despite differing proposed and observed
+values. Primary blocker: observed state versus causal attribution.
+
+Exact restart point: descend to the R1 byte-equality prompt appended to the ledger. Ask only whether
+`b"draft" == b"published"` and what that equality result says about content match. After recovery,
+use a fresh same-rung comparison before climbing again.
+
+The learner passed the unequal-content R1 prompt at confidence 90: the hook proposal and observed
+file content differ, so the proposal does not match the observation.
+
+Exact restart point: the equal-content same-rung transfer appended to the ledger. Require the learner
+to distinguish proof of content equality from proof that the hook caused the write. If correct, climb
+back to an R2 observation-to-hash sequence.
+
+The equal-content transfer was PARTIAL at confidence 60. The learner correctly evaluated equality,
+rejected causation, and stated that proposed and observed bytes match at that moment. They also said
+the hook was validated, overgeneralizing one field comparison to the whole event. Primary blocker:
+scope of evidence.
+
+Exact restart point: descend to the R0 A/B equality-scope prompt appended to the ledger. Require the
+learner to identify only the proposition checked by byte equality and explain why whole-hook validity
+and causation exceed that evidence.
+
+The learner passed the R0 equality-scope recognition: equal proposed and observed byte values prove
+only that those compared bytes match. They independently noted that other hook fields were not
+checked. Confidence was omitted.
+
+Exact restart point: the fresh email-recipient R0 near-transfer appended to the ledger. Require the
+learner to limit the conclusion to recipient equality rather than inferring that sending occurred.
+If correct, climb to R1 with support faded.
+
+The learner passed the email-recipient near-transfer; confidence was omitted. They chose recipient
+equality only and used the fact that the message remains a draft to reject any delivery inference.
+
+Exact restart point: the faded-support R1 file-path equality prompt appended to the ledger. Ask for
+the exact supported fact and one unsupported fact without answer choices. If correct, use a fresh
+same-rung transfer and then climb to R2.
+
+The learner rejected the email-draft analogy because the hook itself was sent. The objection is
+correct: the analogy conflated transport of the report with the action reported. Hook receipt proves
+that BuildLens received the message; it does not by itself prove the reported file effect. The email
+example and the unanswered follow-on file-path equality prompt are withdrawn as gate evidence.
+
+Exact restart point: the replacement R1 hook-delivery-versus-file-effect prompt appended to the
+ledger. Ask what receipt directly observes, what file-state fact remains unobserved, and what source
+must be read. Do not claim that a real payload schema has been observed in this repository.
+
+The learner passed the replacement R1 distinction; confidence was omitted. They identified hook
+receipt as directly observed, the reported file effect as still claimed, and local file bytes as the
+source that must be read. This resolves the learner's valid objection without relying on the faulty
+email analogy.
+
+Exact restart point: the fresh target-level `ClaimedEdit` boundary explanation appended to the
+ledger, using `guide.md` and `session-44`. If independently correct, close the Write trace/explanation
+portion and require one non-identical representation-boundary transfer before closing the slice.
+
+The fresh target-level boundary explanation was STRONG PARTIAL at confidence 90. The learner knows
+that observed local bytes are absent and must be read later, but explained content exclusion only as
+deferred validation and listed fields instead of stating their joint semantic claim. Primary blocker:
+field list versus record meaning.
+
+Exact restart point: the `ClaimedEdit` meaning micro-prompt appended to the ledger. Require one
+sentence translating session/tool/path into a claim, one explicit non-claim about current content,
+and why direct reading owns that later fact.
+
+The learner passed the `ClaimedEdit` meaning prompt at confidence 90. They translated the three
+fields into the session/tool/path claim and correctly denied that the record establishes proposed
+changes as current file content. Clarified again that later file reading observes bytes rather than
+validating the entire hook.
+
+Exact restart point: the non-Claude `ClaimedSave` adapter transfer appended to the ledger. If the
+learner preserves claimed metadata versus observed file truth and states the shared boundary, close
+the Write trace/explanation/transfer slice and select the next Phase 8 obligation.
+
+The non-Claude transfer was PARTIAL; confidence was omitted. The learner retained the claimed
+metadata versus local observation distinction but said an observed `todo.txt` version requires
+reading the hook's bytes. Primary blocker: hook-message bytes versus target-file bytes.
+
+Exact restart point: the two-source byte micro-prompt appended to the ledger. Ask which bytes can
+represent `todo.txt` and what reading the hook-message bytes actually observes. After recovery, use
+one fresh same-rung transfer before rebuilding the non-Claude boundary.
+
+The learner passed the two-source byte prompt at confidence 90. They selected bytes read from
+`todo.txt` for the observed version and identified hook bytes as the serialized assistant report.
+Clarified that message bytes are real bytes, but represent the report rather than the target file.
+
+Exact restart point: the config update-request versus config-file byte near-transfer appended to the
+ledger. If correct, rebuild the non-Claude `ClaimedSave` boundary one step at a time.
+
+The learner passed the config message-versus-file byte transfer at confidence 90. They identified
+`config_file_bytes` as representing the observed target file and the other bytes as representing the
+update request.
+
+Exact restart point: the R2 `ClaimedUpdate` versus `ObservedConfig` record-assignment prompt appended
+to the ledger. Require the learner to assign request-reported facts and directly read bytes to their
+separate records and explain why a proposed body cannot become observed truth by copying it.
+
+The R2 record assignment was STRONG PARTIAL; confidence was omitted. The learner placed request
+facts in `ClaimedUpdate` and file-read bytes in `ObservedConfig`, but again explained the exclusion
+of proposed content as missing validation. Primary blocker: input validation versus the operation of
+directly observing state.
+
+Exact restart point: the R0 A/B observation-operation prompt appended to the ledger. Ask which
+operation can populate `ObservedConfig.file_bytes` and what makes it observation rather than input
+validation. Rebuild only after that vocabulary binds to the mechanism.
+
+The learner passed the R0 observation-operation prompt at confidence 90. They selected the direct
+file read and explained that reading from the source makes the value observed, whereas request
+validation does not.
+
+Exact restart point: the fresh thermostat validation-versus-measurement near-transfer appended to
+the ledger. If correct, climb back to the R2 claimed-record/observed-record boundary with support
+faded.
+
+The learner passed the thermostat observation-operation near-transfer; confidence was omitted. They
+selected measured `74` and identified the sensor reading as the source of observation.
+
+Exact restart point: climb to the R1 observed-value assignment appended to the ledger. Ask which of
+validated proposed content and bytes returned by a file read populates the observed-version field,
+and why successful input validation does not alter the source choice.
