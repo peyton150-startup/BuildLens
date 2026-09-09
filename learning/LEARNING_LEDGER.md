@@ -36839,3 +36839,1032 @@ Confidence =
 
 For the second field, imagine a payload that says "tool_name": "Bash" but whose tool_input is {}.
 ```
+### EV-P8-BASH-NONE-TRUST-353 — validation before classification
+
+BASH DISCARDED-RESULT PROMPT (exact):
+
+```text
+if tool_name == "Bash":
+    _required_string(tool_input, "command")
+    return None
+
+Suppose the validation line were deleted and this malformed payload arrived:
+
+"tool_name": "Bash"
+"tool_input": {}
+
+What the command-validation line proves before None is returned =
+What could reach the caller as None if that line were deleted =
+Why the caller should be able to trust a returned None =
+Confidence =
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+that threer is an actual string there&#x20;
+a command that is empty&#x20;
+becasue it is validated by the required string function
+60
+```
+
+TWO OF THREE. The learner correctly identified that `_required_string` proves the command is an
+actual non-empty string and that this validation is what makes the returned `None` trustworthy.
+Primary blocker: an empty dictionary means the `command` field is missing, not that it is present
+with the empty-string value. Descend to a one-concept missing-versus-empty dictionary lookup before
+returning to the Bash branch.
+
+LEARNER SELF-CORRECTION (verbatim):
+
+```text
+absent is the word
+```
+
+ACCEPTED. The learner corrected the state from empty to absent without needing the prepared
+micro-example. Return directly to the target-level consequence: without command validation, a
+malformed Bash payload whose required command is absent would be silently classified as a valid
+no-file event.
+
+TARGET-LEVEL CONSEQUENCE PROMPT (exact):
+
+```text
+What would go wrong if the validation line were deleted?
+
+Your answer =
+Confidence =
+
+Include both ideas: what malformed payload would slip through, and what the caller would
+incorrectly believe after receiving None.
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+an absent command would pass and a command that is not accapatble would pass, like instead of edit it would be delete whic h is not acceptable for our code or in our code&#x20;
+70
+```
+
+PARTIAL. Correct: an absent command would pass; generalized for the learner to absent, empty, or
+wrong-type command values. Primary blocker: `tool_name` and `command` were conflated. `tool_name`
+selects the parser branch; `command` is the text carried by a Bash event. A non-empty command such
+as `"delete temp.txt"` satisfies this parser because command-policy enforcement is not this
+adapter's responsibility. Descend to one branch-selection discrimination before rebuilding the
+trust consequence.
+
+LEARNER SELF-CORRECTION (verbatim):
+
+```text
+sorry i did mix that up, i understand that required string is only for empty or absent strings 
+```
+
+PARTIAL RECOVERY. The learner explicitly recognized the `tool_name`/`command` mix-up, so the planned
+branch-selection discrimination was unnecessary. One contract detail remained omitted:
+`_required_string` rejects three states, not two—absence through `_required_value`, a wrong type
+through `isinstance`, and the empty string through equality. Re-state the complete contract, then
+return to why validating a discarded result matters.
+
+LEARNER ANSWER (verbatim):
+
+```text
+it raises an error when it is empty absent or not a string
+```
+
+PASS on substance. The complete `_required_string` rejection contract was recovered unaided:
+absent, wrong type, or empty string. Confidence was omitted. Climb back to the Bash branch and ask
+for the caller's belief after a malformed event is incorrectly allowed to return `None`.
+
+BASH TRUST CONSEQUENCE RETRACE (exact):
+
+```text
+Suppose the validation line is deleted and tool_input is {}.
+
+What malformed event would now return None =
+What the caller normally believes when it receives None =
+Why allowing that malformed event to return None is dangerous =
+Confidence =
+
+The final field should explain how two different states become indistinguishable.
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+it would be a bash tool name but would not have a tool input and would still return None
+it beleives that it was a bash command that was successfully ingested and there are no errors or issues
+because we could have a lot of blank or absent commands that could signify something if we knew what htey were
+```
+
+PARTIAL, with the central caller-belief idea present. The learner correctly described `None` as
+communicating successful ingestion of a Bash event with no payload error. Scoping correction:
+`tool_input` is present as `{}`; the required `command` inside it is absent. The stated danger did
+not yet name the required indistinguishability: without validation, the same `None` represents both
+a well-formed no-file Bash event and a malformed event, so the caller cannot trust the
+classification. Confidence was omitted. Require one final one-field restatement before closing this
+sub-block.
+
+LEARNER CONFIDENCE ADDENDUM (verbatim):
+
+```text
+70
+```
+
+FINAL DISTINGUISHABILITY RESTATEMENT PROMPT (exact):
+
+```text
+The command-validation line is necessary because without it, None could mean either ______ or
+______, so ______.
+Confidence =
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+None could mean a fail or successful bash command because no errors are raised
+```
+
+PARTIAL. The learner now names the ambiguity and connects it to the absence of an exception. One
+precision issue remains conceptual rather than transcription: the parser cannot establish whether
+the shell command succeeded. It can establish only whether the Bash PAYLOAD is well-formed. The two
+states were supplied explicitly: a well-formed Bash payload with a valid command versus a malformed
+Bash payload whose command is absent, empty, or wrong-type. Without validation both return `None`,
+so the caller cannot distinguish them. Require a near-transfer later to prove this was learned rather
+than merely supplied.
+
+LEARNER CORRECTION (verbatim):
+
+```text
+ok a well formed bash poayload vs en empty bash payload
+```
+
+ACCEPTED on the target distinction. Sharpened from "empty payload" to a malformed Bash payload
+whose required command is absent, empty, or wrong-type. The learner now distinguishes the valid
+no-file classification from malformed input, and understands that validation makes a returned
+`None` trustworthy. The Bash sub-branch review is complete, with a later near-transfer still owed
+because the payload-versus-command-success precision was supplied.
+
+HOOK-EVENT GUARD PROMPT (exact):
+
+```text
+hook_event_name = _required_string(payload, "hook_event_name")
+if hook_event_name != "PostToolUse":
+    raise ValueError("unexpected hook event: " + hook_event_name)
+
+Why check hook_event_name when this function is already named parse_post_tool_use?
+
+Your answer =
+Confidence =
+
+Explain why the function's name cannot guarantee what data a caller passes into it.
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+becSue we get hook events that are other than posttolluse, so if we get anything other than that we have to treat it like it is not a change in the code or it could be a stop hook
+```
+
+PARTIAL. Correct: the wider system produces hook types other than `PostToolUse`, including `Stop`,
+and a function name cannot constrain runtime input. Primary blocker: classification versus
+rejection was conflated. This branch raises `ValueError`; it does not classify another valid hook as
+a no-file event by returning `None`. The exception communicates that the caller invoked the wrong
+parser. Descend to a concrete `Stop` event outcome before returning to the rationale.
+
+STOP-EVENT TRACE PROMPT (exact):
+
+```text
+parse_post_tool_use({
+    "hook_event_name": "Stop",
+    "session_id": "abc",
+    "tool_name": "Bash",
+    "tool_input": {"command": "pytest"},
+})
+
+Does this call return None =
+Does it reach the tool_name checks =
+How the call ends =
+What mistake the error identifies =
+Confidence =
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+no it would have a value error
+
+no it stops on&#x20;
+```java
+    raise ValueError("unexpected hook event: " + hook_event_name)
+```
+
+the function returns nothing&#x20;
+
+the incorrect hook event 
+```
+
+PASS on substance. The learner correctly rejected `None`, stopped execution before the tool-name
+checks, identified the `ValueError` line, applied abandonment rather than return, and named the
+wrong hook-event type as the mistake. Confidence was omitted. Principle connected back to error
+locality: reject the mismatch at the first point where this parser can prove that the caller chose
+the wrong parser. The `hook_event_name` guard review is complete.
+
+TOP-LEVEL CONTAINER GUARD PROMPT (exact):
+
+```text
+if not isinstance(payload, dict):
+    raise ValueError("payload must be an object")
+
+This check runs before _required_string looks for any field.
+
+Why must the container type be checked first?
+
+Your answer =
+Confidence =
+
+Explain what could go wrong if _required_string(payload, "hook_event_name") ran first when payload
+were "hello" or 7.
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+so that they do not get an object that is not usable, like a string or list or tuple
+```
+
+PARTIAL. Correct at the design level: the parser must reject container types that cannot be
+interpreted as named fields. The ordering mechanism remains unstated. If a field helper runs first,
+operations intended for dictionaries may either produce a misleading missing-field error on another
+container or raise an unrelated Python `TypeError`, obscuring the actual defect that the payload
+container has the wrong type. Descend to one concrete string-container trace before returning to
+check ordering.
+
+STRING-CONTAINER TRACE PROMPT (exact):
+
+```text
+def _required_value(values, field):
+    if field not in values:
+        raise ValueError("missing required field: " + field)
+
+    return values[field]
+
+Call:
+
+_required_value("hello", "hook_event_name")
+
+Is "hook_event_name" contained inside "hello" =
+Which error is raised =
+Why that error message is misleading =
+Confidence =
+```
+
+LEARNER ANSWER/QUESTION (verbatim):
+
+```text
+yes, so it is not about it being a list or touple or dict, is it becasue the hook will only have a dict or we read the json in as a dict so any other type is not json?
+```
+
+INCORRECT on the membership result and uncertain on the JSON model. Primary immediate blocker:
+`in` applied to a string performs substring membership; `"hook_event_name"` is not a substring of
+`"hello"`, so the condition using `not in` is `True`. A second misconception was corrected directly
+because the learner asked: non-object values can still be valid JSON. JSON can decode to an object,
+array, string, number, Boolean, or null; this hook's SCHEMA specifically requires the top-level value
+to be an object, represented as a Python `dict`. Descend to an R0 string-membership example, then
+return to the misleading-error trace.
+
+STRING-MEMBERSHIP MICRO-PROMPT (exact):
+
+```text
+text = "hello"
+a = "ell" in text
+b = "world" in text
+
+a =
+b =
+What "in" checks when the right side is a string =
+Confidence =
+```
+
+LEARNER ANSWER/QUESTION (verbatim):
+
+```text
+true
+false
+it checks the chatacters&#x20;
+is that how it would be written, a = "ell" in text or should it be ==
+```
+
+PASS on membership evaluation; confidence omitted. The learner then explicitly requested syntax
+help comparing `in` and `==`, so syntax-only help mode remains active and the parser problem is
+paused. Explained only the distinction: `in` checks whether the left-hand sequence occurs anywhere
+inside the right-hand string; `==` compares the two complete values. Require one tiny
+discrimination before rebuilding the parser trace.
+
+MEMBERSHIP-VERSUS-EQUALITY PROMPT (exact):
+
+```text
+text = "PostToolUse"
+contains = "Tool" in text
+equal = "Tool" == text
+
+contains =
+equal =
+Why the answers differ =
+Confidence =
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+ok i see what you mean
+true
+false&#x20;
+becasue equal is asking if the tentire string of "Tool" is the entiure string of "PostToolUse" instead of is it in posttooluse
+```
+
+PASS. The learner correctly evaluated both expressions and explained whole-string equality versus
+substring membership in their own words. Confidence omitted. Syntax-only help mode closes; rebuild
+the original `_required_value("hello", "hook_event_name")` trace.
+
+STRING-CONTAINER TRACE RETRACE (exact):
+
+```text
+"hook_event_name" in "hello" =
+"hook_event_name" not in "hello" =
+Which error is raised =
+Why that error message misdiagnoses the payload =
+Confidence =
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+it is not in hookeventname so it will rasie the valueerror
+missing required field: hookevnetname
+90
+```
+
+PARTIAL but the target control flow is correct: membership is `False`, `not in` is `True`, and the
+missing-field `ValueError` runs. Identifier transcription is not graded. The learner omitted the
+reason the message is misleading. Ask only that remaining field: the field is not the primary defect;
+the top-level payload has the wrong container type.
+
+LEARNER ANSWER (verbatim):
+
+```text
+because the field is not miussing it just does not match the field
+```
+
+INCORRECT. The learner still modeled the string as though it had fields that could match or fail to
+match. Primary blocker: container shape versus container contents. A string has no named fields at
+all; using `in` on it performs substring membership accidentally. Descend to a direct comparison of
+an empty dictionary (correct container, missing field) and a string (wrong container entirely).
+
+CONTAINER-TYPE-VERSUS-CONTENTS PROMPT (exact):
+
+```text
+payload_a = {}
+payload_b = "hello"
+
+Is payload_a a dictionary =
+Can payload_a contain named fields =
+What is wrong with payload_a for this parser =
+Is payload_b a dictionary =
+Can payload_b contain named fields =
+What is wrong with payload_b for this parser =
+Confidence =
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+ok so becasue a dictonary is expected when it is a string it says value missing instead of wrong type, yes
+yes
+it is empty&#x20;
+no
+no
+it is a string&#x20;
+90
+```
+
+PASS. The learner distinguished a correct container lacking required fields from a wrong container
+that cannot have named fields. They also stated the diagnostic consequence in their own words: the
+string would receive a missing-value message when the actual problem is its type. Climb back to the
+ordering rationale and require the complete mechanism in one answer.
+
+TOP-LEVEL GUARD RATIONALE RETRACE (exact):
+
+```text
+if not isinstance(payload, dict):
+    raise ValueError("payload must be an object")
+
+Why must it run before field validation?
+
+Your answer =
+Confidence =
+
+Include both parts: what the guard proves, and what misleading behavior it prevents.
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+because the validation does not check to see if it is a string or dictionary
+```
+
+PARTIAL. The learner points at the missing responsibility but conflates the field value with its
+container. `_required_string` does check whether the FIELD VALUE is a string; it does not check
+whether the CONTAINER holding that field is a dictionary. Supply this terminology only, then require
+one final completion connecting container proof to prevention of misleading field errors.
+
+LEARNER COMPLETION (verbatim):
+
+```text
+and the string cannot hold named variables
+```
+
+PASS. Combined with the preceding answer, the learner now holds the complete ordering rationale:
+the top-level guard proves the payload is a dictionary capable of named-field lookup before field
+validators operate, preventing a wrong-container payload from being mislabeled as a dictionary that
+merely lacks a field. The top-level container guard review is complete. Next review the ordering
+among the remaining field and branch checks.
+
+CHECK-ORDERING PROMPT (exact):
+
+```text
+hook_event_name = _required_string(payload, "hook_event_name")
+if hook_event_name != "PostToolUse":
+    raise ValueError("unexpected hook event: " + hook_event_name)
+
+session_id = _required_string(payload, "session_id")
+tool_name = _required_string(payload, "tool_name")
+tool_input = _required_object(payload, "tool_input")
+
+Suppose this payload arrives:
+
+{
+    "hook_event_name": "Stop",
+    "tool_name": "Write",
+    "tool_input": {}
+}
+
+Which problem is reported first =
+Which line proves that problem =
+Are the other two problems checked during this call =
+Why this ordering is useful =
+Confidence =
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+the hookevent name raises a valueerror
+the second line the if&#x20;
+they are not because the valueerror stops execution of the rest&#x20;
+we can make sure that the name is correct before doing anything else, if the name is wrong it would make sense that the rest will not be what we expect&#x20;
+90
+```
+
+PASS, four of four at confidence 90. The learner followed execution order, applied raise-as-
+abandonment, and independently stated the design rationale: prove that the payload belongs to the
+schema this parser understands before interpreting fields whose meaning depends on that schema.
+Real-code block review of `parse_post_tool_use` is complete. A non-identical transfer and shared deep
+principle remain before the knowledge gate closes.
+
+FIRST TRANSFER — PAYMENT EVENT (exact):
+
+```text
+def parse_payment_event(message):
+    if not isinstance(message, dict):
+        raise ValueError("message must be an object")
+
+    event_type = required_string(message, "event_type")
+    if event_type != "PaymentCompleted":
+        raise ValueError("unexpected event type")
+
+    amount = required_number(message, "amount")
+    currency = required_string(message, "currency")
+    return Payment(amount, currency)
+
+Call:
+
+parse_payment_event({
+    "event_type": "UserDeleted",
+    "amount": "not a number"
+})
+
+First error reported =
+Is amount validated =
+Why validating amount first would be a design mistake =
+Deep principle shared with parse_post_tool_use =
+Confidence =
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+it will throw the value error on the payment completed line, it does not even get to the not a number check&#x20;
+beccasue the event type matters more becasue a user deleted cannot be checked for the payment amount it would be checked for a payment amount, it takes the most important field first that defines what the next filed will potenttialy hold
+```
+
+PASS on substance; confidence omitted. The learner transferred execution ordering and supplied the
+reason in their own words: the event type defines what subsequent fields can mean, so interpreting
+`amount` under a `UserDeleted` schema would be a category mistake. The deep principle was named for
+them as: validate the discriminator before validating fields whose meaning depends on it. One second
+transfer with faded scaffolding remains before the gate closes.
+
+SECOND TRANSFER — NETWORK MESSAGE (exact):
+
+```text
+A network-message parser receives:
+
+{
+    "message_type": "Disconnect",
+    "payload": {"text": 42}
+}
+
+The parser understands only "ChatMessage", whose payload requires a string text.
+
+In your own words, explain which fact must be checked first, what must not be interpreted yet, and
+why.
+
+Your answer =
+Confidence =
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+the payload must be checked first, the message disconnect means the payload would not be read becasue we would inter[pret taht as a disconnect
+```
+
+PARTIAL and internally contradictory. The second clause carries the correct model: because the
+message is `Disconnect`, the ChatMessage payload must not be read. The opening claim says the
+payload is checked first, contradicting that ordering. Primary blocker is terminology/order under a
+new surface, not the deep rationale. State the correction—that `message_type` is checked first and
+only a `ChatMessage` permits validation of `payload["text"]`—then isolate the two-step order once
+more.
+
+LEARNER ANSWER (verbatim):
+
+```text
+if we check disconnect first then we should not check payload after so it logically means we have to check payload first becasue nothing can be read after dicsonnect
+```
+
+INCORRECT, revealing the primary blocker. MISCONCEPTION RECORDED: the learner treats the string
+value `"Disconnect"` as an executing instruction that makes the already-received dictionary
+unreadable. In this parser it is only a discriminator label. Reading it does not mutate, destroy, or
+lock the payload. The parser stops afterward because ChatMessage-specific fields are irrelevant to
+a Disconnect message, not because they became inaccessible. Descend to a two-line guard trace with
+an observable assignment after the guard.
+
+LEARNER CLARIFICATION (verbatim):
+
+```text
+i missed this: The parser understands only `"ChatMessage"`, whose payload requires a string `text`.
+```
+
+ACCEPTED as the source of the contradiction. The learner had modeled a general network dispatcher
+that understands `Disconnect`, not a parser specialized to `ChatMessage`. Reconnected explicitly to
+the target: this is the same relationship as `parse_post_tool_use` receiving a `Stop` event. Retain
+the already-issued guard-order micro-example and require its trace before accepting the second
+transfer.
+
+GUARD-ORDER MICRO-TRACE ANSWERS (verbatim, across two turns):
+
+```text
+it will rasie becasue diconnect is not the same message type as chatmessage
+```
+
+```text
+no
+deliberatly not read
+if we wanted it read anyway we could have a try except and then have it run after
+```
+
+PASS on the target. The learner correctly evaluated the discriminator mismatch, ran the raise,
+stopped before the dependent assignment, and explicitly classified the field as deliberately not
+read rather than impossible to read. Confidence omitted. The `try/except` observation is
+mechanically true but was bounded: catching an exception can alter control flow; it cannot make a
+Disconnect payload valid under the ChatMessage schema or change what its fields mean. The second
+transfer now passes after one reading correction and one guard trace. Require the shared deep
+principle once more in the learner's own words before closing the review gate.
+
+FINAL SYNTHESIS PROMPT (exact):
+
+```text
+Shared principle across PostToolUse, PaymentCompleted, and ChatMessage parsers =
+Confidence =
+
+State why the parser checks the event/message type before fields that belong only to that type.
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+we need to validate the discriminator before valiadating fields whjpse meaning depends on it 
+```
+
+PASS. The learner stated the shared deep principle cleanly and independently of any one domain:
+validate the discriminator before validating fields whose meaning depends on it. This follows two
+non-identical transfers and closes the conceptual portion of the `parse_post_tool_use` review.
+Confidence was omitted and must be collected before the knowledge gate is finalized.
+
+LEARNER CONFIDENCE ADDENDUM (verbatim):
+
+```text
+90
+```
+
+PASS finalized at confidence 90. The complete `claude_adapter.py` first-slice milestone now has all
+four required forms of evidence: automated tests, learner trace, learner explanation, and two
+non-identical transfers ending in a shared deep principle. The post-implementation code review is
+complete. Phase 8 is not complete; this closes only the first PostToolUse parser slice. The
+major/deep counter therefore remains 1/2 and no cumulative retrieval review is due before the next
+Phase 8 slice.
+
+## EV-P8-WRITE-CONTRACT-354 — extend PostToolUse to Write
+
+PRE-PATCH DECLARATION:
+
+```text
+Current phase = Phase 8 — Claude Code adapter
+Learning objective = extend an existing discriminator safely
+Behavior being added = valid Write PostToolUse becomes a ClaimedEdit
+Conceptual change introduced = one additional accepted tool value
+Out of scope = worktree identity, PreToolUse, Stop reconciliation, persistence
+Expected patch size = one focused parser change plus tests
+Knowledge gate afterward = trace Edit, Write, Bash, and unsupported-tool paths
+```
+
+WRITE CONTRACT PREDICTION (exact):
+
+```text
+What a valid Write payload should return =
+Which tool_input field Write must provide =
+What malformed Write input should do =
+What must remain unchanged for Bash =
+What must remain unchanged for unsupported tools =
+Confidence =
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+a claimededit class instance with the valid values of filepath session id and toolname&#x20;
+the tool name needs to be Edit&#x20;
+it will raise a value error and message&#x20;
+the checks for required string and the return none must remain
+unless we add another toolname edit has to stay the same&#x20;
+70
+```
+
+PARTIAL. Correct: valid Write returns a `ClaimedEdit`; malformed Write raises a readable
+`ValueError`; Bash command validation and `None` remain unchanged. Primary blocker: the new
+discriminator value and its nested data were conflated. A Write event has top-level
+`tool_name == "Write"`; its nested `tool_input` must provide `file_path`, just like Edit. The final
+unsupported-tool statement is unclear and will be revisited after this scoping correction. Descend
+to a two-level payload mapping before branch design or implementation.
+
+WRITE PAYLOAD-LEVELS PROMPT (exact):
+
+```text
+{
+    "tool_name": "Write",
+    "tool_input": {
+        "file_path": "notes.txt",
+        "content": "hello"
+    }
+}
+
+Top-level tool_name value =
+Dictionary containing file_path =
+file_path value =
+Which field ClaimedEdit needs from tool_input =
+Confidence =
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+first level is toolname and tool input , next level is filepath and content&#x20;
+toolinput is the dictionary&#x20;
+notes.txt
+it needs the file path&#x20;
+90
+```
+
+PASS, four of four at confidence 90. The learner correctly separated the top-level discriminator
+from nested tool input and identified `file_path` as the only nested field required by the current
+`ClaimedEdit` representation. The extra Write `content` is outside this record's contract. Advance
+to acceptance-condition design; do not implement yet.
+
+WRITE ACCEPTANCE-RULE PROMPT (exact):
+
+```text
+if tool_name != "Edit":
+    raise ValueError("unsupported tool_name: " + tool_name)
+
+tool_name = "Write"
+
+tool_name != "Edit" =
+What the current code does =
+What the new rule should say in plain English =
+Which tool names must still raise ValueError =
+Confidence =
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+rasie&#x20;
+it rasies a value error
+it should say edit or write making sure both are acceptable inputs
+all other toolnames
+90
+```
+
+THREE OF FOUR. The target contract is correct at confidence 90: accept Edit or Write and reject all
+other tool names; the current code is also correctly traced as raising for Write. One previously
+held distinction slipped: the condition itself was answered as `raise` rather than the Boolean
+`True`; `raise` is the body that runs after the condition evaluates. Isolate only the Boolean before
+choosing new syntax.
+
+LEARNER BOOLEAN RECOVERY (verbatim):
+
+```text
+true
+90
+```
+
+PASS at confidence 90. The learner restored condition evaluation as a Boolean separate from the
+raise body. Proceed to the smallest new syntax required for a two-value accepted set.
+
+ACCEPTED-SET MEMBERSHIP PROMPT (exact):
+
+```text
+accepted = ("Edit", "Write")
+
+a = "Write" in accepted
+b = "Delete" in accepted
+c = "Delete" not in accepted
+
+a =
+b =
+c =
+Condition that should trigger the unsupported-tool ValueError =
+Confidence =
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+true
+false&#x20;
+true
+not&#x20;
+80
+```
+
+THREE OF FOUR at confidence 80. Membership evaluation is correct. The learner supplied the right
+negation idea for the condition but not a complete Python expression. Enter syntax-only help: a
+membership condition requires a left value, the two-word operator `not in`, and the collection on
+the right. Require completion of only those three pieces.
+
+PROCESS REQUEST (verbatim): "also once this is done can we move to a new sesion and give me a 1
+sentnce handoff". Accepted. After the Write slice is implemented, tested, and its learner gate
+passes, commit and push, then create a new Codex task with exactly one sentence of handoff context.
+
+LEARNER OPERATOR RECOVERY (verbatim):
+
+```text
+not in
+```
+
+Correct operator, but the whole expression remained open. Asked to fill `_____ not in _____` using
+`tool_name` and `accepted`.
+
+LEARNER ANSWER (verbatim):
+
+```text
+delete notin accpeted&#x20;
+10
+```
+
+INCORRECT at honestly low confidence 10. The conceptual direction is present, but three syntax/
+generality issues remain: `not in` requires a space; the left side must be the variable `tool_name`,
+not one hard-coded unsupported example; and the right side is the collection variable `accepted`.
+Repeated difficulty permits a worked-example rescue. Supplied neighboring example
+`color not in allowed_colors`, the general pattern `value-being-tested not in
+collection-of-allowed-values`, and the target mapping `tool_name not in accepted`. Require the
+learner to explain the solved mapping, then complete a fresh near-transfer before returning to the
+parser.
+
+LEARNER SOLVED-MAPPING EXPLANATION (verbatim):
+
+```text
+it is the input for tool name
+the accepted inputs&#x20;
+i was using it as an example, if delete was= to tool name then the expression would be correct becasue then it would be true and we would raise  the error
+90
+```
+
+PASS at confidence 90. The learner correctly identified the tested input and accepted collection,
+and clarified that `"Delete" not in accepted` is a valid concrete expression that evaluates `True`.
+They also understand that the parser must use `tool_name` to generalize over whichever value arrives.
+Proceed to the required fresh near-transfer before returning to target code.
+
+NEAR-TRANSFER PROMPT (exact):
+
+```text
+allowed_roles = ("admin", "editor")
+role = "viewer"
+
+Condition =
+What it evaluates to =
+Confidence =
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+role not in allowed roles&#x20;
+for viewer it is true so we throw the value error
+90
+```
+
+PASS at confidence 90. The learner independently transferred the membership pattern and connected
+the `True` result to execution of the rejection body. Identifier transcription is not graded. Climb
+back to a fresh target-level parser condition.
+
+TARGET CONDITION PROMPT (exact):
+
+```text
+Replace only this condition:
+
+if tool_name != "Edit":
+    raise ValueError("unsupported tool_name: " + tool_name)
+
+Use a tuple directly—no separate accepted variable.
+
+New if line =
+Why Write now passes =
+Why Delete still raises =
+Confidence =
+```
+
+LEARNER FIRST ANSWER (verbatim):
+
+```text
+if toolname not in accpeted\_inputs:
+becasue we can add write to the accpeted inputs and delete still is not in accpeted inputs&#x20;
+80
+```
+
+PARTIAL at confidence 80. The acceptance logic is correct, but the learner introduced an undefined
+`accepted_inputs` variable despite the direct-tuple constraint. This would require an additional
+assignment and enlarge the patch. Reduced to filling the tuple directly.
+
+LEARNER CORRECTION (verbatim):
+
+```text
+if toolname not in ("Edit","Write",)
+```
+
+PASS. Identifier transcription is not graded. The trailing comma is valid tuple syntax. The
+condition now skips the error body for Edit and Write and enters it for every other tool name.
+Contract and target syntax are held; proceed to test prediction before implementation.
+
+WRITE TEST-PREDICTION PROMPT (exact):
+
+```text
+Valid Write:
+tool_name = "Write"
+tool_input = {"file_path": "notes.txt", "content": "hello"}
+
+Malformed Write:
+tool_name = "Write"
+tool_input = {"content": "hello"}
+
+What the valid-Write test should expect =
+Why that test fails against the current code =
+What the malformed-Write test should expect =
+Existing behavior the Bash regression test protects =
+Existing behavior the unsupported-tool regression test protects =
+Confidence =
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+a tool input dict, with a filepath and content
+because we do not check to see if there is a filepath, i do not think thati s is so idk
+it should expect a field in the dict to be missing or be empty or be a non string&#x20;
+that we will not check the bash toolname for a write or edit toolname
+we will not get any toolnames other than write or edit
+80
+```
+
+INCORRECT overall at confidence 80. Primary blocker: test input was described where the requested
+field was the expected output. Secondary issues are downstream of that: current Write fails at the
+unsupported-tool guard before reaching `file_path`; malformed Write should raise the specific
+missing-field `ValueError`; Bash regression protects validated-command-plus-`None`; and unsupported
+tool regression protects rejection of every name outside Bash, Edit, and Write. Descend first to a
+one-concept arranged-input versus asserted-output example. Do not continue parser test design until
+that distinction passes.
+
+INPUT-VERSUS-OUTPUT MICRO-PROMPT (exact):
+
+```text
+def double(number):
+    return number * 2
+
+result = double(4)
+
+Input arranged by the test =
+Output the test receives =
+Expected value the test should assert =
+Confidence =
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+result equals 8
+the input is 4 that is then multiplied by 2 and retunrs the resulting 8 to result&#x20;
+idk
+60
+```
+
+PARTIAL in field order, but the prose shows the underlying operation: the learner identified input
+`4` and actual result `8`. The remaining unknown is the role of the expected value. Supplied the
+mapping: arranged input `4`, received output `8`, expected value `8`; the test compares actual output
+against the contract's expected value. Require a fresh near-transfer before returning to Write test
+design.
+
+FRESH TEST-ROLE TRANSFER (exact):
+
+```text
+def first_letter(word):
+    return word[0]
+
+actual = first_letter("BuildLens")
+expected = "B"
+
+Input arranged by the test =
+Actual output received =
+Expected output from the contract =
+What the test compares =
+Confidence =
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+Buildlens
+B
+B
+the input it inputs and the output it recveives&#x20;
+90
+```
+
+THREE OF FOUR at confidence 90. Input, actual output, and expected output are correct. One blocker
+remains: the learner says the test compares input to output; it instead compares actual output to
+expected output. Isolate `actual == expected` and require its Boolean result.
+
+LEARNER COMPARISON RECOVERY (verbatim):
+
+```text
+the actual and the expected&#x20;
+this is a parallel to what the last test was testing for the actual and the expected in this case they are the same&#x20;
+90
+```
+
+PASS at confidence 90. The learner correctly identifies the two compared roles and recognizes that
+equal actual and expected values make the comparison `True`. Input-versus-expected-output
+remediation is complete. Return to a fresh target-level valid-Write test before adding malformed and
+regression cases.
+
+VALID-WRITE TEST PROMPT (exact, unanswered at session pause):
+
+```text
+payload = {
+    "hook_event_name": "PostToolUse",
+    "session_id": "session-9",
+    "tool_name": "Write",
+    "tool_input": {
+        "file_path": "notes.txt",
+        "content": "hello",
+    },
+}
+
+actual = parse_post_tool_use(payload)
+
+Actual outcome with the current code =
+Expected output after Write support is implemented =
+What the test compares =
+Confidence =
+
+Write the expected output as a ClaimedEdit(...) instance using the three values from the payload.
+```
+
+SESSION PAUSE: the learner requested commit and push before answering because they needed to move.
+No Write production code or tests exist. Resume with this exact prompt; do not treat it as answered.

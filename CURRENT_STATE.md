@@ -2434,9 +2434,9 @@ constructor PARTIAL. The major/deep counter remains 1/2, so no cumulative review
 architecture reset remains due only by time or major transition. The next implementation step is
 still blocked on completion of the adapter code review; do not add Phase 8 behavior yet.
 
-The `@dataclass` restart point is superseded. The block-by-block review of `claude_adapter.py` has
-completed `ClaimedEdit`, `_required_value`, `_required_string`, and `_required_object`, and is now
-partway through `parse_post_tool_use`.
+The block-by-block review of the first `claude_adapter.py` implementation slice is complete. The
+milestone now has automated tests, learner trace, explanation, two non-identical transfers, and a
+shared deep principle. This closes the first PostToolUse parser slice, not Phase 8 as a whole.
 
 Concepts held: guard-clause control flow, the difference between evaluating an `if` condition and
 running its body, `isinstance` and `not` as separate steps, completion versus abandonment, and the
@@ -2459,6 +2459,16 @@ permanent correct reading of a Bash event, and only BuildLens's response to that
 later phases. The learner reached the last of these after twice calling `None` a temporary
 workaround, so it is fresh and should be re-probed.
 
+The completed parser review added two more held principles. TRUSTWORTHY CLASSIFICATION: the discarded
+`_required_string(tool_input, "command")` result makes `None` trustworthy by proving the Bash payload
+is well-formed before classifying it as a valid no-file event. DISCRIMINATOR FIRST: validate the
+event/message discriminator before fields whose meaning depends on it. The learner transferred the
+latter to payment and network-message parsers and stated it independently at confidence 90.
+
+The top-level container guard is also held: JSON may validly decode to several Python value types,
+but this hook schema requires a dictionary. Proving the container type before named-field lookup
+prevents a wrong-type payload from receiving a misleading missing-field diagnosis.
+
 Still owed as genuine retrieval: the two misconceptions corrected last session, both confidently held
 at 90 beforehand - that an assignment target is bound regardless of how the call terminated, and that
 an empty string is the same as absence. Also owed: the conditions under which boundary validation
@@ -2470,25 +2480,27 @@ Identifier transcription slips in learner answers are not graded, by the learner
 The only retained exception is test-assertion work, where a message literal must match the source
 exactly.
 
-Last knowledge gate: permanence of the Bash classification PASS. The major/deep counter remains 1/2,
-so no cumulative review is due. The next architecture reset remains due only by time or major
-transition. Implementation is still blocked on completion of the adapter code review; do not add
-Phase 8 behavior yet.
+Last knowledge gate: first PostToolUse parser slice PASS at confidence 90, with automated tests,
+trace, explanation, and transfer complete. The major/deep counter remains 1/2 because Phase 8 itself
+is not complete, so no cumulative review is due. The next architecture reset remains due only by
+time or major transition.
 
-EXACT RESTART POINT: one question is posed and unanswered. It concerns the discarded-result call in
-the Bash branch:
+The next smallest Phase 8 slice is selected: valid `Write` PostToolUse handling. The accepted
+contract is that Edit and Write return `ClaimedEdit`, Bash validates `command` and returns `None`,
+and every other tool name raises `ValueError`. The learner recovered direct tuple-membership syntax:
+`tool_name not in ("Edit", "Write")`. No production code or tests for Write have been added yet.
 
-```python
-    if tool_name == "Bash":
-        _required_string(tool_input, "command")
-        return None
-```
+One test-design misconception was remediated immediately before the pause. The learner initially
+described arranged input when asked for expected output. On two smaller examples they recovered that
+a test compares actual output against the contract's expected output, passing at confidence 90.
 
-The fields are recorded verbatim at the end of `learning/LEARNING_LEDGER.md`. The learner must say
-what that line proves before `None` is returned, what could reach the caller as `None` if the line
-were deleted, and why a caller should be able to trust a `None`. The target idea is that the `None`
-is only trustworthy because the payload was proven well-formed first; without the check, a malformed
-Bash payload with `tool_input` of `{}` would be silently indistinguishable from a legitimate no-file
-event. After that, the remaining review items are the `hook_event_name` guard, the top-level
-`isinstance(payload, dict)` guard, and the ordering of the checks; then the review closes and Phase 8
-implementation may resume.
+EXACT RESTART POINT: one valid-Write test question is posed and unanswered. The exact prompt is at
+the end of `learning/LEARNING_LEDGER.md`. Given a complete Write payload and
+`actual = parse_post_tool_use(payload)`, ask for: (1) the current outcome, which is the unsupported-
+tool `ValueError`; (2) the expected `ClaimedEdit(file_path="notes.txt", session_id="session-9",
+tool_name="Write")`; and (3) that the test compares actual output to this expected instance. Then
+design the malformed-Write and Bash/unsupported regression cases. Before any implementation, finish
+the required reading in AGENTS.md order. Keep worktree identity, PreToolUse, Stop reconciliation,
+and persistence out of this patch. After implementation, tests, and learner gate pass, commit and
+push and create a new Codex task with exactly one sentence of handoff context, per the learner's
+request.
