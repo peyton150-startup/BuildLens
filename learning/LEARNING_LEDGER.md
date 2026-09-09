@@ -37958,6 +37958,161 @@ Confidence =
 RECOVERY STATUS:
 near-transfer due
 
+LEARNER DIRECTION (verbatim):
+
+```text
+nitpick move on
+```
+
+The learner declined another ordinary value/type transfer. Honor the direction. Close the JSON
+mapping lesson from cumulative substantive evidence: serialized JSON is a Python str before
+decoding; `json.loads(...)` changes representation; object/array map to dict/list; null maps to
+None; and true/false map to Python Boolean values of type bool. Exact type-name and literal-format
+precision is not used as another gate. Proceed to BuildLens boundary application.
+
+BUILDLENS JSON-BOUNDARY APPLICATION (exact):
+
+```text
+raw_hook = '{"session_id": "s-3"}'
+payload = json.loads(raw_hook)
+
+1. What Python type is raw_hook?
+2. What Python type is payload?
+3. parse_post_tool_use receives raw_hook or payload?
+4. Does json.loads succeeding prove payload satisfies the PostToolUse contract? Why or why not?
+5. Confidence =
+```
+
+RECOVERY STATUS:
+JSON mapping closed by cumulative evidence and learner direction; BuildLens application due
+
+LEARNER REQUEST AND ANSWER (verbatim):
+
+```text
+if it was not a nitpick on the NoneType spelling give me a question about his next: Now a fresh value/type transfer:
+
+json text
+dict
+payload
+it does not, it is just loading in json text to something we can turn into python values and objects
+90
+```
+
+PASS at confidence 90. `raw_hook` is correctly identified as JSON text held in a Python str,
+`payload` as a dict, and `payload` as the representation received by `parse_post_tool_use`.
+Successful JSON decoding is correctly separated from satisfying the adapter contract. Precision
+correction after commitment: `json.loads(...)` already returns Python values; validation does not
+turn them into Python values, but determines whether they satisfy BuildLens's contract.
+
+The learner asked to revisit value-versus-type if the concept itself was not a nitpick. Clarified:
+the concept matters; only spacing in the written type name was treated as transcription. Honor the
+request with one fresh transfer before the non-BuildLens JSON boundary transfer.
+
+VALUE-VERSUS-TYPE FRESH TRANSFER (exact):
+
+```text
+value = 3.5
+
+Exact value stored in value =
+Python type of value =
+What is the difference between those two answers?
+Confidence =
+```
+
+RECOVERY STATUS:
+BuildLens application passed; requested value/type transfer due
+
+LEARNER ANSWER (verbatim):
+
+```text
+3.5
+float
+are you saying a decimal for the json vs the float in python?
+80
+```
+
+PASS on value and type at confidence 80: `3.5` is the exact value and `float` is its Python type.
+The explanation moved to a valid adjacent representation point rather than directly contrasting
+value and type. Clarified both: a value is the particular datum; a type is its Python category. Also
+confirmed that JSON `3.5` normally maps to a Python float. Reinforce both in the required external
+transfer.
+
+NON-BUILDLENS JSON BOUNDARY TRANSFER (exact):
+
+```text
+A thermostat receives this JSON text:
+
+raw = '{"temperature": 3.5}'
+reading = json.loads(raw)
+
+1. Python type of raw =
+2. Exact value of reading["temperature"] =
+3. Python type of reading["temperature"] =
+4. Does successful decoding prove 3.5 is a safe temperature setting? Why or why not?
+5. Confidence =
+```
+
+RECOVERY STATUS:
+non-BuildLens transfer and shared principle due
+
+LEARNER ANSWER (verbatim):
+
+```text
+json text&#x20;
+3.5
+float&#x20;
+no ti does not, 3.5 would be really cold it just translates it from json to python
+90
+```
+
+PASS at confidence 90. The learner correctly supplies decoded value `3.5`, Python type `float`, and
+separates representation translation from domain validation. Terminology correction: `raw` contains
+JSON text but its Python type is `str`. The temperature judgment additionally needs units and an
+allowed-range contract; it is not established by decoding. Require the shared principle across the
+BuildLens and thermostat variants.
+
+SHARED-PRINCIPLE PROMPT (exact):
+
+```text
+BuildLens variant:
+JSON hook text -> Python dict -> PostToolUse validation
+
+Thermostat variant:
+JSON reading text -> Python dict/float -> safe-temperature validation
+
+What deep principle do both variants share?
+Confidence =
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+they take a JSON text and turn it in to actioanlbe data
+```
+
+PARTIAL; confidence omitted. The learner correctly identifies JSON-text-to-Python-data
+representation change, but "actionable" incorrectly implies that decoding establishes the domain
+contract. Both prior variants explicitly showed decoded-but-invalid values. Primary blocker:
+decoded representation versus validated/actionable domain input. Reduce to one statement choice.
+
+DECODED-VERSUS-VALIDATED MICRO-PROMPT (exact):
+
+```text
+After json.loads succeeds, which statement is accurate?
+
+A. We have Python values that still need domain validation.
+B. We have trusted, actionable domain data.
+
+Why?
+Confidence =
+```
+
+RECOVERY STATUS:
+decoded-versus-validated distinction due
+
+RECOVERY STATUS:
+shared principle due
+
 LEARNER ANSWER (verbatim):
 
 ```text
@@ -38068,6 +38223,316 @@ after independent retrieval; then teach JSON Boolean mapping and recombine objec
 
 SESSION STATUS:
 checkpoint commit authorized; learning gate remains open
+
+SESSION 2026-09-09 CONTINUED — JSON ABSENCE REMEDIATION RESUMED.
+
+PYTHON-ABSENCE EXECUTABLE RECOGNITION PROMPT (exact):
+
+```text
+value = None
+
+Using Python's exact spelling:
+
+What value is assigned to value?
+Confidence =
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+None
+```
+
+PASS; confidence omitted. The learner correctly reads Python's built-in absence value in ordinary
+executable syntax. Return to the decoder boundary with one scalar near-transfer before restoring a
+list or object.
+
+JSON-NULL SCALAR NEAR-TRANSFER (exact):
+
+```text
+value = json.loads("null")
+
+After json.loads finishes, what exact Python value is stored in value?
+Confidence =
+```
+
+RECOVERY STATUS:
+scalar decoder transfer due
+
+LEARNER ANSWER (verbatim):
+
+```text
+None
+```
+
+LEARNER CONFIDENCE FOLLOW-UP (verbatim):
+
+```text
+90
+```
+
+PASS at confidence 90. The learner independently maps scalar JSON `null` through
+`json.loads(...)` to Python `None`. Require one list-based near-transfer before introducing JSON
+Boolean spelling.
+
+JSON-NULL LIST TRANSFER (exact):
+
+```text
+decoded = json.loads('["ready", null]')
+value = decoded[1]
+
+What exact Python value is stored in value?
+Confidence =
+```
+
+RECOVERY STATUS:
+list-based null transfer due
+
+LEARNER ANSWER (verbatim):
+
+```text
+None
+```
+
+LEARNER CONFIDENCE FOLLOW-UP (verbatim):
+
+```text
+90
+```
+
+PASS at confidence 90. The learner transfers the mapping into a decoded list and selects the
+`None` element correctly. JSON `null` -> Python `None` is recovered across scalar and collection
+contexts. Introduce Boolean spelling as one scalar mapping.
+
+JSON-BOOLEAN MICRO-PROMPT (exact):
+
+```text
+value = json.loads("true")
+
+After json.loads finishes:
+What exact Python value is stored in value?
+What is its Python type?
+Confidence =
+```
+
+RECOVERY STATUS:
+JSON Boolean mapping due
+
+LEARNER ANSWER (verbatim):
+
+```text
+true
+string&#x20;
+it is not upper case T nice try 90
+```
+
+INCORRECT at confidence 90. JSON uses lowercase `true`, but `json.loads(...)` maps that JSON value
+to Python `True`, whose type is `bool`, not `str`. The answer appears to preserve both the input
+spelling and the input container type rather than reading the decoded value. Primary blocker:
+Python Boolean spelling/type before recombining it with decoding. Descend to ordinary executable
+Python with no JSON string or decoder.
+
+PYTHON-BOOLEAN R0 PROMPT (exact):
+
+```text
+value = True
+
+What exact Python value is stored in value?
+What is its Python type?
+Confidence =
+```
+
+RECOVERY STATUS:
+Python Boolean recognition due
+
+LEARNER BLOCKER DIAGNOSIS (verbatim):
+
+```text
+the blocker is that i do not know the cases for json decoding to python
+```
+
+ACCEPTED. The blocker is broader than ordinary Python Boolean syntax: the learner does not yet know
+the JSON-to-Python mapping set. Entered worked-reference mode and supplied the compact mappings for
+object/dict, array/list, string/str, integer/int, decimal/float, true/True-bool,
+false/False-bool, and null/None-NoneType. Explained that `json.loads(...)` receives a Python string
+containing JSON text and returns the Python value represented by that text.
+
+TABLE-ASSISTED BOOLEAN PROMPT (exact):
+
+```text
+value = json.loads("false")
+
+Exact value =
+Python type =
+Why isn't it a string?
+Confidence =
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+False
+bool
+becasue whene you decode it loads as a bool
+90
+```
+
+PASS at confidence 90 with the mapping table visible. The learner gives the exact Python spelling,
+type, and decoder rationale. This is scaffolded recognition, not independent recovery. Remove the
+table and require one nested-object Boolean transfer.
+
+JSON-BOOLEAN UNSCAFFOLDED TRANSFER (exact):
+
+```text
+decoded = json.loads('{"enabled": true}')
+value = decoded["enabled"]
+
+What exact Python value is stored in value?
+What is its Python type?
+Confidence =
+```
+
+RECOVERY STATUS:
+unscaffolded Boolean transfer due
+
+LEARNER ANSWER (verbatim):
+
+```text
+true
+bool
+90
+```
+
+PARTIAL at confidence 90. The learner correctly identifies the decoded type as `bool` but retains
+JSON's lowercase spelling. The requested exact Python value is `True` with uppercase `T`. Case is the
+representation distinction under study, not an unrelated transcription detail. Descend to R0
+language-spelling recognition with no decoder or container.
+
+PYTHON-BOOLEAN SPELLING R0 PROMPT (exact):
+
+```text
+Which spelling is Python's Boolean value?
+
+True
+true
+
+Confidence =
+```
+
+RECOVERY STATUS:
+Python Boolean spelling recognition due
+
+LEARNER ANSWER (verbatim):
+
+```text
+True
+```
+
+PASS; confidence omitted. The learner recognizes Python's uppercase Boolean spelling. Return to a
+fresh decoded-list surface with the mapping table removed.
+
+JSON-BOOLEAN LIST TRANSFER (exact):
+
+```text
+decoded = json.loads('[true]')
+value = decoded[0]
+
+What exact Python value is stored in value?
+What is its Python type?
+Confidence =
+```
+
+RECOVERY STATUS:
+fresh decoded Boolean transfer due
+
+LEARNER ANSWER (verbatim):
+
+```text
+True
+bool
+100
+```
+
+PASS at confidence 100. The learner independently maps JSON `true` inside a decoded list to Python
+`True`, type `bool`. Boolean mapping is recovered. Recombine serialized text, object, array, null,
+and Boolean on a fresh target-level structure without the table.
+
+RECOMBINED JSON REPRESENTATION TRACE (exact):
+
+```text
+raw = '{"paths": ["one.py", null], "active": false}'
+decoded = json.loads(raw)
+
+1. Python type of raw =
+2. Python type of decoded =
+3. Type and exact value of decoded["paths"] =
+4. Type and exact value of decoded["paths"][1] =
+5. Type and exact value of decoded["active"] =
+6. Which operation changes representation?
+7. Confidence =
+```
+
+RECOVERY STATUS:
+recombined independent trace due
+
+LEARNER ANSWER (verbatim):
+
+```text
+json text
+dict
+list [one.py, None]
+None type None
+False bool
+loads(raw)
+90
+```
+
+PARTIAL at confidence 90. Correct: the decoded outer value is a dict; `paths` is a list containing
+a Python `None`; `active` is Python `False` of type bool; and `json.loads(raw)` changes
+representation. Precision gaps: `raw` has Python type `str` while "JSON text" describes its
+contents; the exact list retains the string value as `["one.py", None]`; and Python `None` has type
+`NoneType`, not type `None`.
+
+Primary blocker: distinguish an exact value from the name of its Python type. Remove JSON and ask
+about one ordinary Python value.
+
+VALUE-VERSUS-TYPE MICRO-PROMPT (exact):
+
+```text
+value = None
+
+Exact value stored in value =
+Python type of value =
+Confidence =
+```
+
+RECOVERY STATUS:
+value-versus-type precision due
+
+LEARNER ANSWER (verbatim):
+
+```text
+None
+None type
+90
+```
+
+PASS in concept at confidence 90. The learner separates value `None` from its type, written as
+"None type"; Python's exact type name is `NoneType`. The spacing/name transcription does not block
+this gate under the learner's standing rule. Require one fresh Boolean value/type transfer.
+
+VALUE-VERSUS-TYPE NEAR-TRANSFER (exact):
+
+```text
+value = False
+
+Exact value stored in value =
+Python type of value =
+Confidence =
+```
+
+RECOVERY STATUS:
+near-transfer due
 
 LEARNER ANSWER (verbatim):
 
@@ -38462,3 +38927,626 @@ Confidence =
 
 RECOVERY STATUS:
 near-transfer due
+
+CHRONOLOGICAL CONTINUATION — JSON REPRESENTATION COMPLETION:
+
+The detailed intermediate prompts and answers for EV-P8-JSON-REPRESENTATION-355 were inserted near
+their related remediation anchors above. This continuation records the final recovery sequence in
+actual interaction order.
+
+LEARNER RECOVERY STATEMENT (verbatim):
+
+```text
+so it gives us data that is ready to be validated
+```
+
+PASS; confidence omitted. Decoding is now distinguished from validation.
+
+NEAR-TRANSFER PROMPT (verbatim):
+
+```text
+A registration API receives:
+
+raw = '{"age": -4}'
+payload = json.loads(raw)
+
+1. Did representation decoding succeed?
+2. Did the registration contract necessarily succeed?
+3. What step is still required before the application acts on age?
+4. Confidence =
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+yes
+no
+still need to validate the data ans make sure it is the right field and that nothing is missing etc
+90
+```
+
+PASS at confidence 90. The learner transfers decoding-versus-validation to a registration API and
+names required-field and missing-data checks.
+
+FINAL SHARED-PRINCIPLE PROMPT (verbatim):
+
+```text
+JSON decoding =
+Domain validation =
+Why are they separate?
+Confidence =
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+Translates the JSON text into data ready for validation
+taking the data and making sure it is what we expect&#x20;
+because one responsilbity is decoding and validation iis the other responsilbity&#x20;
+80
+```
+
+PASS at confidence 80. Deep principle: serialization decoding changes representation; domain
+validation separately decides whether the decoded values satisfy the consuming application's
+contract. The same distinction held across BuildLens, thermostat, and registration surfaces.
+
+RECOVERY STATUS:
+EV-P8-JSON-REPRESENTATION-355 complete; delayed retrieval still required before mastery
+
+## EV-P8-LLM-TOKENS-356 — smallest LLM pipeline prerequisite
+
+DATE / PHASE / GATE:
+2026-09-09 / Phase 8 / missing LLM-foundation side lesson
+
+IMPLEMENTATION TRIGGER:
+BuildLens observes model-proposed tool use, but the curriculum audit found that the earlier lesson
+started at model output and skipped text -> tokens -> model/context -> generation.
+
+ACADEMIC SOURCE:
+CMU-11667-LLM — high-level language-model fundamentals and inference/output; no transformer
+mathematics required.
+
+PROBLEM — VERBATIM:
+
+```text
+A user sends:
+
+Rename the file
+
+Before the model generates output, a tokenizer processes that text.
+
+1. What do you think a token represents?
+2. Is one written word always exactly one token? Why or why not?
+3. What reaches the model: raw intention, tokens representing the text, or an executed file change?
+4. Confidence =
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+each character in each word
+i have no idea
+no idea
+```
+
+INCORRECT/UNKNOWN; confidence omitted. This is a genuine new prerequisite, not a lapse. Correct model
+supplied after commitment: a token is a model-input unit represented by an ID and may correspond to
+a word, subword, punctuation, whitespace, or sometimes a character; one word is not guaranteed to
+equal one token. The model receives token IDs representing text, not raw intention or an executed
+effect.
+
+PRIMARY BLOCKER:
+TOKEN_REPRESENTATION
+
+SCAFFOLD RUNG:
+R0 worked mapping with one text string and one supplied token ID.
+
+TOY-TOKEN MICRO-PROMPT (exact):
+
+```text
+A toy tokenizer defines:
+
+"cat" -> token ID [17]
+
+When the text "cat" is sent toward the model, which representation does the model receive in this
+toy example?
+
+A. the user's private intention
+B. the token ID sequence [17]
+C. an action already executed
+
+Why?
+Confidence =
+```
+
+RECOVERY STATUS:
+token representation recognition due
+
+LEARNER ANSWER (verbatim):
+
+```text
+B
+no idea
+```
+
+PARTIAL; confidence omitted. The learner selects the token ID sequence correctly but cannot yet
+explain the mapping. Supplied only the one-concept chain:
+
+```text
+"cat" -> tokenizer -> [17] -> model
+```
+
+The tokenizer maps input text into token IDs the model operates on. Private intention is not
+directly transferred and no action has occurred. In worked-example rescue mode, require the learner
+to explain this supplied chain before completing a missing token step.
+
+TOY-TOKEN CHAIN TEACH-BACK (exact):
+
+```text
+"cat" -> tokenizer -> [17] -> model
+
+In your own words, what did the tokenizer receive, what did it produce, and what reached the model?
+Confidence =
+```
+
+RECOVERY STATUS:
+worked-chain teach-back due
+
+LEARNER BLOCKER STATEMENT (verbatim):
+
+```text
+i do not know what a tokenizer is
+```
+
+The unknown term is the primary blocker. Enter concept-only help mode and stop the surrounding LLM
+pipeline. Defined a tokenizer as a deterministic preprocessing program that takes text, divides it
+into pieces using fixed rules, and maps those pieces to numeric IDs. It is not the language model and
+does not execute tools. Recast it as a familiar function call.
+
+TOKENIZER INPUT-OUTPUT R0 PROMPT (exact):
+
+```text
+token_ids = tokenizer("cat")
+# token_ids becomes [17]
+
+What is the tokenizer's input?
+What is the tokenizer's output?
+Confidence =
+```
+
+RECOVERY STATUS:
+tokenizer meaning/input-output due
+
+LEARNER ANSWER (verbatim):
+
+```text
+cat
+[17]
+80
+```
+
+PASS at confidence 80. The learner identifies the tokenizer's text input and token-ID-list output.
+Continue worked-example rescue by requiring one missing output from a supplied mapping.
+
+TOY-TOKEN MISSING-STEP PROMPT (exact):
+
+```text
+A toy tokenizer defines:
+
+"dog" -> [23]
+
+token_ids = tokenizer("dog")
+
+What exact value is stored in token_ids?
+What reaches the model next?
+Confidence =
+```
+
+RECOVERY STATUS:
+one missing tokenizer step due
+
+LEARNER ANSWER (verbatim):
+
+```text
+[23]
+no idea
+```
+
+PARTIAL; confidence omitted. The learner correctly evaluates the tokenizer result as `[23]` but
+does not follow that value into the model input. Supplied after commitment: in this simplified
+pipeline, the same token-ID sequence reaches the model. Primary blocker is downstream value handoff,
+not tokenization. Remove the tokenizer and use one assignment.
+
+MODEL-INPUT HANDOFF R1 PROMPT (exact):
+
+```text
+token_ids = [23]
+model_input = token_ids
+
+What exact value is stored in model_input?
+Confidence =
+```
+
+RECOVERY STATUS:
+downstream value handoff due
+
+LEARNER ANSWER (verbatim):
+
+```text
+[23]
+90
+```
+
+PASS at confidence 90. The learner follows the token-ID sequence unchanged into `model_input`.
+Increase complexity by one feature: one written word mapped to multiple tokens by a supplied toy
+tokenizer. Do not ask for real tokenizer IDs.
+
+SUBWORD TOKEN TRANSFER (exact):
+
+```text
+A toy tokenizer defines:
+
+"unhappy" -> [5, 8]
+
+token_ids = tokenizer("unhappy")
+model_input = token_ids
+
+1. What exact value reaches the model?
+2. How many written words were supplied?
+3. How many tokens were supplied?
+4. Does one word always equal one token? Explain from this example.
+5. Confidence =
+```
+
+RECOVERY STATUS:
+subword/token-boundary transfer due
+
+LEARNER ANSWER (verbatim):
+
+```text
+[5, 8]
+one
+2&#x20;
+no if the word is big enough it has multiple tokens
+90
+```
+
+PASS at confidence 90. The learner follows `[5, 8]` into the model and distinguishes one written
+word from two tokens. Precision correction: token splitting is not a simple word-length threshold;
+it depends on the tokenizer's vocabulary and rules, so word and token boundaries are not guaranteed
+to match. Token representation prerequisite is held on the toy surface.
+
+CONTEXT BASELINE PROMPT (exact):
+
+```text
+Before answering, a model is given the current prompt plus some context selected by the surrounding
+system.
+
+For each item, say whether the model can use it only if the surrounding system puts it into context:
+
+A. an earlier conversation message
+B. a tool's description
+C. the contents of a project file
+D. every private thought the user had but never expressed
+
+Then explain what "context" means in your own words.
+Confidence =
+```
+
+RECOVERY STATUS:
+LLM context baseline due
+
+LEARNER CHALLENGE BEFORE ANSWERING (verbatim):
+
+```text
+but it is a higher prorabaility that bigger words will have multiple tokens vs cat
+```
+
+ACCEPTED WITH BOUNDARY. As a heuristic, longer or less-common words generally have more
+opportunities to split than a short common word such as cat. It is not a rule that predicts an exact
+tokenization; tokenizer vocabulary and rules remain authoritative.
+
+LEARNER ANSWER (verbatim):
+
+```text
+A, D
+context measn the information that surrounds the message or text&#x20;
+```
+
+PARTIAL; confidence omitted. The learner gives a useful general definition of context but
+misclassifies visibility. Earlier messages, tool descriptions, and file contents can be used only
+when the surrounding system selects and includes them. An unexpressed private thought has no captured
+representation for the system to include. Primary blocker: model-visible input versus information
+that exists outside the model.
+
+EXPLICIT-CONTEXT VISIBILITY MICRO-PROMPT (exact):
+
+```text
+The surrounding system constructs this context:
+
+context = [current_prompt, tool_description]
+
+It does not read project_file, and the user never expresses private_thought.
+
+Which items can the model use in this call?
+
+current_prompt
+tool_description
+project_file
+private_thought
+
+Why?
+Confidence =
+```
+
+RECOVERY STATUS:
+context visibility due
+
+LEARNER ANSWER (verbatim):
+
+```text
+current prompt and tool description, those are the 2 pieces of information in the context&#x20;
+90
+```
+
+PASS at confidence 90. The learner distinguishes the two represented/included inputs from omitted
+file contents and an uncaptured thought. Require one BuildLens transfer before assembling the full
+pipeline.
+
+BUILDLENS CONTEXT TRANSFER (exact):
+
+```text
+For one model call, the surrounding system includes:
+
+- the current user prompt
+- the AGENTS.md instructions
+- the Edit tool description
+
+It has not read CURRENT_STATE.md and does not include that file's contents.
+
+Which of those four information sources can the model use in this call?
+Why can't the existence of CURRENT_STATE.md on disk be enough by itself?
+Confidence =
+```
+
+RECOVERY STATUS:
+BuildLens context transfer due
+
+LEARNER ANSWER (verbatim):
+
+```text
+the current user prompt agents.md edit tool
+because it needs to be read in as context os it is avaiable to the model&#x20;
+90
+```
+
+PASS at confidence 90. The learner correctly identifies the three included sources and explains
+that disk existence alone is insufficient: contents must be read and represented in model-visible
+context. Token and context prerequisites are now ready to compose.
+
+FULL LLM-TO-EFFECT PIPELINE PREDICTION (exact):
+
+```text
+Put these seven stages in execution order:
+
+A. deterministic validation and permission checks
+B. bytes on disk change
+C. model uses tokenized input plus context
+D. tool executes
+E. tokenizer maps input text to token IDs
+F. model generates a tool proposal
+G. user supplies text
+
+Then answer:
+
+1. Which stage is probabilistic?
+2. Which stages occur after the model's output but before disk truth changes?
+3. If permission denies the proposal, which stages do not occur?
+4. Confidence =
+```
+
+RECOVERY STATUS:
+full pipeline prediction due
+
+LEARNER ANSWER (verbatim):
+
+```text
+G&#x20;
+E
+C
+F
+A
+D
+B
+
+F is proabalistic
+A
+B
+60
+```
+
+STRONG PARTIAL at confidence 60. The complete seven-stage order is correct, and model generation
+stage F is correctly classified as probabilistic. Two omissions share one blocker: after model
+output and before disk change, both validation A and execution D occur; denial at A prevents both
+execution D and disk change B. The learner tracked the final effect but omitted the immediately
+preceding execution stage from both answers.
+
+PRIMARY BLOCKER:
+TOOL_EXECUTION_VERSUS_EFFECT
+
+FOUR-STAGE SUFFIX MICRO-PROMPT (exact):
+
+```text
+proposal -> permission check -> tool execution -> bytes change
+
+Permission check returns DENIED.
+
+For each later stage, answer occurs or does not occur:
+
+tool execution =
+bytes change =
+
+Why?
+Confidence =
+```
+
+RECOVERY STATUS:
+execution-versus-effect suffix due
+
+LEARNER ANSWER (verbatim):
+
+```text
+does not occur
+does not occur&#x20;
+because everything after permission check is ommited since it was denied
+90
+```
+
+PASS at confidence 90. The learner correctly states that denial stops both tool execution and the
+subsequent bytes change while the earlier proposal still exists. Require one allowed-path
+near-transfer before returning to composition.
+
+ALLOWED-PATH NEAR-TRANSFER (exact):
+
+```text
+proposal -> permission check -> tool execution -> bytes change
+
+Permission check returns ALLOWED, and the tool executes successfully.
+
+tool execution = occurs / does not occur
+bytes change = occurs / does not occur
+Which of the four stages first makes the proposed file change real?
+Confidence =
+```
+
+RECOVERY STATUS:
+allowed-path transfer due
+
+LEARNER ANSWER (verbatim):
+
+```text
+occurs&#x20;
+occurs
+tool execution&#x20;
+90
+```
+
+PARTIAL at confidence 90. Both occurrence predictions are correct, but the learner says tool
+execution first makes the proposed file change real. Corrected after commitment: execution can begin
+and fail before the intended effect; the file change becomes real when bytes change.
+
+EXECUTION-WITHOUT-EFFECT MICRO-PROMPT (exact):
+
+```text
+The permission check allows an Edit tool.
+
+The tool starts executing, opens the file, then crashes before writing.
+
+Did tool execution occur?
+Did bytes change?
+Did the proposed file change become real?
+Confidence =
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+yes
+no
+no
+90
+```
+
+PASS at confidence 90. The learner distinguishes attempted execution from completed state change:
+execution occurred, bytes did not change, and the proposed edit did not become real. Return to one
+fresh target-level BuildLens composition.
+
+FRESH BUILDLENS LLM-PIPELINE TARGET (exact):
+
+```text
+A user asks the model to replace a line in app.py. The prompt and Edit-tool description are included
+in context. The tokenizer produces token IDs. The model generates an Edit proposal. Permission
+allows it. The tool executes successfully, and app.py's bytes change.
+
+1. What representation reaches the model before generation?
+2. Which step is probabilistic?
+3. Which steps after generation are deterministic control/effect steps?
+4. At what point does the proposed edit become authoritative file state?
+5. If permission denied it instead, would the proposal still exist, and would app.py change?
+6. Confidence =
+```
+
+RECOVERY STATUS:
+fresh target-level LLM pipeline due
+
+LEARNER ANSWER (verbatim):
+
+```text
+occurs&#x20;
+occurs
+tool execution&#x20;
+90
+```
+
+PARTIAL at confidence 90. Both occurrence answers are correct. The learner says tool execution first
+makes the proposed change real, but execution can begin and fail before writing. The file-state
+effect becomes real when bytes change. Primary blocker: operation occurrence versus completed
+external effect.
+
+EXECUTION-WITHOUT-EFFECT MICRO-PROMPT (exact):
+
+```text
+The permission check allows an Edit tool.
+The tool starts executing, opens the file, then crashes before writing.
+
+Did tool execution occur?
+Did bytes change?
+Did the proposed file change become real?
+Confidence =
+```
+
+RECOVERY STATUS:
+operation-versus-effect distinction due
+
+## CHRONOLOGICAL CONTINUATION — FRESH LLM PIPELINE TARGET
+
+This continuation corrects the misplaced learner answer under the earlier fresh target while
+preserving the historical text above unchanged.
+
+LEARNER ANSWER (verbatim):
+
+```text
+the user input and the edit tool description&#x20;
+the model generating an eidt proposal
+the tool execution and the bytes change, the only proabalistic step is the model generation&#x20;
+at the end when the app.py's mytes change
+not sure and app.py would not change
+70
+```
+
+STRONG PARTIAL at confidence 70. The learner correctly identifies probabilistic generation, the
+bytes change as authoritative file state, and that denial prevents `app.py` from changing. Two gaps
+remain: the model receives token representations of the included prompt/context rather than raw
+source directly, and deterministic validation/permission was omitted from the post-generation
+control path. The learner is unsure whether an already-generated proposal continues to exist after
+a later denial.
+
+PRIMARY BLOCKER:
+PROPOSAL_EXISTENCE_VERSUS_AUTHORIZED_EFFECT
+
+DENIED-PROPOSAL MICRO-PROMPT FOR NEXT SESSION (exact):
+
+```text
+Step 1: the model generates the text "Edit app.py".
+Step 2: the permission check denies it.
+
+After step 2:
+Did the model-generated text exist?
+Did the Edit tool execute?
+Did app.py change?
+Why?
+Confidence =
+```
+
+RECOVERY STATUS:
+resume with denied-proposal existence versus authorized effect; Write implementation remains complete

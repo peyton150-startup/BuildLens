@@ -2668,3 +2668,229 @@ recognition, then near-transfer to `json.loads("null")`. Next architecture reset
 time or a major transition. Major/deep counter remains 1/2. Next implementation step: none until the
 curriculum catch-up resumes; do not expand the adapter. Files the learner should next be able to
 teach remain `claude_adapter.py` and `test_claude_adapter.py`.
+
+SESSION 2026-09-09 CONTINUED — JSON REMEDIATION RESUMED.
+
+The learner correctly identified the value in ordinary Python `value = None` as `None`; confidence
+was omitted. Exact restart point: the scalar `json.loads("null")` near-transfer appended to the
+ledger. If correct, require a list-based transfer, then introduce the JSON-Boolean mapping before
+recombining the original object/list/null/boolean exercise.
+
+The learner independently passed the scalar decoder transfer: `json.loads("null")` produces Python
+`None`; confidence was omitted. Exact restart point is the list-based null transfer appended to the
+ledger. If correct, mark the null mapping recovered and introduce one JSON `true` -> Python Boolean
+exercise.
+
+The learner supplied confidence 90 for the preceding scalar `null` attempt, then passed the
+list-based transfer by selecting Python `None`; confidence for the list answer was omitted. The JSON
+`null` -> Python `None` mapping is now recovered in two contexts.
+
+Exact restart point: the scalar JSON `true` mapping prompt appended to the ledger. Require exact
+Python value and type, then transfer with `false` before recombining the original structure.
+
+The learner supplied confidence 90 for the list-based `None` answer. On the scalar JSON Boolean
+prompt they answered lowercase `true`, type string, and explicitly rejected uppercase `T` at
+confidence 90. Correct model supplied after commitment: decoded JSON `true` becomes Python `True`
+of type `bool`. Primary blocker is ordinary Python Boolean spelling/type, followed by distinguishing
+the decoder's input string from its output value.
+
+Exact restart point: the R0 `value = True` prompt appended to the ledger. After recovery, use an
+ordinary Python Boolean near-transfer, then return to `json.loads("true")` and later `false`.
+
+The learner correctly diagnosed the broader blocker: they did not know the JSON-to-Python mapping
+cases. A compact worked-reference table was supplied. With it visible, they correctly predicted
+`json.loads("false")` as Python `False`, type `bool`, and explained that decoding interprets the
+literal rather than preserving it as a string, at confidence 90.
+
+This is scaffolded evidence only. Exact restart point: the unscaffolded nested-object JSON `true`
+transfer appended to the ledger. If correct, recombine object/list/null/boolean in a fresh structure
+and ask for the deep representation-change principle before applying it to BuildLens.
+
+On the unscaffolded nested-object Boolean transfer, the learner answered lowercase `true`, type
+`bool`, at confidence 90. Type mapping is held; exact language spelling is not. This capitalization
+is the JSON-versus-Python representation distinction itself, so it remains graded despite the
+standing tolerance for unrelated identifier transcription.
+
+Exact restart point: the R0 `True` versus `true` Python-spelling recognition prompt appended to the
+ledger. After recognition, require a fresh scalar or list Boolean transfer without the mapping table.
+
+The learner correctly recognized Python's Boolean spelling as `True`; confidence was omitted. Exact
+restart point is the fresh decoded-list Boolean transfer appended to the ledger. If correct, mark
+Boolean mapping recovered, recombine the JSON structure, and ask for the shared representation
+principle.
+
+The learner passed the fresh decoded-list Boolean transfer at confidence 100: exact Python value
+`True`, type `bool`. Boolean mapping is independently recovered. Exact restart point is the fresh
+recombined JSON representation trace appended to the ledger. If correct, apply the boundary to a
+BuildLens hook payload, transfer it to a different domain, and ask for the shared principle.
+
+The recombined JSON trace was a strong PARTIAL at confidence 90. The learner correctly recovered
+dict/list, decoded `None`, decoded `False`/bool, and `json.loads(raw)` as the representation change.
+Gaps: called `raw` "JSON text" instead of its Python type `str`; omitted quotes around the retained
+string element; and named the type of `None` as `None` rather than `NoneType`.
+
+Primary blocker is value versus type. Exact restart point: the ordinary-Python `value = None`
+micro-prompt appended to the ledger. After recovery, use one near-transfer and then reissue a shorter
+recombined JSON trace targeting only the three precision gaps.
+
+The learner passed the ordinary-Python value/type distinction at confidence 90: value `None`, type
+concept `NoneType`, written as "None type." Exact naming whitespace is treated as transcription, not
+a blocker. Exact restart point: the `False`/`bool` value-type near-transfer appended to the ledger.
+If correct, reissue only the three unresolved precision points from the combined JSON trace.
+
+The learner called the additional value/type transfer a nitpick and directed the session onward.
+Close the JSON mapping lesson from cumulative substantive evidence rather than exact formatting:
+serialized JSON text as Python str; `json.loads` as the representation change; object/array to
+dict/list; null to None; and JSON Booleans to Python bool values.
+
+Exact restart point: the BuildLens JSON-boundary application appended to the ledger. It asks what
+representation enters `parse_post_tool_use` and whether successful decoding alone establishes the
+PostToolUse contract. After application and transfer, record the shared principle and proceed to the
+missing LLM pipeline lesson.
+
+The BuildLens JSON-boundary application passed at confidence 90. The learner identified raw JSON
+text/Python str, decoded dict, and that `parse_post_tool_use` receives the decoded payload. They also
+correctly denied that successful decoding proves the PostToolUse contract. Clarified that
+`json.loads` itself already produces Python values; validation judges the BuildLens contract.
+
+The learner requested the previously skipped fresh value/type transfer if the concept was substantive.
+Clarified that value-versus-type matters; only spacing in `NoneType` was transcription. Exact restart
+point: the `value = 3.5` transfer appended to the ledger. After it, complete one non-BuildLens JSON
+boundary transfer and shared principle before starting the LLM pipeline lesson.
+
+The requested value/type transfer passed at confidence 80: value `3.5`, type `float`. The learner's
+explanation instead asked about JSON decimal-to-Python-float mapping; confirmed that adjacent point
+and clarified value as the particular datum versus type as its Python category.
+
+Exact restart point: the thermostat JSON-boundary transfer appended to the ledger. It recombines
+serialized text, decoded numeric value/type, and decoding-versus-domain-validation. After it, ask
+what deep principle the BuildLens and thermostat variants share, then close this side lesson or
+remediate before proceeding to the LLM pipeline.
+
+The thermostat transfer passed at confidence 90. The learner identified decoded value/type and
+correctly stated that decoding translates JSON to Python but does not prove domain safety. Clarified
+that `raw` has Python type `str` even when its contents are JSON text, and that temperature safety
+also requires units and an allowed-range contract.
+
+Exact restart point: ask the shared principle between the BuildLens hook and thermostat variants,
+using the prompt appended to the ledger. If independently stated, close the JSON representation side
+lesson and begin the missing LLM pipeline lesson anchored in CMU-11667-LLM.
+
+The shared-principle answer was PARTIAL with confidence omitted. The learner correctly identified
+JSON-text-to-Python-data translation but called the result "actionable," conflating successful
+decoding with satisfaction of a domain contract despite correctly separating them in each concrete
+variant. Primary blocker is decoded representation versus validated/actionable input.
+
+Exact restart point: the A/B decoded-versus-validated micro-prompt appended to the ledger. After a
+correct explanation, use one fresh near-transfer and return to the shared principle without the
+wording scaffold.
+
+JSON REPRESENTATION SIDE LESSON COMPLETE at confidence 80, with delayed retrieval still owed before
+mastery. The learner recovered that decoding produces Python data ready for validation, transferred
+the distinction to a negative-age registration payload, and stated the shared principle: decoding
+changes representation while domain validation separately checks what the application expects.
+
+Exact restart point: begin the missing Phase 8 LLM pipeline lesson anchored in CMU-11667-LLM. Start
+with the smallest prerequisite—predict what a token represents—before teaching
+text -> tokens -> model/context -> generation -> model output. The Write trace remains suspended.
+
+LLM PIPELINE SIDE LESSON STARTED (`EV-P8-LLM-TOKENS-356`). The learner predicted tokens as each
+character in each word, then reported no model for word/token correspondence or what reaches the
+model; confidence was omitted. This is a new prerequisite. Supplied the high-level model: tokens are
+input units represented by IDs and may align with words, subwords, punctuation, whitespace, or
+characters; word-to-token count is tokenizer-dependent. The model receives token representations,
+not private intention or an executed file change.
+
+Exact restart point: the R0 toy mapping `"cat" -> [17]` appended to the ledger. After recognition,
+use one subword/punctuation near-transfer before assembling the full LLM pipeline.
+
+The learner selected `[17]` correctly in the toy-token recognition but could not explain why;
+confidence was omitted. Supplied only the chain `"cat" -> tokenizer -> [17] -> model`. Exact restart
+point is the teach-back of what the tokenizer received, produced, and passed to the model. After the
+teach-back, require one missing token step and then a fresh subword/punctuation transfer.
+
+The learner stated they do not know what a tokenizer is. Stop the larger pipeline and treat the term
+itself as the prerequisite. Defined it as deterministic preprocessing that maps text pieces to
+numeric token IDs, not as the model or a tool executor. Exact restart point: the R0 familiar-function
+form `token_ids = tokenizer("cat")`, asking only for input and output.
+
+The learner passed the tokenizer input/output micro-problem at confidence 80: input text `cat`,
+output token-ID sequence `[17]`. Exact restart point is the supplied `"dog" -> [23]` mapping with one
+missing assignment result. After that, require a fresh mapping showing one word can become multiple
+tokens before rebuilding the pipeline.
+
+The learner correctly evaluated the toy `dog` tokenizer output as `[23]` but did not know what
+reaches the model. Supplied that the same token-ID sequence is handed forward in this simplified
+pipeline. Primary blocker is following a value through the next assignment. Exact restart point:
+`token_ids = [23]; model_input = token_ids`, asking for `model_input`.
+
+The learner passed the downstream handoff at confidence 90: `[23]` remains `[23]` when assigned to
+`model_input`. Exact restart point is the supplied `"unhappy" -> [5, 8]` toy tokenizer transfer. It
+tests that one written word may map to multiple tokens without requiring knowledge of any real
+tokenizer's vocabulary or IDs.
+
+The learner passed the subword toy transfer at confidence 90: one written word, two tokens, and the
+exact ID sequence reaching the model. Clarified that splitting depends on tokenizer vocabulary and
+rules, not merely word length. Exact restart point: the LLM-context baseline prompt appended to the
+ledger. Establish what the surrounding system must make available before assembling the complete
+text/token/context/generation/output pipeline.
+
+The learner correctly challenged that longer/less-common words are probabilistically more likely to
+split than a short common word, while the no-guarantee boundary remains. On the context baseline they
+selected A and D and defined context as surrounding information. PARTIAL: the definition is useful,
+but visibility is not held. Earlier messages, tool descriptions, and files require inclusion by the
+surrounding system; unexpressed thoughts have no captured representation to include.
+
+Exact restart point: the explicit two-item context-list prompt appended to the ledger. After the
+learner distinguishes included from merely existing information, require a fresh BuildLens context
+transfer before assembling the generation pipeline.
+
+The learner passed the explicit context-list visibility problem at confidence 90: only the current
+prompt and tool description can be used because they are the represented items included in the
+call. Exact restart point: the BuildLens context transfer appended to the ledger, distinguishing
+included prompt/instructions/tool description from CURRENT_STATE.md merely existing on disk.
+
+The learner passed the BuildLens context transfer at confidence 90: prompt, AGENTS.md, and Edit-tool
+description are usable because they were included; CURRENT_STATE.md must be read and represented in
+context before the model can use it. Token and context prerequisites are ready to compose.
+
+Exact restart point: the seven-stage LLM-to-disk pipeline prediction appended to the ledger. Ask for
+execution order, probabilistic generation, post-output deterministic stages, and the denied-proposal
+path. Adapt down by one relation if composition fails.
+
+The learner produced the complete seven-stage LLM-to-disk order correctly and identified model
+generation as probabilistic at confidence 60. STRONG PARTIAL: they named validation alone between
+proposal and disk change, omitting tool execution; on denial they named disk change alone as absent,
+again omitting tool execution. Primary blocker is execution versus its resulting effect.
+
+Exact restart point: the four-stage suffix with permission DENIED appended to the ledger. Require
+occurs/does-not-occur for tool execution and bytes change, then use an allowed-path near-transfer
+before returning to the full pipeline.
+
+The learner passed the denied-path reduction at confidence 90: both tool execution and bytes change
+do not occur because denial stops the later chain; the earlier proposal remains. Exact restart point
+is the allowed-and-successful near-transfer appended to the ledger. After it, return to a fresh
+composed pipeline and then transfer model-output-versus-state to a familiar non-finance domain.
+
+The allowed-path near-transfer was PARTIAL at confidence 90: execution and bytes-change occurrence
+were correct, but the learner initially treated execution start as the first real file state. A
+crash-before-write example repaired the distinction at confidence 90: execution occurred, bytes did
+not change, so the proposal never became real.
+
+Exact restart point: the fresh BuildLens LLM-pipeline target appended to the ledger. If correct,
+transfer the same proposal/control/effect/authority principle to a familiar non-finance domain and
+ask what both variants share.
+
+The allowed-path transfer was PARTIAL at confidence 90. The learner correctly said tool execution
+and bytes change both occur, but located the moment the proposed change becomes real at tool
+execution rather than the bytes effect. Primary blocker is an operation starting versus its external
+effect completing.
+
+Exact restart point: the allowed Edit tool that crashes after opening but before writing, appended to
+the ledger. Ask whether execution occurred, bytes changed, and the proposed change became real.
+
+SESSION HANDOFF — 2026-09-09:
+Phase 8 Write support is implemented and pushed; resume the LLM-pipeline side lesson with the exact
+denied-proposal micro-prompt at the end of `learning/LEARNING_LEDGER.md`, where the remaining blocker
+is distinguishing an existing model proposal from permission, execution, and authoritative file
+effect.
