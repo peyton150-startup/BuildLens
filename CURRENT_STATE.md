@@ -2504,3 +2504,167 @@ the required reading in AGENTS.md order. Keep worktree identity, PreToolUse, Sto
 and persistence out of this patch. After implementation, tests, and learner gate pass, commit and
 push and create a new Codex task with exactly one sentence of handoff context, per the learner's
 request.
+
+SESSION 2026-09-09 — VALID-WRITE TEST PREDICTION PARTIAL.
+
+The learner answered the resumed valid-Write prompt at confidence 90. They correctly predicted the
+current unsupported-tool `ValueError`, correctly said the test compares actual versus expected, and
+then clarified that the future result returns the three `ClaimedEdit` fields. They still did not
+construct the requested concrete `ClaimedEdit(...)` expected value. Record this as
+DATA_REPRESENTATION, not a return-flow or comparison-role failure; those other parts were correct.
+
+Exact restart point: ask the `DeliveryClaim(...)` R1 micro-prompt appended to
+`learning/LEARNING_LEDGER.md`. If correct, give one fresh non-identical named-record construction,
+then return to a fresh valid-Write target case. Do not design malformed-Write or Bash/unsupported
+regression cases and do not implement Write support until the target-level expected value is held.
+
+The learner requested clarification about whether the R1 answer should be a payload. After
+syntax-only support using an unrelated `Book(...)` example, they independently constructed the
+complete `DeliveryClaim(...)` value with all three fields and values. Concrete expected-value
+construction passed. A terminology correction was supplied: a class call constructs an instance;
+it is not a namespace object. Exact restart point is the fresh `ScanClaim(...)` transfer appended to
+the ledger. If it passes, return to a fresh valid-Write target case with support removed.
+
+The learner passed the fresh `ScanClaim(...)` construction independently at confidence 90. The
+DATA_REPRESENTATION remediation has reached near-transfer. Exact restart point is now the fresh
+valid-Write target prompt using `session-14` and `draft.md`, appended to the ledger. Require all four
+fields before designing malformed-Write and regression cases.
+
+The fresh target response was PARTIAL. The learner chose `ClaimedEdit` and recognizable payload
+values, but wrote an invalid Python expression with unquoted text, an identifier containing a space,
+and altered field names. They also omitted the current outcome, comparison, and confidence. Treat
+identifier transcription as ungraded, but require executable assertion syntax. Exact restart point:
+the R0 `Book(title=...)` string-literal prompt appended to the ledger. After recovery, reissue a fresh
+complete valid-Write target prompt; malformed and regression design remain paused.
+
+The learner supplied confidence 70 but did not answer the string-literal micro-prompt, then explicitly
+said "nitpcik move on." Honor that direction and the standing no-grading rule for identifier
+transcription. The valid-Write design is accepted from cumulative evidence, not recorded as a clean
+final target expression: current `ValueError`, actual-versus-expected comparison, two independent
+analogous record constructions, and selection of the three target values were all demonstrated.
+
+Exact restart point: the combined malformed-Write, valid-Bash regression, and unsupported-tool
+regression design prompt appended to `learning/LEARNING_LEDGER.md`. Require exact `ValueError`
+messages and name the realistic production bug each test catches. No Write test or production code
+has been added yet.
+
+The learner's malformed/regression design was PARTIAL at confidence 60. They correctly classified
+all three outcomes: malformed Write and unsupported Read raise `ValueError`; valid Bash returns
+`None`. Both requested error-message literals were inexact. The malformed test purpose was broadened
+from missing `file_path` to all required fields; the Bash purpose did not name a concrete break; and
+the Read purpose incorrectly invoked authorization, persistence, and UI behavior outside this
+parser's boundary.
+
+Primary blocker is naming the concrete production break a regression catches. Exact restart point:
+the Bash mutation micro-prompt appended to `learning/LEARNING_LEDGER.md`. After it passes, require a
+fresh exact-message transfer, then return to the remaining malformed/unsupported test designs. No
+test or production code has been added.
+
+The learner answered the Bash mutation prompt incorrectly at confidence 80: they correctly named
+the mutated actual result as a `ClaimedEdit`, but said the regression would pass despite expecting
+`None`. The actual-value identification is held; the blocker is mapping unequal actual and expected
+values to test failure, resurfacing a recently remediated comparison concept.
+
+Exact restart point: the R1 `actual is expected` micro-prompt appended to the ledger. Remove parser,
+payload, branch, and dataclass-field noise until the learner maps `False` to a failing requirement;
+then use one near-transfer before returning to the Bash regression design.
+
+The learner passed the reduced identity-comparison problem at confidence 90: unequal actual and
+expected values produce `False`, so a test requiring `True` fails. Exact restart point is the fresh
+numeric equality near-transfer appended to the ledger. If correct, return immediately to a fresh
+Bash regression mutation and then continue exact-message/test-purpose recovery.
+
+The learner passed the numeric equality near-transfer and spontaneously connected it to the real
+Bash regression: any actual value other than expected `None` makes the test fail. Confidence was
+omitted. The assertion-result remediation is complete.
+
+Exact restart point: the unrelated `target_path` exact-message micro-prompt appended to the ledger.
+After exact concatenation and one fresh transfer pass, return to malformed Write and unsupported
+Read error literals and their concrete protected breaks.
+
+The learner called exact-message construction a nitpick and explicitly directed the session to move
+on. Close that remediation by learner direction; do not make spelling/punctuation recall another
+gate in this slice. Exact literals remain an executable test requirement. Proceed test-first with
+two new failing behaviors (valid Write and Write missing `file_path`) while retaining the existing
+valid-Bash and unsupported-Read tests as regressions. No production code has changed yet.
+
+WRITE SUPPORT IS IMPLEMENTED BUT THE SLICE IS NOT YET CLOSED.
+
+Two tests were added first and each was observed failing for the intended reason. Malformed Write
+expected the local missing-`file_path` error but received `unsupported tool_name: Write`. Valid Write
+raised that same unsupported-tool error instead of returning `ClaimedEdit`. The minimal production
+change replaced `tool_name != "Edit"` with `tool_name not in ("Edit", "Write")`.
+
+`python test_claude_adapter.py` passes. A broader run of all eight `test_*.py` scripts also passes,
+including the pre-existing valid-Bash and unsupported-Read regressions. The patch does not consume
+Write `content` and does not introduce worktree identity, PreToolUse, Stop reconciliation,
+enrichment, or persistence.
+
+Exact restart point: the fresh valid-Write four-point trace appended to the learning ledger. After
+the trace, require explanation, a non-identical transfer, and the shared principle before closing
+this implementation slice. Phase 8 remains open; do not commit or push yet.
+
+CURRICULUM CATCH-UP STARTED before the pending Write trace. `EV-P8-JSON-REPRESENTATION-355` tested
+serialized JSON text versus decoded Python object/list/null/boolean representations. The attempt was
+PARTIAL with confidence omitted. Held: `json.loads(...)` performs the representation change; the
+decoded outer value is a dictionary; `files` becomes a list. Missed: `raw` was classified as a dict
+despite being quoted text; JSON `null` and `true` retained their JSON spellings; and `"app.py"` was
+split at the dot.
+
+Primary blocker is serialized text versus decoded object. Exact restart point: the R0
+`raw = '{"mode": "safe"}'` prompt appended to the ledger. Do not proceed to null/boolean mappings,
+the LLM pipeline, observability, unfamiliar-code review, or the suspended Write trace until this
+small representation distinction passes and transfers.
+
+The learner passed the R0 quoted-JSON distinction: `raw` is a Python string because the complete
+document is in quotes. Confidence was omitted. Exact restart point is the triple-quoted list-shaped
+JSON near-transfer appended to the ledger. If correct, restore `json.loads(...)` and isolate the
+JSON-null-to-Python mapping next.
+
+The learner passed the triple-quoted JSON-text near-transfer. They correctly said the value remains
+undecoded text until loading and may decode to a list, dictionary, or another JSON-mapped Python
+value. Clarified after commitment that triple quotes belong to Python string syntax, not JSON.
+
+Exact restart point: the one-value JSON `null` mapping prompt appended to the ledger. Confidence was
+again omitted. Continue requiring confidence, but do not repeat the already-recovered string lesson.
+
+The learner correctly said the complete decoded `[1, null]` value is a Python list but incorrectly
+classified its selected `null` element as a string; confidence was omitted. Supplied the mapping only
+after commitment: JSON `null` becomes Python `None` (`NoneType`). Exact restart point is the scalar
+`json.loads("null")` retrieval appended to the ledger. If correct, require a list-based near-transfer
+before adding the Boolean mapping.
+
+The learner clarified that the first list/indexing attempt came from reading only its first line, so
+the scalar prompt was reissued alone. They answered `null`, retaining JSON spelling after decoding
+even though `None` had just been supplied. Primary blocker remains the JSON-versus-Python spelling
+for absence. Exact restart point: the R0 `None` versus `null` recognition prompt in the ledger.
+
+SESSION 2026-09-09 — CHECKPOINT REQUESTED WITH JSON REMEDIATION OPEN.
+
+The learner answered the final `None` versus `null` recognition question with `null`. Correct model
+was supplied after commitment: `None` is Python's built-in absence value; `null` is JSON syntax. The
+learner explicitly ended the teaching session for dinner and authorized a commit and push. Preserve
+this as incorrect evidence; do not treat the catch-up as passed.
+
+Phase: Phase 8 remains open. Exact code now present: PostToolUse accepts Edit and Write through
+`tool_name not in ("Edit", "Write")`; both return `ClaimedEdit` after `file_path` validation. Bash
+still validates `command` and returns `None`; other tool names still raise `ValueError`. Execution
+path for Write: payload/container and common fields -> Bash check -> supported-tool membership ->
+`file_path` validation -> `ClaimedEdit`.
+
+Automated evidence: both new tests were observed RED for the intended unsupported-Write reason, then
+the one-line production change made `test_claude_adapter.py` and all eight repository test scripts
+green. Existing Bash and unsupported-Read regressions remained green.
+
+Concepts currently held: serialized JSON source can be a Python string; `json.loads(...)` performs
+the representation change; decoded object and array values become Python dict/list; adapter
+validation and claimed-versus-observed boundaries from earlier Phase 8 work. Uncertain/open: JSON
+`null` -> Python `None`; JSON Boolean spellings; the recombined JSON mapping; familiar-domain transfer
+of model-output-is-not-state; Phase 8 observability; weekly unfamiliar-code review; weekly design
+defense; and the suspended post-implementation Write trace/explanation/transfer.
+
+Last knowledge gate: JSON absence spelling INCORRECT. Next retrieval: executable Python `None`
+recognition, then near-transfer to `json.loads("null")`. Next architecture reset: still due only by
+time or a major transition. Major/deep counter remains 1/2. Next implementation step: none until the
+curriculum catch-up resumes; do not expand the adapter. Files the learner should next be able to
+teach remain `claude_adapter.py` and `test_claude_adapter.py`.

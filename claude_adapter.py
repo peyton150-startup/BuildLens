@@ -57,7 +57,7 @@ def parse_post_tool_use(payload: object) -> ClaimedEdit | None:
         _required_string(tool_input, "command")
         return None
 
-    if tool_name != "Edit":
+    if tool_name not in ("Edit", "Write"):
         raise ValueError("unsupported tool_name: " + tool_name)
 
     file_path = _required_string(tool_input, "file_path")

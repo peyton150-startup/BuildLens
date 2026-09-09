@@ -33,6 +33,27 @@ def test_valid_edit_returns_claimed_edit_from_nested_tool_input():
     )
 
 
+def test_valid_write_returns_claimed_edit_from_nested_tool_input():
+    claude_adapter = importlib.import_module("claude_adapter")
+    payload = {
+        "session_id": "session-9",
+        "hook_event_name": "PostToolUse",
+        "tool_name": "Write",
+        "tool_input": {
+            "file_path": "notes.txt",
+            "content": "hello",
+        },
+    }
+
+    result = claude_adapter.parse_post_tool_use(payload)
+
+    assert result == claude_adapter.ClaimedEdit(
+        file_path="notes.txt",
+        session_id="session-9",
+        tool_name="Write",
+    )
+
+
 def test_claimed_edit_fields_cannot_be_reassigned():
     claude_adapter = importlib.import_module("claude_adapter")
     edit = claude_adapter.ClaimedEdit(
@@ -265,6 +286,24 @@ def test_unsupported_tool_name_raises_readable_error():
     )
 
 
+def test_missing_write_file_path_raises_readable_error():
+    claude_adapter = importlib.import_module("claude_adapter")
+    payload = {
+        "session_id": "session-9",
+        "hook_event_name": "PostToolUse",
+        "tool_name": "Write",
+        "tool_input": {
+            "content": "hello",
+        },
+    }
+
+    assert_payload_error(
+        claude_adapter,
+        payload,
+        "missing required field: file_path",
+    )
+
+
 def test_malformed_bash_command_raises_readable_error():
     claude_adapter = importlib.import_module("claude_adapter")
     cases = [
@@ -302,6 +341,7 @@ def test_malformed_bash_command_raises_readable_error():
 
 
 test_valid_edit_returns_claimed_edit_from_nested_tool_input()
+test_valid_write_returns_claimed_edit_from_nested_tool_input()
 test_claimed_edit_fields_cannot_be_reassigned()
 test_valid_bash_returns_none()
 test_missing_session_id_raises_readable_error()
@@ -311,5 +351,6 @@ test_empty_required_strings_raise_readable_errors()
 test_wrong_payload_types_raise_readable_errors()
 test_wrong_event_name_raises_readable_error()
 test_unsupported_tool_name_raises_readable_error()
+test_missing_write_file_path_raises_readable_error()
 test_malformed_bash_command_raises_readable_error()
 print("test passed")

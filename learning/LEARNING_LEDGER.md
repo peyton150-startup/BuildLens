@@ -37868,3 +37868,597 @@ Write the expected output as a ClaimedEdit(...) instance using the three values 
 
 SESSION PAUSE: the learner requested commit and push before answering because they needed to move.
 No Write production code or tests exist. Resume with this exact prompt; do not treat it as answered.
+
+LEARNER ANSWER (verbatim):
+
+```text
+it will raise the valueerror
+it will complete successfully
+the actual vs expected outcome
+90
+```
+
+LEARNER FOLLOW-UP (verbatim):
+
+```text
+return the 3 climededit fields
+```
+
+PARTIAL at confidence 90. The learner correctly predicts that the current code raises `ValueError`,
+correctly identifies that the test compares actual output with expected output, and recognizes that
+the future result is a `ClaimedEdit` containing three fields. The expected-output field remains
+incomplete: neither response constructs the concrete instance explicitly requested by the prompt.
+Primary blocker: DATA_REPRESENTATION. Descend to one R1 named-record construction with supplied field
+values; do not add malformed-Write or regression cases yet and do not reveal the valid-Write target
+instance.
+
+NAMED-RECORD EXPECTED-VALUE MICRO-PROMPT (exact):
+
+```text
+Suppose this named record already exists:
+
+@dataclass(frozen=True)
+class DeliveryClaim:
+    package_path: str
+    run_id: str
+    tool_name: str
+
+The test contract says the expected value must contain:
+package_path = "parcel.txt"
+run_id = "run-4"
+tool_name = "Create"
+
+Write the complete expected value as one DeliveryClaim(...) instance.
+Confidence =
+```
+
+RECOVERY STATUS:
+in progress; concrete expected-value construction is the only active blocker
+
+LEARNER CLARIFICATION REQUEST (verbatim):
+
+```text
+in terms of a payload?
+```
+
+SYNTAX-ONLY SUPPORT PROVIDED:
+Clarified that the micro-exercise constructs the expected Python object directly rather than a
+payload, and supplied the unrelated form `Book(title="Dune", shelf="A3")`.
+
+LEARNER ANSWER (verbatim):
+
+```text
+it is a namespace object named book where title = dune and shelf = a3
+DeliveryClaim(package\_path = "parcel.txt", run\_id = "run-4", tool\_name = "Create")
+```
+
+PASS for concrete expected-value construction. Markdown escaping and identifier transcription are
+not graded; the learner supplied the correct class call, all three field names, and all three literal
+values. Terminology correction supplied after commitment: `Book(...)` constructs an instance of the
+`Book` class rather than naming a namespace object. Require one fresh R1 construction with support
+removed, then return to a fresh target-level valid-Write case.
+
+FRESH NAMED-RECORD TRANSFER (exact):
+
+```text
+Suppose this named record already exists:
+
+@dataclass(frozen=True)
+class ScanClaim:
+    source_path: str
+    scan_id: str
+    action: str
+
+The expected value must contain source_path "report.csv", scan_id "scan-12", and action "Inspect".
+
+Write the complete expected value as one ScanClaim(...) instance.
+Confidence =
+```
+
+RECOVERY STATUS:
+near-transfer due
+
+LEARNER ANSWER (verbatim):
+
+```text
+so the json 3 qutoes means it is uncodede json text instead of a list but when you load it it can become a list or dict, etc
+```
+
+PASS; confidence omitted. The learner correctly distinguishes undecoded JSON text from the Python
+list/dictionary produced after loading. Terminology correction after commitment: triple quotes are
+Python string syntax, not a JSON feature. The text itself is serialized/undecoded JSON.
+
+The text-versus-decoded-object remediation is complete. Restore one decoder operation and isolate
+the `null` mapping.
+
+JSON-NULL MICRO-PROMPT (exact):
+
+```text
+decoded = json.loads('[1, null]')
+value = decoded[1]
+
+What exact Python value is stored in value?
+What is its Python type?
+Confidence =
+```
+
+RECOVERY STATUS:
+JSON null mapping due
+
+LEARNER ANSWER (verbatim):
+
+```text
+it is a string&#x20;
+once it is loaded then it is a list
+```
+
+INCORRECT for the requested value; confidence omitted. The learner correctly identifies that the
+complete decoded value is a Python list, but classifies the selected JSON `null` element as a string.
+Correct model supplied after commitment: JSON `null` maps to Python `None`, whose type is
+`NoneType`. Primary blocker remains the one representation mapping. Descend from list-plus-indexing
+to decoding one scalar JSON value.
+
+JSON-NULL R0 RETRIEVAL (exact):
+
+```text
+value = json.loads("null")
+
+What exact Python value is stored in value?
+Confidence =
+```
+
+RECOVERY STATUS:
+in progress; scalar retrieval due
+
+LEARNER CLARIFICATION (verbatim):
+
+```text
+i only read the first line
+```
+
+The learner said the prior attempt came from reading only the first prompt line. Reissued the scalar
+problem alone rather than counting the omitted fields as additional gaps.
+
+LEARNER ANSWER (verbatim):
+
+```text
+null
+```
+
+INCORRECT. The learner retained the JSON spelling after `json.loads(...)` despite the mapping having
+just been supplied. Primary blocker remains JSON-versus-Python spelling for the absence value.
+Descend to R0 recognition before asking for another decode.
+
+PYTHON-ABSENCE-SPELLING R0 PROMPT (exact):
+
+```text
+Which spelling is Python's built-in absence value?
+
+None
+null
+
+Confidence =
+```
+
+RECOVERY STATUS:
+R0 recognition due
+
+LEARNER SESSION LIMIT (verbatim):
+
+```text
+last question then we commit and push and i eat dinner
+```
+
+The learner requested that this be the final question before a checkpoint commit and push.
+
+LEARNER ANSWER (verbatim):
+
+```text
+null
+```
+
+INCORRECT. Python's built-in absence value is `None`; `null` is JSON syntax. Do not continue
+remediation in this sitting because the learner explicitly ended the teaching session. This is not a
+pass and does not close the curriculum catch-up, the Write slice, or Phase 8.
+
+NEXT RETRIEVAL:
+Begin with a smaller recognition surface that contains ordinary executable Python using `None`, ask
+the learner to identify the value, then near-transfer back to `json.loads("null")`. Continue only
+after independent retrieval; then teach JSON Boolean mapping and recombine object/list/null/boolean.
+
+SESSION STATUS:
+checkpoint commit authorized; learning gate remains open
+
+LEARNER ANSWER (verbatim):
+
+```text
+ScanClaim(source\_path = "report.csv", scan\_id = "scan-12", action = "Inspect") 90
+```
+
+PASS at confidence 90. Markdown escaping is not graded. The learner independently constructed the
+complete `ScanClaim(...)` instance with the correct three field-to-value mappings. Assistance now
+fades completely; return to a fresh target-level valid-Write test prediction.
+
+FRESH VALID-WRITE TEST PROMPT (exact):
+
+```text
+payload = {
+    "hook_event_name": "PostToolUse",
+    "session_id": "session-14",
+    "tool_name": "Write",
+    "tool_input": {
+        "file_path": "draft.md",
+        "content": "first draft",
+    },
+}
+
+actual = parse_post_tool_use(payload)
+
+Actual outcome with the current code =
+Expected output after Write support is implemented =
+What the test compares =
+Confidence =
+
+Write the expected output as a ClaimedEdit(...) instance using the three relevant values from the
+payload.
+```
+
+RECOVERY STATUS:
+fresh target-level retrieval due
+
+LEARNER ANSWER (verbatim):
+
+```text
+ClaimedEdit( filepath = draft.md, session id= session-14, toolname=write)
+```
+
+PARTIAL. The learner selected the correct record type and recognizable values, but the written
+expression is not executable Python: the text values are unquoted, `session id` is not a valid
+identifier, and the field names do not preserve the supplied model names. The current-code outcome,
+comparison, and confidence fields were also unanswered. Identifier transcription remains ungraded,
+but a test's expected expression must be valid Python. Primary blocker for the next step:
+SYNTAX_READING, specifically string-literal quoting. Descend to R0 before reissuing a fresh complete
+target response.
+
+STRING-LITERAL MICRO-PROMPT (exact):
+
+```text
+Which call passes the text value Dune into title?
+
+Book(title=Dune)
+Book(title="Dune")
+
+Why?
+Confidence =
+```
+
+RECOVERY STATUS:
+string-literal syntax due
+
+LEARNER RESPONSE (verbatim):
+
+```text
+70
+```
+
+Only confidence was supplied; the syntax micro-prompt itself remained unanswered.
+
+LEARNER DIRECTION (verbatim):
+
+```text
+nitpcik move on
+```
+
+The learner explicitly classified the quoting/identifier issue as a transcription nitpick and
+directed the session onward. Honor the standing instruction that identifier transcription is not
+graded. Accept the substantive valid-Write design from cumulative evidence: the learner correctly
+predicted the current `ValueError`, identified actual-versus-expected comparison, constructed two
+complete analogous named-record instances, and selected the three relevant target values. This is
+not recorded as an independently completed final target expression. Proceed to malformed-Write and
+regression test design; no production implementation yet.
+
+MALFORMED-WRITE AND REGRESSION DESIGN PROMPT (exact):
+
+```text
+Case A — malformed Write:
+tool_name = "Write"
+tool_input = {"content": "hello"}
+
+Case B — valid Bash:
+tool_name = "Bash"
+tool_input = {"command": "echo hello"}
+
+Case C — unsupported tool:
+tool_name = "Read"
+tool_input = {"file_path": "notes.txt"}
+
+For each case, state the expected outcome after Write support is added.
+For every ValueError, include the exact message.
+
+Then state the realistic production bug each test would catch.
+Confidence =
+```
+
+RECOVERY STATUS:
+valid-Write design accepted from cumulative evidence at learner direction; malformed and regression
+test design due
+
+LEARNER ANSWER (verbatim):
+
+```text
+tool input is missing file path and it woulrd rasie a value errror the message would be "missing required field: filepath" this would catch if the payload was missing any fields that were required
+retunrs none, it would treat bash and edit/write differently
+unsupporeted tool name: Read, it would be a valueerror and it is there to catch any unauthorized toolnames so we do not have a read in the records/ the user does not see them, 60
+```
+
+PARTIAL at confidence 60. All three outcome categories are conceptually correct: malformed Write
+raises `ValueError`, valid Bash returns `None`, and Read raises the unsupported-tool `ValueError`.
+The malformed and unsupported error literals are not exact. Exact message assertions remain the
+explicit exception to ungraded transcription. The malformed test protects the required `file_path`,
+not every required payload field. The Bash rationale does not name a concrete mutation. The Read
+rationale shifts into authorization, persistence, and UI visibility, none of which this parser
+implements; the test protects the supported-tool contract.
+
+Primary blocker: naming the concrete production break a regression test catches. Descend to one Bash
+mutation with the output difference supplied by the existing contract.
+
+BASH REGRESSION MUTATION MICRO-PROMPT (exact):
+
+```text
+The existing contract says a valid Bash payload returns None.
+
+Imagine the Write patch accidentally changes the Bash branch so a valid Bash payload returns a
+ClaimedEdit(...) instead.
+
+Would the existing Bash regression test pass or fail?
+What actual value would violate its expected None?
+Confidence =
+```
+
+RECOVERY STATUS:
+concrete regression-break identification due; exact-message transfer remains due afterward
+
+LEARNER ANSWER (verbatim):
+
+```text
+it would pass, it would return a claimed edit , i do not know past that
+80
+```
+
+INCORRECT at confidence 80. The learner correctly identifies the mutated actual value as a
+`ClaimedEdit`, but predicts that the regression passes even though its expected value is `None`.
+Primary blocker: mapping unequal actual and expected values to assertion failure. This is a
+resurfacing of the comparison-role concept previously recovered before the valid-Write prompt.
+Descend to one R1 identity comparison with no parser, payload, branch, or dataclass fields.
+
+ASSERTION-RESULT MICRO-PROMPT (exact):
+
+```text
+actual = "ClaimedEdit"
+expected = None
+
+comparison = actual is expected
+
+Is comparison True or False?
+If a test requires comparison to be True, does the test pass or fail?
+Confidence =
+```
+
+RECOVERY STATUS:
+assertion-result recovery due
+
+LEARNER ANSWER (verbatim):
+
+```text
+false&#x20;
+it fails
+90
+```
+
+PASS at confidence 90. The learner correctly evaluates unequal actual and expected values as
+`False` and maps a required-true comparison to test failure. Require one fresh near-transfer with a
+different comparison form before returning to the Bash regression.
+
+ASSERTION-RESULT NEAR-TRANSFER (exact):
+
+```text
+actual = 7
+expected = 9
+
+comparison = actual == expected
+
+Is comparison True or False?
+If a test asserts comparison, does the test pass or fail?
+Confidence =
+```
+
+RECOVERY STATUS:
+near-transfer due
+
+LEARNER ANSWER (verbatim):
+
+```text
+false&#x20;
+so what you are saying is that the bash test would fail if it returned anything other than None
+```
+
+PASS; confidence omitted. The learner correctly evaluates the fresh unequal numeric comparison as
+`False` and independently transfers the rule back to Bash: any actual result other than the
+contract's `None` makes the regression fail. The assertion-result remediation is complete.
+
+Move to the remaining prerequisite: exact error-message construction. Use an unrelated field and
+one concatenation only.
+
+EXACT-MESSAGE MICRO-PROMPT (exact):
+
+```text
+field = "target_path"
+message = "missing required field: " + field
+
+What exact string is stored in message?
+Include every underscore, space, and colon.
+Confidence =
+```
+
+RECOVERY STATUS:
+exact-message construction due
+
+LEARNER DIRECTION (verbatim):
+
+```text
+this is a nitpick move on
+```
+
+The learner explicitly declined further exact-string transcription practice and directed the slice
+forward. Do not use spelling or punctuation recall as another learning gate here. Production tests
+must still contain executable, exact literals derived from the existing helper contract. Proceed to
+RED with the accepted behavioral design: valid Write returns `ClaimedEdit`; malformed Write missing
+`file_path` raises the helper's missing-field `ValueError`; valid Bash remains `None`; names outside
+Bash/Edit/Write remain unsupported.
+
+RECOVERY STATUS:
+closed by learner direction; exact literal accuracy delegated to executable tests, not mastery
+evidence
+
+IMPLEMENTATION RESULT — WRITE RED/GREEN:
+
+```text
+RED 1: malformed Write expected "missing required field: file_path" but received
+       "unsupported tool_name: Write"
+RED 2: valid Write raised "unsupported tool_name: Write" instead of returning ClaimedEdit
+GREEN: changed only `tool_name != "Edit"` to
+       `tool_name not in ("Edit", "Write")`
+VERIFY: test_claude_adapter.py passed
+REGRESSION: all eight repository test scripts passed
+```
+
+The existing valid-Bash and unsupported-Read tests were retained unchanged and passed after the
+production change. No `content`, worktree, PreToolUse, Stop, enrichment, or persistence behavior was
+added.
+
+POST-IMPLEMENTATION WRITE TRACE PROMPT (exact):
+
+```text
+For this payload:
+
+tool_name = "Write"
+tool_input = {"file_path": "outline.md", "content": "v1"}
+session_id = "session-22"
+
+Trace only these four points through parse_post_tool_use:
+
+1. Is `tool_name == "Bash"` True or False?
+2. Is `tool_name not in ("Edit", "Write")` True or False?
+3. Which field does `_required_string` read next?
+4. What exact ClaimedEdit(...) value is returned?
+
+Confidence =
+```
+
+RECOVERY STATUS:
+implementation works; learner trace due before this slice can close
+
+## EV-P8-JSON-REPRESENTATION-355 — serialized JSON text versus decoded Python values
+
+DATE / PHASE / GATE:
+2026-09-09 / Phase 8 / missing implementation-adjacent JSON representation lesson
+
+IMPLEMENTATION TRIGGER:
+The PostToolUse adapter receives decoded Python values originating as hook JSON. A curriculum audit
+found that object/list/null mappings and serialized text versus in-memory values had not been taught
+as one explicit boundary lesson.
+
+ADJACENT CONCEPT:
+Serialized JSON text remains a Python string until `json.loads(...)` decodes it; JSON object, array,
+null, and boolean values then map into Python representations.
+
+ACADEMIC SOURCE / REFERENCE:
+CMU-15213-SYSTEMS programmer's representation model; PY-JSON for the exact language mapping.
+
+EXERCISE TYPE:
+prediction / representation trace
+
+PROBLEM — VERBATIM:
+
+```text
+Phase 8 side lesson 1: JSON representation.
+
+raw = """
+{
+  "job": "scan",
+  "files": ["app.py", null],
+  "enabled": true
+}
+"""
+
+decoded = json.loads(raw)
+
+Predict without running it:
+
+1. Python type of raw =
+2. Python type of decoded =
+3. Python type and value of decoded["files"] =
+4. Python value of decoded["files"][1] =
+5. Python type and value of decoded["enabled"] =
+6. At which line does JSON text become Python values?
+7. Confidence =
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+it is a dict&#x20;
+also a dict&#x20;
+it is a list [app,py, null]
+null
+true and it is a boolean&#x20;
+json.loads
+```
+
+PARTIAL; confidence omitted. Correct: `decoded` is a dictionary, `decoded["files"]` is a list, and
+`json.loads(...)` is the operation where representation changes. The learner classified quoted JSON
+text as a dictionary, retained JSON `null` rather than mapping it to Python, split the filename at
+the dot, and retained JSON `true` spelling while correctly recognizing the Boolean type.
+
+PRIMARY BLOCKER:
+DATA_REPRESENTATION — quoted JSON source text versus an already-decoded Python object.
+
+SCAFFOLD RUNG:
+R0; one assignment, no decoder, indexing, nesting, or multiple JSON types.
+
+SERIALIZED-TEXT MICRO-PROMPT (exact):
+
+```text
+raw = '{"mode": "safe"}'
+
+Before json.loads is called, is raw a Python str or a Python dict?
+Why?
+Confidence =
+```
+
+RECOVERY STATUS:
+in progress; do not continue null/boolean mappings until text-versus-object passes
+
+LEARNER ANSWER (verbatim):
+
+```text
+str
+it is in quotes
+```
+
+PASS; confidence omitted. The learner correctly identifies the value as a Python string and gives
+the governing reason: the whole JSON document is quoted. Require one fresh same-rung variant using
+the triple-quoted form from the original target before restoring `json.loads(...)`.
+
+SERIALIZED-TEXT NEAR-TRANSFER (exact):
+
+```text
+raw = """[1, null]"""
+
+Before json.loads is called, is raw a Python str or a Python list?
+Why?
+Confidence =
+```
+
+RECOVERY STATUS:
+near-transfer due
