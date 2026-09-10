@@ -41692,3 +41692,199 @@ Confidence =
 
 RECOVERY STATUS:
 frozen-dataclass mutability trace due — THIS IS THE NEXT ACTIVITY
+
+## Session 2026-09-11 — frozen-dataclass mutability gate
+
+LEARNER ANSWER (verbatim):
+
+```text
+. it should raise, for edit it should have None in the contnet lookup valiue,
+```
+
+MISS on both halves. Executed evidence supplied rather than assertion:
+
+```text
+edit.details          -> {}
+'content' in details  -> False
+write.details before  -> {'content': 'draft'}
+mutation              -> SUCCEEDED, no exception
+write.details after   -> {'content': 'something Claude never claimed'}
+rebinding details     -> raised FrozenInstanceError
+```
+
+Second misconception recorded separately: Edit's details is `{}`, with no "content" key at all,
+not a key holding None. The learner's own test asserts this.
+
+LEARNER ANSWER (verbatim):
+
+```text
+. i thought we were only populating the writes details because of the new string and old string of edit, so edit would be not populated by the input and then frozen
+```
+
+First half correct — only Write's details is populated, Edit deferred. Second half is the
+misconception: unpopulated was taken to mean protected. Demonstrated that an empty dict accepts new
+keys from outside, including a "content" key on an Edit record where no such claim exists.
+
+PRIMARY BLOCKER:
+FROZEN_ASSUMED_TO_SEAL_CONTENTS
+
+The learner then said "I am not sure, I assumed frozen was for the inputs so once they are inputted
+from the payload they will not change" — an accurate statement of the assumption. Dropped to
+aliasing, below the dataclass entirely.
+
+ALIASING PROMPT (exact):
+
+```text
+    a = {"k": 1}
+    b = a
+    b["k"] = 2
+
+What does a["k"] print now? Predict: 1 or 2? Say why in one line.
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+. 2 
+it changes the lookup value of the key k
+```
+
+PASS. Aliasing held: two names, one dictionary.
+
+REBINDING PROMPT (exact):
+
+```text
+    a = {"k": 1}
+    b = a
+    b = {"k": 99}
+
+What does a["k"] print now?
+What is the difference between b["k"] = 2 and b = {"k": 99}?
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+. it prints 99
+the difference is the syntax
+```
+
+MISS. Executed evidence: a["k"] -> 1, b["k"] -> 99, a is b -> False. The learner then asked, "so the
+second exercise does not remap the dictionary it completely creates a new one?" — correct, and
+self-generated from the output.
+
+Vocabulary supplied at this point (mutation / rebinding), then applied one blank at a time after a
+first attempt restated the evidence without labelling it.
+
+LEARNER ANSWERS (verbatim):
+
+```text
+. A
+```
+
+```text
+. mutation it only blocks rebining 
+80
+```
+
+PASS at 80. frozen=True blocks rebinding; it does not block mutation.
+
+IMMUTABLE-VERSUS-MUTABLE PROMPT (exact):
+
+```text
+frozen blocks rebinding only. Yet session_id has been fully protected all along.
+
+session_id is a str. Is there any way to reach into a str and change its characters in place, the
+way you can reach into a dict and change a key?
+
+So why is "blocks rebinding only" total protection for session_id, but partial for details?
+Confidence =
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+. no because you cannot mutate a string
+becasue details is a dict so it has the possiblity of mutation
+```
+
+PASS. The learner states the rule completely: blocking rebinding is total protection for an
+immutable value because no mutation operation exists, and partial protection for a mutable one.
+
+EV-P8-FROZEN-MUTABILITY-364
+Exercise type: ADJACENT_CONCEPT
+Objective: frozen=True protects the binding, not the object bound.
+Result: PASS after remediation to aliasing and back. Initial prediction wrong; concept now held.
+
+CONSEQUENCE FOR THE INVARIANT — NEXT:
+
+```text
+INVARIANT PROMPT (exact):
+
+Every session you have held this: a claimed record holds what the hook claimed.
+
+The patch you approved introduced a field that any code holding the record can rewrite after
+construction, without error, including adding claims the hook never made.
+
+Is the invariant still guaranteed by the code? Yes or no.
+If no, say whether that is acceptable to you and why — this is your decision, not a defect report.
+Confidence =
+```
+
+RECOVERY STATUS:
+invariant consequence decision due
+
+LEARNER ANSWER (verbatim):
+
+```text
+. i do not think that is has a chance to be changed once we recieve it from the payload, i would wonder how we would make it immutable once we get the input though
+```
+
+PARTIAL. The learner's read of today's callers is correct — nothing in the project mutates details.
+Two things were separated: no code does this yet is a fact about current callers; the invariant
+being guaranteed is a property of the record. The gap is the same one the learner rejected two
+sessions ago when choosing a structural mechanism over a naming convention.
+
+Three closures were offered with their costs: MappingProxyType read-only view; a tuple of pairs;
+typed fields per tool (the learner's earlier option C).
+
+LEARNER ANSWER (verbatim):
+
+```text
+.  i think read only view makes the most sense as it is a small change and when we make it then it will be preventing anyother issues if later down the line we do make code that could change the inputs
+```
+
+Decision: MappingProxyType. Reason is the learner's own — small change, and it forecloses a class
+of future mistake rather than relying on future callers behaving.
+
+LEARNER ANSWER (verbatim):
+
+```text
+. it will add in 1 extra  required string function call
+```
+
+MISS on the cost. The proxy wraps the finished dict; the number of `_required_string` calls is
+unchanged. Actual costs stated: an import; the annotation `dict[str, object]` becomes wrong because
+a proxy is a Mapping not a dict; repr shows `mappingproxy({...})` in failure output; and the
+protection holds only because the underlying dict is not retained anywhere.
+
+PATCH LANDED (EV-P8-READONLY-DETAILS-365)
+
+```text
+Current phase              Phase 8 — Claude adapter observation boundary
+Learning objective         binding-level versus object-level protection, applied
+Behavior being added       details becomes a read-only mapping
+Conceptual change          none new; applying EV-P8-FROZEN-MUTABILITY-364
+Out of scope               Edit claim modelling; disk reads; comparison
+Expected patch size        ~5 lines plus a test
+```
+
+`claude_adapter.py` gains `from collections.abc import Mapping` and
+`from types import MappingProxyType`; the field is annotated `Mapping[str, object]` and constructed
+as `MappingProxyType(details)`. One test added asserting that item assignment raises TypeError and
+that the claim is unchanged afterward. Full suite green across all eight test files.
+
+PROCESS NOTE, recorded against the assistant rather than the learner: the new test was written
+after the change rather than red-first, so it never demonstrated a failure against the old code. It
+asserts the exception rather than passing silently, so it would catch a regression, but it did not
+earn its red. Prior patch (363) was correctly red-first.

@@ -3297,3 +3297,61 @@ construction.
 
 Exact restart point: run the frozen-dataclass mutability prompt cold, then decide with the learner
 whether anything must change as a result.
+
+## Session 2026-09-11
+
+The knowledge gate owed from `363` is CLOSED (`EV-P8-FROZEN-MUTABILITY-364`). The learner predicted
+that mutating `details` on a frozen record would raise, and that Edit's details held a "content" key
+set to None. Both predictions were wrong and were answered with executed output rather than
+assertion. Remediation dropped below the dataclass to aliasing (`a = {"k": 1}; b = a; b["k"] = 2`),
+which passed, then to rebinding, which missed and was corrected by running it. Vocabulary was
+supplied at that point and applied one blank at a time.
+
+The rule is now held: `frozen=True` blocks rebinding, not mutation. It was total protection for
+`session_id` only because `str` has no mutation operation at all, and partial for `details` because
+a dict does. The learner stated this unaided.
+
+PATCH LANDED (`EV-P8-READONLY-DETAILS-365`). `details` is now built with `MappingProxyType` and
+annotated `Mapping[str, object]`, with `from collections.abc import Mapping` and
+`from types import MappingProxyType` added. A test asserts that item assignment raises `TypeError`
+and the claim is unchanged. Full suite green across all eight test files.
+
+The learner chose the read-only view over a tuple of pairs and over per-tool typed fields, with
+their own reason: it is a small change that forecloses a class of future mistake rather than relying
+on future callers behaving. Their stated cost was wrong (they expected an extra `_required_string`
+call; the proxy wraps the finished dict) and the real costs were supplied.
+
+Measured, not assumed: `dict(proxy)` costs about 1 us for a one-key mapping and is unchanged at
+1.06 us when the value is a 10 MB string, because the conversion copies references rather than
+values. It reaches 94 us at 1000 keys. Cost scales with key count, not value size, and is noise at
+BuildLens's scale.
+
+PROCESS NOTE against the assistant, not the learner: the `365` test was written after the change
+rather than red-first, so it never demonstrated a failure against the old code. Patch `363` was
+correctly red-first. Do not repeat this.
+
+### Gotcha to surface at the persistence/API phase
+
+```text
+json.dumps on a ClaimedEdit's details raises TypeError — details is a mappingproxy, not a dict.
+Convert with dict(record.details) at the serialization boundary.
+isinstance(details, dict) is False and fails silently rather than raising; check against
+collections.abc.Mapping instead.
+```
+
+Every read operation works normally on the proxy — indexing, `.get`, `in`, `.items()`, `{**p}`
+unpacking, and equality against a plain dict. Only serialization, `dict` type checks, and mutation
+behave differently. Terminology for future notes: `Mapping` is the category and the contract
+callers should rely on; `mappingproxy` is the concrete type and the name that appears in the error.
+
+Exact code that exists now in `claude_adapter.py`: `ClaimedEdit(file_path, session_id, tool_name,
+details)` with `details` read-only, `_required_value`, `_required_string`, `_required_object`,
+`parse_post_tool_use`. There is still no disk read and no comparison anywhere in the project.
+
+The claim side of the observation boundary is complete: a claim is captured, tool-tagged, and
+cannot be rewritten after construction. Nothing observes anything yet.
+
+Exact restart point: the learner chooses between implementing the observed side (a disk read
+producing a separate observed record) and modelling Edit's claim shape
+(`old_string`, `new_string`, `replace_all`, needing a containment check rather than an equality
+check). Neither has been started. No knowledge gate is currently owed.

@@ -1,6 +1,8 @@
 """Translate Claude PostToolUse payloads into BuildLens representations."""
 
+from collections.abc import Mapping
 from dataclasses import dataclass
+from types import MappingProxyType
 
 
 @dataclass(frozen=True)
@@ -10,7 +12,7 @@ class ClaimedEdit:
     file_path: str
     session_id: str
     tool_name: str
-    details: dict[str, object]
+    details: Mapping[str, object]
 
 
 def _required_value(values: dict[str, object], field: str) -> object:
@@ -71,5 +73,5 @@ def parse_post_tool_use(payload: object) -> ClaimedEdit | None:
         file_path=file_path,
         session_id=session_id,
         tool_name=tool_name,
-        details=details,
+        details=MappingProxyType(details),
     )
