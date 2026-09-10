@@ -10,6 +10,7 @@ class ClaimedEdit:
     file_path: str
     session_id: str
     tool_name: str
+    details: dict[str, object]
 
 
 def _required_value(values: dict[str, object], field: str) -> object:
@@ -62,8 +63,13 @@ def parse_post_tool_use(payload: object) -> ClaimedEdit | None:
 
     file_path = _required_string(tool_input, "file_path")
 
+    details: dict[str, object] = {}
+    if tool_name == "Write":
+        details["content"] = _required_string(tool_input, "content")
+
     return ClaimedEdit(
         file_path=file_path,
         session_id=session_id,
         tool_name=tool_name,
+        details=details,
     )

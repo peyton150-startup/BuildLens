@@ -41473,3 +41473,222 @@ Confidence =
 
 RECOVERY STATUS:
 transfer variant due — SESSION PAUSED BY LEARNER BEFORE ANSWERING
+
+## Session 2026-09-10 (resumed after pause)
+
+LEARNER ANSWER (verbatim):
+
+```text
+.  it needs the file path and the content for the report 
+claimededit  idk
+it can estalish what the code and the report have in common but it cannot establish that the report wrote the code or installed the node mudule
+```
+
+PARTIAL. Part 3 PASS and it is the deep principle: comparison establishes what the report and the
+installed files have in common, and never that the report's action caused the files to be there.
+Transferred to a domain with no hook, no Claude and no BuildLens code.
+
+Parts 1 and 2 remain surface-bound. The learner names fields rather than two records, and reaches
+for `ClaimedEdit` — a BuildLens type name — inside a package-manager domain where it does not
+exist. The structure did not travel with the principle.
+
+PRIMARY BLOCKER:
+STRUCTURE_NOT_RE_DERIVED_IN_A_NEW_DOMAIN
+
+Narrowed rather than re-rung, per the standing instruction.
+
+TWO-RECORD RE-DERIVATION PROMPT (exact):
+
+```text
+Forget BuildLens names. ClaimedEdit does not exist in this system.
+
+The auditor has two independent things available:
+
+  the package manager's report
+  the directory node_modules/left-pad on disk
+
+Give each one a name of your own and say what it holds.
+Then say, for each, what the auditor has to DO to obtain it.
+Confidence =
+```
+
+RECOVERY STATUS:
+two-record re-derivation in package-manager domain due
+
+LEARNER ANSWER (verbatim):
+
+```text
+. manangers report is the claude  hook payload 
+the directory is the disk file bytes
+the auditer has to first read the report and then go into the directory and check to see the actual verson on disk
+```
+
+PASS. The learner maps the new domain onto the structure correctly — report corresponds to the
+claimed source, directory to the observed source — and names both operations: read the report, then
+go read the directory. Fresh names were requested and analogy names were given instead; the
+structural mapping is what the transfer tests, and it is correct.
+
+EV-P8-CLAIM-OBSERVATION-TRANSFER-361
+Exercise type: TRANSFER
+Result: PASS. Principle, structure and operations all re-derived in a domain containing no hook, no
+Claude and no BuildLens code.
+
+MILESTONE GATE — CLOSED:
+
+```text
+automated tests      pre-existing, green
+learner trace        EV-P8-WRITE-TRACE-359
+learner explanation  EV-P8-WRITE-EXPLANATION-360
+transfer variant     EV-P8-CLAIM-OBSERVATION-TRANSFER-361
+```
+
+Counter check before resuming implementation: major/deep counter stands at 1/2 (Phase 7 complete,
+Phase 8 in progress). Foundation counter 1/3. Neither is due.
+
+Implementation of the approved `claimed_content` patch may now begin. One design fork must be
+settled by the learner first, because it changes the code rather than being an implementation
+detail.
+
+EDIT-VERSUS-WRITE CONTENT FORK PROMPT (exact):
+
+```text
+Your approved decision adds claimed_content. Now the payloads disagree.
+
+A Write payload's tool_input holds:   file_path, content
+An Edit payload's tool_input holds:   file_path, old_string, new_string
+
+There is no "content" key in an Edit payload. But one type, ClaimedEdit, currently covers both.
+
+Pick one and give your reason:
+
+A. claimed_content is required. Edit payloads must supply something for it.
+B. claimed_content is optional, present for Write and absent for Edit.
+C. Write and Edit stop sharing one type.
+
+What does your choice cost?
+Confidence =
+```
+
+RECOVERY STATUS:
+Edit-versus-Write content fork due
+
+LEARNER ANSWER (verbatim):
+
+```text
+. A 
+it cost another return field and another function to read it in, past that idk
+```
+
+Answered before the Edit payload shape was known. Superseded below.
+
+FACTUAL INPUT SUPPLIED (not an exercise): tool_input carries whatever parameters that tool takes.
+Write takes file_path and content; Edit takes file_path, old_string, new_string, replace_all. There
+is no "content" key in an Edit payload. Evidence: the parameter names on the Edit and Write tools in
+use in this session. Gap noted — every payload example in this ledger is Write-shaped, so Edit's
+actual shape had never been recorded in the project.
+
+The learner then asked, unprompted, whether old_string and new_string could be read the same way as
+file_path, and separately inferred that replace_all must also be read because without it the number
+of intended occurrences cannot be stated. Both are correct and self-generated.
+
+LEARNER ANSWER (verbatim):
+
+```text
+. so for now we can do the write content and for edit we would have to still read the file bytes but then we would have to see where each occourance happend and record that or see if any occurance happend and record that based on replace all true or false, or could we use new string as the claimed content and then go throug hthe file bytes to find it
+```
+
+PASS. The learner identifies that Edit requires containment and occurrence counting rather than
+equality, and proposes scoping Write now. The final sub-proposal — reusing claimed_content to hold
+new_string — was flagged: one field name would then carry a whole-file claim for Write and a
+fragment claim for Edit, and an `==` comparison would be correct for one and wrong for the other
+with nothing in the type to warn a later reader.
+
+LEARNER ANSWER (verbatim):
+
+```text
+.C, for edit claimed contnet is 2 fields and for write it is 1 field, i would think we would need a sepereate directory for edit
+```
+
+Option C selected: different claim shapes require different types. "Directory" was a terminology
+slip and was clarified.
+
+The learner then asked for the pros and cons of a details-dict versus two dataclasses. Both were
+laid out on the axis of when a wrong assumption is caught — the dict defers it to the consumer, the
+two types make it impossible to express — with the verdict withheld.
+
+LEARNER ANSWER (verbatim):
+
+```text
+.  i want to go with bag of fields but do you think it would be worth putting in the details dict that this was an edit and make write the (toolname=write) then if it is edit it would change the exisintg varable
+```
+
+Design reversed from C to the details-dict form. The discriminator sub-question was answered: the
+record already carries tool_name, so storing the tool identity a second time inside details would
+duplicate a fact across two places that can disagree.
+
+LEARNER ANSWER (verbatim):
+
+```text
+. ok so we are good on that front
+```
+
+DESIGN DECISION — SUPERSEDES EV-P8-CLAIMED-CONTENT-DECISION-358 on shape only:
+
+```text
+one type              ClaimedEdit keeps covering Edit and Write
+claimed payload       details dict, tool-specific keys
+discriminator         existing tool_name field; not duplicated inside details
+Write                 details holds the claimed content
+Edit                  deferred; old_string/new_string/replace_all not yet modelled
+accepted cost         wrong key assumptions surface at the consumer, not at construction
+```
+
+EV-P8-CLAIM-SHAPE-DECISION-362
+Exercise type: DESIGN_REVIEW
+Result: PASS. Alternatives compared, cost accepted knowingly, redundant discriminator rejected on
+single-source grounds.
+
+PATCH IMPLEMENTED (EV-P8-DETAILS-PATCH-363)
+
+Block stated before the patch:
+
+```text
+Current phase              Phase 8 — Claude adapter observation boundary
+Learning objective         a claimed record carries tool-specific claim data
+Behavior being added       ClaimedEdit gains details; Write populates the claimed content
+Conceptual change          one field whose valid keys depend on another field's value
+Out of scope               Edit's old_string/new_string/replace_all; any disk read; any comparison
+Expected patch size        ~10 lines in claude_adapter.py, plus tests
+Knowledge gate afterward   frozen-dataclass mutability trace
+```
+
+Tests written first and confirmed red with
+`TypeError: ClaimedEdit.__init__() got an unexpected keyword argument 'details'`, then green.
+Three tests added: Write details hold the claimed content; Edit details are empty until Edit claims
+are modelled; missing Write content raises "missing required field: content". Three existing
+assertions updated for the new field. Full suite green across all seven test files.
+
+KNOWLEDGE GATE OWED — not yet run:
+
+```text
+FROZEN-DATACLASS MUTABILITY PROMPT (exact):
+
+ClaimedEdit is declared @dataclass(frozen=True), and one existing test proves that
+
+    edit.session_id = "invented-session"
+
+raises FrozenInstanceError.
+
+The record now also holds details, a dict.
+
+Predict what this does:
+
+    edit.details["content"] = "something Claude never claimed"
+
+Does it raise? Say why or why not.
+If it does not raise, what does frozen=True actually protect?
+Confidence =
+```
+
+RECOVERY STATUS:
+frozen-dataclass mutability trace due — THIS IS THE NEXT ACTIVITY

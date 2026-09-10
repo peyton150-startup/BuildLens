@@ -3247,3 +3247,53 @@ unchanged; `ClaimedEdit` still carries only `file_path`, `session_id`, `tool_nam
 
 Exact restart point: the left-pad package-manager transfer prompt appended to the ledger, already
 issued and unanswered. Ask for it cold; do not restate the BuildLens case first.
+
+## Session 2026-09-10 (afternoon)
+
+Transfer PASSED (`EV-P8-CLAIM-OBSERVATION-TRANSFER-361`) — principle, structure and operations
+re-derived in a package-manager domain. The Phase 8 milestone gate is CLOSED: tests, trace
+(`359`), explanation (`360`), transfer (`361`).
+
+Counter check before resuming implementation: major/deep 1/2, foundation 1/3. Neither due.
+
+A factual gap was closed during the design fork. Edit and Write have different `tool_input`
+schemas — Write carries `file_path` and `content`; Edit carries `file_path`, `old_string`,
+`new_string`, `replace_all`. Every payload example previously in this project was Write-shaped, so
+`ClaimedEdit` had been named for a tool whose payload had never been examined. The learner
+independently inferred that `replace_all` must be read too, since without it the number of intended
+occurrences cannot be stated, and that Edit verification needs containment and occurrence counting
+rather than the equality check Write allows.
+
+DESIGN DECISION (`EV-P8-CLAIM-SHAPE-DECISION-362`) — supersedes `358` on shape only:
+
+```text
+one type              ClaimedEdit keeps covering Edit and Write
+claimed payload       details dict, tool-specific keys
+discriminator         existing tool_name field; not duplicated inside details
+Write                 details holds the claimed content
+Edit                  deferred; old_string/new_string/replace_all not yet modelled
+accepted cost         wrong key assumptions surface at the consumer, not at construction
+```
+
+The learner first chose two separate types, then reversed to the details-dict form after the
+tradeoffs were laid out, and correctly rejected storing the tool identity inside `details` on the
+grounds that `tool_name` already carries it and two copies can disagree.
+
+PATCH LANDED (`EV-P8-DETAILS-PATCH-363`). `ClaimedEdit` now carries
+`details: dict[str, object]`. `parse_post_tool_use` populates `details["content"]` for Write via
+`_required_string`, leaving it empty for Edit. Tests were written first and confirmed red, then
+green; the full suite passes across all seven test files.
+
+Exact code that exists now in `claude_adapter.py`: `ClaimedEdit(file_path, session_id, tool_name,
+details)`, `_required_value`, `_required_string`, `_required_object`, `parse_post_tool_use`. Still
+no disk read and no comparison anywhere in the project.
+
+KNOWLEDGE GATE OWED BEFORE FURTHER PHASE 8 WORK: the frozen-dataclass mutability trace, appended to
+the ledger and not yet run. `frozen=True` prevents rebinding `edit.details`, but the dict it points
+at stays mutable, so `edit.details["content"] = ...` succeeds. The learner has an existing passing
+test asserting that `session_id` cannot be reassigned and may reasonably assume the whole record is
+protected. Do not skip this — it bears directly on whether a claimed record can be altered after
+construction.
+
+Exact restart point: run the frozen-dataclass mutability prompt cold, then decide with the learner
+whether anything must change as a result.
