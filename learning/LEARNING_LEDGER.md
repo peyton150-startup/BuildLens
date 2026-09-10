@@ -42282,3 +42282,112 @@ DECISION (learner's): leave the `else` as it is.
 EV-P8-EDIT-CLAIM-371
 Exercise type: MILESTONE_TRACE / DESIGN_REVIEW
 Result: PASS.
+
+## Session 2026-09-11 (late) — the observed side
+
+OBSERVED-RECORD SPEC PROMPT (exact):
+
+```text
+1. What fields does it hold?
+2. What produces it — same function as the claim, or a different one? Say why, in terms of the
+   mechanism you argued for in 358.
+3. Where should it live: in claude_adapter.py alongside the claim, or in its own module?
+Confidence =
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+. so we would have a file path and contnet field i am not sure what other fields, a differnt function would produce it  we need to keep the sources different on top of that thsi is nto a payload it is a read from a local file, it should be in its own module, claude adapters responsilbity is to handle the payloads from claude and turn them into claims
+```
+
+PASS on all three, with a module-responsibility statement the prompt did not ask for:
+`claude_adapter` turns payloads into claims; a file read is a different source and belongs elsewhere.
+
+MISSING-FILE SEQUENCE. The learner did not know whether a missing file should raise or be recorded,
+and initially argued for raising: "if there is no file to be read there is nothing to compare".
+Two remediation steps were needed. The abstract framing (did the reader FAIL to observe, or
+SUCCESSFULLY observe absence) did not land, and the learner said so directly:
+
+LEARNER ANSWER (verbatim):
+
+```text
+. i am so confused, because what is there to gain from telling the user the file does not exist than to have the user check to see if the file is ther
+```
+
+The abstraction was dropped for a concrete batch: 50 files checked, one missing. Raising loses the
+other 46; recording yields "47 match, 2 differ, 1 does not exist". Also supplied: raising does not
+hide the problem, it changes its type — a crash says BuildLens broke, a record says the write did
+not land, and only the second says whose problem it is.
+
+LEARNER ANSWER (verbatim):
+
+```text
+. ok that makes more sense, so you would want to record the returns so that it is on record as to what happend instead of it just cutting execution off and we never know what happended
+```
+
+PASS. Decision: record absence, do not raise.
+
+THREE-OUTCOME REFINEMENT. Asked whether permission and device errors should produce the same record
+as a missing file, the learner answered "no there are other issues with the process" — correct — and
+asked what I/O means. Explained: input/output, any operation touching something outside the
+program's memory; an I/O error is a device-level failure, not a program mistake.
+
+LEARNER ANSWER (verbatim):
+
+```text
+. i am not sure, if they raise then it is not recorded but if they retunr it is, but is it worth recording a permission denied or a drive disconnect, because they are outside of the scope of the program, 10
+```
+
+Confidence 10. The tradeoff was framed correctly by the learner. Deciding argument supplied: the
+batch argument applies unchanged, but the CONTENT differs — "the file is not there" is a finding
+about the write, "could not look" is a finding about BuildLens's own reach, and collapsing them
+makes the tool lie about which thing is broken.
+
+LEARNER ANSWER (verbatim):
+
+```text
+. ok i guess A then so at least the rest of the file get read
+```
+
+DECISION (learner's): three outcomes — READ, ABSENT, UNREADABLE.
+DECISION (learner's): one type with a status field, not three types, "because a file can only be one
+of the 3".
+
+ENUM — new syntax, taught on request. The learner asked what an enum is, then asked the sharpest
+possible question about it: "how would the status be reed isnt this going to be in the read module
+that has a fixed return for this type". Correct — the producer is not where it goes wrong. The risk
+is at a CONSUMER written later and elsewhere.
+
+LEARNER ANSWER (verbatim):
+
+```text
+. so plain string nothing happens
+but enum it would raise an error
+```
+
+PASS, confirmed by execution: `status == "reed"` evaluates False silently; `Status.REED` raises
+AttributeError at the wrong line.
+
+DECISION (learner's): enum now, not strings.
+
+LEARNER ANSWER (verbatim):
+
+```text
+. enum now
+B is what we have been talking about this whole time "file  bytes" so i would assume that that is waht we will go with
+```
+
+PASS. Bytes, not text. Noted consequence: bytes removes the decode failure mode entirely, and since
+the claim holds str, the comparison must encode one to match the other — which puts the encoding
+assumption at the point of use where it can be labelled, the same shape as replace_all's default.
+
+PATCH LANDED (EV-P8-FILE-OBSERVER-372). `file_observer.py`: `ObservationStatus` enum,
+`ObservedFile(file_path, status, file_bytes)` frozen, `observe_file(path)` which never raises.
+`FileNotFoundError` becomes ABSENT; any other `OSError` becomes UNREADABLE. Six tests written first
+and confirmed red with ModuleNotFoundError, then green. Full suite green across nine files.
+
+Verified live: `claude_adapter.py` -> read, 3193 bytes; a missing path -> absent; a directory ->
+unreadable.
+
+KNOWLEDGE GATE OWED: trace of the three outcomes.
