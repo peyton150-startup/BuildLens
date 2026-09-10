@@ -3182,3 +3182,68 @@ Exact restart point: the worked-example follow-up is closed. Next session opens 
 learner to state, without a supplied example, what a comparison of two values licenses BuildLens to
 report and why neither value alone licenses it — then returns to the open `claimed_content` design
 decision for an adoption reason of the learner's own. Only after that does the Write trace begin.
+
+## Session 2026-09-10
+
+The relation-versus-value blocker carried out of 2026-09-09 is CLOSED, along with four others opened
+and closed during this session. The learner stated unaided that comparing a claimed and an observed
+value lets BuildLens report whether what the hook says is reality, and later reached the target
+formulation without being shown it: agreement establishes that what Claude claimed to have written
+is currently in the file bytes — a content relation, not a causal one, holding for every write
+including the silent failures. Recorded as `EV-P8-CLAIM-OBSERVATION-BOUNDARY-357`.
+
+Two intermediate results worth carrying: a single value underdetermines, so absence of evidence is
+CANNOT TELL rather than NO; and observed bytes carry no provenance, so the claim is what supplies
+attribution. The learner produced the provenance insight unprompted.
+
+One rescue attempt was rejected: after conceding a counterexample the learner retreated to "normally
+true". Rejected on two grounds — the silent-failure case is the case BuildLens exists to detect, not
+an edge case, and "normally true" is not a value a per-invocation checker can return.
+
+DESIGN DECISION APPROVED, learner-owned (`EV-P8-CLAIMED-CONTENT-DECISION-358`):
+
+```text
+ClaimedEdit gains claimed_content
+adoption reason   the two-value comparison is the report BuildLens exists to make
+mechanism         separate producing functions, separate sources, separate types
+reversal          if Git history with timestamps supplied the same information, drop it
+```
+
+The mechanism answer is structural, not conventional: the two values are produced by different
+functions reading different sources into different types, so no naming discipline is required.
+
+MILESTONE GATE PROGRESS:
+
+```text
+Write trace          PASS   EV-P8-WRITE-TRACE-359
+Write explanation    PASS   EV-P8-WRITE-EXPLANATION-360 (at 70, ordering correction issued)
+transfer variant     ISSUED, UNANSWERED — session paused
+```
+
+The trace required one rung drop: the learner reproduced the constructor's source text when asked
+for runtime values. Resolved at R0 and not repeated. The learner then declined to fill the remaining
+two mechanical fields, correctly, and the request was withdrawn.
+
+The explanation failed once at target level with three open questions issued at once, was rebuilt
+one question at a time across four sub-answers, then consolidated unaided. Prompt-design note for
+future sessions: after a run of single-question prompts, do not stack three open questions.
+
+Ordering correction issued and worth re-checking later: the learner believes validation happens
+after the tool branching. It does not. `hook_event_name`, `session_id`, `tool_name` and `tool_input`
+are validated at the top; only `file_path` is validated after the branch, because the required key
+inside `tool_input` depends on which tool it was.
+
+Concepts known cold at pause: claimed versus observed record assignment; naming the producing
+operation; refusing `tool_input["content"]` as observed state; CANNOT TELL versus NO; provenance
+comes from the claim; agreement establishes content match, never authorship; divergence establishes
+disagreement, never attribution; `file_path` as the address of a future observation; None versus
+raise for known-benign versus unrecognized tools.
+
+Uncertain: the ordering of validation relative to branching inside `parse_post_tool_use`.
+
+PHASE 8 GATE STILL OPEN — the transfer variant is the only item left. `claude_adapter.py` remains
+unchanged; `ClaimedEdit` still carries only `file_path`, `session_id`, `tool_name`. The approved
+`claimed_content` patch may not be written until the transfer closes.
+
+Exact restart point: the left-pad package-manager transfer prompt appended to the ledger, already
+issued and unanswered. Ask for it cold; do not restate the BuildLens case first.
