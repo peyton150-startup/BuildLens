@@ -41888,3 +41888,254 @@ PROCESS NOTE, recorded against the assistant rather than the learner: the new te
 after the change rather than red-first, so it never demonstrated a failure against the old code. It
 asserts the exception rather than passing silently, so it would catch a regression, but it did not
 earn its red. Prior patch (363) was correctly red-first.
+
+## Session 2026-09-11 — Edit claim shape specification
+
+EDIT CLAIM SPEC PROMPT (exact):
+
+```text
+Specify the claim, field by field. For each of the three, say:
+
+  - required, or allowed to be absent?
+  - what type?
+  - what should parse_post_tool_use do if it is missing?
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+. allowed to be absent , string , ignore 
+required , string , rasie an error
+required, bool, rasie an error
+the only one that can be absent is the old string becasue it could jsut be editing a blank part of the file
+```
+
+Spec recorded. The replace_all line was challenged: the Edit tool's schema gives replace_all a
+default, so a payload may omit it, and requiring it would reject a legitimate edit while defaulting
+it would manufacture a claim Claude never made.
+
+LEARNER ANSWER (verbatim):
+
+```text
+.  for option 2 is that what the website says, becasue if that is actually how the hook runs that htat is a legimate option
+```
+
+PASS — and the strongest move of the session. The learner asked for the evidence behind an asserted
+payload shape instead of accepting it. The assistant had supplied a claim about the payload with no
+observation behind it, which is the very failure this phase studies.
+
+FINDING: no hook was installed in this project. `.claude/settings.local.json` held permissions only.
+Every payload `parse_post_tool_use` has ever parsed — in every test and every exercise in this
+ledger — was hand-written. The adapter's input contract was an assumption throughout.
+
+LEARNER ANSWER (verbatim):
+
+```text
+. i think Install a hook that writes real PostToolUse payloads to a file, make one edit, and read what
+   actually arrives would be the best option so how do we do that
+```
+
+Chose observation over both authority and defensive coding. A PostToolUse hook matching Edit|Write
+was installed in `.claude/settings.local.json` (untracked), appending raw stdin to
+`payload_samples.jsonl`. Command pipe-tested before installation; one round-trip bug found and fixed
+(a `printf "\n"` written through json.dumps became a real newline and would have broken the shell
+command — replaced with `{ cat; echo; }`). Hook proven to fire by three real Edits.
+
+OBSERVED PAYLOAD — Edit tool_input keys confirmed:
+
+```text
+file_path, old_string, new_string, replace_all
+```
+
+QUESTION STILL OPEN — the replace_all omission case is NOT settled. All three captures carried
+replace_all because the assistant supplied it in every call; the only agent editing this project is
+the assistant, so the omitted case could not be produced on demand. Recorded as unresolved rather
+than assumed. It remains observable later, from any edit made without that parameter.
+
+UNEXPECTED FINDING — the payload carries far more than the adapter reads:
+
+```text
+top level    session_id, transcript_path, cwd, scratchpad_dir, prompt_id, permission_mode,
+             effort, hook_event_name, tool_name, tool_input, tool_response, tool_use_id,
+             duration_ms
+tool_response    originalFile (the file's contents BEFORE the edit), structuredPatch,
+                 userModified, filePath, oldString, newString, replaceAll
+```
+
+ORIGINALFILE PROMPT (exact):
+
+```text
+originalFile contains the text of hook_probe.txt as it was before the edit.
+
+BuildLens wants to know the state of that file. Here is a field claiming to hold it, free, with no
+disk read at all.
+
+Should BuildLens treat originalFile as the observed pre-edit state of the file?
+Say why, using the rule you have been building for the last four sessions.
+Confidence =
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+.  i thought we were saying thsi was a claim, it is still fro mthe hook and then we can observe it
+```
+
+PASS. The learner refuses the shortcut and applies the rule unaided to a field seen for the first
+time: it arrives in the hook message, so it is a claim; observation would require reading the file.
+
+Sharpening supplied: `originalFile` claims a state that no longer exists. It cannot be observed
+after the fact at all, which makes it more dangerous to file as observed truth than a claim about a
+current state, not less.
+
+EV-P8-REAL-PAYLOAD-OBSERVATION-366
+Exercise type: ADJACENT_CONCEPT / APPLY
+Result: PASS. The learner demanded evidence for an asserted contract, chose observation over
+authority, and correctly classified a newly discovered field as claimed rather than observed.
+
+FIELD-SCOPE PROMPT (exact):
+
+```text
+For each field, say KEEP or SKIP, and if KEEP, name the report it enables:
+
+  cwd / tool_use_id / duration_ms / permission_mode
+  tool_response.originalFile / tool_response.userModified
+
+Anything that does not serve a report you can name is a SKIP.
+Confidence =
+```
+
+LEARNER ANSWERS (verbatim):
+
+```text
+. keep
+skip
+skip
+skip
+possibibly keep 
+possibly keep
+50
+```
+
+```text
+. ok skip all of them
+```
+
+PASS. When asked to name the report each KEEP would serve, the learner could not, and chose SKIP
+rather than retaining fields on the chance they might prove useful. This is the correct discipline:
+a captured field must be specified, validated, tested, kept read-only and serialized, and every
+unjustified one is a future reader's trust problem. The payload will still carry these fields
+whenever a named report needs them.
+
+DECISION: the adapter's field scope is unchanged. No new top-level or tool_response fields are read.
+
+EV-P8-FIELD-SCOPE-367
+Exercise type: DESIGN_REVIEW
+Result: PASS. Scope held against available-but-unjustified data.
+
+REMAINING EDIT SPEC DECISIONS — all open:
+
+```text
+1. may old_string be absent?     learner's spec says yes; every observed payload carried it
+2. what happens when replace_all is absent?   unresolved; omission case never observed
+3. is _required_string right for new_string?  it rejects "", and a deletion supplies ""
+```
+
+NEW_STRING EMPTY PROMPT (exact):
+
+```text
+_required_string raises on an empty string:
+
+    if value == "":
+        raise ValueError("empty required field: " + field)
+
+An edit that deletes text supplies old_string="dead code" and new_string="".
+
+Your spec says new_string is required and should raise if missing.
+What does the current helper do with new_string=""?
+Is that the behavior you want? Say what BuildLens loses if it raises here.
+Confidence =
+```
+
+RECOVERY STATUS:
+new_string empty-value decision due
+
+EMPTY-STRING SEQUENCE
+
+LEARNER ANSWER (verbatim):
+
+```text
+. it rasies an error
+that is a delema because if the edit was deleting something then the string would be empty, it would lose out in those cases
+```
+
+PASS on diagnosis. The learner identifies that `_required_string` rejects "" and that a deletion
+legitimately supplies "".
+
+LEARNER ANSWER (verbatim):
+
+```text
+. this is an edit only change so we could create a new function that would check for that,  and exclude write, raising for write makes sense because you cannot write "" into a file that is not a change
+```
+
+PARTIAL. The new-helper design is right. The Write justification was challenged with two payloads:
+content="" creating a new empty file, and content="" truncating a 500-line file. The learner agreed
+truncation is a change and that the parser cannot tell the two apart.
+
+LEARNER ANSWER (verbatim):
+
+```text
+. git diff
+```
+
+A real observation, and the one built in Phase 7, but it answers a different question. Separated:
+reading the file gives current contents; `git diff` gives difference from a committed version and
+cannot answer at all for an untracked file.
+
+LEARNER ANSWER (verbatim):
+
+```text
+. ok so you are saying that once we get the hook we read the claim and then before returning anytthing have to observe the file bytes and then we return depending if it was a menaingless or meaningful
+```
+
+MISCONCEPTION, corrected. Two questions had merged. Whether "" is a legitimate claimed value needs
+no file access; whether the file changed is a later comparison. A `parse_post_tool_use` that read
+the disk would violate the learner's own mechanism from `EV-P8-CLAIMED-CONTENT-DECISION-358` —
+separate functions, separate sources, separate types — and would blend claimed and observed data
+into one record with no way to tell them apart.
+
+LEARNER ANSWER (verbatim):
+
+```text
+. so we check to see if it is present and a string but for the "" we cannot confirm or deny the meaning so it moves forward
+```
+
+PASS. The learner states the boundary: the parser validates shape (present, correct type) and
+records the value faithfully; it makes no judgment about significance, because it has no
+information with which to make one.
+
+EV-P8-SHAPE-VERSUS-SIGNIFICANCE-368
+Exercise type: ADJACENT_CONCEPT / DESIGN_REVIEW
+Result: PASS after one merged-question correction.
+
+PATCH LANDED (EV-P8-EMPTY-CLAIM-369). `_required_text` added: requires the key and the str type,
+accepts "". `content` now uses it; `file_path`, `session_id`, `tool_name` and `hook_event_name` keep
+`_required_string`, since an empty path or id names nothing. Tests written FIRST and confirmed red
+with `ValueError: empty required field: content`, then green. Two tests added: empty Write content
+is recorded as claimed; empty file_path still raises. Full suite green across eight files.
+
+This corrects a defect in landed code: before this patch, a Write creating an empty file or
+truncating an existing one was rejected outright and recorded nowhere.
+
+FIXTURE DECISION (learner's): keep the rolling capture log untracked, commit one trimmed sample.
+`payload_samples.jsonl` added to `.gitignore`; `fixtures_post_tool_use_edit.json` committed, holding
+a real captured Edit payload with the machine-specific paths and session id replaced and unused
+fields dropped. It is the first real payload evidence in the repository.
+
+REMAINING EDIT SPEC DECISIONS — still open:
+
+```text
+1. may old_string be absent?     learner's spec says yes; every observed payload carried it
+2. what happens when replace_all is absent?   omission case still never observed
+3. does the Edit branch populate details at all yet?   no — still {}
+```

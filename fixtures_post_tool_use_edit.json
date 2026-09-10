@@ -1,0 +1,29 @@
+{
+  "session_id": "session-sample",
+  "cwd": "C:\\repo",
+  "hook_event_name": "PostToolUse",
+  "tool_name": "Edit",
+  "tool_input": {
+    "file_path": "C:\\repo\\hook_probe.txt",
+    "old_string": "cat\ncat",
+    "new_string": "dog\ncat",
+    "replace_all": false
+  },
+  "tool_response": {
+    "originalFile": "cat\ncat\n",
+    "structuredPatch": [
+      {
+        "oldStart": 1,
+        "oldLines": 2,
+        "newStart": 1,
+        "newLines": 2,
+        "lines": [
+          "+dog",
+          " cat",
+          "-cat"
+        ]
+      }
+    ],
+    "userModified": false
+  }
+}

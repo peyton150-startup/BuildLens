@@ -3355,3 +3355,84 @@ Exact restart point: the learner chooses between implementing the observed side 
 producing a separate observed record) and modelling Edit's claim shape
 (`old_string`, `new_string`, `replace_all`, needing a containment check rather than an equality
 check). Neither has been started. No knowledge gate is currently owed.
+
+## Session 2026-09-11 (afternoon) — Edit claim shape and the first real payload
+
+Phase 8, Edit claim shape. Specification only; no adapter code changed. `claude_adapter.py` is
+unchanged from `EV-P8-READONLY-DETAILS-365`.
+
+The learner specified the three Edit fields, then challenged the assistant's assertion about
+`replace_all` by asking for its evidence. That challenge exposed a project-level gap: NO HOOK WAS
+INSTALLED. Every payload the adapter had ever parsed, in every test and exercise, was hand-written.
+The input contract was an assumption.
+
+The learner chose to observe rather than reason further. A PostToolUse hook matching `Edit|Write`
+now lives in `.claude/settings.local.json` (untracked, not committed) and appends raw stdin to
+`payload_samples.jsonl` in the project root. It is proven to fire.
+
+CONFIRMED BY OBSERVATION — Edit `tool_input` keys:
+
+```text
+file_path, old_string, new_string, replace_all
+```
+
+STILL OPEN — whether `replace_all` is present when a caller omits it. All captures carried it
+because the assistant supplied it every time, and the assistant is the only agent editing this
+project. Not assumed either way. Answerable later from any edit made without that parameter.
+
+DISCOVERED — the payload is much larger than the adapter reads:
+
+```text
+top level        session_id, transcript_path, cwd, scratchpad_dir, prompt_id, permission_mode,
+                 effort, hook_event_name, tool_name, tool_input, tool_response, tool_use_id,
+                 duration_ms
+tool_response    originalFile, structuredPatch, userModified, filePath, oldString, newString,
+                 replaceAll
+```
+
+`tool_response.originalFile` holds the file's contents BEFORE the edit, and `structuredPatch` holds
+a computed diff. The learner correctly classified `originalFile` as claimed, not observed
+(`EV-P8-REAL-PAYLOAD-OBSERVATION-366`), and did so on a field never seen before. It claims a state
+that no longer exists and therefore cannot be verified after the fact at all.
+
+Two fields worth remembering for later phases: `cwd` is directly relevant to Phase 7's Git work,
+and `structuredPatch` overlaps with what `classify.py` and `summarize.py` already compute from a
+diff — but as a claim, not as an observation.
+
+Exact restart point: the Edit claim spec is unfinished. Three decisions remain, all the learner's:
+whether `old_string` may be absent (their spec says yes; the observed payload always carried it),
+what `replace_all` should do when absent, and whether `_required_string` — which rejects the empty
+string — is the right helper for `new_string`, since an edit that deletes text would supply "".
+No code may be written until those close.
+
+Housekeeping: the capture hook is still active and `payload_samples.jsonl` is untracked. Decide
+whether to keep capturing, and whether to commit a sample payload as a fixture for tests that
+currently rely on invented ones.
+
+### Empty-claim correction and the first committed fixture
+
+`EV-P8-SHAPE-VERSUS-SIGNIFICANCE-368` and `EV-P8-EMPTY-CLAIM-369`.
+
+A defect was found in landed code while specifying Edit: `_required_string` rejects "", so a Write
+that creates an empty file — or truncates an existing one — was rejected and recorded nowhere. The
+learner diagnosed it, initially defended raising for Write on the grounds that writing "" is "not a
+change", and withdrew that after seeing the truncation case.
+
+One misconception was corrected: the learner proposed that `parse_post_tool_use` should read the
+file before returning, and decide meaning from it. That merges claim capture with observation in one
+function and contradicts the learner's own mechanism in `EV-P8-CLAIMED-CONTENT-DECISION-358`. The
+boundary now held: the parser validates SHAPE (key present, correct type) and records the value
+faithfully; SIGNIFICANCE is decided later, by comparison, using the observed side.
+
+`_required_text` now exists alongside `_required_string`. It requires presence and str type but
+accepts "". `content` uses it; `file_path`, `session_id`, `tool_name`, `hook_event_name` keep
+`_required_string`, because an empty path or id names nothing. Tests were written first and
+confirmed red this time.
+
+`payload_samples.jsonl` is gitignored; `fixtures_post_tool_use_edit.json` is committed — a real
+captured Edit payload, trimmed, with machine-specific values replaced. It is the first real payload
+evidence in the repository, and the only one not invented by us.
+
+Exact restart point: three Edit spec decisions remain, all the learner's — whether `old_string` may
+be absent, what to do when `replace_all` is absent (still never observed), and the Edit branch still
+populates `details` with `{}`. No Edit code may be written until those close.

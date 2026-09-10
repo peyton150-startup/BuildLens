@@ -9,6 +9,40 @@ import importlib
 from dataclasses import FrozenInstanceError
 
 
+def test_empty_write_content_is_recorded_as_claimed():
+    claude_adapter = importlib.import_module("claude_adapter")
+    payload = {
+        "session_id": "session-9",
+        "hook_event_name": "PostToolUse",
+        "tool_name": "Write",
+        "tool_input": {
+            "file_path": "notes.txt",
+            "content": "",
+        },
+    }
+
+    result = claude_adapter.parse_post_tool_use(payload)
+
+    assert result.details == {"content": ""}
+
+
+def test_empty_file_path_still_raises():
+    claude_adapter = importlib.import_module("claude_adapter")
+    payload = {
+        "session_id": "session-9",
+        "hook_event_name": "PostToolUse",
+        "tool_name": "Write",
+        "tool_input": {
+            "file_path": "",
+            "content": "hello",
+        },
+    }
+
+    assert_payload_error(
+        claude_adapter, payload, "empty required field: file_path"
+    )
+
+
 def test_details_cannot_be_mutated_after_construction():
     claude_adapter = importlib.import_module("claude_adapter")
     payload = {
@@ -433,4 +467,6 @@ test_write_details_hold_the_claimed_content()
 test_edit_details_are_empty_until_edit_claims_are_modelled()
 test_missing_write_content_raises_readable_error()
 test_details_cannot_be_mutated_after_construction()
+test_empty_write_content_is_recorded_as_claimed()
+test_empty_file_path_still_raises()
 print("test passed")

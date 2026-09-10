@@ -33,6 +33,15 @@ def _required_string(values: dict[str, object], field: str) -> str:
     return value
 
 
+def _required_text(values: dict[str, object], field: str) -> str:
+    """Return a claimed string, allowing "" as a value the tool may really send."""
+    value = _required_value(values, field)
+    if not isinstance(value, str):
+        raise ValueError("field must be a string: " + field)
+
+    return value
+
+
 def _required_object(
     values: dict[str, object], field: str
 ) -> dict[str, object]:
@@ -67,7 +76,7 @@ def parse_post_tool_use(payload: object) -> ClaimedEdit | None:
 
     details: dict[str, object] = {}
     if tool_name == "Write":
-        details["content"] = _required_string(tool_input, "content")
+        details["content"] = _required_text(tool_input, "content")
 
     return ClaimedEdit(
         file_path=file_path,
