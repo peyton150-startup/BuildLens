@@ -42139,3 +42139,146 @@ REMAINING EDIT SPEC DECISIONS — still open:
 2. what happens when replace_all is absent?   omission case still never observed
 3. does the Edit branch populate details at all yet?   no — still {}
 ```
+
+## Session 2026-09-11 (evening) — Edit spec decisions 1 and 2
+
+OBSERVATION BEFORE RESUMING: the capture log still held only 3 records, all Edit, all carrying
+replace_all. Every change made to `claude_adapter.py` and `test_claude_adapter.py` in the previous
+session went uncaptured, because they were made through Bash rather than the Edit tool. A
+hook-based observer sees tool calls, not file changes. This is the concrete form of what the Bash
+branch already encodes — a Bash command may or may not change a file and the payload will not say —
+now demonstrated against the project's own source files.
+
+OLD_STRING PROMPT (exact):
+
+```text
+Your spec said old_string may be absent, reasoning that an edit might be "editing a blank part of
+the file".
+
+Observation says: all three captured Edit payloads carried old_string.
+The Edit tool's schema lists old_string as a required parameter.
+
+Does your "allowed to be absent" line survive that?
+Confidence =
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+. ok so it cannot be absent then because it needs to be there in the claude hook
+ if i drop it not sure anything would change, the only thing is if it is empty then that would be a malformed payload
+```
+
+PASS. The learner withdraws the speculative "may be absent" line against observation, and applies
+yesterday's empty-value criterion unaided: old_string="" names no location to find, so empty is
+meaningless there, while new_string="" is a real deletion.
+
+DECISION (learner's):
+
+```text
+old_string    required, _required_string    empty names nothing to find
+new_string    required, _required_text      empty is a deletion
+```
+
+REPLACE_ALL SEQUENCE
+
+The learner asked what evidence supports False as the default. Answered honestly: the tool's schema
+documents default false, but that describes the TOOL's behavior when the flag is missing and says
+nothing about what Claude claimed. Also noted that the key was present in every capture, so the
+missing-key branch may never execute and will sit untested until it does.
+
+LEARNER ANSWER (verbatim):
+
+```text
+. it did not claim it but if it claims absent i guess that is the most transparent but it is not exactly helpful, would we then have to put as a disclaimer that if absent either the replaceall is false or malformed
+```
+
+STRONG PARTIAL. The learner sees that C manufactures a claim and that recording absence is
+transparent, but wants the interpretation carried in the record. Correction supplied: the default
+belongs at the point of USE, where it can be labelled and attributed, not frozen into the record. A
+record holding False is wrong forever if the tool's default changes; a record holding "not stated"
+stays accurate and is the only version that could ever signal a changed sender or tool version.
+
+LEARNER ANSWER (verbatim):
+
+```text
+. so then B is the one i want to go with
+```
+
+DECISION (learner's): B — record replace_all when present, record its absence when absent. Never
+default it into the record.
+
+EV-P8-REPLACE-ALL-ABSENCE-370
+Exercise type: DESIGN_REVIEW
+Result: PASS. The learner refused to write an unclaimed value into a claimed record, on a field
+whose default is documented and whose absence has never been observed.
+
+RECOVERY STATUS:
+absence representation (missing key versus explicit None) due
+
+LEARNER ANSWER (verbatim):
+
+```text
+. so A it is becasue the keys that are claimed are the only ones that show up in details
+```
+
+PASS. Absence is represented by omission, consistent with what `details` already means.
+
+PATCH LANDED (EV-P8-EDIT-CLAIM-371)
+
+```text
+Current phase              Phase 8 — Claude adapter observation boundary
+Learning objective         recording absence as absence
+Behavior being added       Edit populates details: old_string, new_string, replace_all if stated
+Conceptual change          an optional claimed key; absence represented by omission
+Out of scope               disk reads; comparison; tool_response fields
+```
+
+`_required_boolean` added. The Edit branch records `old_string` via `_required_string`,
+`new_string` via `_required_text`, and `replace_all` via `_required_boolean` only when the key is
+present. Five tests added and confirmed red before implementing. Two older tests encoded the
+superseded contract and were updated: the first valid-Edit test now supplies a complete Edit payload,
+and `test_edit_details_are_empty_until_edit_claims_are_modelled` was deleted as superseded.
+
+Verified against the committed real payload: `fixtures_post_tool_use_edit.json` parses to
+`{'old_string': 'cat\ncat', 'new_string': 'dog\ncat', 'replace_all': False}`. The adapter is no
+longer tested only against payloads we invented.
+
+KNOWLEDGE GATE — MULTIEDIT BRANCH (exact):
+
+```text
+Someone later adds "MultiEdit" to the allowed tuple, and changes nothing else.
+Which branch does a MultiEdit payload take? What gets recorded, and is it true?
+Confidence =
+```
+
+LEARNER ANSWERS (verbatim):
+
+```text
+. i think that is a good change, if tool_name not in ("Edit", "Write"): as long as that stays then the rest work, checking the old string and new string, i am not sure about the payload, i ma not sure
+```
+
+```text
+. so multi edit shares the other checks with edit for old new string and replace all
+```
+
+```text
+. so my options are to have it silently fail or loudly fail but what about the tuple, if it is write and edit then multi edit will raise right there, if we do code in that multiedit is acceptable then we would need to have it be its own elif so we could make sure the fields for the payload are correct
+```
+
+PASS. The learner identifies that the guard is what makes `else` mean Edit, traces MultiEdit to the
+Edit branch, and then produces the complete resolution unaided: the tuple already rejects MultiEdit
+today, so the hypothetical only bites if someone widens it, and whoever widens it must add the
+branch. Forgetting produces a loud raise, not a corrupted record.
+
+Assistant correction made during this gate: the initial framing implied a MultiEdit payload might
+record something untrue. It would not — a real MultiEdit carries an `edits` array, so the Edit
+branch raises `missing required field: old_string`. The weakness is legibility, not correctness:
+the code reads as "anything not Write is an Edit", which holds only because of a guard several
+lines away.
+
+DECISION (learner's): leave the `else` as it is.
+
+EV-P8-EDIT-CLAIM-371
+Exercise type: MILESTONE_TRACE / DESIGN_REVIEW
+Result: PASS.

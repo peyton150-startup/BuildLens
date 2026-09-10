@@ -42,6 +42,14 @@ def _required_text(values: dict[str, object], field: str) -> str:
     return value
 
 
+def _required_boolean(values: dict[str, object], field: str) -> bool:
+    value = _required_value(values, field)
+    if not isinstance(value, bool):
+        raise ValueError("field must be a boolean: " + field)
+
+    return value
+
+
 def _required_object(
     values: dict[str, object], field: str
 ) -> dict[str, object]:
@@ -77,6 +85,11 @@ def parse_post_tool_use(payload: object) -> ClaimedEdit | None:
     details: dict[str, object] = {}
     if tool_name == "Write":
         details["content"] = _required_text(tool_input, "content")
+    else:
+        details["old_string"] = _required_string(tool_input, "old_string")
+        details["new_string"] = _required_text(tool_input, "new_string")
+        if "replace_all" in tool_input:
+            details["replace_all"] = _required_boolean(tool_input, "replace_all")
 
     return ClaimedEdit(
         file_path=file_path,

@@ -3436,3 +3436,48 @@ evidence in the repository, and the only one not invented by us.
 Exact restart point: three Edit spec decisions remain, all the learner's — whether `old_string` may
 be absent, what to do when `replace_all` is absent (still never observed), and the Edit branch still
 populates `details` with `{}`. No Edit code may be written until those close.
+
+### Edit claim shape implemented
+
+`EV-P8-REPLACE-ALL-ABSENCE-370` and `EV-P8-EDIT-CLAIM-371`.
+
+All three open Edit spec decisions are closed, each the learner's:
+
+```text
+old_string     required, _required_string     empty names nothing to find
+new_string     required, _required_text       empty is a real deletion
+replace_all    recorded when present, absent when absent; never defaulted into the record
+absence        represented by omitting the key, since details means "the keys that were claimed"
+```
+
+The learner withdrew the speculative "old_string may be absent" line against observation, and
+refused to default `replace_all` to False even though the tool documents that default — a default
+describes what the TOOL does when a flag is missing, and says nothing about what Claude claimed. The
+correction that landed: the default belongs at the point of USE, where it can be labelled and
+attributed. A record holding False would be wrong forever if the tool's default changed; a record
+holding "not stated" stays accurate and is the only version that could ever signal a changed sender
+or tool version.
+
+`_required_boolean` now exists alongside `_required_string` and `_required_text`. The Edit branch
+populates details. Five tests added, confirmed red first. Two older tests encoded the superseded
+contract and were updated or deleted. Full suite green across eight files.
+
+The adapter now parses the committed real payload, not only invented ones.
+
+Observation worth carrying: the capture log gained no records across a whole session of adapter
+work, because those edits were made through Bash rather than the Edit tool. A hook-based observer
+sees tool calls, not file changes — the concrete form of what the Bash branch already encodes,
+demonstrated against the project's own source.
+
+Exact code in `claude_adapter.py`: `ClaimedEdit(file_path, session_id, tool_name, details)` with
+read-only details; `_required_value`, `_required_string`, `_required_text`, `_required_boolean`,
+`_required_object`; `parse_post_tool_use`. There is still no disk read and no comparison anywhere in
+the project.
+
+The claim side of the observation boundary is now COMPLETE for both tools. Nothing observes
+anything yet.
+
+Exact restart point: the observed side. A function that reads a file from disk and produces a
+separate observed record, kept apart from the claim by separate function, source and type — the
+mechanism the learner argued for in `EV-P8-CLAIMED-CONTENT-DECISION-358`. Nothing is owed before it
+starts; no knowledge gate is open.

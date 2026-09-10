@@ -43,6 +43,98 @@ def test_empty_file_path_still_raises():
     )
 
 
+def _edit_payload(tool_input):
+    return {
+        "session_id": "session-7",
+        "hook_event_name": "PostToolUse",
+        "tool_name": "Edit",
+        "tool_input": tool_input,
+    }
+
+
+def test_edit_details_hold_the_claimed_strings_and_flag():
+    claude_adapter = importlib.import_module("claude_adapter")
+
+    result = claude_adapter.parse_post_tool_use(
+        _edit_payload(
+            {
+                "file_path": "notes.md",
+                "old_string": "cat",
+                "new_string": "dog",
+                "replace_all": True,
+            }
+        )
+    )
+
+    assert result.details == {
+        "old_string": "cat",
+        "new_string": "dog",
+        "replace_all": True,
+    }
+
+
+def test_absent_replace_all_is_recorded_as_absent():
+    claude_adapter = importlib.import_module("claude_adapter")
+
+    result = claude_adapter.parse_post_tool_use(
+        _edit_payload(
+            {
+                "file_path": "notes.md",
+                "old_string": "cat",
+                "new_string": "dog",
+            }
+        )
+    )
+
+    assert "replace_all" not in result.details
+    assert result.details == {"old_string": "cat", "new_string": "dog"}
+
+
+def test_edit_that_deletes_text_records_empty_new_string():
+    claude_adapter = importlib.import_module("claude_adapter")
+
+    result = claude_adapter.parse_post_tool_use(
+        _edit_payload(
+            {
+                "file_path": "notes.md",
+                "old_string": "dead code",
+                "new_string": "",
+            }
+        )
+    )
+
+    assert result.details["new_string"] == ""
+
+
+def test_empty_old_string_raises_readable_error():
+    claude_adapter = importlib.import_module("claude_adapter")
+
+    assert_payload_error(
+        claude_adapter,
+        _edit_payload(
+            {"file_path": "notes.md", "old_string": "", "new_string": "dog"}
+        ),
+        "empty required field: old_string",
+    )
+
+
+def test_non_boolean_replace_all_raises_readable_error():
+    claude_adapter = importlib.import_module("claude_adapter")
+
+    assert_payload_error(
+        claude_adapter,
+        _edit_payload(
+            {
+                "file_path": "notes.md",
+                "old_string": "cat",
+                "new_string": "dog",
+                "replace_all": "yes",
+            }
+        ),
+        "field must be a boolean: replace_all",
+    )
+
+
 def test_details_cannot_be_mutated_after_construction():
     claude_adapter = importlib.import_module("claude_adapter")
     payload = {
@@ -79,6 +171,8 @@ def test_valid_edit_returns_claimed_edit_from_nested_tool_input():
         "tool_name": "Edit",
         "tool_input": {
             "file_path": "C:/repo/app.py",
+            "old_string": "cat",
+            "new_string": "dog",
         },
     }
 
@@ -88,7 +182,7 @@ def test_valid_edit_returns_claimed_edit_from_nested_tool_input():
         file_path="C:/repo/app.py",
         session_id="session-7",
         tool_name="Edit",
-        details={},
+        details={"old_string": "cat", "new_string": "dog"},
     )
 
 
@@ -418,24 +512,6 @@ def test_write_details_hold_the_claimed_content():
     assert result.details == {"content": "hello"}
 
 
-def test_edit_details_are_empty_until_edit_claims_are_modelled():
-    claude_adapter = importlib.import_module("claude_adapter")
-    payload = {
-        "session_id": "session-7",
-        "hook_event_name": "PostToolUse",
-        "tool_name": "Edit",
-        "tool_input": {
-            "file_path": "C:/repo/app.py",
-            "old_string": "cat",
-            "new_string": "dog",
-        },
-    }
-
-    result = claude_adapter.parse_post_tool_use(payload)
-
-    assert result.details == {}
-
-
 def test_missing_write_content_raises_readable_error():
     claude_adapter = importlib.import_module("claude_adapter")
     payload = {
@@ -464,9 +540,13 @@ test_unsupported_tool_name_raises_readable_error()
 test_missing_write_file_path_raises_readable_error()
 test_malformed_bash_command_raises_readable_error()
 test_write_details_hold_the_claimed_content()
-test_edit_details_are_empty_until_edit_claims_are_modelled()
 test_missing_write_content_raises_readable_error()
 test_details_cannot_be_mutated_after_construction()
 test_empty_write_content_is_recorded_as_claimed()
 test_empty_file_path_still_raises()
+test_edit_details_hold_the_claimed_strings_and_flag()
+test_absent_replace_all_is_recorded_as_absent()
+test_edit_that_deletes_text_records_empty_new_string()
+test_empty_old_string_raises_readable_error()
+test_non_boolean_replace_all_raises_readable_error()
 print("test passed")
