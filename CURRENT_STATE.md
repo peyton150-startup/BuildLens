@@ -3776,16 +3776,34 @@ Write question  is the observed file THE SAME AS the claimed content, at observe
                 (whole-file equality, not containment; says nothing about the file later)
 ```
 
-Verdict set as it stands (learner-named; the R/S grouping is NOT yet closed):
+Verdict set — CLOSED (EV-P8-RS-SPLIT-DEFENSE-398A, EV-P8-UNKNOWN-STATUS-DECISION-401):
 
 ```text
 READ, same content       claim holds
 READ, different content  claim does not hold  — "out of date or incorrect": a mismatch cannot say
                                                 whether Claude was wrong or the file changed after
-ABSENT                   claim does not hold — the learner's current label is "file absent";
-                         whether it shares S's verdict or stays separate is undecided
+ABSENT                   file absent          — contradicts the claim; kept separate from "claim
+                                                does not hold" so the verdict is a complete one-line
+                                                answer. Reversal: when the reader always sees
+                                                observed.status beside the verdict
 UNREADABLE               incomparable
+unknown status           status not accepted  — a fact about BuildLens's own code (missing branch).
+                                                Returned, not raised: one raise would drop the rest
+                                                of the batch. Reversal: if an unknown status could
+                                                corrupt later results (today it cannot —
+                                                compare_write is stateless per call)
 ```
+
+Check order (EV-P8-CHECK-ORDER-400): each known status is checked explicitly; the hash comparison
+runs only inside the READ branch, never by elimination. This is requirement 1 in its claim-versus-
+observation form: the claim always has a digest, the observation only when READ.
+
+Required test cases so far: E1 (claim "" vs ABSENT → file absent) and E2 (claim "" vs READ b"" →
+claim holds) — any code treating None and b"" alike fails E1. Candidate, not yet put to the learner:
+a test sending every ObservationStatus member through compare_write, failing on "status not accepted".
+
+Process note: on two-sided design decisions, weigh both sides equally — the learner caught the
+assistant stacking scaffolds toward RAISE (401).
 
 Misconception recurred and recovered twice: "compare" read as the BYTE MECHANISM rather than as a
 verdict about the claim, which led the learner to file ABSENT under "incomparable" next to
@@ -3800,15 +3818,36 @@ State observed facts as observations.
 Still open for the spec, in order:
 
 ```text
-1. EV-P8-EMPTY-WRITE-TRANSFER-397  pending — claim "" vs ABSENT and vs READ b""
-2. R/S: one verdict or two, with a reason and a reversal condition
-3. requirement 1  both sides READ before trusting hash equality — how it applies when one side is
-                  a claim, not an observation
-4. requirement 2  line-ending normalisation
-5. requirement 3  str -> bytes encoding at the comparison, labelled
-6. requirement 4  compare content_hash, not records (learner already tied bytes to hash in 392)
-7. function shape, return type, then the pre-patch frame; tests red first; then code
+DONE  EV-P8-EMPTY-WRITE-TRANSFER-397 (passed), R/S split (two), requirement 1 (check order)
+1. requirement 3  str -> bytes encoding at the comparison, labelled   ← IN PROGRESS
+2. requirement 2  line-ending normalisation (depends on 3: line endings are a bytes question)
+3. requirement 4  compare content_hash, not records (already how the check-order sketch works)
+4. verdict type (strings vs enum), function name/signature, where it lives
+5. pre-patch frame; tests red first (incl. E1/E2, every-status test candidate); then code
 ```
 
-Exact restart point: re-present the exact EV-P8-EMPTY-WRITE-TRANSFER-397 prompt from the ledger.
-Do not reveal its answer. No code has been written for the comparison.
+Requirement 3 progress (EV-P8-STR-BYTES-EQUALITY-402 through 407):
+
+```text
+held      str == bytes is False SILENTLY; .encode(enc) turns str into bytes; the same text under
+          two encodings gives different bytes; a wrong encoding guess yields a false "claim does
+          not hold" that blames Claude for BuildLens's assumption
+decided   C then A (learner's): observe the Write tool, then assume UTF-8 and label it
+observed  Claude Code Write, Windows 11: "é" stored as UTF-8 (c3 a9) for a NEW file and when
+          OVERWRITING a Latin-1 file; line ending \n, not \r\n. Supports A on this machine/version
+open      misconception (406): the learner read C as something compare_write does at runtime on
+          every comparison. C was a one-off design-time experiment; at runtime compare_write has
+          only the str and the bytes, neither of which names the encoding. R1 check 407 pending.
+          Alternative D (try several encodings at runtime) is real — weigh evenly if proposed.
+then      lock in A: yes/no, the one-line label beside .encode("utf-8"), reversal observation
+```
+
+Requirement 2 evidence gathered in passing: Write itself emits \n on Windows, so a \r\n on disk would
+come from something else (Git core.autocrlf on checkout, another editor).
+
+Scratch evidence files (not in the repo): scratchpad new_cafe.txt, existing_latin1.txt; the captured
+claims are in the gitignored payload_samples.jsonl.
+
+Exact restart point: the learner pasted back the A/B/C option text instead of answering
+EV-P8-RUNTIME-INPUTS-R1-407. Ask what the paste was meant to show, then re-present the exact 407
+prompt from the ledger. Do not reveal its answer. No comparison code exists.

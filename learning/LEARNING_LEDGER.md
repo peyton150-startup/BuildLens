@@ -44460,4 +44460,824 @@ Why E1 and E2 differ             =
 Confidence (0–100)               =
 ```
 
-No answer yet. Resume by re-presenting this exact prompt; do not reveal its answer.
+No answer yet at the pause. Re-presented verbatim after the commit, in the same session.
+
+LEARNER ANSWER (verbatim):
+
+```text
+. no
+yes
+becasue None menas there is nothing there and "" means it is empty which it is
+```
+
+EVALUATION:
+PASS on all three fields; confidence omitted. Absence-as-evidence held on a fresh claim (E1: an
+empty-content claim is still contradicted by a missing file), and the None versus b"" distinction
+was applied unaided to the verdict. Precision: None records that no bytes were observed because no
+file was found; b"" records a file read and found empty.
+
+SPEC CONSEQUENCE: E1/E2 become required test cases — any implementation that treats None and b"" as
+the same (a truthiness check, `file_bytes or b""`) would report E1 as holding.
+
+The 395C → 396 remediation chain is CLOSED: R1 passed, near-transfer passed on a new claim.
+
+NEXT: return to the open R/S decision — one verdict or two — now that ABSENT is agreed to contradict
+the claim and the 395C reason for splitting ("could compare S but not R") has been withdrawn.
+
+### EV-P8-RS-SPLIT-DECISION-398 — one verdict or two for ABSENT and different-content
+
+Exercise type: DESIGN_DECISION
+
+PROMPT (exact):
+
+```text
+Should R and S be one verdict or two?
+
+S   ObservedFile(status=READ,   file_bytes=b"print('done')\n", ...)   claim: "print('ready')\n"
+R   ObservedFile(status=ABSENT, file_bytes=None,               ...)   claim: "print('ready')\n"
+
+Both: the claim does not hold.
+
+What the reader does about R                   =
+One verdict or two                             =
+Reason (what one of them tells the reader that the other doesn't, or why nothing is lost) =
+Confidence (0–100)                             =
+
+For S you already wrote "out of date or incorrect". Answer the first field the same way for R.
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+. two
+becasue the reason the claim does not hold are different and that needs to be recorded
+```
+
+EVALUATION:
+DECIDED: two verdicts — the learner's call. Reason given: the two ways of failing differ and the
+difference must be recorded. Field 1 (reader action for R) and confidence omitted.
+
+The reason is a start but not yet a defense: the ObservedFile already records status=ABSENT, so
+"must be recorded" does not yet show the VERDICT is where it has to live. Credible alternative: one
+"claim does not hold" verdict, with the reason read from the observation. Design-rubric challenge
+next: where would the reason be lost under one verdict, and what would have to be true for one
+verdict to be better (reversal condition). Two fields only.
+
+### EV-P8-RS-SPLIT-DEFENSE-398A — design-rubric challenge
+
+PROMPT (exact):
+
+```text
+Option ONE verdict    comparison returns  CLAIM_DOES_NOT_HOLD
+                      the reason lives in observed.status  → ABSENT  or  READ
+
+Option TWO verdicts   comparison returns  CLAIM_DOES_NOT_HOLD   or   FILE_ABSENT
+                      the reason lives in the verdict itself
+
+Under option ONE, the fact that the file was absent is still recorded, in observed.status. Your
+reason has to explain why that isn't good enough.
+
+Under ONE verdict, who or what would lose the reason, and how  =
+What would have to be true for ONE verdict to be the better choice  =
+Confidence (0–100)                                                   =
+
+Answer each field in one or two sentences. Changing your mind to ONE is allowed if the challenge
+convinces you.
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+. becasue when i look at the verdict i do not want to have to go one level down to find the actual answer it needs to be an actual answer in one line
+```
+
+EVALUATION:
+Field 1 PASS: a real mechanism, starting from the reader's requirement — the verdict alone must be a
+complete answer, readable in one line, without dereferencing observed.status. Quality optimized:
+self-sufficiency of the verdict for its reader. Not "X is better". Field 2 (reversal condition) and
+confidence omitted.
+
+NEXT: the reversal condition alone, as one field.
+
+REVERSAL PROMPT (exact):
+
+```text
+When would ONE verdict be the better choice?
+
+Option ONE    CLAIM_DOES_NOT_HOLD                  (reason in observed.status)
+Option TWO    CLAIM_DOES_NOT_HOLD  or  FILE_ABSENT (reason in the verdict)   ← your choice
+
+What would have to be true for ONE verdict to be better  =
+Confidence (0–100)                                        =
+
+A good answer names a concrete situation, such as a specific reader or caller, a use of the verdict,
+or a future change. Under that situation, TWO would cost more than it gives.
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+. if the verdict was returned with the status of absent or read
+```
+
+EVALUATION:
+PASS; confidence omitted. A concrete reversal condition, consistent with the learner's own reason:
+if whatever the reader sees always carries observed.status beside the verdict, the reason is no
+longer "one level down" and the split buys nothing. Precision supplied: the downside of TWO under
+that condition is the same fact held twice — verdict and status — which could then disagree.
+
+DECISION CLOSED (learner's): four verdicts — CLAIM HOLDS, CLAIM DOES NOT HOLD (read, different
+content), FILE ABSENT, INCOMPARABLE (unreadable). Reason: the verdict must be a complete one-line
+answer. Reversal: when the result the reader sees always pairs the verdict with observed.status.
+
+NEXT: requirement 1 in its claim-versus-observation form — trace a hash-first implementation against
+UNREADABLE and ABSENT.
+
+### EV-P8-HASH-FIRST-TRACE-399 — requirement 1, claim-versus-observation form
+
+Exercise type: TRACE
+
+PROMPT (exact):
+
+```text
+What does this version return?
+
+def compare_write(claim, observed):
+    claimed_hash = digest_of(claim.details["content"])
+    if observed.content_hash == claimed_hash:
+        return "claim holds"
+    return "claim does not hold"
+
+Call:
+compare_write(claim, P)      # claim content "print('ready')\n"
+compare_write(claim, R)      # claim content "print('ready')\n"
+
+P   ObservedFile(status=UNREADABLE, file_bytes=None, content_hash=None, ...)
+R   ObservedFile(status=ABSENT,     file_bytes=None, content_hash=None, ...)
+
+compare_write(claim, P) returns                        =
+compare_write(claim, R) returns                        =
+Which return(s) break your verdict set, and why        =
+Confidence (0–100)                                     =
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+. it returns whether the hashes are the same 
+both of them return claim does not hold but we need to seperate the 2 cases from eachother
+```
+
+EVALUATION:
+Return values PASS: both calls return "claim does not hold" (line 1 stated the general behavior;
+line 2 supplied this call's values for both — the capability-versus-this-call pattern, self-
+resolved). Field 3 PARTIAL: saw that the two cases collapse, but not that EACH is wrong on its own —
+R should be "file absent", and P's return is worse than unseparated: it asserts a contradiction
+BuildLens has no evidence for, where the spec says "incomparable". Mechanism not stated: None ==
+<64-hex string> is False, so both fall through to the last line. Confidence omitted.
+
+Precision supplied, not remediated (the learner committed and the values were right). Requirement 1
+restated for this shape: the claim side always has a digest; the observed side has one only when
+READ, so status must be checked before the hash is consulted.
+
+NEXT: the learner specifies the order of checks in compare_write.
+
+### EV-P8-CHECK-ORDER-400 — learner specifies the order of checks
+
+Exercise type: SPECIFICATION
+
+PROMPT (exact):
+
+```text
+In what order should compare_write check things?
+
+def compare_write(claim, observed):
+    ...
+
+Your four verdicts: claim holds, claim does not hold, file absent, incomparable.
+
+Step 1 =
+Step 2 =
+Step 3 =
+Step 4 =
+Confidence (0–100) =
+
+Write each step in plain words or in Python, whichever is easier, in the form "check ___ → return
+___". Use fewer than four steps if that's all you need.
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+. incomparable first so we can make sure the file is actually there and it is not an error then file abesnt so we get the fields where the compare for the hash does not matter then we move to the hash mattering, cliam holds then claim does not hold, not confident please push back
+```
+
+EVALUATION:
+PASS on behavior for all four current statuses: UNREADABLE → incomparable; ABSENT → file absent;
+then hash equal → claim holds; otherwise → claim does not hold. The key principle is stated
+unaided: the non-READ cases, "where the compare for the hash does not matter", come before "the hash
+mattering" — requirement 1 in the learner's words. Confidence: "not confident", with an explicit
+request for pushback.
+
+Imprecision: step 1's reason ("make sure the file is actually there") — checking UNREADABLE does not
+establish that the file is there.
+
+PUSHBACK REQUESTED, delivered as two traces rather than as answers:
+(a) swap steps 1 and 2 — does any verdict change? (tests whether the order between the two status
+    checks carries meaning, or only "status before hash" does);
+(b) a future fourth status, not READ, with content_hash None — which verdict does the learner's
+    order return? (tests whether the hash step is guarded by "status is READ" or merely reached by
+    elimination).
+
+PUSHBACK PROMPT (exact):
+
+```text
+def compare_write(claim, observed):
+    if observed.status is ObservationStatus.UNREADABLE:
+        return "incomparable"
+    if observed.status is ObservationStatus.ABSENT:
+        return "file absent"
+    claimed_hash = digest_of(claim.details["content"])
+    if observed.content_hash == claimed_hash:
+        return "claim holds"
+    return "claim does not hold"
+
+Pushback A: swap the first two if blocks, so ABSENT is checked before UNREADABLE. Do any of P, Q, R
+or S now get a different verdict?
+
+Pushback B: suppose that next month ObservationStatus gains a fourth member, TOO_LARGE. The file
+exists, but BuildLens deliberately doesn't read files over a size limit. That observation holds
+file_bytes=None and content_hash=None.
+
+Call:
+compare_write(claim, ObservedFile(status=TOO_LARGE, file_bytes=None, content_hash=None, ...))
+
+A — does any verdict change after the swap (yes / no), and why   =
+B — what the call returns                                         =
+B — what it should return, and what that says about step 3        =
+Confidence (0–100)                                                =
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+. nothing changes becasue you are testing the observed status
+```
+
+EVALUATION:
+A PASS: no verdict changes. Reason partial — precision supplied: one observation holds exactly one
+status, so at most one of the two status checks can be true; they are mutually exclusive, and only
+"status checks before the hash" carries meaning. B (both fields) and confidence omitted — wide-prompt
+field omission again. Narrow to B alone.
+
+NARROWED B PROMPT (exact):
+
+```text
+What does this call return?
+
+(same compare_write as above)
+
+TOO_LARGE is a new status. The file exists, but BuildLens chose not to read it, so there are no
+bytes and no hash.
+
+Call:
+compare_write(claim, ObservedFile(status=TOO_LARGE, file_bytes=None, content_hash=None, ...))
+
+Returns              =
+Is that verdict true  = yes / no
+Confidence (0–100)   =
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+. claim does not hold, so we would need to make the tuple check for the read absent and unreadable options so if we want too large later we will have to add that to the guard and another if statmente
+```
+
+EVALUATION:
+PASS; confidence omitted. Return value correct, and the learner went straight to the fix without
+being asked: check the known statuses explicitly rather than reaching the hash step by elimination,
+so a new status has to be added deliberately. This is requirement 1 made robust — the hash step is
+guarded by "status is READ", not by "none of the other checks matched". The "tuple check" echoes the
+adapter's `tool_name not in ("Edit", "Write")` guard.
+
+Left open by the answer: what the function does when a status it does not know reaches it. That is a
+real decision with precedents on both sides — parse_post_tool_use RAISES on an unsupported tool_name;
+observe_file NEVER raises and the learner argued absence-as-result partly on the batch argument.
+Asked next.
+
+### EV-P8-UNKNOWN-STATUS-DECISION-401 — what an unrecognised status does
+
+Exercise type: DESIGN_DECISION
+
+PROMPT (exact):
+
+```text
+def compare_write(claim, observed):
+    if observed.status is ObservationStatus.UNREADABLE:
+        return "incomparable"
+    if observed.status is ObservationStatus.ABSENT:
+        return "file absent"
+    if observed.status is ObservationStatus.READ:
+        claimed_hash = digest_of(claim.details["content"])
+        if observed.content_hash == claimed_hash:
+            return "claim holds"
+        return "claim does not hold"
+    ???        # reached only by a status this function does not know
+
+What goes in ???
+
+parse_post_tool_use   an unsupported tool_name  →  raise ValueError("unsupported tool_name: ...")
+observe_file          never raises; you argued a missing file is a result, partly because one
+                      raise would stop a whole batch of observations
+
+???                                              = raise ValueError(...)  /  return "incomparable"
+Reason                                           =
+What would have to be true for the other choice  =
+Confidence (0–100)                               =
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+. i would return so we can record it and see what went wrong
+```
+
+EVALUATION:
+TENTATIVE DECISION: return "incomparable". Reason: keep a record so the cause can be found. Reversal
+condition and confidence omitted.
+
+Not yet consistent with the learner's own principle from EV-P8-RS-SPLIT-DEFENSE-398A (the verdict
+must be a complete one-line answer, no going a level down): "incomparable" from an unknown status is
+indistinguishable from "incomparable" from UNREADABLE, so the reader cannot "see what went wrong" —
+the stated goal. Also unexamined: an unknown status reaching this line is a fact about BuildLens's
+OWN CODE (the function was not updated when the enum grew), a third category beside the ABSENT
+(fact about the file) / UNREADABLE (fact about BuildLens's reach) split the learner made in
+EV-P8-FILE-OBSERVER-372.
+
+NEXT: design-rubric challenge as two narrow checks — can the reader tell the two "incomparable"s
+apart; and which kind of fact an unknown status is. Then let the learner re-decide or defend.
+
+CHALLENGE PROMPT (exact):
+
+```text
+Case U   ObservedFile(status=UNREADABLE, ...)   open raised PermissionError
+Case T   ObservedFile(status=TOO_LARGE,  ...)   a status compare_write was never updated to know
+
+With ??? set to return "incomparable", BuildLens prints:
+Case U   incomparable
+Case T   incomparable
+
+Reading only those two lines, can you tell which one is a PermissionError?   = yes / no
+Case T is a fact about:   the file  /  BuildLens's reach  /  BuildLens's own code
+Confidence (0–100)                                                           =
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+. so we make a new option called status not accpeted
+```
+
+EVALUATION:
+Field 1 answered implicitly (no — hence a new verdict). The learner revised the decision unprompted:
+a fifth verdict, "status not accepted", instead of reusing "incomparable" — consistent with their
+one-line-answer principle. A legitimate design. Field 2 (which kind of fact T is) and confidence
+omitted; that field is what separates "record it as a verdict" from "raise", so it is asked alone
+next.
+
+FACT-CATEGORY PROMPT (exact):
+
+```text
+What kind of fact is Case T?
+
+Case T   ObservedFile(status=TOO_LARGE, ...)
+         observe_file produced TOO_LARGE; compare_write was never updated to know it exists
+
+ABSENT        a fact about the file              (it isn't there)
+UNREADABLE    a fact about BuildLens's reach     (it couldn't look)
+
+Case T is a fact about   = the file / BuildLens's reach / BuildLens's own code
+Why                      =
+Confidence (0–100)       =
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+. buildlens own code 
+we have not created an if statment to process that stauts that is all
+```
+
+EVALUATION:
+PASS; confidence omitted. Correct category and the exact mechanism: a missing branch in compare_write,
+nothing about the file or the claim. This makes a third category beside the observer's two: an
+unknown status is a BuildLens defect.
+
+NEXT: re-decide ??? with that category in hand. Every verdict so far describes claim-versus-file;
+T describes BuildLens. Neutral scaffold: who is first to hit T, and when.
+
+RE-DECISION PROMPT (exact):
+
+```text
+Who runs into Case T first?
+
+Picture the sequence: someone adds TOO_LARGE to ObservationStatus and teaches observe_file to
+produce it. They forget to update compare_write.
+
+Option VERDICT   ???  →  return "status not accepted"
+Option RAISE     ???  →  raise ValueError("unhandled observation status: TOO_LARGE")
+
+Who is likely to hit Case T first, and when         =
+Your final choice for ???  (VERDICT / RAISE)        =
+Confidence (0–100)                                  =
+
+Keeping VERDICT is allowed. The design review will ask for one downside of whichever you pick, but
+not yet.
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+. ok so you think raiseing is the correct otion but why, ok so since we would hit the observation first and that check has to pass befroe we get to compare we should raise becasue that signifies that the code was changewd for observe but not for compare
+```
+
+EVALUATION:
+DECISION: RAISE. Reason is a real mechanism: the raise signals that observe_file was changed and
+compare_write was not — a cross-module mismatch. Field 1 answered as ordering (observation runs
+before compare) rather than who/when; precision: the first person to hit it is the developer who
+added TOO_LARGE, at test time — IF a test feeds compare_write every status. Confidence omitted.
+
+LEARNER OBJECTION UPHELD: "you think raising is the correct option". The facilitator's sequence
+(third category named "a bug", then "who hits it first") leaned toward RAISE before the learner
+committed. PROCESS NOTE against the assistant: on a genuine two-sided design decision, present
+evidence for both sides with equal weight; do not stack scaffolds that point one way. Both options
+are defensible; the decision is only the learner's if the VERDICT side got a fair hearing. The
+learner is invited to switch.
+
+NEXT: downside of RAISE (the learner's own batch argument from EV-P8-FILE-OBSERVER-372) and the
+reversal condition — what would have to be true for VERDICT to be better.
+
+BALANCED CHALLENGE PROMPT (exact):
+
+```text
+VERDICT's best argument (yours, from the observer design):
+    one raise stops the whole batch — every other claim in that run gets no verdict at all,
+    because one status was unknown
+
+One real downside of RAISE                                  =
+What would have to be true for VERDICT to be the better choice =
+Still RAISE after this? (yes / switch to VERDICT)           =
+Confidence (0–100)                                          =
+
+Switching is a perfectly good outcome. So is staying with RAISE, as long as you can answer the batch
+argument.
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+. the batch is paused and the rest are thrown out, if the unkown was somehow chained to every file so it would currpt every file after it, so returning is the corret verdict that is my choice
+```
+
+EVALUATION:
+DECISION CLOSED (learner's, switched): VERDICT — ??? returns "status not accepted". Downside of
+RAISE stated: the batch stops and the remaining claims are thrown out. Field 2 answered in the
+reverse direction, which is the reversal condition for the choice actually made: RAISE would be
+better if an unknown status could corrupt every result after it. Coherent. Confidence omitted.
+
+Evidence supplied (the rubric's evidence step): compare_write takes one claim and one observation and
+keeps no state between calls, so an unknown status in one comparison cannot taint another — the
+reversal condition is currently false, which supports the choice.
+
+Known downside of VERDICT, for the test design: a returned "status not accepted" can be silently
+tolerated where a raise could not. Candidate mitigation to ask the learner about when tests are
+designed: a test that sends EVERY ObservationStatus member through compare_write and fails if any
+returns "status not accepted" — it would go red the day a status is added without a branch.
+
+NEXT: requirement 3 — str versus bytes at the comparison, starting with a predict-first equality.
+
+### EV-P8-STR-BYTES-EQUALITY-402 — requirement 3, predict-first
+
+Exercise type: PREDICTION
+
+PROMPT (exact):
+
+```text
+What does this expression evaluate to?
+
+"print('ready')\n" == b"print('ready')\n"
+
+The left side is what claim.details["content"] holds. The right side is what observed.file_bytes
+holds after reading that same file.
+
+Result             = True / False / raises an error
+Why                =
+Confidence (0–100) =
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+. it is not the same because it is bytes vs strings
+```
+
+EVALUATION:
+PASS; confidence omitted. "Not the same" = False, with the correct reason (different types).
+Confirmed by execution:
+
+```text
+result: False
+types : str vs bytes
+```
+
+Precision supplied: it is False SILENTLY — no error. A naive `content == file_bytes` would therefore
+report "claim does not hold" for every Write, including perfect ones, and nothing would warn. That is
+why requirement 3 exists: one side must be converted, deliberately, at the comparison.
+
+NEXT: `.encode(...)` — predict-first on an ASCII case (converts to equal bytes) and a non-ASCII case
+under two encodings (the assumption the conversion must label).
+
+### EV-P8-ENCODE-PREDICTION-403 — `.encode` and the encoding assumption
+
+Exercise type: PREDICTION
+
+PROMPT (exact):
+
+```text
+What do these evaluate to?
+
+1.   "print('ready')\n".encode("utf-8") == b"print('ready')\n"
+2.   "café".encode("utf-8") == "café".encode("latin-1")
+
+1 result            = True / False
+2 result            = True / False
+What 2 means for compare_write, if Claude's file was saved in a different encoding than the one we pick =
+Confidence (0–100)  =
+
+latin-1 is another real encoding. Predict from the rule above; you don't need to know how either
+encoding works inside.
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+. true beasue you encodeed it into bytes
+false becasue the encodig is 2 different types
+```
+
+EVALUATION:
+1 PASS, 2 PASS on value; confidence omitted. Confirmed by execution:
+
+```text
+1: True
+2: False
+utf-8  : b'caf\xc3\xa9' bytes
+latin-1: b'caf\xe9' bytes
+```
+
+Reason for 2 imprecise: both results are the SAME type (bytes); the two encodings produce DIFFERENT
+BYTE SEQUENCES — "é" becomes two bytes (c3 a9) in UTF-8 and one (e9) in Latin-1. Precision supplied;
+the type-versus-content distinction was held in 402, so not remediated. Field 3 (consequence for
+compare_write) omitted — asked alone next.
+
+### EV-P8-WRONG-ENCODING-TRACE-404 — consequence of a wrong encoding assumption
+
+Exercise type: TRACE
+
+PROMPT (exact):
+
+```text
+What does this mean for compare_write?
+
+Suppose compare_write converts the claim with .encode("utf-8"), but Claude's Write tool actually
+saved the file as Latin-1:
+
+claim.details["content"]        "café\n"
+claim converted by BuildLens    "café\n".encode("utf-8")   → b'caf\xc3\xa9\n'
+observed.file_bytes             b'caf\xe9\n'                 (the file Claude really wrote)
+
+Verdict compare_write returns       =
+Is that verdict true                = yes / no
+Confidence (0–100)                  =
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+.  it should return claim holds but i am nto sure about the encoding
+```
+
+EVALUATION:
+MISS on the traced value; low confidence stated in words. "Should return claim holds" gives what is
+TRUE (Claude wrote exactly the claimed text), not what the code RETURNS. The code compares bytes (via
+their digests): b'caf\xc3\xa9\n' and b'caf\xe9\n' differ, so it returns "claim does not hold" — a
+false verdict caused by BuildLens's own assumption, not by Claude.
+
+PRIMARY BLOCKER: separating what compare_write computes (bytes only — it cannot see the text) from
+what is true about the claim. Descend to one R1 check: are the two byte sequences equal, and which
+branch runs as a result.
+
+R1 PROMPT (exact):
+
+```text
+Which branch runs?
+
+    if observed.status is ObservationStatus.READ:
+        claimed_hash = digest_of(claim_bytes)
+        if observed.content_hash == claimed_hash:
+            return "claim holds"
+        return "claim does not hold"
+
+claim_bytes            b'caf\xc3\xa9\n'
+observed.file_bytes    b'caf\xe9\n'
+
+Are the two byte sequences equal?    = yes / no
+So the two digests are               = equal / different
+So compare_write returns             =
+Confidence (0–100)                   =
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+. no
+different 
+claim not hold
+but why and how can we fix this
+```
+
+EVALUATION:
+PASS on all three traced fields; confidence omitted. The code-returns-versus-what-is-true split is
+recovered: the code returns "claim does not hold" on identical text. The learner then asked WHY and
+HOW TO FIX — the design question itself, raised unprompted.
+
+WHY (explained after commitment): the claim is text, the disk holds bytes, and the translation
+between them needs an encoding the claim does not name. BuildLens must supply one; when its choice
+differs from the Write tool's, identical text yields different bytes and the verdict blames Claude
+for BuildLens's own guess.
+
+FIX: presented as three balanced options for the learner to choose (process note from 401 applied):
+A assume UTF-8 and label it; B decode the observed bytes and compare text; C observe first — have
+Claude's Write tool write non-ASCII text and read the raw bytes back.
+
+LEARNER QUESTION before choosing (verbatim):
+
+```text
+. do we require utf-8 or is there a defaultthat is alwasy used for git or claude?
+```
+
+ANSWERED (facts, with confidence stated):
+- Git stores file contents as bytes and does not re-encode them; there is no content encoding Git
+  "always uses". (Git CAN rewrite LINE ENDINGS on checkout via core.autocrlf — a requirement-2
+  matter, noted for later.)
+- Python: `str.encode()` with no argument uses UTF-8; `open(path, "rb")`, which observe_file uses,
+  applies no encoding at all.
+- Claude Code's Write tool: the assistant believes it writes UTF-8 for new files and may preserve an
+  existing file's encoding, but has no authoritative source — stated as unverified. That gap is
+  exactly what option C would close.
+Choice among A / B / C still pending.
+
+LEARNER CHOICE (verbatim):
+
+```text
+. so we could go with c and then A
+```
+
+DECISION (learner's): C then A — observe the Write tool's real bytes first, then assume UTF-8 with the
+assumption labelled, if the evidence supports it. Reason omitted.
+
+EXPERIMENT DESIGN: (1) Write "café\n" to a NEW scratch file; (2) create a scratch file holding
+Latin-1 bytes b'caf\xe9\n', then have Write overwrite it with "café au lait\n" — tests whether Write
+keeps an existing file's encoding, the one case that would undermine A. Both also reveal the line
+ending Write puts on disk (\n or \r\n) — free evidence for requirement 2. Predictions asked first.
+
+### EV-P8-WRITE-ENCODING-OBSERVATION-405 — option C run
+
+PREDICTION PROMPT (exact):
+
+```text
+What bytes will Claude's Write tool put on disk?
+
+Experiment 1: Write creates a new file with the claimed content "café\n".
+Experiment 2: Write overwrites existing_latin1.txt, which currently holds b'caf\xe9\n' (Latin-1), with
+the claimed content "café au lait\n".
+
+é stored as    b'\xc3\xa9'  (UTF-8)     or   b'\xe9'  (Latin-1)
+line ends as   b'\n'        (Unix)      or   b'\r\n'  (Windows)
+
+Exp 1 — é stored as          = UTF-8 / Latin-1
+Exp 1 — line ends as         = \n / \r\n
+Exp 2 — é stored as          = UTF-8 / Latin-1
+Confidence (0–100)           =
+
+A guess is fine. The point is to have a prediction written down before we look.
+```
+
+LEARNER PREDICTION (verbatim):
+
+```text
+. so it is stored incorrectly in utf-8 so it will be malformed when we look at it in bytes
+```
+
+Read as: UTF-8 (at least for experiment 2), described as "incorrect / malformed". Line ending not
+predicted. Confidence omitted.
+
+OBSERVED (Claude Code Write tool, Windows 11, this session):
+
+```text
+new_cafe.txt           b'caf\xc3\xa9\n'
+existing_latin1.txt    b'caf\xc3\xa9 au lait\n'     (was b'caf\xe9\n' before the Write)
+```
+
+- Experiment 1: UTF-8, line ending \n — NOT \r\n, even on Windows.
+- Experiment 2: UTF-8 — Write did NOT keep the file's previous Latin-1 encoding.
+- Prediction for experiment 2 CORRECT on value. "Malformed" is imprecise: the UTF-8 bytes are
+  well-formed; they only look wrong to a reader that assumes Latin-1. observe_file decodes nothing,
+  so BuildLens sees no malformation.
+- Side observation: the console printed "caf�" for these strings — a DISPLAY artifact of the
+  Windows console's encoding, not a property of the data. Display versus storage again (cf.
+  EV-P8-TIME-STORAGE-DECISION-378).
+- Write's tool_response keys differ from Edit's: content, filePath, originalFile, structuredPatch,
+  type, userModified.
+
+EVIDENCE STATUS: supports option A (UTF-8) for this tool version on this machine, for new and existing
+files. One machine and one version — not a guarantee; this is what the label must say. Also bears on
+requirement 2: Write itself emits \n on Windows, so a \r\n on disk would come from something other
+than the Write (for example Git's core.autocrlf on checkout, or another editor).
+
+### EV-P8-LOCK-IN-A-406 — confirm option A
+
+PROMPT (exact):
+
+```text
+Lock in A?
+
+Evidence:  Claude's Write stored "é" as UTF-8 in a new file AND when overwriting a Latin-1 file,
+           on this machine, this session.
+Option A:  compare_write encodes the claimed text with UTF-8, and says so where it does it.
+
+Lock in A (yes / no)                                           =
+The one-line comment you want beside the .encode("utf-8")      =
+What observation would make you reverse A                      =
+Confidence (0–100)                                             =
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+. but first it would do C which would tell us if it is latin 1 or utf8 which would make this entire thing redundant
+```
+
+EVALUATION:
+MISCONCEPTION, not a design objection: the learner reads option C as a step compare_write performs
+at RUNTIME on every comparison, which would make a fixed UTF-8 assumption redundant. C was a one-off
+DESIGN-TIME experiment run by us, just now; its result is the evidence for A. At runtime
+compare_write receives only the claim's str and the observed bytes — neither names the encoding the
+Write tool used, so it cannot "do C".
+
+PRIMARY BLOCKER: design-time evidence gathering versus runtime behavior. Descend to one R1 check:
+which of the two runtime inputs says which encoding was used.
+
+Noted for fairness (process note 401): trying several encodings at runtime IS a real alternative
+design (D). Not raised yet — if the learner proposes it after the R1 check, weigh it evenly.
+
+### EV-P8-RUNTIME-INPUTS-R1-407 — PENDING, not answered
+
+Exercise type: REMEDIATION_R1
+
+PROMPT (exact):
+
+```text
+What does compare_write have to work with?
+
+claim.details["content"]    "café\n"               (type str)
+observed.file_bytes         b'caf\xc3\xa9\n'       (type bytes)
+
+Which of these two values says which encoding Claude's Write tool used?   = the str / the bytes / neither
+Confidence (0–100)                                                         =
+```
+
+LEARNER REPLY (verbatim) — asked to commit and push for dinner, and pasted back the A/B/C option text
+from EV-P8-WRONG-ENCODING-TRACE-404 without answering the field:
+
+```text
+. als ocan you commit and push i need to go eat dinner , A  Assume UTF-8, and say so
+   compare_write encodes with UTF-8, and the assumption is named where it happens
+   (requirement 3's "labelled").
+   Cost: a non-UTF-8 write gets a wrong "claim does not hold".
+B  Decode the file instead, and compare text
+   observed.file_bytes.decode("utf-8") == claim content
+   Cost: the same UTF-8 guess, just on the other side. Bytes that aren't valid UTF-8 raise
+   UnicodeDecodeError, a new failure none of your five verdicts covers. It also stops using
+   content_hash (requirement 4).
+C  Observe before deciding
+   Have Claude's Write tool write "café\n" to a scratch file, then read the raw bytes back.
+   That's evidence of what the tool really does on this machine. It's the same move you made
+   when you installed the capture hook instead of guessing the payload shape.
+   Cost: a detour now, and one machine's behavior isn't a guarantee.
+```
+
+Not graded. The paste may be the learner re-reading C's wording ("Observe before deciding" — a
+design-time step). Resume by asking, without revealing, what the paste was meant to show, then
+re-present the R1 field exactly.
