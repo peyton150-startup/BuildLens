@@ -43384,3 +43384,553 @@ LEARNER DIRECTION (verbatim):
 
 Option A chosen as the next Phase 8 step: repository-relative path. Not started — it needs learner
 design decisions first. Session paused for a location change; committed at the learner's request.
+
+## Repository-relative path — first design question
+
+REPO-PATH PROMPT (exact):
+
+```text
+Goal: turn file_path into a path relative to the repository root, e.g. "hook_probe.txt".
+    capture_repository_root   ->  'C:/Users/nicol/BuildLens_Project'
+    hook payload file_path    ->  'C:\Users\nicol\BuildLens_Project\hook_probe.txt'
+1. Using the two strings exactly as they are:  file_path.startswith(root)  ->  TRUE / FALSE ?
+2. Claude edits C:\Users\nicol\Desktop\notes.txt — outside the repository entirely.
+   What should the observation record as its repository-relative path?
+Confidence =
+```
+
+Finding verified by execution before the prompt was issued: Git on Windows reports the root with
+forward slashes; Claude's hook payload uses backslashes for the same folder.
+
+LEARNER ANSWER (verbatim):
+
+```text
+. no idea for both
+```
+
+BLOCKED on both. Per adaptive remediation, taken one at a time, question 1 first.
+
+PRIMARY BLOCKER:
+PATH_SEPARATORS_ASSUMED_INTERCHANGEABLE_IN_STRING_COMPARISON (suspected — not yet evidenced)
+
+SCAFFOLD RUNG:
+R0 — are "/" and "\\" the same character?
+
+R0 SEPARATOR PROMPT (exact):
+
+```text
+    "/"     a forward slash
+    "\\"    a single backslash
+1.  "/" == "\\"    ->  TRUE / FALSE ?
+2.  len("\\")      ->  1 or 2 ?
+Confidence =
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+. false 
+1
+70
+```
+
+PASS at R0, confidence 70. The learner holds that the two separators are different characters and
+reads the doubled-backslash notation as one character.
+
+NEXT: climb back to question 1 with the real root and payload strings.
+
+Q1 CLIMB PROMPT (exact):
+
+```text
+root       ->  C:/Users/nicol/BuildLens_Project
+file_path  ->  C:\Users\nicol\BuildLens_Project\hook_probe.txt
+file_path.startswith(root)   ->   TRUE / FALSE ?
+One line on why.
+Confidence =
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+. false 
+the file path would not have the "\" show up so it would read as if there were no \ at all
+```
+
+Answer CORRECT, reasoning WRONG; confidence omitted. The learner believes the backslash is invisible
+or absent from the string. It is present as a real character — one that differs from "/" — and
+startswith fails at the first mismatch. Correction scoped to the reasoning sentence only; the FALSE
+was stated as right. Demonstrated character by character (output in the next entry).
+
+PRIMARY BLOCKER:
+BACKSLASH_ASSUMED_ABSENT_FROM_THE_STRING
+
+REAL-PATH DEMONSTRATION (output), using the actual Git root and the actual captured payload path —
+no backslash literals in source, after two assistant quoting failures:
+
+```text
+file_path.startswith(root) -> False
+root,      first 4 characters -> ['C', ':', '/', 'U']
+file_path, first 4 characters -> ['C', ':', '\', 'U']
+first mismatch at position 2: root has '/', file_path has '\'
+is a backslash really in file_path? -> True | how many: 4
+```
+
+LEARNER QUESTION (verbatim):
+
+```text
+. so is \ == \ ?
+```
+
+Notation-only help: `\` is how Python DISPLAYS a single backslash (repr, and source code);
+`\` is what the string holds and what print() shows. One character, two displays. Evidence from the
+learner's own data: the path has four separators and the count is 4, not 8.
+
+NEXT: check that the backslash is now understood as present, not absent — restate why startswith
+is False.
+
+LEARNER ANSWER (verbatim):
+
+```text
+. i understand that the slashes are the same i was looking to see what the sytax of the \ was
+```
+
+Clarification accepted. The learner's earlier reasoning sentence ("would not have the '\' show up")
+is read in light of this as a question about DISPLAY notation rather than a belief that the character
+is absent; the learner had already stated "/" != "\\" correctly at R0, and the FALSE on startswith
+was right. Blocker BACKSLASH_ASSUMED_ABSENT_FROM_THE_STRING closed on the learner's clarification
+rather than a further probe — re-asking would drill a point the learner reports understanding.
+
+EV-P8-PATH-SEPARATORS-384
+Exercise type: ADJACENT_CONCEPT
+Result: PASS. "/" and "\" are different characters; `\` is the display of one backslash; a
+string-prefix check between a Git root and a hook path fails at the first separator.
+
+NEXT: question 2 — what an observation records for a file outside the repository.
+
+LEARNER CORRECTION (verbatim), sent immediately after the message above:
+
+```text
+. are not the same
+```
+
+Read together: "i understand that the slashes are NOT the same". This is the correct statement —
+"/" and "\" are different characters — and confirms EV-P8-PATH-SEPARATORS-384 without further probe.
+
+LEARNER QUESTION (verbatim), in place of choosing A/B/C for question 2:
+
+```text
+.  wait does that mean that if we want to observe the coding of another project inside of nicol that we cannnot unless it is inside the buildlensproject folder?
+```
+
+Well-aimed scope question. The example repository in the prompt was BuildLens_Project, and the
+learner reasonably read it as a fixed root. It is not: capture_repository_root (Phase 7) resolves
+the repository containing whatever path it is handed, searching parent directories. Demonstrated
+with a throwaway repository outside BuildLens (output in the next entry) rather than by inspecting
+the learner's other folders.
+
+Connection surfaced: the payload's top-level `cwd` field — SKIPPED in EV-P8-FIELD-SCOPE-367 for want
+of a named report — now has a candidate report: identifying which repository the Claude session is
+working in. The learner's rule was to revisit a skipped field the day a report can be named.
+
+OTHER-REPOSITORY DEMONSTRATION (output):
+
+```text
+BuildLens folder resolves to     -> C:/Users/nicol/BuildLens_Project
+another project's subfolder      -> C:/Users/nicol/AppData/Local/Temp/tmpnzsocz53/SomeOtherProject
+```
+
+One function, two repositories, two roots; a subfolder resolves upward to its own project's root.
+BuildLens is not limited to its own folder. Question 2 re-posed with "outside the repository"
+clarified as "outside the repository the file's session is working in, or outside any repository".
+
+QUESTION 2 RE-POSED (exact):
+
+```text
+The session is working in   C:/Users/nicol/BuildLens_Project
+Claude edits                C:\Users\nicol\Desktop\notes.txt
+The Desktop is not inside any Git repository.
+What should the observation record as its repository-relative path?
+A. None   B. raise an error   C. a path that climbs out:  ..\..\Desktop\notes.txt
+Pick one, and say why. Think about what None has meant everywhere else in ObservedFile.
+Confidence =
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+. so then we would have a path that climbs out of the repo especially because that is what i would want the project to normally do as we will be observing files that are not buildlens
+```
+
+Choice C, with a reason that merges two different cases. The learner's GOAL is right — BuildLens must
+observe projects other than itself — but a file in ANOTHER repository needs no climbing: it is
+relative to its own repository's root. Climbing only arises for a file in NO repository, where a
+"..\..\" path is relative to the wrong project. Being demonstrated on real paths (output in the next
+entry) before the learner is asked to confirm or revise.
+
+PRIMARY BLOCKER:
+OTHER_REPOSITORY_CONFLATED_WITH_NO_REPOSITORY
+
+TWO-CASE DEMONSTRATION (output):
+
+```text
+CASE 1  file in ANOTHER repository
+  its own root           -> SomeOtherProject
+  path relative to root  -> src/app.py
+CASE 2  file in NO repository
+  Desktop resolves to    -> C:/Users/nicol
+```
+
+Case 1 confirms the learner's goal needs no climbing path: a file in another repository is relative
+to its own root ("src/app.py").
+
+ASSISTANT FACTUAL ERROR in the question 2 prompt: it asserted "The Desktop is not inside any Git
+repository" without observing it. Observation shows C:/Users/nicol — the learner's home folder — is
+itself a Git repository, and BuildLens_Project is nested inside it. This is the claim-without-
+observation failure the phase teaches against, made by the assistant. The prompt's premise is void;
+question 2 must be re-posed on corrected facts. The learner's choice C is NOT graded against the
+voided premise.
+
+FINDING (environmental, surfaced to the learner, no action taken): the home folder being a
+repository means any path under C:/Users/nicol with no nearer repository resolves to the home repo.
+
+HOME-REPOSITORY CHECK (read-only; no file names listed):
+
+```text
+home toplevel -> C:/Users/nicol
+commits       -> 0
+remotes       -> 0
+created       -> 2026-08-26 13:02:21
+```
+
+Reads as an accidental `git init` in the home folder: nothing ever committed, nothing pushed, so no
+data exposure — but every path under C:/Users/nicol without a nearer repository resolves to it. For
+BuildLens this means a Desktop file would currently get a "repository-relative" path of
+"Desktop/notes.txt" relative to the home repo: technically computed, meaningfully misleading.
+
+No action taken. Removing or renaming C:/Users/nicol/.git is the learner's decision; the assistant
+does not delete it. Question 2 re-posting waits on that decision, because its answer depends on
+whether the home repository remains.
+
+LEARNER REPORT (verbatim): `.  ok i ran the 2 scripts`
+
+Verified by the assistant rather than taken on the report:
+
+```text
+home .git present?        -> no
+renamed backup present?   -> yes   (C:/Users/nicol/.git-accidental-2026-08-26, reversible)
+Desktop resolves to       -> fatal: not a git repository
+BuildLens resolves to     -> C:/Users/nicol/BuildLens_Project
+```
+
+Full suite green across nine files after the rename (the integration tests create repositories
+under the home folder, which the empty home repository previously contained).
+
+Environment finding RESOLVED by the learner, reversibly. Question 2's premise — a file outside every
+repository — is now TRUE for the Desktop, so question 2 is re-posed on corrected facts.
+
+QUESTION 2 ON CORRECTED FACTS (exact):
+
+```text
+The session is working in   C:/Users/nicol/BuildLens_Project
+Claude edits                C:\Users\nicol\Desktop\notes.txt
+That file belongs to no repository at all.
+What should the observation record as its repository-relative path?
+A. None   B. raise an error   C. ..\..\Desktop\notes.txt
+Pick one, and say why. Think about what None has meant everywhere else in ObservedFile.
+Confidence =
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+.  A because there is no exsiting repo it is absent , i missed tht line
+```
+
+PASS; confidence omitted. None, because no repository exists for the file — consistent with None
+meaning "nothing there" throughout ObservedFile. One word sharpened, scoped to it: the REPOSITORY is
+absent, not the file. A file in no repository can still be READ with bytes and a hash while its
+repository-relative path is None; status and path are independent facts.
+
+DECISION (learner's): repository-relative path is None for a file in no repository. Not an error,
+not a climbing path.
+
+EV-P8-NO-REPOSITORY-PATH-385
+Exercise type: DESIGN_REVIEW
+Result: PASS on corrected facts, after an assistant premise error was found and the environment fixed.
+
+NEXT: module boundary — does observe_file find the repository root itself, or is it handed one?
+
+BOUNDARY PROMPT (exact):
+
+```text
+Who finds the repository root?
+A. observe_file calls capture_repository_root itself
+     observe_file(file_path)  ->  record includes repository_relative_path
+B. the caller finds the root and hands it in
+     observe_file(file_path, repository_root)  ->  observer only does the path arithmetic
+1. Pick A or B, and say why in terms of what each module is responsible for.
+2. Name one real cost of the option you picked.
+Confidence =
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+.  A
+the oberve module is repsonsible for the entire process of a file being observed and storeing that data 
+we have to do the path aritmetic ourselves
+```
+
+Choice A with a responsibility argument ("the entire process of a file being observed"). The named
+cost is shared by both options — B does only the path arithmetic — so no cost specific to A has been
+given. Challenged per DESIGN_REVIEW_RUBRIC rather than overridden: A is defensible.
+
+Tension raised with the learner's own earlier boundary: file_observer was kept separate from
+claude_adapter because "this is not a payload it is a read from a local file" — a different source.
+Under A, one module talks to two sources (disk and Git).
+
+PENDING: a real cost of A, or a revision.
+
+LEARNER ANSWER (verbatim), to the cost/reversal challenge:
+
+```text
+. if we were to go with B then we would already need to have a function in cli that would have the repo root and hand it to observe
+```
+
+PASS on the rubric's reversal form: the learner names the condition under which B works — a caller
+that already holds the root. Not yet a cost of A, but a legitimate precondition analysis. Being
+checked against the code (where Phase 7 resolves the root) before the learner decides.
+
+CODE CHECK of B's precondition (grep of snapshot.py and cli.py):
+
+```text
+snapshot.py:31   repository_root = git_adapter.capture_repository_root(repository)
+snapshot.py:48   repository_root=repository_root,        -> stored on Snapshot
+cli.py:79        result = snapshot.capture_snapshot(Path.cwd())
+cli.py:51        "Repository: " + result.repository_root  -> printed
+```
+
+B's precondition is already TRUE: the Phase 7 flow resolves the root once per run (in snapshot.py,
+not a cli function) and carries it on Snapshot. This also answers cost prompt 2: A runs one git
+subprocess per file; the existing flow runs one per run.
+
+Balancing cost of B, surfaced so the decision has both sides: the snapshot root is the repository
+of the CURRENT DIRECTORY. Handed to a file in a different project (Case 1), B would use BuildLens's
+root for that file. A resolves each file's own root, which matches the learner's stated goal of
+observing projects other than BuildLens.
+
+PENDING: the learner's final A/B decision with both costs visible.
+
+BOUNDARY DECISION PROMPT (exact):
+
+```text
+A. observer calls Git itself
+B. caller hands in one root per run
+C. caller resolves each file's own root and hands it in
+Pick one. Say which cost from the table you are accepting, and why it's worth it.
+Confidence =
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+. so we go with B because the repo root can simply be passed on instead of calling a new subprocess for no reason
+```
+
+Choice B with a real reason (one git call per run, not per file). The accepted COST was not named —
+B's cost is that a file in another project would receive the current directory's root, which
+conflicts with the learner's earlier goal of observing projects other than BuildLens.
+
+Evidence supplied that may make the cost acceptable in scope: IMPLEMENTATION_PLAN.md Phase 8 states
+"At this phase BuildLens only observes the Claude worktree" — a single repository. C recorded as
+the upgrade path if multi-repository observation arrives.
+
+PENDING: the learner names the accepted cost in their own words.
+
+LEARNER ANSWER (verbatim), naming B's accepted cost:
+
+```text
+.  we then have to rely on another module for the repo root so if the other module gets it wrong we get it wrong
+```
+
+PASS. A real downside in the learner's own words: under B the observer trusts the root it is handed
+and inherits the caller's errors. This is the general form of the specific cost surfaced earlier —
+the caller handing the current directory's root to another project's file is exactly "the other
+module getting it wrong".
+
+DECISION (learner's), complete by DESIGN_REVIEW_RUBRIC:
+
+```text
+requirement   repository-relative path on each observation (plan field)
+choice        B — the caller resolves the root once and hands it to observe_file
+reason        one git call per run instead of one per file; observer stays disk-only
+alternative   A (observer calls Git per file); C (caller resolves per-file roots)
+cost          observer inherits any wrong root the caller supplies; a file in another
+              project would get the current directory's root
+evidence      IMPLEMENTATION_PLAN Phase 8: "BuildLens only observes the Claude worktree"
+reversal      multi-repository observation arrives -> move to C
+```
+
+EV-P8-ROOT-BOUNDARY-DECISION-386
+Exercise type: DESIGN_REVIEW
+Result: PASS after one challenge (first named cost was shared by both options).
+
+NEXT: pathlib relative_to, predict-first, before the patch.
+
+LEARNER QUESTION (verbatim), before the relative_to predictions:
+
+```text
+. if repo root is optional how will we observe the filke?
+```
+
+Answered by pointing at the existing read: `open(file_path, "rb")` uses the full hook path and never
+the root. The root only derives the repository-relative LABEL. Without a root, status, bytes, hash
+and time are unchanged; only repository_relative_path is None — the same "two independent facts"
+distinction as EV-P8-NO-REPOSITORY-PATH-385. The relative_to predictions remain pending.
+
+RELATIVE_TO PREDICTION PROMPT (exact):
+
+```text
+1.  Path("C:/repo/src/app.py").relative_to(Path("C:/repo")).as_posix()   ->  ?
+2.  Path("C:/Desktop/notes.txt").relative_to(Path("C:/repo"))
+        A. returns a path       B. raises an error
+3.  Path("C:\repo\src\app.py").relative_to(Path("C:/repo")).as_posix()
+        A. "src/app.py"         B. raises an error, because the slashes differ
+Confidence =
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+. /src/app.py
+rasies an error
+A
+50
+```
+
+2 and 3 PASS at confidence 50; 1 NEAR — confirmed output 'src/app.py', with no leading slash.
+Scoped note: a leading slash would never equal Git's repository-relative style (docs/CURRICULUM.md),
+so comparisons would fail; not remediated further, since the concept (the part after the root) is
+held. Case 3 is the payoff: the separator mismatch that defeated startswith is handled by pathlib on
+Windows.
+
+```text
+1 -> 'src/app.py'
+2 -> ValueError: 'C:\Desktop\notes.txt' is not in the subpath of 'C:\repo'
+3 -> 'src/app.py'   (input was C:\repo\src\app.py)
+```
+
+EV-P8-RELATIVE-TO-387
+Exercise type: ADJACENT_CONCEPT
+Result: PASS.
+
+PATCH LANDED (EV-P8-REPO-RELATIVE-PATH-388)
+
+```text
+Current phase              Phase 8 — Claude adapter observation boundary
+Learning objective         path arithmetic with pathlib instead of string matching
+Behavior being added       ObservedFile.repository_relative_path; observe_file(file_path, repository_root=None)
+Conceptual change          Path.relative_to; outside-the-root handled as None
+Out of scope               per-file root resolution (C); wiring into snapshot/cli; comparison
+```
+
+`file_observer.py`: `ObservedFile` gains `repository_relative_path: str | None`. New private helper
+`_relative_to_root(file_path, repository_root)` returns the posix-style relative path, or None when
+no root is given or `relative_to` raises ValueError (file outside the root). Computed once, before the
+read, and passed into all three outcomes — status and path are independent facts. The observer still
+imports no Git; the caller supplies the root (EV-P8-ROOT-BOUNDARY-DECISION-386, option B).
+
+Four tests written first and confirmed red (`TypeError: ... unexpected keyword argument
+'repository_relative_path'`), then green: inside the root with a backslash path against a
+forward-slash root -> "src/app.py"; outside the root -> None with status still READ; no root -> None;
+an ABSENT file inside the root still gets "gone.md". Full suite green across nine files.
+
+Real pair, the exact mismatch from EV-P8-PATH-SEPARATORS-384:
+
+```text
+git root        -> C:/Users/nicol/BuildLens_Project
+hook-style path -> C:\Users\nicol\BuildLens_Project\claude_adapter.py
+startswith      -> False
+relative path   -> claude_adapter.py | status read
+```
+
+Third plan-required version field in place.
+
+KNOWLEDGE GATE OWED: trace a hook path through _relative_to_root and the read.
+
+RELATIVE-PATH KNOWLEDGE GATE (exact):
+
+```text
+    root      = "C:/Users/nicol/BuildLens_Project"
+    file_path =  C:\Users\nicol\BuildLens_Project\docs\old.md      (as printed)
+docs\old.md was deleted — the file does NOT exist on disk.
+    observed = observe_file(file_path, repository_root=root)
+Trace line 55 (_relative_to_root), then the read (lines 56–68). Give:
+1. observed.repository_relative_path   ->  ?
+2. observed.status                     ->  ?
+3. observed.content_hash               ->  ?
+Confidence =
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+.  nicol/buildlensproject/docs/old.md
+read
+empty 
+50
+```
+
+MISS on all three; confidence 50. Expected: "docs/old.md"; ABSENT; None.
+
+1: the learner kept part of the root ("nicol/buildlensproject/") — the relative path is everything
+AFTER the whole root.
+2 and 3 are linked: READ would imply bytes and a digest; "empty" follows from believing READ. Both
+contradict material the learner has passed (EV-P8-OBSERVER-TRACE-373: FileNotFoundError -> ABSENT;
+EV-P8-CONTENT-HASH-376: no bytes -> None hash). Two hypotheses, not yet distinguished: (a) the stated
+fact "does NOT exist" was missed in reading; (b) a successful path computation on line 55 was taken
+to mean the file was read — conflating the two independent facts.
+
+PRIMARY BLOCKER (provisional): STATUS_TRACE_ON_MISSING_FILE — probed first because 3 depends on it.
+Question 1 deferred.
+
+NARROWED PROBE (exact):
+
+```text
+docs\old.md does not exist on disk.
+1. Line 55 works out a path string. Does line 55 open or read the file?   YES / NO
+2. Line 57 tries to open a file that does not exist. What does it raise, and so which status
+   comes back?
+Confidence =
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+. oh i thought you were sayingthat you deleted it so i do not have to delete it later and to treat it as an empty file, relative path would be docs/old.md 
+Absent 
+None
+```
+
+PASS at target on all three original gate questions; confidence omitted. Hypothesis (a) confirmed,
+in a form not anticipated: the learner read "docs\old.md was deleted" as a housekeeping note from
+the assistant, and so treated the file as existing-but-empty. With the scenario understood, the full
+trace is correct: "docs/old.md", ABSENT, None. Question 1 was self-corrected unprompted — the
+leftover root prefix dropped.
+
+PROCESS NOTE against the assistant, third today: scenario facts must be written so they cannot be
+read as asides — "Assume docs\old.md does not exist" rather than "docs\old.md was deleted".
+
+EV-P8-RELATIVE-PATH-GATE-389
+Exercise type: MILESTONE_TRACE
+Result: PASS. Gate owed from EV-P8-REPO-RELATIVE-PATH-388 is CLOSED.
+
+LEARNER DIRECTION (verbatim):
+
+```text
+. A this is the main responsiblity that we have been building the 2 sides of and now they are for the most part complete, can you commit and push and igvem e a 2 snetnce handoff i can give to a new session
+```
+
+Option A chosen: the comparison — joining a ClaimedEdit and an ObservedFile. The learner's reason: it
+is the main responsibility both sides were built for. Not started. Session closed here with a
+handoff to a new session.

@@ -154,6 +154,62 @@ def test_every_outcome_carries_a_time_even_when_no_bytes_were_seen():
         assert observed.observed_at.utcoffset() == timedelta(0)
 
 
+def test_path_inside_the_root_is_recorded_relative_with_forward_slashes():
+    file_observer = importlib.import_module("file_observer")
+
+    with temporary_directory() as directory:
+        path = Path(directory) / "src" / "app.py"
+        path.parent.mkdir()
+        path.write_bytes(b"x = 1\n")
+
+        # The real mismatch: a backslash file path against a forward-slash root.
+        observed = file_observer.observe_file(
+            str(path), repository_root=Path(directory).as_posix()
+        )
+
+    assert observed.repository_relative_path == "src/app.py"
+
+
+def test_path_outside_the_root_has_no_repository_relative_path():
+    file_observer = importlib.import_module("file_observer")
+
+    with temporary_directory() as repository, temporary_directory() as elsewhere:
+        path = Path(elsewhere) / "notes.txt"
+        path.write_bytes(b"hi")
+
+        observed = file_observer.observe_file(str(path), repository_root=repository)
+
+    assert observed.status is file_observer.ObservationStatus.READ
+    assert observed.repository_relative_path is None
+
+
+def test_no_root_given_means_no_repository_relative_path():
+    file_observer = importlib.import_module("file_observer")
+
+    with temporary_directory() as directory:
+        path = Path(directory) / "notes.txt"
+        path.write_bytes(b"hi")
+
+        observed = file_observer.observe_file(str(path))
+
+    assert observed.status is file_observer.ObservationStatus.READ
+    assert observed.repository_relative_path is None
+
+
+def test_an_absent_file_inside_the_root_still_has_its_relative_path():
+    file_observer = importlib.import_module("file_observer")
+
+    # Status and path are independent facts: the path is known even when the
+    # file is not there.
+    with temporary_directory() as directory:
+        observed = file_observer.observe_file(
+            str(Path(directory) / "gone.md"), repository_root=directory
+        )
+
+    assert observed.status is file_observer.ObservationStatus.ABSENT
+    assert observed.repository_relative_path == "gone.md"
+
+
 def test_observed_file_fields_cannot_be_reassigned():
     file_observer = importlib.import_module("file_observer")
 
@@ -163,6 +219,7 @@ def test_observed_file_fields_cannot_be_reassigned():
         file_bytes=None,
         content_hash=None,
         observed_at=datetime(2026, 9, 11, 17, 16, tzinfo=timezone.utc),
+        repository_relative_path=None,
     )
 
     try:
@@ -184,4 +241,8 @@ test_empty_file_carries_the_real_digest_of_zero_bytes()
 test_no_bytes_observed_means_no_hash()
 test_observed_at_is_an_aware_utc_moment_taken_during_the_read()
 test_every_outcome_carries_a_time_even_when_no_bytes_were_seen()
+test_path_inside_the_root_is_recorded_relative_with_forward_slashes()
+test_path_outside_the_root_has_no_repository_relative_path()
+test_no_root_given_means_no_repository_relative_path()
+test_an_absent_file_inside_the_root_still_has_its_relative_path()
 print("test passed")

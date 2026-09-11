@@ -3681,3 +3681,84 @@ The learner chose option A. Session paused for a location change before any A wo
 its first design question: relative to which root (the repository root that
 `git_adapter.capture_repository_root` resolves), and what an observation records for a path that is
 NOT inside the repository. No code exists for A. No gate is open.
+
+### Repository-relative path — in progress, blocked on an environment finding
+
+`EV-P8-PATH-SEPARATORS-384` closed: "/" and "\" are different characters, `\` is the display of one
+backslash, and a string-prefix check between Git's root (forward slashes) and Claude's hook path
+(backslashes) fails at the first separator — so path relativising cannot be done with startswith.
+
+The learner asked whether BuildLens can only observe its own folder. No: `capture_repository_root`
+resolves whichever repository contains the given path — demonstrated on a throwaway repository,
+where `src/app.py` came back relative to its own project root with no climbing.
+
+ENVIRONMENT FINDING: C:/Users/nicol (the home folder) is itself a Git repository — 0 commits,
+0 remotes, created 2026-08-26 13:02. Almost certainly an accidental `git init`. No data exposure, but
+every path under the home folder without a nearer repository resolves to it, and BuildLens_Project is
+nested inside it. The assistant's question-2 prompt wrongly asserted the Desktop was in no repository;
+that premise is void and the learner's choice C was not graded against it.
+
+Decision pending (the learner's): keep, rename, or remove C:/Users/nicol/.git. Not acted on.
+
+Also surfaced, not decided: the payload's `cwd` field, skipped in EV-P8-FIELD-SCOPE-367, may now have
+a named report — which repository the Claude session is working in.
+
+Exact restart point: the learner decides on the home repository; then question 2 is re-posed on
+corrected facts.
+
+### Environment finding resolved
+
+The learner renamed C:/Users/nicol/.git to C:/Users/nicol/.git-accidental-2026-08-26 (reversible;
+it held 0 commits and 0 remotes). Verified: the Desktop is no longer inside any repository;
+BuildLens_Project still resolves to its own root; full suite green across nine files.
+
+Exact restart point: question 2 re-posed on corrected facts — what an observation records as the
+repository-relative path for a file in NO repository. Case 1 already established that a file in
+ANOTHER repository needs no climbing path: it is relative to its own root.
+
+### Repository-relative path landed — third plan-required version field
+
+`EV-P8-NO-REPOSITORY-PATH-385`, `EV-P8-ROOT-BOUNDARY-DECISION-386`, `EV-P8-RELATIVE-TO-387`,
+`EV-P8-REPO-RELATIVE-PATH-388`.
+
+Decisions the learner owns: a file in no repository gets repository_relative_path = None (not an
+error, not a climbing path); the CALLER supplies the root (option B) so the observer stays disk-only
+and Git runs once per run — accepted cost, in the learner's words: "if the other module gets it wrong
+we get it wrong". Evidence: the plan's Phase 8 observes only the Claude worktree. Reversal: when
+multi-repository observation arrives, move to option C (caller resolves each file's own root).
+
+Exact code in `file_observer.py`:
+
+```text
+ObservedFile(file_path, status, file_bytes, content_hash, observed_at, repository_relative_path)
+_relative_to_root(file_path, repository_root) -> posix relative path, or None
+observe_file(file_path, repository_root=None)  — never raises; imports no Git
+```
+
+Full suite green across nine files. Nothing yet passes a root in: wiring snapshot.py's
+`repository_root` to `observe_file` is out of scope and not started.
+
+### Plan fields for the observed-version record
+
+```text
+content hash               YES (376)
+observed-at time           YES (379)
+repository-relative path   YES (388)
+session/worktree id        no
+base commit/blob           no
+provenance = CLAUDE        no
+```
+
+Comparison-patch requirements, unchanged at four (see the walkthrough section above).
+
+Knowledge gate CLOSED (EV-P8-RELATIVE-PATH-GATE-389): an absent file inside the root traces to
+"docs/old.md", ABSENT, None. Code uncommitted since d2fa064: file_observer.py,
+test_file_observer.py, and both docs.
+
+Exact restart point: the learner chose the COMPARISON (joining a ClaimedEdit and an ObservedFile)
+as the next Phase 8 step. Not started. Begin with its specification, learner-first, carrying the
+four recorded requirements: (1) trust hash equality only when both sides are READ; (2) decide
+line-ending normalisation; (3) encode claimed str to bytes at the comparison, labelled;
+(4) compare content_hash, never whole ObservedFile records. The remaining plan fields
+(session/worktree id, provenance, base commit/blob) belong on the combined record, not in
+observe_file. No gate is open.
