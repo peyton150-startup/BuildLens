@@ -3848,6 +3848,86 @@ come from something else (Git core.autocrlf on checkout, another editor).
 Scratch evidence files (not in the repo): scratchpad new_cafe.txt, existing_latin1.txt; the captured
 claims are in the gitignored payload_samples.jsonl.
 
-Exact restart point: the learner pasted back the A/B/C option text instead of answering
-EV-P8-RUNTIME-INPUTS-R1-407. Ask what the paste was meant to show, then re-present the exact 407
-prompt from the ledger. Do not reveal its answer. No comparison code exists.
+UPDATE — requirements 1–4 all CLOSED (EV-P8-ENCODING-LABEL-413, EV-P8-LINE-ENDING-DECISION-415):
+
+```text
+req 1  status checked explicitly; hash compared only inside the READ branch
+req 3  claim str encoded with UTF-8 at the comparison, labelled with assumption, evidence (405) and
+       reversal; the learner can now say neither the str, the bytes, nor the ClaimedEdit names an
+       encoding — BuildLens's own code supplies it (chain 406–413 closed)
+req 2  exact hash first; on mismatch normalise \r\n → \n on both sides and compare again; a
+       line-ending-only match returns "claim holds after normalize"; otherwise "claim does not hold".
+       Evidence: core.autocrlf=true here; the repo's own .py files are mixed LF/CRLF on disk.
+       Reversal condition owed at the milestone defense.
+req 4  content_hash for the exact check, normalised bytes for the second; never whole records
+```
+
+Verdict set is now SIX: claim holds · claim holds after normalize · claim does not hold · file absent
+· incomparable · status not accepted.
+
+Sketch agreed so far (not code in the repo):
+
+```text
+def compare_write(claim, observed):
+    if observed.status is UNREADABLE: return "incomparable"
+    if observed.status is ABSENT:     return "file absent"
+    if observed.status is READ:
+        claim_bytes = claim.details["content"].encode("utf-8")   # labelled comment from 413
+        if observed.content_hash == digest_of(claim_bytes): return "claim holds"
+        if normalise(observed.file_bytes) == normalise(claim_bytes): return "claim holds after normalize"
+        return "claim does not hold"
+    return "status not accepted"
+```
+
+Facilitator correction recorded (415): the cost framing against Y was unfair — Y can also check
+first; Y versus M is only about what the reader sees.
+
+Further decisions (EV-P8-VERDICT-TYPE-416, EV-P8-COMPARE-MODULE-417):
+
+```text
+verdicts     an Enum, ComparisonVerdict — a misspelt member raises AttributeError when that line
+             runs; a misspelt string silently becomes a new value
+module       new flat module compare.py; imports file_observer (and claude_adapter if annotated);
+             claude_adapter and file_observer still import nothing of each other. Reason: either
+             existing module would gain an "and" in its responsibility sentence
+functions    SEPARATE functions per tool — compare_write now, compare_edit in a later patch (learner
+             asked for this to be recorded). Write asks equality, Edit asks containment. Cost:
+             something must later choose which to call for a claim (a dispatcher on tool_name)
+```
+
+CLOSED (EV-P8-WRONG-TOOL-TRACE-418, EV-P8-WRONG-TOOL-DECISION-419): compare_write checks
+`claim.tool_name == "Write"` FIRST, before any status check, and raises
+`ValueError("compare_write needs a Write claim, got: <tool_name>")` otherwise. Without the guard an Edit
+claim with an ABSENT file would get FILE_ABSENT confidently, and with a READ file an accidental
+KeyError: 'content'. Rule separating this RAISE from the unknown-status VERDICT: a fault in the code
+driving the batch (misrouting) stops the batch; a fault confined to one item is recorded and the
+batch continues.
+
+DESIGN COMPLETE. Pre-patch frame presented (EV-P8-TEST-ROWS-420). Test specification COMPLETE — the
+learner supplied or confirmed the expected result for every row:
+
+```text
+Row 1    Write "hello\n"   vs READ b"hello\n"          claim holds
+Row 2    Write "hello\n"   vs READ b"hello\r\n"        claim holds after normalize
+Row 3    Write "hello\n"   vs READ b"goodbye\n"        claim does not hold
+Row 4    Write "hello\n"   vs READ b"goodbye\r\n"      claim does not hold
+Row 5    Write "hello\n"   vs ABSENT                   file absent
+Row 6    Write "hello\n"   vs UNREADABLE               incomparable
+Row 7    Write ""          vs ABSENT                   file absent            (E1)
+Row 8    Write ""          vs READ b""                 claim holds            (E2)
+Row 9    Write "café\n"    vs READ b"caf\xc3\xa9\n"    claim holds            (UTF-8)
+Row 10   Write "hello\n"   vs status="too_large"       status not accepted    (stand-in: annotations
+                                                                               do not enforce)
+Row 11   Edit claim        vs READ b"goodbye\n"        raises ValueError
+Row 12   Edit claim        vs ABSENT                   raises ValueError      (guard runs first)
+```
+
+PENDING: row 13 — for every ObservationStatus member, compare_write must NOT return status not
+accepted (goes red when a status is added without a compare_write branch). The learner asked when it
+goes red; answered; include yes/no not yet given.
+
+Test style to copy (test_file_observer.py): plain functions, `importlib.import_module` inside each
+test, module-level calls at the bottom, then `print("test passed")`.
+
+Exact restart point: ask only "Include row 13 (yes / no)". Then write test_compare.py with every row,
+run it RED before compare.py exists, then write compare.py. No comparison code exists.
