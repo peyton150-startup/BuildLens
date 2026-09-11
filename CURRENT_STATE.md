@@ -3762,3 +3762,53 @@ line-ending normalisation; (3) encode claimed str to bytes at the comparison, la
 (4) compare content_hash, never whole ObservedFile records. The remaining plan fields
 (session/worktree id, provenance, base commit/blob) belong on the combined record, not in
 observe_file. No gate is open.
+
+### Comparison specification — in progress, no code
+
+`EV-P8-COMPARISON-SCOPE-390` through `EV-P8-EMPTY-WRITE-TRANSFER-397`. Academic objective:
+MIT-6102-2026, specification by input partitioning. Counters checked at start: neither due.
+
+Decided by the learner:
+
+```text
+scope           first comparison patch handles WRITE ONLY; Edit (fragment claim) is a later patch
+Write question  is the observed file THE SAME AS the claimed content, at observed_at
+                (whole-file equality, not containment; says nothing about the file later)
+```
+
+Verdict set as it stands (learner-named; the R/S grouping is NOT yet closed):
+
+```text
+READ, same content       claim holds
+READ, different content  claim does not hold  — "out of date or incorrect": a mismatch cannot say
+                                                whether Claude was wrong or the file changed after
+ABSENT                   claim does not hold — the learner's current label is "file absent";
+                         whether it shares S's verdict or stays separate is undecided
+UNREADABLE               incomparable
+```
+
+Misconception recurred and recovered twice: "compare" read as the BYTE MECHANISM rather than as a
+verdict about the claim, which led the learner to file ABSENT under "incomparable" next to
+UNREADABLE (395C). Recovered with the word "compare" removed (396). Watch for it when the verdict
+enum is named: ABSENT is evidence against the claim; UNREADABLE is no evidence.
+
+Confidence was omitted on most answers this session — ask for it, but it is not a gate.
+
+Process note against the assistant: "Assume the porch is empty" read as a guess, not a seen fact.
+State observed facts as observations.
+
+Still open for the spec, in order:
+
+```text
+1. EV-P8-EMPTY-WRITE-TRANSFER-397  pending — claim "" vs ABSENT and vs READ b""
+2. R/S: one verdict or two, with a reason and a reversal condition
+3. requirement 1  both sides READ before trusting hash equality — how it applies when one side is
+                  a claim, not an observation
+4. requirement 2  line-ending normalisation
+5. requirement 3  str -> bytes encoding at the comparison, labelled
+6. requirement 4  compare content_hash, not records (learner already tied bytes to hash in 392)
+7. function shape, return type, then the pre-patch frame; tests red first; then code
+```
+
+Exact restart point: re-present the exact EV-P8-EMPTY-WRITE-TRANSFER-397 prompt from the ledger.
+Do not reveal its answer. No code has been written for the comparison.

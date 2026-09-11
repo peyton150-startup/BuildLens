@@ -43934,3 +43934,530 @@ LEARNER DIRECTION (verbatim):
 Option A chosen: the comparison — joining a ClaimedEdit and an ObservedFile. The learner's reason: it
 is the main responsibility both sides were built for. Not started. Session closed here with a
 handoff to a new session.
+
+## Session 2026-09-11 (evening) — comparison specification, learner-first
+
+Resumed from the handoff. Counters checked: major 1/2 (Phase 7 complete), foundation not advancing
+in major phases — neither due. Tree clean at 16d721b. Academic objective: MIT-6102-2026,
+specification by input partitioning. Carried requirements (1)–(4) from the walkthrough section of
+CURRENT_STATE.md.
+
+### EV-P8-COMPARISON-SCOPE-390 — which claim the first comparison patch handles
+
+Exercise type: DESIGN_DECISION
+
+PROMPT (exact):
+
+```text
+Which claim does the first comparison patch handle?
+
+Write   details = {"content": "hello\n"}
+
+Edit    details = {"old_string": "hello", "new_string": "goodbye"}
+        details = {"old_string": "hello", "new_string": "goodbye", "replace_all": True}
+
+ObservedFile(status=READ, file_bytes=b"...whole file...", content_hash="…64 hex…", ...)
+
+First patch handles     = Write only / Edit only / both
+Reason                  =
+What the comparison asks of the observed file for that tool (one sentence) =
+Confidence              =
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+. write only 
+ it is the simplier of the 2 and will give us a better basis to tackle edit later 
+it would ask for the bytes of the file and i am missing something
+```
+
+EVALUATION:
+Field 1 DECIDED: Write only — the learner's call; Edit is out of scope for the first patch.
+Field 2 ACCEPTED as a sequencing reason; what makes Write simpler is not yet stated and should emerge
+from field 3.
+Field 3 PARTIAL, self-flagged ("i am missing something"): named the INPUT the comparison needs (the
+file's bytes) but not the QUESTION it asks of them. Confidence omitted.
+
+PRIMARY BLOCKER (provisional): what relation between claimed content and observed file makes a
+Write claim true — the whole-file-versus-part distinction. Descend to an R1 text-only check with no
+bytes, encoding, or line endings in play.
+
+### EV-P8-WRITE-MATCH-R1-391 — whole-file match, text only
+
+Exercise type: REMEDIATION_R1
+
+PROMPT (exact):
+
+```text
+Does the file on disk match what the Write claimed?
+
+Claude's Write claimed this content:
+hello
+
+Case A: the file on disk contains exactly these lines and nothing else:
+hello
+
+Case B: the file on disk contains exactly these lines and nothing else:
+hello
+extra line
+
+Case A matches the claim   = yes / no
+Case B matches the claim   = yes / no
+So a Write comparison asks whether the observed file ______ the claimed content =
+Confidence                 =
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+. yes
+no
+is the same at the current moment
+```
+
+EVALUATION:
+PASS on all three fields; confidence omitted (second consecutive omission). Case B rejected even
+though the claimed text appears inside it — whole-file equality, not containment. "At the current
+moment" was volunteered unprompted and is correct: the verdict is about one observation taken at
+observed_at and says nothing about the file later. Field 3 of EV-P8-COMPARISON-SCOPE-390 is closed by
+this answer: a Write comparison asks whether the observed file IS THE SAME AS the claimed content.
+This also answers what makes Write simpler: one equality, where Edit's fragment claim needs a
+different relation.
+
+NEXT: climb to the target — partition the observed side by status and let the learner name the
+verdict for each case (MIT-6102-2026 partitioning). Line endings and encoding still held out.
+
+### EV-P8-WRITE-PARTITION-392 — report per observation status, Write claim
+
+Exercise type: SPECIFICATION
+
+PROMPT (exact):
+
+```text
+What should the comparison report for each observation?
+
+ClaimedEdit(tool_name="Write", details={"content": "hello\n"}, ...)
+
+Case 1   ObservedFile(status=READ,       file_bytes=b"hello\n",   content_hash=<digest of b"hello\n">,   ...)
+Case 2   ObservedFile(status=READ,       file_bytes=b"goodbye\n", content_hash=<digest of b"goodbye\n">, ...)
+Case 3   ObservedFile(status=ABSENT,     file_bytes=None,         content_hash=None,                     ...)
+Case 4   ObservedFile(status=UNREADABLE, file_bytes=None,         content_hash=None,                     ...)
+
+Case 1 report   =
+Case 2 report   =
+Case 3 report   =
+Case 4 report   =
+Confidence      =
+
+Name each report in a few words, in your own terms. If two cases should get the same report, say
+so. If you think two need different reports, say what separates them.
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+.  it is read  the bytes were the saem and the hash is the same as well 
+it is read the byutes are differnet and so the hash will be different 
+the file was absent so we return that error and record 
+the file was unreadable we return that and record 
+80
+```
+
+EVALUATION:
+PARTIAL at confidence 80. All four facts about the observations are correct, and cases 1 and 2 tie
+same/different bytes to same/different hash (requirement 4 in the learner's own terms). But every
+report restates the OBSERVATION'S status rather than saying what it means for the CLAIM. Cases 1–2
+imply match/mismatch without naming a verdict; cases 3–4 echo ABSENT and UNREADABLE back, so the
+comparison would add nothing a caller could not read off the ObservedFile directly. Case 3 also
+calls absence an "error", against the learner's own EV-P8-FILE-OBSERVER-372 decision that absence
+is a result — secondary, not remediated separately; expected to resolve with the primary blocker.
+
+PRIMARY BLOCKER: the comparison's report is a verdict ABOUT THE CLAIM (did what Claude said hold?),
+not a restatement of the observation. Descend to an R1 non-file surface with a yes / no / can't
+tell choice, then near-transfer back to cases 3 and 4.
+
+### EV-P8-CLAIM-VERDICT-R1-393 — did the claim hold? (parcel surface)
+
+Exercise type: REMEDIATION_R1
+
+PROMPT (exact):
+
+```text
+Did the claim hold?
+
+A delivery driver's app sends you this message:
+"I left your parcel on the front porch."
+
+Situation X: you look at the porch. Assume the porch is empty.
+Situation Y: you try to look at the porch. Assume the gate is locked and you cannot see the porch at all.
+
+Situation X — did the driver's claim hold?   = yes / no / can't tell
+Situation Y — did the driver's claim hold?   = yes / no / can't tell
+What separates X from Y                      =
+Confidence                                   =
+
+Answer the third field in one sentence.
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+.  cant tell 
+cant tell
+```
+
+EVALUATION:
+NOT GRADED YET. Field 3 (what separates X from Y) and confidence omitted — the reasoning field is
+the one that would show whether X's "can't tell" is a miss or a defensible reading.
+
+FACILITATOR NOTE: the claim was worded in the past tense ("I left"), so an empty porch leaves the
+past act undecided — the parcel could have been left and taken. "Can't tell" on X may be the
+learner's own "at the current moment" precision from EV-P8-WRITE-MATCH-R1-391, not a miss. The same
+ambiguity is real in BuildLens: a Write claim is a past act, observed later.
+
+ADAPTATION: per standing instruction, narrow the prompt rather than lower the rung — ask only for
+the X reasoning and for what X establishes that Y does not.
+
+FIELD 3, sent as a follow-up before the narrowed prompt went out (verbatim):
+
+```text
+. the difference is you did not try to look on x
+```
+
+EVALUATION:
+Explains the X answer: the learner read Situation X as NOT looking. The prompt said "you look at the
+porch. Assume the porch is empty." — "Assume" was meant to set a scenario fact (per the
+EV-P8-RELATIVE-PATH-GATE-389 process note) but reads just as naturally as "you guess it is empty
+without checking". Under that reading, "can't tell" is the correct answer. The miss is in the prompt,
+not the model. Not graded.
+
+PROCESS NOTE against the assistant, second wording failure of this kind: "Assume X" can itself read
+as a guess. State observed facts as observations — "you see with your own eyes that the porch is
+empty".
+
+ADAPTATION: re-pose the same rung with the observation stated as seen, and the claim in the present
+tense ("Your parcel is on the front porch") so it maps to a Write claim about current file content
+and the past-act ambiguity is held out. That ambiguity — a Write claim is a past act observed later —
+is real and is parked for the spec, not dropped.
+
+RE-POSED PROMPT (exact):
+
+```text
+Did the claim hold?
+
+The driver's app sends you this message:
+"Your parcel is on the front porch."
+
+Situation X: you walk out and look at the porch. You see with your own eyes that the porch is empty.
+Situation Y: you walk out to look, but the gate is locked. You never see the porch.
+
+Situation X — does the driver's claim hold?   = yes / no / can't tell
+Situation Y — does the driver's claim hold?   = yes / no / can't tell
+What separates X from Y                       =
+Confidence                                    =
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+.  no
+cant tell 
+one confimrs the claim is hootspa and the other you are blocked from validating the claim
+```
+
+EVALUATION:
+PASS on all three fields; confidence omitted (third consecutive). X is a definite finding that
+contradicts the claim; Y is no finding at all — "blocked from validating". The verdict is now framed
+as a statement about the CLAIM, which is the primary blocker from EV-P8-WRITE-PARTITION-392.
+
+NEXT: near-transfer back to ObservedFile cases 3 (ABSENT) and 4 (UNREADABLE) only, no parcel mapping
+given.
+
+### EV-P8-ABSENT-UNREADABLE-VERDICT-394 — near-transfer to ObservedFile
+
+Exercise type: NEAR_TRANSFER
+
+PROMPT (exact):
+
+```text
+What does each observation mean for the Write claim?
+
+ClaimedEdit(tool_name="Write", details={"content": "hello\n"}, ...)
+
+Case 3   ObservedFile(status=ABSENT,     file_bytes=None, content_hash=None, ...)
+Case 4   ObservedFile(status=UNREADABLE, file_bytes=None, content_hash=None, ...)
+
+In case 3, open raised FileNotFoundError. In case 4, open raised a different OSError, for example
+permission denied.
+
+Case 3 — does the Write claim hold?   = yes / no / can't tell
+Case 4 — does the Write claim hold?   = yes / no / can't tell
+Why case 3 and case 4 differ          =
+Confidence                            =
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+. no
+cant tell
+if the file is absent and the path is correct than the write is wrong because the file does not exsitis, the unreadable is an error that needs to be addressed befroe you can observe the file like the gate
+```
+
+EVALUATION:
+PASS on all three fields; confidence omitted (fourth consecutive). ABSENT is a definite finding that
+contradicts the claim; UNREADABLE is BuildLens being blocked, like the gate. Absence is no longer
+called an error — the secondary issue in EV-P8-WRITE-PARTITION-392 resolved without separate
+remediation, as expected. "If the path is correct" is a volunteered precondition: the observation
+must be of the same path the claim named.
+
+PRECISION PARKED FOR THE NEXT STEP: "the write is wrong" says more than the observation shows. ABSENT
+at observed_at contradicts the claim NOW; it does not show that Claude's write never happened (it may
+have landed and been deleted since). This is the past-act ambiguity parked in
+EV-P8-CLAIM-VERDICT-R1-393. It bears on verdict NAMING, so it is asked at target level next rather
+than corrected here.
+
+NEXT: fresh target-level partition — all four statuses on a new claim, learner names the verdicts.
+
+### EV-P8-WRITE-VERDICTS-395 — fresh target-level partition, learner-named verdicts
+
+Exercise type: SPECIFICATION (target level, fresh surface)
+
+PROMPT (exact):
+
+```text
+What verdict does the comparison return for each case?
+
+ClaimedEdit(tool_name="Write", details={"content": "print('ready')\n"}, ...)
+
+Case P   ObservedFile(status=UNREADABLE, file_bytes=None,                content_hash=None, ...)
+Case Q   ObservedFile(status=READ,       file_bytes=b"print('ready')\n", content_hash=<digest of those bytes>, ...)
+Case R   ObservedFile(status=ABSENT,     file_bytes=None,                content_hash=None, ...)
+Case S   ObservedFile(status=READ,       file_bytes=b"print('done')\n",  content_hash=<digest of those bytes>, ...)
+
+Case P verdict   =
+Case Q verdict   =
+Case R verdict   =
+Case S verdict   =
+Confidence       =
+
+Name each verdict yourself: a short label that says what it means for the claim. These labels will
+likely become the values the comparison returns. If two cases should share a verdict, give them the
+same label.
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+.  incomparable 
+bytes match
+bytes differ 
+bytes differ
+these need work but i understand the gist
+```
+
+EVALUATION:
+PARTITION PASS, LABELS PARTIAL. Numeric confidence omitted (fifth consecutive); the learner's own
+note ("these need work but i understand the gist") is an accurate self-assessment and is recorded
+in its place.
+
+Structure correct unprompted on a fresh surface: three verdict classes — can't tell (P), claim holds
+(Q), claim contradicted (R and S). Grouping ABSENT with different-content into one verdict is a
+legitimate design choice, owned by the learner, not yet defended.
+
+Label defects:
+- "bytes differ" is false for R: R has file_bytes=None — no bytes to differ. This is the None versus
+  b"" distinction the learner holds (EV-P8-OBSERVER-TRACE-373) not yet applied to naming.
+- "bytes match" / "bytes differ" name the MECHANISM, not what it means for the claim, which the
+  prompt asked for.
+"incomparable" is accurate for P.
+
+NEXT: label revision with one rule stated (a label must be true for every case it covers), plus the
+design-rubric challenge on the R/S grouping: what would have to be true for splitting to be better.
+
+### EV-P8-WRITE-VERDICTS-395A — label revision
+
+PROMPT (exact):
+
+```text
+Q  ObservedFile(status=READ,       file_bytes=b"print('ready')\n", ...)   claim: "print('ready')\n"
+S  ObservedFile(status=READ,       file_bytes=b"print('done')\n",  ...)   claim: "print('ready')\n"
+R  ObservedFile(status=ABSENT,     file_bytes=None,                ...)   claim: "print('ready')\n"
+P  ObservedFile(status=UNREADABLE, file_bytes=None,                ...)   claim: "print('ready')\n"
+
+Label for Q                                                      =
+Label for S                                                      =
+Label for R                                                      =
+Label for P                                                      =
+R and S share a label (yes / no), and the reason                 =
+What would have to be true for the other choice to be better     =
+Confidence (0–100)                                               =
+
+Rule: each label must be true for every case it covers, at the moment of observation.
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+. Claim holds
+claim does not hold 
+no bytes to compare 
+unreadable - not sure what to name this
+```
+
+EVALUATION:
+PARTIAL. Q and S PASS — both labels now say what the result means for the claim.
+R REGRESSED: "no bytes to compare" is true, but (a) it describes the mechanism again, (b) it is
+equally true of P, so it cannot separate R from P, and (c) it no longer says the claim is
+contradicted — which the learner committed to for ABSENT in EV-P8-ABSENT-UNREADABLE-VERDICT-394
+("no"). Likely cause: the None-bytes defect flagged on "bytes differ" was fixed by describing the
+None, instead of by naming the meaning.
+P: unsure — though the learner's own "incomparable" from 395 already met the rule.
+Fields 5–7 (grouping, reversal condition, confidence) omitted — the documented wide-prompt field-
+omission fragility; seven fields was too wide.
+
+ADAPTATION: narrow, not lower. Put the learner's two R answers (394 "no" and 395A "no bytes to
+compare") side by side and ask only for the R label and the R/S grouping. Reversal condition deferred
+to its own prompt.
+
+### EV-P8-WRITE-VERDICTS-395B — R label, narrowed
+
+PROMPT (exact):
+
+```text
+What does a caller learn from R?
+
+R  ObservedFile(status=ABSENT, file_bytes=None, ...)   claim: "print('ready')\n"
+
+Label for R                                      =
+Does R share S's label "claim does not hold"?    = yes / no, and why
+Confidence (0–100)                               =
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+.  ok so incomparable 
+what about file absent
+```
+
+EVALUATION:
+P = "incomparable" adopted. R = "file absent" proposed, phrased as a question to the facilitator.
+It meets the stated rule: true for R, false for P, so it separates the two no-bytes cases — fixing
+the 395A defect. It implies a SPLIT from S (a label distinct from "claim does not hold"), but the
+reason for splitting and the confidence were omitted.
+
+Not a miss: a verdict set holding both "claim does not hold" and "file absent" is a legitimate
+design. The open question is whether "file absent", read by a caller, still says the claim failed —
+and what the caller would do differently from S that justifies two verdicts. Asked as one field.
+
+### EV-P8-WRITE-VERDICTS-395C — reader action, R versus S
+
+PROMPT (exact):
+
+```text
+What does a caller do differently with R than with S?
+
+Imagine BuildLens prints one line per Write claim. For each result below, what should the person
+reading it do about it?
+
+S   claim does not hold    — Claude said "print('ready')\n", the file holds "print('done')\n"
+R   file absent            — Claude said "print('ready')\n", the file is not there
+
+What the reader does about S                            =
+What the reader does about R                            =
+So R and S should be one verdict or two, and why        =
+Confidence (0–100)                                      =
+
+Answer the first two fields in a few words each. If the two actions come out the same, that's an
+argument for one verdict.
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+. the claim not holding means the bytes were different and the claim is now either out of date or incorrect.
+for file absent the file is mssing so how would you comapre the 2 
+they should be seperate becasue we actually were able to comapre for s but not for r, could we specify incomparable, file abest and incomparable, oserror
+```
+
+EVALUATION:
+PARTIAL; confidence omitted.
+
+STRONG: S — "the claim is now either out of date or incorrect" volunteers, unprompted, the parked
+past-act precision from EV-P8-CLAIM-VERDICT-R1-393 / 394: a mismatch at observed_at cannot say
+whether Claude was wrong or the file changed afterwards. Closes that parked item for S.
+
+REGRESSION on R: the learner now files ABSENT under "incomparable" alongside UNREADABLE
+("incomparable, file absent" / "incomparable, oserror"), reasoning that bytes could not be compared.
+This contradicts two of the learner's own commitments:
+- EV-P8-ABSENT-UNREADABLE-VERDICT-394: ABSENT → does the Write claim hold? "no";
+- EV-P8-FILE-OBSERVER-372: ABSENT is a fact about the write, UNREADABLE a fact about BuildLens's
+  own reach.
+The same pattern as the empty-porch X case: absence is evidence, not lack of it.
+
+PRIMARY BLOCKER (recurrence of EV-P8-WRITE-PARTITION-392, narrower): "compare" read as the BYTE
+MECHANISM rather than as judging the claim. Where no byte comparison runs, the learner concludes no
+verdict is possible — true for UNREADABLE, false for ABSENT.
+
+ADAPTATION: descend to R1 with the word "compare" removed: for R and for P, does the observation tell
+you whether the file holds the claimed content right now? Then rebuild the verdict set.
+
+### EV-P8-ABSENCE-IS-EVIDENCE-R1-396 — "compare" removed
+
+Exercise type: REMEDIATION_R1
+
+PROMPT (exact):
+
+```text
+What does each observation tell you about the file right now?
+
+Claim:  the file holds exactly "print('ready')\n"
+
+R   ObservedFile(status=ABSENT,     file_bytes=None, ...)   open raised FileNotFoundError
+P   ObservedFile(status=UNREADABLE, file_bytes=None, ...)   open raised PermissionError
+
+R — right now, does the file hold "print('ready')\n"?   = yes / no / can't tell
+P — right now, does the file hold "print('ready')\n"?   = yes / no / can't tell
+Confidence (0–100)                                       =
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+. no 
+your right the claim does not hold it is not incomparable, the file is just not there
+```
+
+EVALUATION:
+PASS on R with the learner's own reason ("the file is just not there"); the 395C regression is
+reversed and ABSENT is back to a definite contradiction of the claim. P and confidence omitted — P
+has been answered "can't tell"/"incomparable" consistently in 393, 394, 395A, so the omission is not
+treated as a gap.
+
+NEXT: near-transfer on a spec edge case the Write claim really allows (EV-P8-EMPTY-CLAIM-369):
+claim content "" against ABSENT and against READ b"". Tests absence-as-evidence together with the
+None versus b"" distinction. Then return to the open R/S one-or-two decision.
+
+### EV-P8-EMPTY-WRITE-TRANSFER-397 — PENDING, not answered
+
+Exercise type: NEAR_TRANSFER
+
+PROMPT (exact, presented; the learner paused to move locations before answering):
+
+```text
+Does an empty-content Write claim hold?
+
+Claim:  ClaimedEdit(tool_name="Write", details={"content": ""}, ...)
+
+Case E1   ObservedFile(status=ABSENT, file_bytes=None, content_hash=None,                 ...)
+Case E2   ObservedFile(status=READ,   file_bytes=b"",   content_hash=<digest of zero bytes>, ...)
+
+Case E1 — does the claim hold?   = yes / no / can't tell
+Case E2 — does the claim hold?   = yes / no / can't tell
+Why E1 and E2 differ             =
+Confidence (0–100)               =
+```
+
+No answer yet. Resume by re-presenting this exact prompt; do not reveal its answer.
