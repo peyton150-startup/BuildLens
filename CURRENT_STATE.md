@@ -3622,4 +3622,62 @@ equality; line-ending normalisation decision; str/bytes encoding at the point of
 
 Exact restart point: knowledge gate owed on EV-P8-OBSERVED-AT-379 — predict a stored stamp's
 display in two zones, off daylight time. Then the learner picks the next Phase 8 step.
-Uncommitted: file_observer.py, cli.py, both test files, and the two docs.
+Committed as 2b171fa.
+
+### Observed-at gate closed
+
+`EV-P8-OBSERVED-AT-GATE-380`. The learner converted a stored December UTC moment to New York time
+correctly (03:30 PM EST) once the operation and the offset were stated. The earlier rounds were lost
+to an ambiguous prompt and a lookup fact, not to the concept — recorded as a process note against the
+assistant: gates should name the operation being tested and supply lookup facts up front.
+
+No gate is open. Committed through 2b171fa; the ledger entry for this gate and this section are the
+only uncommitted changes.
+
+Exact restart point: the learner picks the next Phase 8 step. Remaining plan fields for the
+observed-version record: repository-relative path, session/worktree id, base commit/blob,
+provenance. Also available: the comparison (three recorded requirements) and the Stop
+reconciliation scan.
+
+### Block walkthrough of 2b171fa — learner-requested
+
+`EV-P8-TRY-SKIP-381`, `EV-P8-EQUALITY-RULES-382`, `EV-P8-BLOCK-WALKTHROUGH-383`.
+
+The learner asked to go through the content-hash / observed-at addition block by block. Five blocks,
+one check each. Three concepts needed remediation and all three closed at target level:
+
+```text
+try/except      once a line in try raises, the rest of the try does not run — a variable assigned
+                after the raising line does not exist in the except branch (UnboundLocalError)
+equality        == means whatever the type's __eq__ says; with none, identity. @dataclass writes a
+                field-comparing __eq__; hashlib's hash object has none. .hexdigest() is what makes
+                bytes the ONLY factor — digests carry no file identity
+conversion      astimezone returns a NEW value and leaves the original untouched; in
+                shown = f(x), f runs, its return value is stored in shown, and x is only read
+```
+
+One misconception was reversed direction and worth remembering: the learner first read
+`.hexdigest()` as ADDING file identity to comparison. It removes identity.
+
+### Comparison-patch requirements — four, none implemented
+
+```text
+1. hash equality is meaningful only when BOTH observations are READ (None == None is True)
+2. line endings: "hello\n" may be observed as b"hello\r\n" on Windows; normalisation is undecided
+3. the claim holds str and the observation holds bytes; encoding belongs at the comparison
+4. compare content_hash for "did content change", never whole ObservedFile records — record
+   equality includes observed_at and is False for any two distinct looks
+```
+
+No gate is open. Code is committed through 2b171fa; only docs have changed since.
+
+Exact restart point: the learner picks the next Phase 8 step — repository-relative path
+(recommended; reuses git_adapter.capture_repository_root), the comparison, or the Stop
+reconciliation scan.
+
+### Next step chosen — repository-relative path (not started)
+
+The learner chose option A. Session paused for a location change before any A work began. Open A with
+its first design question: relative to which root (the repository root that
+`git_adapter.capture_repository_root` resolves), and what an observation records for a path that is
+NOT inside the repository. No code exists for A. No gate is open.

@@ -42926,3 +42926,461 @@ Confidence =
 
 RECOVERY STATUS:
 narrowed observed-at gate due
+
+LEARNER ANSWER (verbatim):
+
+```text
+.  i understand they are 5 hours apart i just did not know how far apart the timezones were and did not want to google it
+```
+
+Confirms the recorded blocker was factual (OFFSET_KNOWLEDGE_MISSING), not conceptual. Part 2 of the
+narrowed gate withdrawn: the stored-versus-display concept is already evidenced by
+EV-P8-TIME-STORAGE-DECISION-378, where the learner stated a stored timestamp does not change. Only
+the offset application remains as a committed prediction.
+
+LEARNER QUESTION (verbatim): `. is that utc 20?` — notation-reading help given only for the ISO
+string: date, "T" separator, 24-hour time (20:30 = 8:30 PM), and +00:00 meaning the time is UTC.
+
+LEARNER ANSWER (verbatim):
+
+```text
+.  8:30 pm utc, america/newyork
+```
+
+PARTIAL. The input is now read correctly (8:30 PM UTC, target zone New York), but the conversion was
+not performed — the answer restates the inputs rather than producing the displayed output.
+
+PRIMARY BLOCKER:
+OFFSET_DIRECTION_NOT_APPLIED
+
+SCAFFOLD RUNG:
+R0 — one arithmetic step, direction supplied ("5 hours BEHIND" -> subtract)
+
+RECOVERY STATUS:
+single-step offset subtraction due
+
+LEARNER ANSWER (verbatim):
+
+```text
+. so it is 3:30, i did not understand what you were asking
+```
+
+PASS. Confirmed by execution against the real function:
+
+```text
+stored             -> 2026-12-01T20:30:00+00:00
+America/New_York   -> 03:30 PM EST
+Europe/London      -> 08:30 PM GMT
+```
+
+PROCESS NOTE against the assistant: the learner reports not understanding what was being asked. The
+gate asked what format_local_time would "show" without stating that this meant performing the
+conversion; three rounds were spent on prompt ambiguity and a lookup fact (the December offsets),
+not on the concept. Gates should name the operation being tested, and supply lookup facts up front
+when the facts are not the objective.
+
+EV-P8-OBSERVED-AT-GATE-380
+Exercise type: MILESTONE_TRACE
+Result: PASS. Offset applied correctly once the operation and the offset were stated; the
+stored-versus-display concept was already evidenced in EV-P8-TIME-STORAGE-DECISION-378.
+Gate owed from EV-P8-OBSERVED-AT-379 is CLOSED.
+
+## Session 2026-09-11 — block walkthrough of 2b171fa (learner-requested)
+
+Block 1 (imports and new field annotations): the learner explained why content_hash is `str | None`
+but observed_at is `datetime` — "there will always be a time but the file could be absent which is
+None". PASS; extended to note None also covers UNREADABLE.
+
+BLOCK 2 PROMPT (exact):
+
+```text
+Suppose observed_at = datetime.now(timezone.utc) were moved INSIDE the try, after handle.read().
+notes.md does not exist. open() raises FileNotFoundError.
+
+Does the line  observed_at = datetime.now(...)  run?
+So what happens when the except branch reaches  observed_at=observed_at ?
+Confidence =
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+. yes 
+it gives the date and time of the error
+```
+
+MISS. When open() raises, control jumps straight to the matching except; the remaining lines of the
+try block never run. observed_at is never assigned, so the except branch's reference to it raises
+UnboundLocalError. The earlier pass (EV-P8-OBSERVER-TRACE-373) established the other direction —
+no except clause runs on the happy path — but not that a raise SKIPS the rest of the try.
+
+PRIMARY BLOCKER:
+TRY_LINES_AFTER_A_RAISE_ASSUMED_TO_RUN
+
+SCAFFOLD RUNG:
+R0 — a three-line try with prints, predict which print lines appear
+
+R0 TRY/RAISE PROMPT (exact):
+
+```text
+    try:
+        print("A")
+        raise FileNotFoundError
+        print("B")
+    except FileNotFoundError:
+        print("C")
+    print("D")
+
+Which letters get printed, in order?
+Confidence =
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+. A C D
+```
+
+PASS at R0; confidence omitted. The learner skips B: once raise executes, the rest of the try block
+does not run and control goes to the matching except, then continues after it.
+
+NEXT: climb back to the Block 2 target — apply the same rule to observed_at moved inside the try.
+
+BLOCK 2 TARGET PROMPT (exact):
+
+```text
+    try:
+        with open(file_path, "rb") as handle:     # raises FileNotFoundError here
+            file_bytes = handle.read()
+        observed_at = datetime.now(timezone.utc)
+    except FileNotFoundError:
+        return ObservedFile(..., observed_at=observed_at)
+
+1. Does  observed_at = datetime.now(...)  run?   YES / NO
+2. The except branch then reads  observed_at . Does that variable exist yet?   YES / NO
+3. So what happens on that line?
+Confidence =
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+. no
+no
+an error
+```
+
+PASS at target level after one R0 rung; confidence omitted. Blocker
+TRY_LINES_AFTER_A_RAISE_ASSUMED_TO_RUN resolved: the learner now traces that the assignment after the
+raising line never runs, the variable does not exist in the except branch, and referencing it errors.
+
+EV-P8-TRY-SKIP-381
+Exercise type: TRACE
+Result: PASS after remediation (miss -> R0 print trace -> target).
+
+Block 2 follow-up: the learner proposed "so we need to move observed at up" — clarified that the real
+code already places it above the try (line 33); the crashing version was the hypothetical, and the
+UnboundLocalError it produced would break observe_file's never-raises contract on exactly the
+missing-file case.
+
+BLOCK 3 PROMPT (exact):
+
+```text
+The ABSENT and UNREADABLE returns are identical except for one line.
+1. Which line is different between the two returns?
+2. content_hash=None appears in both. Why is None the honest value here, and not
+   hashlib.sha256(b"").hexdigest()?
+Confidence =
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+. the status 
+becasue there i truley no bytes to read so there is no hash
+```
+
+PASS on both. Sharpened: the digest of b"" is the fingerprint of an empty file, so storing it would
+assert a READ finding ("read it, it was empty") that the reader never made.
+
+BLOCK 4 PROMPT (exact):
+
+```text
+1.  hashlib.sha256(b"hi") == hashlib.sha256(b"hi")
+2.  hashlib.sha256(b"hi").hexdigest() == hashlib.sha256(b"hi").hexdigest()
+TRUE or FALSE for each?
+Confidence =
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+. treu for both
+```
+
+MISS on 1, PASS on 2; confidence omitted. Hash objects do not define content equality, so `==` falls
+back to identity: two separately built objects compare False even over identical bytes. The
+hexdigest strings compare by value and are True. This is why content_hash stores `.hexdigest()`
+rather than the hash object.
+
+PRIMARY BLOCKER:
+EQUALITY_ASSUMED_TO_COMPARE_CONTENTS_FOR_EVERY_TYPE
+
+Connects to the earlier aliasing sequence (EV-P8-FROZEN-MUTABILITY-364), where `a is b` was used to
+show two names on two different dictionaries.
+
+LEARNER QUESTION (verbatim), in place of answering the A/B/C equality prompt:
+
+```text
+. wait so hexdigest makes it so that the files bytes being the same is not the only factor now if they are 2 different files they will be different?
+```
+
+MISCONCEPTION — direction reversed. The learner reads .hexdigest() as ADDING file identity to the
+comparison. It is the reverse: the hash OBJECT compares by identity; .hexdigest() removes identity
+and leaves only the bytes. Two different files with identical bytes produce identical digests; the
+digest carries no information about which file it came from. Answered with a demonstration on two
+real files (see output in the next entry).
+
+PRIMARY BLOCKER:
+HEXDIGEST_ASSUMED_TO_ADD_IDENTITY
+
+Pending A/B/C equality prompt deferred behind this.
+
+TWO-FILE DEMONSTRATION (output), answering the learner's reversed-direction question:
+
+```text
+two different files, same bytes      -> digests equal? True
+two different files, different bytes -> digests equal? False
+same bytes, stored as OBJECTS instead -> equal?        False
+```
+
+Rule supplied: after .hexdigest(), the bytes are the only factor in equality. File identity lives in
+file_path, a separate field; a digest match between claim and observation establishes "same bytes"
+and nothing about which file.
+
+NEXT: R1 near-transfer to confirm the corrected direction before returning to the A/B/C prompt.
+
+R1 CORRECTED-DIRECTION PROMPT (exact):
+
+```text
+Two different files. Same bytes.
+    observe_file("a.txt")    a.txt holds b"x"
+    observe_file("b.txt")    b.txt holds b"x"
+1. Are their content_hash values equal?   YES / NO
+2. Which ObservedFile field tells you these are two different files?
+Confidence =
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+. so now we are only comparing the bytes not if the files are differnet files contnet only
+```
+
+PASS on the rule; confidence omitted. The learner states that digest comparison is content-only and
+carries no file identity. Blocker HEXDIGEST_ASSUMED_TO_ADD_IDENTITY resolved. Part 2 (file_path)
+not named, but it had been stated by the assistant in the preceding message, so re-asking would test
+recall of a just-given fact rather than the concept; not pursued.
+
+RETURNING TO: the A/B/C equality prompt — near-transfer for the Block 4 blocker
+EQUALITY_ASSUMED_TO_COMPARE_CONTENTS_FOR_EVERY_TYPE.
+
+A/B/C EQUALITY PROMPT (exact):
+
+```text
+Your adapter tests build two separate ClaimedEdit objects and compare them, and the test passes.
+Two separately built hash objects over identical bytes compared False.
+So which is it:
+A. == always compares identity (same object)
+B. == always compares contents
+C. it depends on the type — each type decides what == means for it
+And which kind is a hash object, and which kind is a dataclass?
+Confidence =
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+. C, but i do not know why
+```
+
+PASS on the principle; the mechanism was requested. Supplied: each type may define an equality
+rule (`__eq__`); a type without one falls back to identity. `@dataclass` generates an `__eq__` that
+compares fields in order; hashlib's hash object defines none, so it compares by identity. Shown with
+a plain class versus a dataclass of the same fields (output in the next entry).
+
+EQUALITY-RULE DEMONSTRATION (output):
+
+```text
+plain class,  same fields  -> False
+dataclass,    same fields  -> True
+hash objects, same bytes   -> False
+did @dataclass add an equality rule?  -> True
+does the plain class have its own?    -> False
+```
+
+Rule now supplied and shown: == means whatever the type's __eq__ says; with no __eq__, identity.
+Hash object = identity kind; dataclass = field-contents kind.
+
+NEXT: near-transfer on ObservedFile itself — a dataclass whose fields include observed_at.
+
+OBSERVEDFILE EQUALITY TRANSFER PROMPT (exact):
+
+```text
+You observe notes.md twice, ten seconds apart. Nobody touches the file in between.
+    first  = observe_file("notes.md")
+    second = observe_file("notes.md")
+1. first.content_hash == second.content_hash    ->  TRUE / FALSE
+2. first == second                              ->  TRUE / FALSE
+3. To ask "did the file's content change between these two looks?", compare the whole records or
+   the content_hash fields? Why?
+Confidence =
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+.  true 
+false 
+beasue you are not comparing the observed file anymore you are com[aing the rest of the datacalss
+```
+
+PASS; confidence omitted. Near-transfer of the equality-rule mechanism onto the learner's own type.
+The learner identifies that dataclass == compares all fields rather than content. Sharpened: the
+field that differs is observed_at, so whole-record equality would report every re-observation as a
+change.
+
+REQUIREMENT ADDED FOR THE COMPARISON PATCH (fourth):
+compare content_hash for "did content change", never whole ObservedFile records — record equality
+includes observed_at and is False for any two distinct looks.
+
+EV-P8-EQUALITY-RULES-382
+Exercise type: ADJACENT_CONCEPT / TRANSFER
+Result: PASS after remediation (Block 4 miss -> reversed-direction misconception -> R1 -> A/B/C with
+mechanism -> transfer to ObservedFile). Blockers EQUALITY_ASSUMED_TO_COMPARE_CONTENTS_FOR_EVERY_TYPE
+and HEXDIGEST_ASSUMED_TO_ADD_IDENTITY resolved.
+
+BLOCK 5 PROMPT (exact):
+
+```text
+    shown = format_local_time(first.observed_at, ZoneInfo("Europe/London"))
+1. After that line runs, has first.observed_at changed?   YES / NO
+2. Why is this function in cli.py rather than file_observer.py?
+Confidence =
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+. Yes
+becasue it is run in the command line, so that is the responsilbity of the cli
+```
+
+MISS on 1; PARTIAL on 2; confidence omitted.
+
+Part 1: `astimezone` returns a NEW datetime and leaves the original untouched; the record is also
+frozen and datetime is immutable. The learner holds "a stored timestamp does not change" as a design
+statement (EV-P8-TIME-STORAGE-DECISION-378) but did not apply it at the level of this call — the
+conversion was read as altering the stored value.
+
+Part 2 sharpened: the reason is presentation versus storage, the learner's own boundary; "run in the
+command line" is incidental.
+
+PRIMARY BLOCKER:
+CONVERSION_ASSUMED_TO_MUTATE_THE_SOURCE_VALUE
+
+SCAFFOLD RUNG:
+R0 — one datetime, one astimezone call, predict what the original prints
+
+R0 ASTIMEZONE PROMPT (exact):
+
+```text
+    a = datetime(2026, 12, 1, 20, 30, tzinfo=timezone.utc)
+    b = a.astimezone(ZoneInfo("America/New_York"))
+    print(a)
+Which prints?
+A.  2026-12-01 20:30:00+00:00
+B.  2026-12-01 15:30:00-05:00
+Confidence =
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+. A
+```
+
+PASS at R0; confidence omitted. The original datetime is unchanged; astimezone returns a new value.
+
+NEXT: climb back to the Block 5 target — does first.observed_at change after format_local_time?
+
+LEARNER QUESTION (verbatim), in place of answering the Block 5 target:
+
+```text
+. ok so then what does shown actually do if it is not running formatloacltime
+```
+
+SYNTAX GAP surfaced: the learner reads `shown = format_local_time(...)` as `shown` being something
+that runs, or as the function not running. Neither: the call runs, and its RETURN VALUE — a string —
+is stored under the name `shown`. The name does nothing; it holds a result.
+
+PRIMARY BLOCKER:
+ASSIGNMENT_FROM_A_CALL_NOT_READ_AS_RETURN_VALUE
+
+Per CLAUDE.md syntax-only help mode: stop the surrounding problem, explain only the form
+`name = function(args)`, give an R0 example, and have the learner predict it before rebuilding.
+
+Pending Block 5 target (does first.observed_at change?) deferred behind this.
+
+LEARNER QUESTION (verbatim):
+
+```text
+. so how does it not change what shown is when you run the line, because formatlocaltime runs again
+```
+
+TARGET CONFUSION, not a new misconception: the learner attributed the Block 5 question to `shown`
+(the output) rather than `first.observed_at` (the input). Confirmed the learner's own claim — shown is
+re-assigned each time the line runs, because the call runs again. Separated the two roles: shown is
+the output, written each run; first.observed_at is the input, read to build the string. The graded
+question (does the INPUT change?) was re-posed rather than answered, to avoid revealing before
+commitment. The R0 len() prompt is superseded by this clarification.
+
+BLOCK 5 TARGET PROMPT (exact):
+
+```text
+    shown = format_local_time(first.observed_at, ZoneInfo("Europe/London"))
+Before the line:   first.observed_at  ->  2026-12-01 20:30:00+00:00
+After the line:    first.observed_at  ->  ?
+Same value as before, or different?   SAME / DIFFERENT
+One line on why.
+Confidence =
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+. it is not running a new observed time it is calling it from first then formatting it so same value but formatted and given to shown
+```
+
+PASS at target; confidence omitted. The learner separates input from output unaided: the input is
+read, a new formatted value is produced, and that value is assigned to shown. Blockers
+CONVERSION_ASSUMED_TO_MUTATE_THE_SOURCE_VALUE and ASSIGNMENT_FROM_A_CALL_NOT_READ_AS_RETURN_VALUE
+resolved.
+
+EV-P8-BLOCK-WALKTHROUGH-383
+Exercise type: CODE_READING (learner-requested walkthrough of 2b171fa, five blocks)
+Result: PASS. Block 1 and Block 3 passed directly. Block 2 (try lines skipped after a raise), Block 4
+(== depends on the type's __eq__; .hexdigest() leaves bytes as the only factor), and Block 5
+(conversion returns a new value; assignment stores a return value) each needed remediation and each
+closed at target level.
+
+Walkthrough COMPLETE. Four requirements now recorded for the comparison patch.
+
+LEARNER DIRECTION (verbatim):
+
+```text
+. lets do a then i need to pause and commit to move locations
+```
+
+Option A chosen as the next Phase 8 step: repository-relative path. Not started — it needs learner
+design decisions first. Session paused for a location change; committed at the learner's request.
