@@ -3962,7 +3962,8 @@ learner trace        complete — EV-P8-COMPARE-TRACE-422 (CRLF case and wrong-t
 learner explanation  complete — EV-P8-COMPARE-EXPLANATION-424
 transfer variant     complete — EV-P8-WAREHOUSE-TRANSFER-425 (warehouse pallet surface)
 reversal conditions  complete — 398A (verdict split), 401 (unknown status), 419 (wrong tool),
-                                423 (line endings: reverse to byte-exact if nothing ever writes 
+                                423 (line endings: reverse to byte-exact if nothing ever writes 
+
 )
 ```
 
@@ -3975,5 +3976,38 @@ remaining plan fields for the observed-version record (session/worktree id, base
 provenance); wiring a repository_root through to observe_file; the Stop reconciliation scan.
 Cumulative counters unchanged: major 1/2, foundation 1/3.
 
-Exact restart point: commit compare.py and test_compare.py (both untracked; nothing else changed),
-then the learner picks the next Phase 8 step.
+Committed as 9313da0.
+
+### compare_edit — specification in progress, no code
+
+The learner chose to do compare_edit and then the dispatcher (separate patches).
+
+Decisions and findings so far (EV-P8-EDIT-WHAT-IS-CHECKABLE-426 to EV-P8-EDIT-VERDICTS-430):
+
+```text
+checkable      containment, never equality: an Edit claim names two fragments, not the whole file
+               - is new_string present now?
+               - is old_string gone?
+tool rule      OBSERVED (428): Claude's Edit REFUSES when old_string is not unique and replace_all is
+               false ("Found 2 matches ... but replace_all is false"); the file is left unchanged and
+               NO PostToolUse record is written. So every Edit claim BuildLens sees came from a
+               success, and old_string appeared exactly once at edit time
+exception      old_string may legitimately remain when new_string CONTAINS old_string (429)
+verdicts       reuse the existing six, no additions (430, confidence 70):
+                 new present, old gone            -> claim holds
+                 new present, old still there     -> claim does not hold
+                 new absent                       -> claim does not hold
+                 new present only after 
+ -> 
+  -> claim holds after normalize
+               status cases behave exactly as in compare_write
+precision      for Edit, "claim holds" means the expected text is present and the replaced text is
+               gone — not proof Claude made the change (same limit as a matching hash: no authorship)
+```
+
+OPEN: EV-P8-REPLACE-ALL-RELEVANCE-431 — must compare_edit read replace_all at all, given that the
+tool's rule means old_string should be gone in every successful case? Prompt preserved in the ledger,
+unanswered.
+
+Exact restart point: re-present the exact 431 prompt. Then tests red first, then compare_edit. After
+that, the dispatcher as its own patch. No compare_edit code exists.

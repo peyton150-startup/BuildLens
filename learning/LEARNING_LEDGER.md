@@ -46583,3 +46583,171 @@ learner explanation  complete — EV-P8-COMPARE-EXPLANATION-424
 transfer variant     complete — EV-P8-WAREHOUSE-TRANSFER-425
 reversal conditions  complete — EV-P8-NORMALIZE-REVERSAL-423 and the decisions at 398A, 401, 419
 ```
+
+## Session 2026-09-11 (night) — compare_edit specification
+
+Pre-patch frame (provisional): Phase 8; objective — what a partial claim can and cannot establish
+(containment, not equality); behavior — compare_edit(claim, observed) in compare.py; conceptual
+change — a claim about a FRAGMENT; out of scope — the dispatcher (separate patch); size ~30 lines
+plus ~8 tests.
+
+### EV-P8-EDIT-WHAT-IS-CHECKABLE-426
+
+PROMPT (exact):
+
+```text
+Write   details = {"content": "print('ready')\n"}          the WHOLE file
+Edit    details = {"old_string": "hello",
+                   "new_string": "goodbye"}                 a fragment, plus what it replaced
+
+observed.file_bytes = b"goodbye world\nhello again\n"
+
+Can you check the file is EQUAL to something the claim names?   = yes / no, and why
+What CAN you check about this file from this claim              =
+Confidence (0-100)                                              =
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+. no, becasue this is telling you what the old string was and then what the new change is
+```
+
+EVALUATION:
+Field 1 PASS: no equality check is possible — the claim names two fragments, never the whole file.
+Field 2 and confidence omitted; asked alone next.
+
+NARROWED ANSWER (verbatim):
+
+```text
+. if what hte claim states happened is in the file right now
+```
+
+PASS: containment — is new_string in the file now.
+
+### EV-P8-EDIT-OLD-STRING-427 — does a leftover old_string contradict the claim?
+
+PROMPT (exact, first form): File 1 b"goodbye world\nhello again\n" (new present, old still present)
+versus File 2 b"goodbye world\n"; claim old_string "hello", new_string "goodbye", replace_all not
+stated.
+
+LEARNER ANSWER 1 (verbatim):
+
+```text
+. you can sheck if the old string is still there and the question of how many occourances there are
+```
+
+Second checkable fact named unaided (old_string presence), plus occurrence counts — the crux. The
+File 1 verdict field was skipped and re-asked alone.
+
+LEARNER ANSWER 2 (verbatim):
+
+```text
+. cant tell, it contains both strings
+```
+
+PASS on the verdict; confidence omitted. The reason is thin: whether a leftover old_string is
+allowed depends on the TOOL'S RULE (does a successful Edit without replace_all require old_string to
+be unique?), which this project has never observed. Same shape as the encoding gap in 404-405 —
+answerable by experiment rather than argument.
+
+### EV-P8-EDIT-UNIQUENESS-OBSERVATION-428 — the Edit tool's rule, observed
+
+LEARNER PREDICTION (verbatim), before the run:
+
+```text
+. i have no idea, i think if replace all is not set it only happens once so then it could replace either of the two hello's
+```
+
+EXPERIMENT: scratch file containing "hello world\nhello again\n"; Claude's Edit tool called with
+old_string "hello", new_string "goodbye", replace_all not set.
+
+OBSERVED (verbatim tool error):
+
+```text
+Found 2 matches of the string to replace, but replace_all is false. To replace all occurrences, set
+replace_all to true. To replace only one occurrence, please provide more context to uniquely identify
+the instance.
+```
+
+The file was UNCHANGED afterwards, and the capture log gained NO record — a refused edit produces no
+PostToolUse claim, so every Edit claim BuildLens ever sees came from a tool call that succeeded.
+
+PREDICTION WRONG, honestly flagged as a guess ("i have no idea"). The tool REFUSES rather than
+choosing an occurrence. Consequence for the spec: a successful Edit claim WITHOUT replace_all implies
+old_string appeared exactly once at edit time. Put to the learner next, including the exception where
+new_string itself contains old_string.
+
+LEARNER ANSWER (verbatim):
+
+```text
+.  so it can only replace the exact string in old string and if there are more than one of those occroances replace all has to be set to true, hello was 2 times, yes, if we assume that replace all is false then it did not run or it only replaced on of the 2 hellos
+```
+
+EVALUATION:
+Rule restated correctly. Verdict PASS: File 1 contradicts the claim. Count field muddled — answered
+"2 times", reading the count off the file as observed NOW rather than at edit time. The chain: a
+claim exists, so the edit succeeded, so old_string appeared exactly ONCE when it ran, so it was
+replaced and zero occurrences should remain; a leftover therefore means the file changed after the
+edit. The learner's "then it did not run" is the same reasoning reached from the other end (two
+occurrences would have meant refusal and no claim at all). Confidence omitted.
+
+NEXT: the exception — a claim whose new_string CONTAINS old_string, where a leftover is expected.
+
+### EV-P8-EDIT-CONTAINS-EXCEPTION-429
+
+PROMPT: claim old_string "hello", new_string "hello there"; file b"hello there world\n".
+
+LEARNER ANSWER (verbatim):
+
+```text
+.  yes 
+no
+this means that the old string can be contained in the new string
+```
+
+PASS on all three. Rule refined by the learner: old_string is expected to be GONE after a successful
+edit, UNLESS new_string contains old_string.
+
+### EV-P8-EDIT-VERDICTS-430
+
+PROMPT (exact): claim old_string "hello", new_string "goodbye" (replace_all not stated).
+Case a b"goodbye world\n" (new present, old gone); case b b"goodbye world\nhello again\n" (new
+present, old still there, new does not contain old); case c b"hello world\n" (new absent); case d
+b"goodbye\r\nworld\n" against new_string "goodbye\nworld".
+
+LEARNER ANSWER (verbatim):
+
+```text
+. claim holds
+claim does not hold 
+claim does not hold 
+claim holds after normalize 
+70
+```
+
+PASS at confidence 70 — the first numeric confidence given unprompted in this stretch. The existing
+six verdicts are reused with no additions; the assignments are consistent with the Write semantics.
+Precision to carry: for Edit, CLAIM_HOLDS means the expected text is present and the replaced text is
+gone — it is not proof that Claude made the change, exactly as a matching hash was never proof of
+authorship (EV-P8-CONTENT-HASH-376).
+
+### EV-P8-REPLACE-ALL-RELEVANCE-431 — PENDING, not answered
+
+PROMPT (exact, presented; the learner paused to move locations):
+
+```text
+Does the check change when replace_all is set?
+
+replace_all not stated   the tool refuses unless old_string appears exactly once  -> that one is replaced
+replace_all = True       every occurrence is replaced
+replace_all = False      same refusal rule as "not stated"
+
+After a successful edit, should old_string be gone in all three rows?   = yes / no
+So does compare_edit need to read replace_all at all                    = yes / no
+Confidence (0-100)                                                      =
+
+Assume new_string does not contain old_string, which is the exception you found.
+```
+
+No answer yet. Resume by re-presenting this exact prompt; do not reveal its answer.
