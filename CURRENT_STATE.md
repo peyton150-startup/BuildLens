@@ -3929,5 +3929,51 @@ goes red; answered; include yes/no not yet given.
 Test style to copy (test_file_observer.py): plain functions, `importlib.import_module` inside each
 test, module-level calls at the bottom, then `print("test passed")`.
 
-Exact restart point: ask only "Include row 13 (yes / no)". Then write test_compare.py with every row,
-run it RED before compare.py exists, then write compare.py. No comparison code exists.
+Row 13 INCLUDED (EV-P8-ROW-13-DECISION-420A): "so no one updates a module that would effect compare
+without looking at compare".
+
+### Comparison patch LANDED — EV-P8-COMPARE-WRITE-421
+
+`compare.py` and `test_compare.py` now exist. RED first: `ModuleNotFoundError: No module named
+'compare'` at the first test's import line, before any product code. Then green; full suite green
+across TEN files; no existing file modified.
+
+```text
+compare.py   ComparisonVerdict(Enum): CLAIM_HOLDS, CLAIM_HOLDS_AFTER_NORMALIZE, CLAIM_DOES_NOT_HOLD,
+                                      FILE_ABSENT, INCOMPARABLE, STATUS_NOT_ACCEPTED
+             _normalise_line_endings(data) -> data.replace(b"
+
+", b"
+")
+             compare_write(claim, observed) -> ComparisonVerdict
+                 tool_name guard first (raises ValueError), then UNREADABLE / ABSENT / READ each by
+                 name, then the unknown-status verdict. Inside READ: UTF-8 encode (labelled with its
+                 assumption, evidence and reversal), hash compare, normalised compare, else
+                 CLAIM_DOES_NOT_HOLD
+test_compare.py   13 tests, every expected result specified by the learner before they were written
+```
+
+MILESTONE COMPLETE in every required dimension:
+
+```text
+implementation       complete — compare.py; every decision in it is the learner's (390-420A)
+automated tests      complete — 13 tests, all specified before being written; red first; suite green
+learner trace        complete — EV-P8-COMPARE-TRACE-422 (CRLF case and wrong-tool case)
+learner explanation  complete — EV-P8-COMPARE-EXPLANATION-424
+transfer variant     complete — EV-P8-WAREHOUSE-TRANSFER-425 (warehouse pallet surface)
+reversal conditions  complete — 398A (verdict split), 401 (unknown status), 419 (wrong tool),
+                                423 (line endings: reverse to byte-exact if nothing ever writes 
+)
+```
+
+Watch items for later retrieval: the runtime-encoding-source chain (406-413) closed only after a long
+remediation; the verdict names "incomparable" (unreadable) versus "status not accepted" (a status the
+code was never taught) were confused once on the transfer surface.
+
+Phase 8 is NOT complete. Still open in the phase: compare_edit and the dispatcher on tool_name; the
+remaining plan fields for the observed-version record (session/worktree id, base commit/blob,
+provenance); wiring a repository_root through to observe_file; the Stop reconciliation scan.
+Cumulative counters unchanged: major 1/2, foundation 1/3.
+
+Exact restart point: commit compare.py and test_compare.py (both untracked; nothing else changed),
+then the learner picks the next Phase 8 step.

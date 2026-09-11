@@ -46380,3 +46380,206 @@ means the comparison side (compare_write / ComparisonVerdict). Precision supplie
 exactly when compare_write has NO BRANCH for a status — that is its purpose; a new verdict member is
 not required (a new branch could return an existing verdict such as INCOMPARABLE). Include decision
 re-asked.
+
+### EV-P8-ROW-13-DECISION-420A
+
+LEARNER ANSWER (verbatim):
+
+```text
+. yes
+this is a good one so no one updates a module that would effect compare without looking at compare
+```
+
+INCLUDED. The learner's reason names the real purpose: the test makes a cross-module dependency
+visible at test time — change ObservationStatus without touching compare.py and the suite goes red.
+
+## EV-P8-COMPARE-WRITE-421 — first comparison patch
+
+PRE-PATCH FRAME: as presented in EV-P8-TEST-ROWS-420.
+
+RED (verbatim), observed with test_compare.py written and compare.py absent:
+
+```text
+ModuleNotFoundError: No module named 'compare'
+exit status: 1
+```
+
+Raised at the first test's import line, before any product code existed.
+
+GREEN: `python test_compare.py` → "test passed". Full suite green across TEN files: classify,
+claude_adapter, cli, compare, file_observer, git_adapter, git_adapter_integration, session,
+snapshot, summarize. No existing file was modified; `git status` shows only the two new files.
+
+CODE LANDED — compare.py:
+
+```text
+ComparisonVerdict(Enum)      CLAIM_HOLDS, CLAIM_HOLDS_AFTER_NORMALIZE, CLAIM_DOES_NOT_HOLD,
+                             FILE_ABSENT, INCOMPARABLE, STATUS_NOT_ACCEPTED
+_normalise_line_endings      data.replace(b"\r\n", b"\n")
+compare_write(claim, observed) -> ComparisonVerdict
+    tool_name guard first (raises ValueError), then UNREADABLE, ABSENT, READ by name,
+    then the unknown-status verdict; inside READ: UTF-8 encode, hash compare, normalised
+    compare, otherwise CLAIM_DOES_NOT_HOLD
+```
+
+Every decision in it is the learner's (390–420A); the encoding comment carries the assumption, its
+evidence and its reversal condition.
+
+TESTS: 13, all specified by the learner before being written (420, 420A).
+
+KNOWLEDGE GATE OWED: trace one CRLF case and one wrong-tool case through the real code, and supply
+the reversal condition for the line-ending decision, still outstanding from 415.
+
+### EV-P8-COMPARE-TRACE-422 — post-patch trace gate
+
+Exercise type: MILESTONE_TRACE
+
+PROMPT (exact): the landed compare_write body (comments trimmed) plus:
+
+```text
+Call A
+    claim    = ClaimedEdit(tool_name="Write", details={"content": "print('ready')\n"}, ...)
+    observed = ObservedFile(status=READ, file_bytes=b"print('ready')\r\n",
+                            content_hash=<sha256 of those bytes>, ...)
+Call B
+    claim    = ClaimedEdit(tool_name="Edit", details={"old_string": "a", "new_string": "b"}, ...)
+    observed = ObservedFile(status=UNREADABLE, file_bytes=None, content_hash=None, ...)
+
+A — which of the two content checks is True, and what is returned   =
+B — what happens, and which line it happens on                       =
+Confidence (0–100)                                                   =
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+. call a goes into the normalize and then it is claim holds after normalize 
+call b raises a value error becasue it is edit and we have only written about write
+```
+
+EVALUATION:
+PASS on both; confidence omitted. A: the hash check is False (the stored digest is of the CRLF
+bytes), the normalised comparison is True, CLAIM_HOLDS_AFTER_NORMALIZE returned. B: ValueError.
+Precision added for B: it happens on the FIRST guard, before the status is looked at at all — which
+is why an UNREADABLE observation does not answer INCOMPARABLE for a claim the function cannot judge
+(the 418 finding, now visible in the landed code).
+
+TRACE GATE CLOSED. Still owed for the milestone: the line-ending reversal condition (from 415), the
+learner explanation, and a transfer variant.
+
+### EV-P8-NORMALIZE-REVERSAL-423 — reversal condition owed from 415
+
+PROMPT (exact):
+
+```text
+Your decision   a match that needs \r\n → \n gets its own verdict, CLAIM_HOLDS_AFTER_NORMALIZE
+    Y   treat it as a plain CLAIM_HOLDS      (the line-ending difference becomes invisible)
+    N   treat it as CLAIM_DOES_NOT_HOLD      (byte-exact only)
+
+What would have to be true for Y or N to be the better choice   =
+Confidence (0–100)                                              =
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+. if the \r was not added in at all
+```
+
+EVALUATION:
+PASS; confidence omitted. A concrete reversal condition: if nothing in the environment ever
+introduces \r\n — core.autocrlf off or a .gitattributes forcing LF, and every tool writing LF — the
+normalised branch never fires, the extra verdict earns nothing, and byte-exact comparison (N) is
+enough. Precision: this favours N specifically, not Y; under it the branch would be dead code rather
+than a hidden difference.
+
+The line-ending decision now has requirement, mechanism, cost, evidence and reversal. Still owed for
+the milestone: the learner explanation and a transfer variant.
+
+### EV-P8-COMPARE-EXPLANATION-424 — milestone explanation
+
+PROMPT: explain compare.py from memory — purpose; why the tool_name guard runs first; why status is
+checked before the hash; why a line-ending match gets its own verdict; why an unknown status returns
+a verdict while a wrong tool raises.
+
+LEARNER ANSWER (verbatim):
+
+```text
+. compare takes the observed fiel and comapres it to the claimed changes made by claude, the toolname runs before anything else becasue as of right now we only have the write tool and will be adding in edit later but regardless those are the 2 tools we will support, if the status is absesnt or incomparable then the hash does not matter becasue there is no hash for those 2 cases, for the line ending match in windows an extra \r is added to the end and that means that the bytes will be different based on that so we need to remove that to normalize the bytes so that when we compare them they have the same syntax, for unkown it will only afffect one fiule in the batch so that can be recorded but if we have a wrong tool that can be a problem for every single batch that matches the wrong tool so it would make sense to raise and stop the whole batch
+```
+
+EVALUATION:
+PASS on purpose, on status-before-hash (no hash exists for those cases), and on the raise-versus-
+verdict rule, which came back cleanly and unaided. Two fields answered a different question: the
+guard's ORDER (answered as which tools are supported) and why the normalised match needs its OWN
+verdict (answered as why normalising is needed). Narrowed.
+
+NARROWED ANSWER (verbatim):
+
+```text
+. then the wrong tool name could be recorded if the status is absent or incomparable
+the reader leanrs that windows changes the bytes and that there is an extra step needed in order to compare the 2 bytes
+```
+
+Both PASS. Precisions: with the guard late, FILE_ABSENT or INCOMPARABLE would be returned for a claim
+the function cannot judge and nothing would report the wrong tool; and the second thing the verdict
+tells a reader is that something touched the file after Claude wrote it, since Write emits \n.
+EXPLANATION GATE CLOSED.
+
+### EV-P8-WAREHOUSE-TRANSFER-425 — transfer variant
+
+PROMPT (exact): a supplier notice claims "pallet 7 contains 48 units of part X"; seven findings —
+1 48 units, 2 40 units, 3 empty bay, 4 locked bay, 5 four sealed boxes marked "12 units",
+6 a scanner condition the procedure never mentions, 7 the notice is a service invoice, not a
+shipment notice. Fields: which is a definite contradiction and which is no evidence; which matches
+"after normalize" and why; which should stop the run.
+
+LEARNER ANSWER (verbatim):
+
+```text
+. correct 
+contradiction
+controadiction
+no evidence 
+no evidence 
+no evidence at all
+no evidence not sure 
+5 would be the match becasue they are in boxes so there is the same number of unites you just have to take the xtra step of opening all of them
+7 should stop everything
+```
+
+EVALUATION:
+PASS: 1 holds; 2 and 3 contradictions (an empty bay contradicts, as an absent file does); 4 no
+evidence; 5 the after-normalize match, with the right shape — the same quantity recorded differently,
+reachable with one extra step; 7 raises and stops the run. Case 6 uncertain, narrowed.
+
+NARROWED ANSWER (verbatim):
+
+```text
+.  about the procedure which would be the buildlens code -> no evidence
+```
+
+Category CORRECT (a fact about the procedure = BuildLens's own code). Verdict mapping missed: "no
+evidence" is INCOMPARABLE, the locked-bay/UNREADABLE case. One retrieval asked on the name of the
+sixth verdict.
+
+RETRIEVAL (verbatim): first answer "wrong tool name" — that is case 7, the raise. On the narrowed
+recognition prompt listing all six verdicts:
+
+```text
+. status no accepted
+```
+
+PASS (spelling normalised). Case 6 is STATUS NOT ACCEPTED: a fact about the procedure — BuildLens's
+own code — not about the shipment or the checker's reach. TRANSFER GATE CLOSED.
+
+MILESTONE EV-P8-COMPARE-WRITE-421 COMPLETE in every required dimension:
+
+```text
+implementation       complete — compare.py, every decision the learner's
+automated tests      complete — 13 tests, specified before written, red first, full suite green (10 files)
+learner trace        complete — EV-P8-COMPARE-TRACE-422
+learner explanation  complete — EV-P8-COMPARE-EXPLANATION-424
+transfer variant     complete — EV-P8-WAREHOUSE-TRANSFER-425
+reversal conditions  complete — EV-P8-NORMALIZE-REVERSAL-423 and the decisions at 398A, 401, 419
+```
