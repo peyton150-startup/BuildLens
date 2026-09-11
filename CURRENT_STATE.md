@@ -3997,7 +3997,8 @@ verdicts       reuse the existing six, no additions (430, confidence 70):
                  new present, old gone            -> claim holds
                  new present, old still there     -> claim does not hold
                  new absent                       -> claim does not hold
-                 new present only after 
+                 new present only after 
+
  -> 
   -> claim holds after normalize
                status cases behave exactly as in compare_write
@@ -4009,5 +4010,31 @@ OPEN: EV-P8-REPLACE-ALL-RELEVANCE-431 — must compare_edit read replace_all at 
 tool's rule means old_string should be gone in every successful case? Prompt preserved in the ledger,
 unanswered.
 
-Exact restart point: re-present the exact 431 prompt. Then tests red first, then compare_edit. After
-that, the dispatcher as its own patch. No compare_edit code exists.
+### compare_edit and compare_tool_name LANDED (EV-P8-COMPARE-EDIT-432, EV-P8-COMPARE-TOOL-NAME-436)
+
+Both patches red first, then green; full suite green across ten files; 34 tests in test_compare.py.
+
+```text
+_edit_landed(file_bytes, old_bytes, new_bytes)
+    new in file AND (old in new OR old not in file)
+compare_edit(claim, observed)
+    Edit-only guard raises first; UNREADABLE / ABSENT / READ by name; unknown status -> verdict.
+    Inside READ: exact containment, then containment on normalised bytes, else CLAIM_DOES_NOT_HOLD.
+    replace_all is NEVER read — decided at confidence 90 from the observed tool rule (428)
+compare_tool_name(claim, observed)
+    "Write" -> compare_write, "Edit" -> compare_edit, otherwise raise
+    ValueError("no comparison for tool: <name>"); explicit branches, not a lookup table
+```
+
+Learner-owned decisions in these two patches: containment not equality; old_string expected gone
+unless new_string contains it; the six verdicts reused unchanged; replace_all not read; dispatcher in
+compare.py, named compare_tool_name, doing the call rather than handing back a function; unknown tool
+raises by the 419 rule.
+
+The learner audited the proposed dispatcher test rows and caught two real problems (an asymmetric
+row, and that rows 1-8 duplicate existing per-function tests) — recorded in 435. All nine kept.
+
+Gates: compare_edit trace CLOSED (433). Dispatcher gate still owed, plus the explanation and transfer
+for this pair of patches if the milestone is to close as 421 did.
+
+Exact restart point: run the dispatcher gate. compare.py and test_compare.py have uncommitted changes.

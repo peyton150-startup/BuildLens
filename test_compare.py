@@ -195,4 +195,246 @@ test_a_status_compare_write_does_not_know_is_not_judged()
 test_an_edit_claim_is_rejected_before_the_content_lookup()
 test_an_edit_claim_is_rejected_even_when_the_file_is_absent()
 test_every_real_status_has_a_branch()
+
+def edit_claim_with(old_string, new_string, replace_all=None):
+    details = {"old_string": old_string, "new_string": new_string}
+    if replace_all is not None:
+        details["replace_all"] = replace_all
+
+    return ClaimedEdit(
+        file_path="notes.md",
+        session_id="session-1",
+        tool_name="Edit",
+        details=details,
+    )
+
+
+def test_edit_holds_when_the_new_text_is_there_and_the_old_is_gone():
+    compare = importlib.import_module("compare")
+
+    claim = edit_claim_with("hello", "goodbye")
+    verdict = compare.compare_edit(claim, read_observation(b"goodbye world\n"))
+
+    assert verdict is compare.ComparisonVerdict.CLAIM_HOLDS
+
+
+def test_edit_does_not_hold_when_the_replaced_text_is_still_there():
+    compare = importlib.import_module("compare")
+
+    claim = edit_claim_with("hello", "goodbye")
+    verdict = compare.compare_edit(claim, read_observation(b"goodbye world\nhello again\n"))
+
+    assert verdict is compare.ComparisonVerdict.CLAIM_DOES_NOT_HOLD
+
+
+def test_edit_does_not_hold_when_the_new_text_is_missing():
+    compare = importlib.import_module("compare")
+
+    claim = edit_claim_with("hello", "goodbye")
+    verdict = compare.compare_edit(claim, read_observation(b"hello world\n"))
+
+    assert verdict is compare.ComparisonVerdict.CLAIM_DOES_NOT_HOLD
+
+
+def test_edit_holds_after_normalize_when_only_line_endings_differ():
+    compare = importlib.import_module("compare")
+
+    claim = edit_claim_with("hello", "goodbye\nworld")
+    verdict = compare.compare_edit(claim, read_observation(b"goodbye\r\nworld\n"))
+
+    assert verdict is compare.ComparisonVerdict.CLAIM_HOLDS_AFTER_NORMALIZE
+
+
+def test_old_text_may_survive_when_the_new_text_contains_it():
+    compare = importlib.import_module("compare")
+
+    claim = edit_claim_with("hello", "hello there")
+    verdict = compare.compare_edit(claim, read_observation(b"hello there world\n"))
+
+    assert verdict is compare.ComparisonVerdict.CLAIM_HOLDS
+
+
+def test_replace_all_does_not_change_the_verdict():
+    compare = importlib.import_module("compare")
+
+    claim = edit_claim_with("hello", "goodbye", replace_all=True)
+    verdict = compare.compare_edit(claim, read_observation(b"goodbye\n"))
+
+    assert verdict is compare.ComparisonVerdict.CLAIM_HOLDS
+
+
+def test_edit_against_a_missing_file_is_absent():
+    compare = importlib.import_module("compare")
+
+    observed = observation_without_bytes(ObservationStatus.ABSENT)
+    verdict = compare.compare_edit(edit_claim_with("hello", "goodbye"), observed)
+
+    assert verdict is compare.ComparisonVerdict.FILE_ABSENT
+
+
+def test_edit_against_an_unreadable_file_decides_nothing():
+    compare = importlib.import_module("compare")
+
+    observed = observation_without_bytes(ObservationStatus.UNREADABLE)
+    verdict = compare.compare_edit(edit_claim_with("hello", "goodbye"), observed)
+
+    assert verdict is compare.ComparisonVerdict.INCOMPARABLE
+
+
+def test_edit_against_a_status_it_does_not_know_is_not_judged():
+    compare = importlib.import_module("compare")
+
+    observed = observation_without_bytes("too_large")
+    verdict = compare.compare_edit(edit_claim_with("hello", "goodbye"), observed)
+
+    assert verdict is compare.ComparisonVerdict.STATUS_NOT_ACCEPTED
+
+
+def test_a_write_claim_is_rejected_by_compare_edit():
+    compare = importlib.import_module("compare")
+
+    try:
+        compare.compare_edit(write_claim("hello\n"), read_observation(b"hello\n"))
+    except ValueError as error:
+        assert "Write" in str(error)
+    else:
+        raise AssertionError("compare_edit judged a Write claim")
+
+
+def test_every_real_status_has_a_branch_in_compare_edit():
+    compare = importlib.import_module("compare")
+
+    for status in ObservationStatus:
+        if status is ObservationStatus.READ:
+            observed = read_observation(b"goodbye world\n")
+        else:
+            observed = observation_without_bytes(status)
+
+        verdict = compare.compare_edit(edit_claim_with("hello", "goodbye"), observed)
+
+        assert verdict is not compare.ComparisonVerdict.STATUS_NOT_ACCEPTED, status
+
+
+def test_edit_strings_are_encoded_as_utf8():
+    compare = importlib.import_module("compare")
+
+    claim = edit_claim_with("caf\u00e9", "th\u00e9")
+    verdict = compare.compare_edit(claim, read_observation(b"th\xc3\xa9 world\n"))
+
+    assert verdict is compare.ComparisonVerdict.CLAIM_HOLDS
+
+
+test_edit_holds_when_the_new_text_is_there_and_the_old_is_gone()
+test_edit_does_not_hold_when_the_replaced_text_is_still_there()
+test_edit_does_not_hold_when_the_new_text_is_missing()
+test_edit_holds_after_normalize_when_only_line_endings_differ()
+test_old_text_may_survive_when_the_new_text_contains_it()
+test_replace_all_does_not_change_the_verdict()
+test_edit_against_a_missing_file_is_absent()
+test_edit_against_an_unreadable_file_decides_nothing()
+test_edit_against_a_status_it_does_not_know_is_not_judged()
+test_a_write_claim_is_rejected_by_compare_edit()
+test_every_real_status_has_a_branch_in_compare_edit()
+test_edit_strings_are_encoded_as_utf8()
+
+def notebook_claim():
+    return ClaimedEdit(
+        file_path="notes.md",
+        session_id="session-1",
+        tool_name="Notebook",
+        details={"content": "hello\n"},
+    )
+
+
+def test_dispatcher_routes_a_write_claim():
+    compare = importlib.import_module("compare")
+
+    verdict = compare.compare_tool_name(write_claim("hello\n"), read_observation(b"hello\n"))
+
+    assert verdict is compare.ComparisonVerdict.CLAIM_HOLDS
+
+
+def test_dispatcher_routes_an_edit_claim():
+    compare = importlib.import_module("compare")
+
+    claim = edit_claim_with("hello", "goodbye")
+    verdict = compare.compare_tool_name(claim, read_observation(b"goodbye world\n"))
+
+    assert verdict is compare.ComparisonVerdict.CLAIM_HOLDS
+
+
+def test_dispatcher_passes_through_absent_for_a_write_claim():
+    compare = importlib.import_module("compare")
+
+    observed = observation_without_bytes(ObservationStatus.ABSENT)
+    verdict = compare.compare_tool_name(write_claim("hello\n"), observed)
+
+    assert verdict is compare.ComparisonVerdict.FILE_ABSENT
+
+
+def test_dispatcher_passes_through_absent_for_an_edit_claim():
+    compare = importlib.import_module("compare")
+
+    observed = observation_without_bytes(ObservationStatus.ABSENT)
+    verdict = compare.compare_tool_name(edit_claim_with("hello", "goodbye"), observed)
+
+    assert verdict is compare.ComparisonVerdict.FILE_ABSENT
+
+
+def test_dispatcher_passes_through_unreadable_for_a_write_claim():
+    compare = importlib.import_module("compare")
+
+    observed = observation_without_bytes(ObservationStatus.UNREADABLE)
+    verdict = compare.compare_tool_name(write_claim("hello\n"), observed)
+
+    assert verdict is compare.ComparisonVerdict.INCOMPARABLE
+
+
+def test_dispatcher_passes_through_unreadable_for_an_edit_claim():
+    compare = importlib.import_module("compare")
+
+    observed = observation_without_bytes(ObservationStatus.UNREADABLE)
+    verdict = compare.compare_tool_name(edit_claim_with("hello", "goodbye"), observed)
+
+    assert verdict is compare.ComparisonVerdict.INCOMPARABLE
+
+
+def test_dispatcher_passes_through_an_unknown_status_for_a_write_claim():
+    compare = importlib.import_module("compare")
+
+    observed = observation_without_bytes("too_large")
+    verdict = compare.compare_tool_name(write_claim("hello\n"), observed)
+
+    assert verdict is compare.ComparisonVerdict.STATUS_NOT_ACCEPTED
+
+
+def test_dispatcher_passes_through_an_unknown_status_for_an_edit_claim():
+    compare = importlib.import_module("compare")
+
+    observed = observation_without_bytes("too_large")
+    verdict = compare.compare_tool_name(edit_claim_with("hello", "goodbye"), observed)
+
+    assert verdict is compare.ComparisonVerdict.STATUS_NOT_ACCEPTED
+
+
+def test_dispatcher_rejects_a_tool_it_cannot_route():
+    compare = importlib.import_module("compare")
+
+    try:
+        compare.compare_tool_name(notebook_claim(), read_observation(b"hello\n"))
+    except ValueError as error:
+        assert "Notebook" in str(error)
+    else:
+        raise AssertionError("the dispatcher routed a claim it has no comparison for")
+
+
+test_dispatcher_routes_a_write_claim()
+test_dispatcher_routes_an_edit_claim()
+test_dispatcher_passes_through_absent_for_a_write_claim()
+test_dispatcher_passes_through_absent_for_an_edit_claim()
+test_dispatcher_passes_through_unreadable_for_a_write_claim()
+test_dispatcher_passes_through_unreadable_for_an_edit_claim()
+test_dispatcher_passes_through_an_unknown_status_for_a_write_claim()
+test_dispatcher_passes_through_an_unknown_status_for_an_edit_claim()
+test_dispatcher_rejects_a_tool_it_cannot_route()
 print("test passed")

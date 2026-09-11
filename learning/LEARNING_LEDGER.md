@@ -46751,3 +46751,191 @@ Assume new_string does not contain old_string, which is the exception you found.
 ```
 
 No answer yet. Resume by re-presenting this exact prompt; do not reveal its answer.
+
+Re-presented after the commit. LEARNER ANSWER (verbatim):
+
+```text
+. no 
+yes
+if replace all is not present we know it was either one replacement exactly or none at all but if it is true then we will see it be replaced by all
+```
+
+EVALUATION:
+MISS on both fields; confidence omitted. Expected: old_string should be gone in ALL three rows (not
+stated / False -> exactly one occurrence, replaced; True -> every occurrence replaced), so
+compare_edit does NOT need to read replace_all.
+
+PRIMARY BLOCKER: "or none at all" — the possibility that the edit did not happen is still being kept
+open even though BuildLens only ever holds a claim when the tool call SUCCEEDED (observed in 428: the
+refused edit wrote no record). Same blocker as the count field in the 428 follow-up. Descend to R1 on
+the evidence already gathered.
+
+R1 PROMPT (exact): given the 428 evidence (refused edit -> file unchanged, no record) and an Edit
+claim held for notes.md with old_string "hello" and no replace_all —
+did that call succeed / how many times did "hello" appear when it ran / how many were replaced.
+
+LEARNER ANSWER (verbatim):
+
+```text
+. cant tell
+1 
+1
+```
+
+EVALUATION:
+Fields 2 and 3 PASS (one occurrence, one replacement) — which already assumes the call succeeded, so
+field 1 sits in tension with them. "Can't tell" is nonetheless DEFENSIBLE and worth preserving: the
+project has observed exactly ONE failure mode writing no record (the non-unique refusal, a check made
+before anything was written). Whether every failure is recordless is beyond the evidence. What the
+evidence does support: a held claim rules out THAT refusal, so old_string was unique and was replaced.
+
+TARGET RETRY (verbatim), after the R1 and one facilitator confirmation of the learner's own reasoning:
+
+```text
+. yes
+no
+90
+```
+
+PASS at confidence 90. DECISION: old_string should be gone in every successful case, so compare_edit
+never reads replace_all — pinned by a test.
+
+## EV-P8-COMPARE-EDIT-432 — second comparison patch
+
+TEST ROWS: 12, approved by the learner ("ok approved") after one clarifying question — whether the
+"new contains old" exception needs a stored field. It does not: it is a condition inside the function,
+computed from the claim's own two strings.
+
+RED (verbatim), with the 12 new tests written and compare_edit absent:
+
+```text
+AttributeError: module 'compare' has no attribute 'compare_edit'. Did you mean: 'compare_write'?
+exit status: 1
+```
+
+The 13 compare_write tests ran first and still passed, so the red came only from the new behaviour.
+
+GREEN: test_compare.py "test passed" (25 tests); full suite green across ten files; compare_write
+untouched.
+
+CODE LANDED — compare.py:
+
+```text
+_edit_landed(file_bytes, old_bytes, new_bytes)
+    new_bytes in file_bytes, AND (old_bytes in new_bytes OR old_bytes not in file_bytes)
+compare_edit(claim, observed)
+    tool_name guard raises first, then UNREADABLE / ABSENT / READ by name, then the unknown-status
+    verdict; inside READ: exact containment, then containment on normalised bytes, else
+    CLAIM_DOES_NOT_HOLD
+```
+
+replace_all is deliberately never read; the comment records the observation (428) that justifies it.
+
+### EV-P8-COMPARE-EDIT-TRACE-433 — post-patch trace gate
+
+PROMPT: the landed _edit_landed / compare_edit (comments trimmed), with
+Call C old "log", new "log_line", file b"log_line = 3\n"; Call D old "alpha", new "beta",
+file b"beta\r\nalpha\n".
+
+LEARNER ANSWERS (verbatim, across three narrowed turns):
+
+```text
+.  it would return true 
+claim does not hold
+```
+
+```text
+. the old string still is ther
+```
+
+```text
+. line 2
+```
+
+EVALUATION:
+PASS. C returns True at line 2 — old_bytes is contained in new_bytes, so its survival is expected —
+giving CLAIM_HOLDS. D is CLAIM_DOES_NOT_HOLD because "alpha" is still in the file and normalising
+only exchanges \r\n for \n, so the second attempt fails for the same reason as the first. Reasoning
+fields arrived only when asked one at a time; confidence omitted throughout.
+
+TRACE GATE CLOSED for EV-P8-COMPARE-EDIT-432.
+
+### EV-P8-DISPATCHER-DESIGN-434
+
+Decisions (learner's), given across three turns:
+
+```text
+lives in      compare.py — "it chooses which tool name is run in compare"
+does          calls the right function and returns the verdict (not a function handed back)
+name          compare_tool_name  (first "choose_compare", then "call_compare_tool_name", then the
+              "call_" prefix removed). Facilitator note offered and declined: the project's other
+              names say what you get (compare_write, observe_file, summarize_diff), e.g.
+              compare_claim
+unknown tool  raise ValueError — "this is the same as the edit error it could affeet the whole
+              batch": a claim the adapter would never build means BuildLens's own driver is at
+              fault, which is the 419 rule (fault in the batch driver stops the batch)
+```
+
+Confidence omitted.
+
+### EV-P8-DISPATCHER-TEST-ROWS-435 — the learner audits the proposed rows
+
+The facilitator proposed four rows. The learner challenged them twice, and both challenges were
+upheld:
+
+```text
+"why is file absent a row for edit dont we check for that and if so ten why not chekc for write
+file absent?"      -> asymmetry: the Edit/ABSENT row was justified as "status passes through", but
+                      that is already covered per function; either drop it or add its Write twin
+"so out of these 9 which already exsit inside of comapre write and compare edit and are completely
+redundnat"         -> rows 1-8 duplicate existing tests by input and expected result; only WHICH
+                      FUNCTION RAN differs, and a misroute would already fail rows 1-2
+```
+
+Facilitator answered honestly with the row-by-row mapping to the existing tests. Trap shown: a
+dispatcher that ignores tool_name and always calls compare_write still passes a suite containing only
+row 9.
+
+LEARNER DECISION (verbatim):
+
+```text
+. ok i think we keep all 9 rows but i think we need some guard in compare toolname
+```
+
+All nine kept; the guard is row 9's raise. BRANCHES versus TABLE was not answered; BRANCHES used, to
+match the explicit-name style already in compare.py, and the learner was told they can change it.
+
+## EV-P8-COMPARE-TOOL-NAME-436 — dispatcher patch
+
+RED (verbatim):
+
+```text
+AttributeError: module 'compare' has no attribute 'compare_tool_name'
+exit status: 1
+```
+
+GREEN: 34 tests in test_compare.py; full suite green across ten files.
+
+CODE LANDED — compare.py: `compare_tool_name(claim, observed)` returns compare_write(...) for
+"Write", compare_edit(...) for "Edit", and otherwise raises
+ValueError("no comparison for tool: <name>").
+
+### EV-P8-DISPATCHER-GATE-437 — dispatcher trace gate
+
+First prompt (a hypothetical swap of the two dispatcher branches) drew "idk". Descended to R1: the
+first two lines of compare_edit, with a claim whose tool_name is "Write".
+
+LEARNER ANSWER (verbatim):
+
+```text
+. true 
+so value error but how owulds this happen in the first place or is this a hypothetical?
+```
+
+PASS, and the question is a good one — answered: the swap is hypothetical, used to show what rows 1
+and 2 protect. A future change (swapped branches, "write" for "Write", a third tool added badly)
+misroutes, the wrong function's guard raises, and those rows go red. That is why rows 1-2 are not
+redundant with the per-function tests despite identical inputs and expected verdicts — they are the
+only tests that detect a misroute. Closes the thread the learner opened in 435.
+
+DISPATCHER GATE CLOSED.
