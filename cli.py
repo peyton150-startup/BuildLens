@@ -18,10 +18,20 @@ streams, or exit status.
 
 import argparse
 import sys
+from datetime import datetime, tzinfo
 from pathlib import Path
 
 import snapshot
 from git_adapter import GitCaptureError
+
+
+def format_local_time(moment: datetime, zone: tzinfo | None = None) -> str:
+    """Return a stored moment as 12-hour time in zone, or the machine's zone.
+
+    Records hold aware UTC moments. This is the only place one is converted,
+    so travelling changes what a person sees and never what was recorded.
+    """
+    return moment.astimezone(zone).strftime("%I:%M %p %Z")
 
 
 def format_summary(summary) -> str:

@@ -3481,3 +3481,145 @@ Exact restart point: the observed side. A function that reads a file from disk a
 separate observed record, kept apart from the claim by separate function, source and type — the
 mechanism the learner argued for in `EV-P8-CLAIMED-CONTENT-DECISION-358`. Nothing is owed before it
 starts; no knowledge gate is open.
+
+## Session 2026-09-11 — the observed side, and a plan divergence
+
+`file_observer.py` exists (`EV-P8-FILE-OBSERVER-372`): `ObservationStatus` enum (READ, ABSENT,
+UNREADABLE), frozen `ObservedFile(file_path, status, file_bytes)`, and `observe_file(path)`, which
+never raises. `FileNotFoundError` becomes ABSENT; any other `OSError` becomes UNREADABLE. Bytes, not
+text. Six tests, red first. Full suite green across nine files.
+
+Decisions the learner owns: absence is a result, not an error (they began arguing for raising and
+moved on the batch argument); ABSENT and UNREADABLE stay separate because one is a fact about the
+write and the other about BuildLens's own reach; enum over strings; bytes over text.
+
+Trace gate CLOSED (`EV-P8-OBSERVER-TRACE-373`). One misconception remediated along the way: the
+learner treated None and b"" as two spellings of one value. They are opposite findings — b"" means
+read and empty, None means nothing observed — and the learner now states that unaided. Also held:
+except clauses are not evaluated on the happy path, and a general clause placed first swallows its
+subclasses.
+
+PROCESS NOTE against the assistant: a correction opened with "Hold on" directly under the learner's
+correct answer to input 4, making it read as wrong. Scope corrections to the exact sentence at fault.
+
+### Divergence from IMPLEMENTATION_PLAN.md — surfaced, not yet decided
+
+Reading the Phase 8 section showed that the plan's required record for every observed file version
+is:
+
+```text
+session/worktree id
+repository-relative path
+base commit/blob
+content hash
+observed-at time
+provenance = CLAUDE
+```
+
+`ObservedFile` holds none of these except a path, and that path is absolute, not
+repository-relative. The plan names SHA-256 content hashing as the adjacent learning triggered in
+this phase ("file bytes -> SHA-256 digest -> equality/version fingerprint"; a hash is not
+authorization, authorship, or semantic equivalence).
+
+The plan's Phase 8 also calls for a `Stop` reconciliation scan comparing actual Git state against
+BuildLens's last observed snapshot, precisely because Claude can change files through Bash — the
+blind spot the learner watched happen to this project's own source files.
+
+What was built is foundational rather than wrong: the claim/observation boundary and a file reader
+are prerequisites for all of it. But "compare claim to observation" is not the plan's next named
+step. The direction is the learner's decision.
+
+Exact restart point: the learner chooses the next Phase 8 step. Nothing is owed; no gate is open.
+
+### Content hash landed — first plan-required version field
+
+`EV-P8-HASH-SEQUENCE-375`, `EV-P8-CONTENT-HASH-376`, `EV-P8-ABSENT-HASH-GATE-377`.
+
+The learner took the recommended next step (content hash) from the three options surfaced by the
+plan divergence. SHA-256 taught predict-first: determinism, sensitivity to a single byte, and a fixed
+64-character length were all predicted correctly at confidence 40 and then confirmed by execution.
+One concept-only detour was needed on line endings — why "hello\n" and "hello\r\n" hash differently —
+explained as invisible stored characters (Unix \n = byte 10; Windows \r\n = bytes 13, 10). A
+same-length case (b"ab" versus b"ba") then established that a digest depends on the exact byte
+SEQUENCE, not on length.
+
+Held from this sequence: a hash reports that bytes differ, never whether the difference matters;
+and a hash match is a faster route to content match that establishes nothing beyond it — no
+authorship, no permission, no semantic equivalence.
+
+`ObservedFile` now carries `content_hash: str | None` — SHA-256 hex of `file_bytes` for READ
+(including the digest of zero bytes for an empty file), None for ABSENT and UNREADABLE. The learner
+made that call unaided from the None / b"" distinction. Three tests, red first after one assistant
+quoting failure that was caught because the run printed the OLD suite's pass line. Full suite green
+across nine files.
+
+Exact code in `file_observer.py`: `ObservationStatus` (READ, ABSENT, UNREADABLE); frozen
+`ObservedFile(file_path, status, file_bytes, content_hash)`; `observe_file(path)`, which never raises.
+
+### Requirements recorded for the comparison patch — none implemented yet
+
+```text
+1. hash equality is meaningful only when BOTH observations are READ;
+   two ABSENT observations compare None == None -> True and must not be reported as same content
+2. on Windows a file Claude wrote as "hello\n" may be observed as b"hello\r\n";
+   a byte-level comparison reports that as divergence — normalisation is a decision for that patch
+3. the claim holds str and the observation holds bytes; the comparison must encode one side,
+   and that encoding assumption belongs at the comparison where it can be labelled
+```
+
+### Plan fields still missing from the observed-version record
+
+```text
+session/worktree id        no
+repository-relative path   absolute path only
+base commit/blob           no
+observed-at time           no
+provenance = CLAUDE        no
+content hash               YES (376)
+```
+
+Exact restart point: no gate is open. The learner chooses the next Phase 8 step — another plan
+field, the comparison (now carrying three recorded requirements), or the Stop reconciliation scan.
+
+### Observed-at time landed — second plan-required version field
+
+`EV-P8-TIME-STORAGE-DECISION-378`, `EV-P8-OBSERVED-AT-379`.
+
+The learner decided every outcome carries a time — including ABSENT and UNREADABLE — because an
+attempt always happened. Sharpened: absence expires, so an ABSENT record without a time reads as
+permanently absent, which is false.
+
+Storage versus display took two demonstrations to separate. The learner first asked for EST and
+12-hour time, then chose naive storage. Shown live: a fixed "EST" offset is an hour wrong from March
+to November; a datetime has no 12-hour form, only a formatted string does; and one instant stored
+naive in New York and London disagrees by five hours and sorts in the wrong order. The learner then
+chose aware UTC storage with local display — the behaviour their Europe question actually wanted.
+
+Exact code:
+
+```text
+file_observer.py   ObservedFile(file_path, status, file_bytes, content_hash, observed_at)
+                   observed_at = datetime.now(timezone.utc), taken once before the attempt
+cli.py             format_local_time(moment, zone=None) -> "01:19 PM EDT"-style string;
+                   no zone means the machine's current zone
+```
+
+Six tests, red first in both files. Full suite green across nine files.
+
+### Plan fields for the observed-version record
+
+```text
+content hash               YES (376)
+observed-at time           YES (379)
+repository-relative path   absolute path only
+session/worktree id        no
+base commit/blob           no
+provenance = CLAUDE        no
+```
+
+The comparison still carries its three recorded requirements (both sides READ before trusting hash
+equality; line-ending normalisation decision; str/bytes encoding at the point of use).
+
+Exact restart point: knowledge gate owed on EV-P8-OBSERVED-AT-379 — predict a stored stamp's
+display in two zones, off daylight time. Then the learner picks the next Phase 8 step.
+Uncommitted: file_observer.py, cli.py, both test files, and the two docs.

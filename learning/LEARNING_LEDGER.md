@@ -42391,3 +42391,538 @@ Verified live: `claude_adapter.py` -> read, 3193 bytes; a missing path -> absent
 unreadable.
 
 KNOWLEDGE GATE OWED: trace of the three outcomes.
+
+## Session 2026-09-11 — three-outcome trace gate
+
+THREE-OUTCOME TRACE PROMPT (exact):
+
+```text
+Trace each input. For each, say which line returns, and the status and file_bytes it carries.
+
+1. notes.md exists, containing b"hi"
+2. notes.md does not exist
+3. notes.md exists, but another program has it locked (raises PermissionError)
+4. notes.md exists and is empty
+
+Then: PermissionError is a subclass of OSError, and so is FileNotFoundError.
+If the two except blocks were written in the opposite order, what would input 2 return?
+Confidence =
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+. it will go through each check adn return the observed files path status and filebytes in an observedfile object 
+it will return not the file  bytes but under the status it will be marked absent 
+i assume permissionerror covers the operating ssytem error so the retunr will read status undreadable with no fole bytes
+if it is empty then it will be read and retunred as empty that is ok
+```
+
+MIXED. Inputs 2 and 4 PASS on status. Input 3 PASS on result, but the subclass relation is stated
+backwards: OSError covers PermissionError, not the reverse. Input 1 describes the happy path as
+going "through each check" — the except clauses are not evaluated when nothing raises. The reorder
+question was left unanswered; it depends on the same concept as input 1.
+
+LEARNER ANSWER (verbatim), unprompted follow-up on input 4:
+
+```text
+.  the bytrs will be "", i thought that but assumed that empty was good enough but None is another way of saying that so i will say b "" next time
+```
+
+MISCONCEPTION, higher priority than the pending except question: the learner treats None and b"" as
+two spellings of the same value. In this design they are opposite findings — b"" means the file was
+read and holds nothing; None means no bytes were observed at all. Collapsing them is exactly the
+distinction `test_empty_file_is_read_not_absent` enforces. Demonstrated by execution:
+
+```text
+empty file    -> read   | file_bytes = b''
+missing file  -> absent | file_bytes = None
+None == b""   -> False
+len(b"")      -> 0
+len(None)     -> TypeError
+```
+
+PRIMARY BLOCKER:
+NONE_TREATED_AS_EMPTY_VALUE
+
+PENDING, deferred behind the blocker: except-clause evaluation on the happy path, and first-match
+ordering with subclasses.
+
+LEARNER ANSWER (verbatim):
+
+```text
+. well now i am confused: 4 is the one people miss: an empty file is READ with b"", not ABSENT. i said this for 4 : if it is empty then it will be read and retunred as empty that is ok
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+None means there is nothing there empty is "", i am a little annoyred becasue you worded it like 4 was wrong
+```
+
+PASS. The learner states the distinction unaided: None means nothing was observed; b"" means the
+file was read and is empty. Blocker NONE_TREATED_AS_EMPTY_VALUE resolved.
+
+PROCESS NOTE against the assistant: the learner's answer to input 4 was correct, and the correction
+that followed opened with "Hold on" directly beneath it, which made a correct answer read as wrong.
+The misconception was in a separate later sentence and should have been scoped to that sentence from
+the first message. Scope corrections to the exact sentence being corrected.
+
+The follow-up Case 1/2 question was withdrawn; the learner's statement already supplies the evidence
+it was meant to collect.
+
+RETURNING TO PENDING: except-clause evaluation on the happy path.
+
+EXCEPT-EVALUATION PROMPT (exact):
+
+```text
+notes.md exists, containing b"hi". handle.read() succeeds. Nothing raises.
+
+    except FileNotFoundError:     <- does Python evaluate this line?
+    except OSError:               <- does Python evaluate this line?
+
+YES or NO for each, and which return line runs?
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+. nonoe of them run then, if oserror is first then the filenotfounderror necer raises which is bad becasue then we are stuck guess which error it is, not we know that the filenotfound is the error and permission/ i/o error is the oserror
+```
+
+PASS on both halves. On the happy path no except clause is evaluated. With the clauses reordered,
+OSError matches first and a missing file is misreported — confirmed by execution:
+`reordered, missing file -> ('UNREADABLE', None)`, `issubclass(FileNotFoundError, OSError) -> True`.
+The learner also volunteered why that ordering is bad: the two outcomes become indistinguishable.
+
+One wording correction, scoped to the phrase alone: FileNotFoundError is still raised; what changes
+is that its except clause is never reached.
+
+EV-P8-OBSERVER-TRACE-373
+Exercise type: MILESTONE_TRACE
+Result: PASS after one misconception (None versus b"") was remediated.
+Gate owed from EV-P8-FILE-OBSERVER-372 is CLOSED.
+
+## Session 2026-09-11 — content hash, adjacent concept
+
+LEARNER DIRECTION (verbatim): `. ok lets do it` — taken as option A (content hash), the
+recommendation on the table; the assumption was stated back to the learner.
+
+SHA-256 PREDICTION PROMPT (exact):
+
+```text
+    d1 = hashlib.sha256(b"hello\n").hexdigest()
+    d2 = hashlib.sha256(b"hello\n").hexdigest()
+    d3 = hashlib.sha256(b"hello!\n").hexdigest()
+
+1. d1 == d2 ?               TRUE / FALSE
+2. d1 == d3 ?               TRUE / FALSE
+3. d3 differs from d1 by one added byte. Will the two digests look
+   A. almost the same, or B. completely different?
+Confidence =
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+. true
+false 
+B
+40
+```
+
+PASS on all three at confidence 40; confirmed by execution. Also shown: 5 of 64 hex characters
+matched between d1 and d3 (chance level), and the digest is 64 characters for both 7 bytes and
+10 MB. Determinism, sensitivity, and fixed length are now observed rather than asserted.
+
+NEXT: what a matching or differing hash does NOT establish (plan: not authorization, authorship, or
+semantic equivalence).
+
+HASH-LIMITS PROMPT (exact):
+
+```text
+Claim:     content = "hello\n"            (Unix line ending)
+Observed:  file_bytes = b"hello\r\n"      (Windows line ending, same visible text)
+
+1. Do their SHA-256 digests match?  Has the text a person would read changed?
+   So what is a hash comparison unable to tell you here?
+2. Suppose the digests DO match. Does hashing change what agreement between a claim and an
+   observation proves?
+Confidence =
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+. no, why do they not match 
+no
+if the line was from unix or windows
+
+no, even if the hashes agree that does not prove anything more than looking at the claim and comparing to the obervation
+```
+
+PASS on 1a, 1b and 2. Part 2 is a clean transfer of `EV-P8-CLAIM-OBSERVATION-BOUNDARY-357` to a new
+mechanism: a hash match is a faster route to content match and establishes nothing beyond it.
+Part 1c is directionally right; sharpened to: a hash reports that BYTES differ, never whether the
+difference matters. The learner asked why the digests differ — answered at byte level: CRLF adds
+byte 13 (carriage return), so the inputs are different byte sequences.
+
+This is live in the repository: every commit prints "LF will be replaced by CRLF".
+
+CONSEQUENCE FOR THE LATER COMPARISON, recorded now so it is not rediscovered the hard way: on
+Windows a file Claude wrote as "hello\n" may be observed as b"hello\r\n", and a byte-level
+comparison will report that as divergence. Whether line-ending normalisation belongs in the
+comparison is a decision for that patch, not this one.
+
+EV-P8-HASH-LIMITS-374
+Exercise type: ADJACENT_CONCEPT / TRANSFER
+Result: PASS.
+
+LINE-ENDING SEQUENCE. The byte-level demonstration did not land; the learner asked again, "so why
+does the unix and windows line produce different hashes". Switched to concept-only help mode:
+stopped the patch question and explained only line endings — a line break is stored as invisible
+characters; Unix uses \n (byte 10), Windows uses \r\n (bytes 13, 10), a convention inherited from
+typewriters' separate carriage-return and line-feed motions.
+
+LEARNER ANSWER (verbatim):
+
+```text
+. ok so on windows it adds an extra charcter by default and that shows up as mroe bytes so when we calculate the hash it has more bytes than that of the same word but in a unix line
+```
+
+PASS on line endings. Possible residual misconception: every example so far also changed LENGTH,
+so the learner might attribute a changed hash to "more bytes". Isolated with a same-length case.
+
+SAME-LENGTH PROMPT (exact):
+
+```text
+    b"ab"     2 bytes
+    b"ba"     2 bytes
+
+Do their SHA-256 digests match?
+So is it "more bytes" that changes a hash, or something else?
+Confidence =
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+. no
+it is the bytes but also the order of the bytes
+```
+
+PASS; confirmed by execution. Rule now held: a digest depends on the exact byte sequence — which
+bytes, in what order. Length is one way a sequence can differ, not the reason the digest changes.
+
+EV-P8-HASH-SEQUENCE-375
+Exercise type: ADJACENT_CONCEPT
+Result: PASS after one concept-only detour.
+
+RETURNING TO PENDING: content_hash value for ABSENT and for an empty READ file.
+
+CONTENT-HASH VALUE PROMPT (exact):
+
+```text
+ObservedFile gains content_hash.
+    READ,   file_bytes = b"hi"   ->  content_hash = sha256 digest of b"hi"
+    ABSENT, file_bytes = None    ->  content_hash = ?
+    READ,   file_bytes = b""     ->  content_hash = ?
+For each "?": a real digest, or None? Say why.
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+. None, there is no bytes to get a hash from
+real digest the hash is jut going to be the empty default hash
+```
+
+PASS. The None / b"" distinction from earlier today is applied unprompted to a new field. One word
+sharpened, scoped to that word: not a "default" — the digest of zero bytes is one specific value, and
+an empty file produces it every time, which is why it is a finding rather than a placeholder.
+
+DECISION (learner's): content_hash is None exactly when file_bytes is None; otherwise it is the
+SHA-256 hex digest of file_bytes, including for b"".
+
+PATCH LANDED (EV-P8-CONTENT-HASH-376)
+
+```text
+Current phase              Phase 8 — Claude adapter observation boundary
+Learning objective         a content fingerprint as a version identity
+Behavior being added       ObservedFile gains content_hash: SHA-256 hex of file_bytes, None when no bytes
+Conceptual change          hashlib; fingerprint follows the None / b"" distinction
+Out of scope               comparison; repo-relative path; observed-at time; line-ending handling
+```
+
+`ObservedFile` now carries `content_hash: str | None`, computed with `hashlib.sha256` in the READ
+branch and None for ABSENT and UNREADABLE. An inline comment records the plan's warning: equal
+digests mean equal bytes, not the same author, not permission, not the same meaning. Three tests
+written first; the first insertion attempt failed on assistant quoting and left the file unchanged,
+caught because the run printed the OLD suite's pass line. Re-inserted, confirmed red with
+`TypeError: ... unexpected keyword argument 'content_hash'`, then green. Full suite green across
+nine files.
+
+Live: `claude_adapter.py` -> read, 9ea24442...; empty file -> read, e3b0c44298fc1c14... (the
+digest of zero bytes, identical on every machine); missing file -> absent, None.
+
+This is the first plan-required field of the observed-version record in place. Still missing from
+the plan's list: session/worktree id, repository-relative path, base commit/blob, observed-at time,
+provenance.
+
+KNOWLEDGE GATE OWED: comparing hashes of two observations where no bytes were seen.
+
+ABSENT-HASH GATE PROMPT (exact):
+
+```text
+A future consumer checks whether two files hold the same content:
+
+    same_content = a.content_hash == b.content_hash
+
+Both a and b are observations of files that do not exist. Both have status ABSENT.
+
+1. What are a.content_hash and b.content_hash?
+2. What does  a.content_hash == b.content_hash  evaluate to?
+3. Is "these two files hold the same content" a true statement here?
+Confidence =
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+. None 
+true
+well both files are absent but we do not differentiate absent from the same, so we neeed to do that as well
+```
+
+PASS on all three; confidence omitted. The learner identifies that `None == None` reports equality
+for two files never observed, and volunteers that absence must be distinguished before hashes are
+compared. Connected for the learner to the earlier collapsed-source result: equal by construction
+then, equal by absence now — in both, the equality carries no information about the files.
+
+REQUIREMENT RECORDED FOR THE COMPARISON PATCH (not implemented here, out of scope):
+hash equality is meaningful only when BOTH observations are READ. Any comparison must check status
+before comparing digests; two ABSENT observations are not "same content".
+
+EV-P8-ABSENT-HASH-GATE-377
+Exercise type: MILESTONE_TRACE / TRANSFER
+Result: PASS. Gate owed from EV-P8-CONTENT-HASH-376 is CLOSED.
+
+## Session 2026-09-11 — observed-at time
+
+LEARNER DIRECTION (verbatim):
+
+```text
+. A, the time observed is small and we can get it wout of the way early
+```
+
+OBSERVED-AT RULE PROMPT (exact):
+
+```text
+content_hash is None for ABSENT and UNREADABLE, because no bytes were seen.
+Does observed_at follow the same rule?
+    READ        observed_at = the time of the read
+    ABSENT      observed_at = ?   a time, or None?
+    UNREADABLE  observed_at = ?   a time, or None?
+Say why. Think about what "notes.md was absent" means without a time attached.
+Confidence =
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+. i think all of then deserve a time if we are recording them, so we know when we checked and when the file was observved absent or when the os issue occcured for the user to use as useful data
+```
+
+PASS. The learner distinguishes the two fields correctly: content_hash depends on bytes being seen;
+observed_at depends only on the attempt, which always happens. Sharpened: absence expires — "absent
+at 14:02" and "present at 14:05" can both be true — so an ABSENT record without a time reads as
+permanently absent, which is false.
+
+DECISION (learner's): observed_at is always present, for all three outcomes. Not optional.
+
+NEXT: timezone-aware versus naive datetimes, predict-first.
+
+LEARNER REQUEST (verbatim), interrupting the naive/aware prediction:
+
+```text
+. also can we make it est and 12 hour time
+```
+
+Treated as a legitimate display preference, routed to the right layer rather than refused.
+Demonstrated live on 2026-09-11 at 17:14 UTC:
+
+```text
+stored, UTC        -> 2026-09-11T17:14:54+00:00
+fixed EST (UTC-5)  -> 12:14 PM EST      <- wrong by one hour
+America/New_York   -> 01:14 PM EDT      <- correct; daylight time is in effect
+%H:%M              -> 17:14
+%I:%M %p           -> 05:14 PM
+```
+
+Two facts supplied: a fixed "EST" offset is wrong from March to November because the East Coast
+observes daylight time; and a datetime has no 12-hour or 24-hour form — only a formatted string does.
+zoneinfo resolves America/New_York on this machine without the tzdata package.
+
+PROPOSED SPLIT, awaiting the learner's decision: store an aware UTC datetime in the record; convert
+to America/New_York and format as 12-hour only where a person reads it. Same principle as
+replace_all's default and line-ending handling — the record holds the fact, interpretation happens
+at the point of use.
+
+PENDING, deferred behind this decision: the naive-versus-aware prediction.
+
+LEARNER QUESTION (verbatim), in place of choosing A/B/C:
+
+```text
+. if we do naive will it change based on the system tou are suing, if i go to europe will it automatically change to that timezone if we do naive?
+```
+
+Well-aimed — it independently reaches the first half of the pending naive/aware prediction.
+Answered: yes, datetime.now() reads the machine's zone at call time, so stamps taken after travel
+come out in the new zone while earlier stamps stay as they were, with nothing recording which zone
+either set came from. Demonstrated by taking one instant and rendering it naive in two zones
+(see the next entry for output).
+
+NAIVE-ACROSS-ZONES DEMONSTRATION (output):
+
+```text
+same instant, recorded naive in New York -> 2026-09-11 01:15 PM
+same instant, recorded naive in London   -> 2026-09-11 06:15 PM
+equal?                                   -> False
+London appears later?                    -> True (it is not; it is the same moment)
+same instant, aware, equal?              -> True
+naive < aware                            -> TypeError: can't compare offset-naive and offset-aware datetimes
+```
+
+The pending naive/aware prediction is SUPERSEDED, not passed: the learner's own question reached
+its first half, and the demonstration then showed both answers before the learner committed. Not
+credited as a prediction. If the concept needs retrieval later, use a fresh surface.
+
+Held from the demonstration: naive stamps from one instant disagree across zones and sort in the
+wrong order; aware stamps of the same instant compare equal; Python refuses to compare naive with
+aware rather than guessing.
+
+PENDING: the learner's A/B/C decision on where the New York 12-hour format lives.
+
+LEARNER DECISION (verbatim), arriving mid-turn after the naive-across-zones demonstration:
+
+```text
+. ok lets go with naive
+```
+
+Concern raised once, per the development contract, before building: the demonstration just run is
+naive storage's failure mode — one instant recorded in two zones disagrees by five hours and sorts
+wrong, and a record spanning travel, two machines, or the November clock change would carry a
+silently wrong timeline.
+
+Offered in place of a refusal: the behaviour the learner's Europe question asked for — times that
+DISPLAY in whatever zone the machine is in — is available without naive storage. Demonstrated:
+
+```text
+stored in the record  -> 2026-09-11T17:16:23+00:00
+shown on this machine -> 01:16 PM Eastern Daylight Time
+```
+
+`astimezone()` with no argument converts to the machine's current zone at display time; the stored
+value never changes.
+
+PENDING: the learner confirms naive storage, or takes aware storage with local 12-hour display. If
+the learner reaffirms naive, record it as their decision and build it.
+
+LEARNER DECISION (verbatim):
+
+```text
+. B, that sucks that naive does not change the timestam[p
+```
+
+DECISION (learner's): aware UTC stored in the record; shown in the machine's current zone, 12-hour,
+at display time. Clarified in reply: a stored timestamp not changing is the point — it records when
+the check happened; the display is what follows the laptop's zone.
+
+Placement (assistant's, flagged for objection): the observer stores the moment; the formatter goes
+in `cli.py`, which already holds `format_summary` and is the project's presentation layer. This
+honours the learner's module-responsibility boundary.
+
+EV-P8-TIME-STORAGE-DECISION-378
+Exercise type: DESIGN_REVIEW
+Result: PASS. Initial preference (EST, 12-hour, then naive) was a display preference expressed as a
+storage choice; after two demonstrations the learner separated the two and chose correctly.
+
+PATCH LANDED (EV-P8-OBSERVED-AT-379)
+
+```text
+Current phase              Phase 8 — Claude adapter observation boundary
+Learning objective         a moment versus how a moment is shown
+Behavior being added       ObservedFile.observed_at (aware UTC); a 12-hour local-zone formatter
+Conceptual change          datetime, timezone-aware storage, display-time conversion
+Out of scope               comparison; repo-relative path; any other plan field
+```
+
+`file_observer.py`: `ObservedFile` gains `observed_at: datetime`, taken once with
+`datetime.now(timezone.utc)` before the read attempt so all three outcomes share one moment.
+`cli.py`: `format_local_time(moment, zone=None)` converts with `astimezone(zone)` and formats
+`"%I:%M %p %Z"`; with no zone it uses the machine's current zone. Storage and presentation stay in
+their own modules, per the learner's boundary.
+
+Tests written first and confirmed red in both files (`TypeError: ... unexpected keyword argument
+'observed_at'`; `ImportError: cannot import name 'format_local_time'`), then green. Six tests
+added: aware UTC and within before/after bounds; every outcome carries a time; New York 12-hour;
+same moment in London; winter shows EST not EDT; no-zone path uses the machine zone. Full suite
+green across nine files.
+
+Live, one stored moment:
+
+```text
+stored        -> 2026-09-11T17:19:03+00:00
+this machine  -> 01:19 PM Eastern Daylight Time
+if in London  -> 06:19 PM BST
+```
+
+Second plan-required version field in place. Remaining: session/worktree id, repository-relative
+path, base commit/blob, provenance.
+
+KNOWLEDGE GATE OWED: predict a stored stamp's display in two zones, off daylight time.
+
+OBSERVED-AT GATE PROMPT (exact):
+
+```text
+A record holds:
+    observed_at = 2026-12-01T20:30:00+00:00
+Predict what format_local_time shows for each:
+1. zone = America/New_York     ->  ?
+2. zone = Europe/London        ->  ?
+3. You fly from New York to London and look at this record again.
+   Which of these changed: the stored observed_at, the displayed string, or both?
+Confidence =
+```
+
+LEARNER ANSWER (verbatim):
+
+```text
+. the times are the similar but the locations/utc are different so you can calculate the exact time comparison
+```
+
+PARTIAL; no committed predictions; confidence omitted. The learner states the principle — one stored
+instant, the zone decides the display — but gives neither displayed string and does not answer part
+3 directly. One word corrected, scoped to it: the displayed times are not "similar"; in December
+they are five hours apart. What they share is the instant.
+
+PRIMARY BLOCKER:
+OFFSET_KNOWLEDGE_MISSING (not the learning objective — December offsets are facts, not reasoning)
+
+Per the standing instruction, the prompt is NARROWED rather than re-rung: the offsets are supplied
+as givens, and one zone is asked at a time.
+
+NARROWED GATE PROMPT (exact):
+
+```text
+Givens: in December, New York is UTC-5 and London is UTC+0.
+
+    observed_at = 2026-12-01T20:30:00+00:00      (20:30 is 8:30 PM UTC)
+
+1. What does format_local_time show for America/New_York?  (12-hour, with AM/PM)
+2. After flying to London, does the stored observed_at change?  YES / NO
+Confidence =
+```
+
+RECOVERY STATUS:
+narrowed observed-at gate due

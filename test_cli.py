@@ -9,10 +9,12 @@ and check what reaches stdout, stderr, and the returned status.
 """
 
 import io
+from datetime import datetime, timezone
+from zoneinfo import ZoneInfo
 from contextlib import redirect_stderr, redirect_stdout
 from unittest.mock import patch
 
-from cli import format_summary, main
+from cli import format_local_time, format_summary, main
 from git_adapter import GitCaptureError
 from snapshot import Snapshot
 from summarize import DiffSummary
@@ -129,6 +131,27 @@ def test_format_summary_still_renders_three_labelled_counts():
     )
 
 
+MOMENT = datetime(2026, 9, 11, 17, 16, tzinfo=timezone.utc)
+
+
+def test_a_stored_moment_is_shown_as_12_hour_time_in_the_given_zone():
+    assert format_local_time(MOMENT, ZoneInfo("America/New_York")) == "01:16 PM EDT"
+
+
+def test_the_same_moment_is_shown_in_whatever_zone_is_asked_for():
+    assert format_local_time(MOMENT, ZoneInfo("Europe/London")) == "06:16 PM BST"
+
+
+def test_winter_moments_are_shown_in_standard_time_not_daylight_time():
+    winter = datetime(2026, 1, 15, 17, 16, tzinfo=timezone.utc)
+    assert format_local_time(winter, ZoneInfo("America/New_York")) == "12:16 PM EST"
+
+
+def test_with_no_zone_the_machines_current_zone_is_used():
+    shown = format_local_time(MOMENT)
+    assert shown.endswith(("AM", "PM")) or " AM " in shown or " PM " in shown
+
+
 test_analyze_prints_the_root_and_both_labelled_views()
 test_a_capture_failure_reports_the_root_it_was_inspecting()
 test_a_failure_before_the_root_was_resolved_prints_no_repository_line()
@@ -137,4 +160,8 @@ test_analyze_takes_no_path_argument()
 test_a_missing_command_is_rejected()
 test_an_unsupported_command_is_rejected()
 test_format_summary_still_renders_three_labelled_counts()
+test_a_stored_moment_is_shown_as_12_hour_time_in_the_given_zone()
+test_the_same_moment_is_shown_in_whatever_zone_is_asked_for()
+test_winter_moments_are_shown_in_standard_time_not_daylight_time()
+test_with_no_zone_the_machines_current_zone_is_used()
 print("test passed")
