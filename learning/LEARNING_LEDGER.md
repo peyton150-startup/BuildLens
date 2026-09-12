@@ -47360,3 +47360,28 @@ cli.py              the provenance value is printed as a fourth line
 ```
 
 Verified live: session_cwd recorded, None when absent, ValueError when mistyped, and never in details.
+
+### EV-P8-RECORD-FIELDS-A-GATE-453
+
+PROMPT: payload P (no cwd) and payload Q ("cwd": 5) through the landed code, plus why
+_optional_string reads the payload top level rather than tool_input.
+
+LEARNER ANSWERS (verbatim, two turns):
+
+```text
+.  retunrs None 
+raises 
+not sure
+```
+```text
+.  None , a completecompare, 
+becasue cwd is the dircetory and toolinput contains the filepath
+```
+
+PASS. Q raises ValueError, so ingest reports on stderr with status 1 and no verdict. P records
+session_cwd None and still returns a CompleteCompare, so a verdict is printed — a missing directory
+costs only the directory. Field 3 correct about WHERE each value lives; precision added about WHO
+reported it: tool_input is what the tool was called with, cwd is what the session reported about
+itself, which is why mixing them would blur "the tool didn't say" with "the session didn't say".
+
+GATE CLOSED for EV-P8-RECORD-FIELDS-A-452.

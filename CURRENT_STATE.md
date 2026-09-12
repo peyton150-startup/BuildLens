@@ -4141,4 +4141,32 @@ the exit status describes BuildLens's run, not the claim: 0 whenever a verdict w
 Phase 8 still open: the remaining record fields (session/worktree id, base commit/blob, provenance),
 and the Stop reconciliation scan. Cumulative counters: major 1/2, foundation 1/3 — neither due.
 
-Exact restart point: the learner picks between the record fields and the Stop scan.
+### Record fields — patch A landed (EV-P8-RECORD-FIELDS-A-452)
+
+```text
+claude_adapter.py   ClaimedEdit.session_cwd: str | None = None, read from the payload TOP LEVEL via a
+                    new _optional_string (absent -> None; present but not a str -> ValueError)
+completeflow.py     Provenance(Enum) CLAUDE / HUMAN; CompleteCompare.provenance, set by start_flow
+cli.py              prints the provenance value as a fourth line
+```
+
+Eleven suites green; gate closed (453). Committed as c0a990e.
+
+Plan fields for the observed-version record:
+
+```text
+content hash               YES (376)
+observed-at time           YES (379)
+repository-relative path   YES (388)
+session/worktree id        YES (452) — session_id was already there; session_cwd added
+provenance = CLAUDE        YES (452)
+base commit/blob           PATCH B, designed but NOT built
+```
+
+Patch B design already decided by the learner (451): record BOTH the HEAD commit and the file's blob;
+distinguish "no committed version" from "could not ask Git" rather than collapsing both to None (the
+ABSENT/UNREADABLE split again). Still to decide in B: the state names and the four situations
+(committed / file not committed / repository has no commits / could not ask), where the Git capture
+lives (git_adapter), and how its failures are handled.
+
+Exact restart point: patch B — name the four base-version states, then tests red first.
