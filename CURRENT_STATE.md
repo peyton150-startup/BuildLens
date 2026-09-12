@@ -4290,3 +4290,24 @@ SPAN argument for carrying two timestamps rather than one.
 
 Exact restart point: turning a real working tree into a Picture (`git ls-files` plus untracked
 paths), which is the last piece of Phase 8 before persistence.
+
+### Patch: undetermined paths (EV-P8-UNDETERMINED-456)
+
+```text
+reconcile.py   Picture.unreadable: frozenset[str]; UndeterminedPath(path, unreadable_at_baseline,
+               unreadable_at_witness, baseline_time, witness_time); ScanResult(changes, undetermined)
+               the loop unions FOUR sets and reports an unreadable path as undetermined rather than
+               falling through to CREATED or DELETED
+test_reconcile.py   13 rows, including one documenting that absolute claimed_paths silently stop
+               matching repository-relative picture keys
+```
+
+Gate closed. Commit 7dca7de. Thirteen suites green.
+
+Concept reinforced across a fourth surface: a record must assert only what was established. DELETED
+is a claim about the present; a failed read is not evidence for it.
+
+Exact restart point: take_picture(repository) -> Picture, from a real working tree. Decided already:
+tracked plus untracked-non-ignored paths, ignored paths EXCLUDED (signal-to-noise; .claude-flow alone
+is 83 files). Reversal condition: watch specific ignored paths by explicit allowlist if the
+application actually reads one. Unreadable paths go in Picture.unreadable.

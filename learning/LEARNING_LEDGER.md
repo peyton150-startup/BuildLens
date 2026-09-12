@@ -47638,3 +47638,43 @@ C2 unknown shelf CREATED named immediately; then said both counts were absent an
 ```
 
 GATE CLOSED for EV-P8-RECONCILE-455: trace, explanation and transfer all passed.
+
+## EV-P8-UNDETERMINED-456 — separating changes from gaps
+
+TRIGGER: asked whether an UNREADABLE tracked path belongs in a Picture, the learner answered
+"wouldn't you record the error" — then traced the consequence of omitting it and confirmed it
+produces a false DELETED.
+
+DESIGN (the learner's):
+
+```text
+shape        Picture gains `unreadable: frozenset[str]`, chosen over hashes[path] = None with the
+             argument supplied and accepted: dict[str, str] stays honest, and a caller looping over
+             hashes cannot mistake a stand-in for a fingerprint
+placement    UNREADABLE is NOT a fourth ChangeKind. Challenged on the grounds that the three kinds
+             assert a change while this asserts an inability to determine one, the learner asked
+             "would either decision still record the unreadable?" — a good question — and on being
+             shown that the difference is what a CONSUMER must do, chose the separate type
+naming       `undetermined` approved
+row 5        a claimed path that is unreadable is not reported at all: PostToolUse already recorded
+             what it could about that file
+```
+
+PATH-SPELLING HAZARD surfaced by the learner's question "is the claimed path even used, i thought we
+were using file path". ClaimedEdit.file_path is absolute; Picture keys are repository-relative. Asked
+what an absolute claimed_paths would do, the learner said it would not crash (correct) but that
+Claude's changes would be "glossed over" — the opposite. The guard never fires, so every legitimately
+edited file is reported as unclaimed. Now covered by a test row.
+
+TRACE: changes for a.py first answered as a record; corrected against the equality guard to []. The
+undetermined half (b.py, unreadable at witness) correct first time. Verified by running it.
+
+EXPLANATION: after one confusion about whether the baseline hash survives, the learner produced it:
+"that b was unreadable and that it was because we could not reach the file to read it does not mean
+it is deleted". The asymmetry was then named: the picture is evidence about the past, and DELETED is
+an assertion about the present that no evidence supports.
+
+CODE: Picture.unreadable, UndeterminedPath, ScanResult(changes, undetermined); reconcile returns a
+ScanResult and unions four sets. 13 rows, thirteen suites green. Commit 7dca7de.
+
+GATE CLOSED for EV-P8-UNDETERMINED-456.
