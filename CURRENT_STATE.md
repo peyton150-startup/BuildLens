@@ -4061,14 +4061,18 @@ test_completeflow.py   7 tests, rows approved before writing, red first; real fi
 Full suite green across ELEVEN files. The observation boundary is joined end to end for the first
 time. Nothing calls start_flow yet.
 
-Gate PARTIAL and still OPEN (EV-P8-COMPLETEFLOW-441): the learner retrieved ABSENT / FILE_ABSENT for
-a deleted folder, but not which except clause runs there, nor that repository_relative_path is None.
-Both are owed next session and must not be treated as passed. The distinction to rebuild: OSError
-means Git never started (the directory is gone); GitCaptureError means Git ran and reported no
-repository.
+MILESTONE COMPLETE: trace 441 (closed after remediation), explanation 442, transfer 443 (lab
+surface). All gates for completeflow are closed.
 
-Also still owed for this milestone: the learner explanation and a transfer variant.
+Remediated along the way, worth re-testing later: GitCaptureError means Git RAN and reported no
+repository; OSError means Git never started (the directory does not exist). The learner first
+assigned a deleted folder to GitCaptureError; live evidence settled it.
 
-Exact restart point: finish the start_flow gate (the two fields above), then the explanation and
-transfer. After that: the CLI slice reaching start_flow, the remaining record fields
-(session/worktree id, base commit/blob, provenance), or the Stop reconciliation scan.
+Process note upheld: the learner objected that they had never been shown completeflow.py in full
+before being asked to explain it. Only start_flow's body had appeared, inside a trace prompt.
+
+Phase 8 still open: a CLI slice reaching start_flow, the remaining record fields (session/worktree
+id, base commit/blob, provenance), and the Stop reconciliation scan. Cumulative counters unchanged:
+major 1/2, foundation 1/3.
+
+Exact restart point: the learner picks the next Phase 8 step.
