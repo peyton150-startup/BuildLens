@@ -47545,3 +47545,64 @@ caller_vs_callee_for_no_answer   who may produce "could not ask" — recovered v
 ```
 
 GATE CLOSED for EV-P8-BASE-VERSION-454: trace, explanation and transfer all passed.
+
+## EV-P8-RECONCILE-455 — the Stop reconciliation scan
+
+DESIGN (all the learner's, VERY LOW assistance per the plan):
+
+```text
+gap          PostToolUse fires for Bash but the payload names no file, so start_flow returns None
+             and a `sed -i` edit never reaches the comparison path. Learner named this immediately
+belief       corrected in passing: BuildLens does not believe the file is unchanged, it holds NO
+             RECORD of it. Silence is not a claim
+baseline     learner rejected HEAD as the baseline after tracing the case of an uncommitted edit
+             made yesterday: the diff would show it and stamping it CLAUDE falsifies provenance
+who knows    "neither git nor claude tells us" -> BuildLens must record the before-picture itself
+moment       chose picture 1 at session start; rejected first-PostToolUse (a shell edit may already
+             have landed, and would then look pre-existing) and Stop-looking-backwards ("it can only
+             look at the record of when the session started" — the bytes are destroyed)
+content      chose HASH over bytes after being challenged, and produced the reversal condition when
+             pushed: bytes are needed to isolate the session's own lines inside a file that was
+             already dirty. Phase 13 will likely trip it
+record       path, both hashes, both moments, NO provenance. CREATED / MODIFIED / DELETED, with the
+             missing side left absent
+row 7        a claimed path in neither picture: ruled out of scope, correctly — PostToolUse already
+             gives a verdict for a claim whose file is absent
+scope        learner ruled cross-process storage into Phase 9. Reason derived on request: each hook
+             is its own process, so picture 1 dies at once. Persistence is now EARNED, not assumed
+```
+
+LEARNER-FOUND DEFECT IN THE FACILITATOR'S CODE: "how do you know the time at start vs the time at
+stop". The first implementation took one `observed_at` (the scan's moment) and the pictures were bare
+dicts, so a stored record could not say what span it covered. Learner first proposed inferring it
+from session start, then withdrew it when asked what a mid-session re-baseline would do to that
+inference. Picture(taken_at, hashes) followed, and `baseline_time` / `witness_time` are theirs.
+
+NAMING: `baseline_time` produced unaided and for the right reason (it names the ROLE). The second
+name needed the codebase's own vocabulary as a prompt. Later the learner rejected `observed` outright
+— "i want the second picture named witness so we have a similar meaning but not the same word as
+observed at" — a real collision with file_observer, and the rename was made.
+
+TRACE (after the patch):
+
+```text
+baseline {app.py aaa, README.md bbb, tools/fix.sh ccc}   witness {app.py zzz, README.md bbb,
+docs/api.md ddd}   claimed {app.py}
+first answer: "3", then listed "app.py, readme, tools/fix.sh" — the baseline's keys
+```
+
+REMEDIATION: the blocker was OPERATOR_MEANING on set `|`. Asked for the union, the learner gave the
+INTERSECTION, then "not sure". Dropped to R0 on `|` and `&` with two-element sets; union correct
+immediately, intersection needed one more pass element-by-element. Climbed back: union of the real
+key sets correct, then "we miss the delete" for what walking only the witness costs, then both
+records correct including which side is None. Verified by running it.
+
+```text
+docs/api.md    created   baseline=None    witness='ddd'
+tools/fix.sh   deleted   baseline='ccc'   witness=None
+```
+
+CODE LANDED: reconcile.py (ChangeKind, Picture, UnclaimedChange, reconcile), test_reconcile.py (8
+rows, 1-6 approved before writing). Twelve suites green. Commits 507ef5c, f178413, afd57e9.
+
+GATE: trace PASSED. Explanation and transfer OWED.

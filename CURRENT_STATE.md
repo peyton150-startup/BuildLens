@@ -4235,3 +4235,44 @@ present and now defended.
 
 Exact restart point: the Stop reconciliation scan, starting from what it is supposed to catch that
 PostToolUse cannot see.
+
+## Session 2026-09-12 (continued) — the reconciliation scan
+
+```text
+landed        reconcile.py: ChangeKind (CREATED/MODIFIED/DELETED), Picture(taken_at, hashes),
+              UnclaimedChange(path, kind, hash_at_baseline, hash_at_witness, baseline_time,
+              witness_time), reconcile(baseline, witness, claimed_paths)
+tests         test_reconcile.py, 8 rows; twelve suites green
+commits       507ef5c, f178413, afd57e9
+design        entirely the learner's, including the record shape and the three kinds
+```
+
+The scan reports what the tree shows and nothing accounted for. It deliberately states no
+provenance: a hash difference establishes WHEN, not WHO.
+
+Stated limitations, all reached by the learner:
+
+```text
+attribution rests on one stream editing the tree. Phase 13's separate worktrees make it structural
+file granularity only; isolating the session's lines in an already-dirty file needs the BYTES
+only the span between two pictures is visible — anything from before BuildLens watched is absorbed
+a file changed and then restored between pictures is indistinguishable from one never touched
+```
+
+Phase 9 is now EARNED rather than assumed: SessionStart and Stop are separate processes, so picture
+one cannot survive to be compared without persistence. The learner ruled that scope out of this
+patch and derived the reason on request.
+
+Not built: turning a real working tree into a Picture (needs `git ls-files`), hook wiring.
+
+Gate for EV-P8-RECONCILE-455: trace PASSED (after R0 remediation on set `|`). EXPLANATION and
+TRANSFER OWED.
+
+Retrieval due, new this session:
+
+```text
+set `|` is union, `&` is intersection — intersection needed element-by-element checking
+why the loop walks the UNION: deletions exist only in the baseline
+```
+
+Exact restart point: the explanation and transfer halves of the 455 gate.
