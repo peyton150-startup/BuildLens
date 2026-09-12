@@ -74,6 +74,7 @@ def format_complete_compare(result) -> str:
         result.observed.status.value
         + ", observed at "
         + format_local_time(result.observed.observed_at),
+        result.provenance.value,
     ]
 
     return "\n".join(lines)

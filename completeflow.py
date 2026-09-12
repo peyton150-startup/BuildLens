@@ -10,6 +10,7 @@ policy about what happens between them:
 """
 
 from dataclasses import dataclass
+from enum import Enum
 from pathlib import Path
 
 import claude_adapter
@@ -19,6 +20,15 @@ import git_adapter
 from claude_adapter import ClaimedEdit
 from compare import ComparisonVerdict
 from file_observer import ObservedFile
+
+
+class Provenance(Enum):
+    """Which change stream one version came from."""
+
+    CLAUDE = "claude"
+    # Not produced yet: the learner's own edits get their own worktree in a later
+    # phase, and every version will then say which stream it belongs to.
+    HUMAN = "human"
 
 
 @dataclass(frozen=True)
@@ -32,6 +42,7 @@ class CompleteCompare:
     claim: ClaimedEdit
     observed: ObservedFile
     verdict: ComparisonVerdict
+    provenance: Provenance
 
 
 def _repository_root_for(file_path: str) -> str | None:
@@ -73,4 +84,7 @@ def start_flow(payload: object) -> CompleteCompare | None:
         claim=claim,
         observed=observed,
         verdict=compare.compare_tool_name(claim, observed),
+        # A PostToolUse payload is a report of a tool call Claude made, so every
+        # record this function builds belongs to the Claude stream.
+        provenance=Provenance.CLAUDE,
     )

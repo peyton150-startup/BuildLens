@@ -47300,3 +47300,63 @@ learner trace   448 (closed after the json.loads SYNTAX versus adapter SHAPE rem
 explanation     449 (closed after repairs to fields 3 and 4)
 transfer        450
 ```
+
+### EV-P8-RECORD-FIELDS-DESIGN-451 — the remaining plan fields
+
+Decisions, all the learner's:
+
+```text
+session id     already met by claim.session_id — "we have no other way of getting the session id"
+worktree       KEEP the payload's cwd, but scoped: "we only use it for that purpose and nothing
+               else ... it is redundant other than when the stop scan needs it". First ruled it out
+               (the absolute file_path locates the file), then kept it when shown that the Stop scan
+               needs a directory to run Git in and may hold no claim at the time
+not in details Ruled out after seeing what would change: five tests assert details exactly, and
+               details means "the keys the TOOL claimed" — mixing in a session-level key would make
+               "not stated by the tool" and "not stated by the session" the same silence
+where          ClaimedEdit ("claimed edit makes the most sense") — the adapter is the only thing
+               that reads payloads
+name           session_cwd, after the facilitator flagged that cwd_stop names the field after its
+               first consumer rather than what it holds
+optional       optional, NOT required. Evidence measured: 81 of 81 captured payloads carry cwd, and
+               so does the fixture — but all from one machine and one version. The learner first
+               assumed a cwd-less payload would fail elsewhere anyway; corrected with the
+               CORRUPTION versus DIFFERENT-SHAPE split, then chose optional and added, unprompted:
+               "this might also be a good idea for if we do decide to use other ai agents for coding
+               that also use write and edit tools" — which is this phase's own transfer expectation
+wrong type     RAISES (the learner switched from "treat as missing"), so a mistyped cwd refuses the
+               payload while a missing one does not. Matches _required_boolean on replace_all
+provenance     an Enum on CompleteCompare with CLAUDE and HUMAN; defined in completeflow.py beside
+               the record, the same pattern as ObservationStatus and ComparisonVerdict
+base version   BOTH the HEAD commit and the file's blob, after seeing live that three commits apart
+               the commit id changed while both files' blobs did not. Also proposed caching HEAD
+               per batch, then worked out that one ingest process handles exactly one payload, so
+               there is nothing to cache yet
+not committed  the states must be DISTINGUISHED, not collapsed to None: "they both mean two very
+               different things" — the same split as ABSENT versus UNREADABLE
+scope          the learner SPLIT the work: patch A session_cwd + provenance, patch B base version
+```
+
+## EV-P8-RECORD-FIELDS-A-452 — session_cwd and provenance
+
+RED (verbatim, three files):
+
+```text
+AttributeError: 'ClaimedEdit' object has no attribute 'session_cwd'. Did you mean: 'session_id'?
+AttributeError: 'CompleteCompare' object has no attribute 'provenance'
+ImportError: cannot import name 'Provenance' from 'completeflow'
+```
+
+GREEN: all eleven suites. 7 rows, approved before writing.
+
+CODE LANDED:
+
+```text
+claude_adapter.py   ClaimedEdit.session_cwd: str | None = None; new _optional_string helper
+                    (absent -> None, present -> must be a str); read from the payload TOP LEVEL
+completeflow.py     Provenance(Enum) CLAUDE / HUMAN; CompleteCompare.provenance; start_flow sets
+                    Provenance.CLAUDE
+cli.py              the provenance value is printed as a fourth line
+```
+
+Verified live: session_cwd recorded, None when absent, ValueError when mistyped, and never in details.

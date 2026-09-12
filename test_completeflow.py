@@ -134,4 +134,27 @@ test_a_file_inside_a_repository_is_labelled_with_its_relative_path()
 test_a_claim_about_a_deleted_folder_still_gets_a_verdict()
 test_a_file_outside_any_repository_still_gets_a_verdict()
 test_a_tool_with_no_comparison_is_rejected()
+
+def test_a_claim_from_a_claude_hook_is_recorded_as_claude_provenance():
+    completeflow = importlib.import_module("completeflow")
+
+    with temporary_directory() as directory:
+        path = Path(directory) / "notes.md"
+        path.write_bytes(b"hello\n")
+
+        result = completeflow.start_flow(write_payload(path, "hello\n"))
+
+    assert result.provenance is completeflow.Provenance.CLAUDE
+
+
+def test_provenance_names_both_streams_that_will_exist():
+    completeflow = importlib.import_module("completeflow")
+
+    names = {member.name for member in completeflow.Provenance}
+
+    assert names == {"CLAUDE", "HUMAN"}
+
+
+test_a_claim_from_a_claude_hook_is_recorded_as_claude_provenance()
+test_provenance_names_both_streams_that_will_exist()
 print("test passed")

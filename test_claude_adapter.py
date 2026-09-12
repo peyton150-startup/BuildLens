@@ -549,4 +549,56 @@ test_absent_replace_all_is_recorded_as_absent()
 test_edit_that_deletes_text_records_empty_new_string()
 test_empty_old_string_raises_readable_error()
 test_non_boolean_replace_all_raises_readable_error()
+
+def write_payload_with(**extra):
+    payload = {
+        "session_id": "session-9",
+        "hook_event_name": "PostToolUse",
+        "tool_name": "Write",
+        "tool_input": {"file_path": "notes.txt", "content": "hello"},
+    }
+    payload.update(extra)
+    return payload
+
+
+def test_the_session_working_directory_is_recorded():
+    claude_adapter = importlib.import_module("claude_adapter")
+
+    result = claude_adapter.parse_post_tool_use(write_payload_with(cwd="C:/proj"))
+
+    assert result.session_cwd == "C:/proj"
+
+
+def test_a_payload_without_a_working_directory_still_gets_a_claim():
+    claude_adapter = importlib.import_module("claude_adapter")
+
+    result = claude_adapter.parse_post_tool_use(write_payload_with())
+
+    assert result.session_cwd is None
+    assert result.details == {"content": "hello"}
+
+
+def test_a_non_string_working_directory_raises_readable_error():
+    claude_adapter = importlib.import_module("claude_adapter")
+
+    try:
+        claude_adapter.parse_post_tool_use(write_payload_with(cwd=5))
+    except ValueError as error:
+        assert "cwd" in str(error)
+    else:
+        raise AssertionError("a non-string cwd was accepted")
+
+
+def test_the_working_directory_is_not_mixed_into_details():
+    claude_adapter = importlib.import_module("claude_adapter")
+
+    result = claude_adapter.parse_post_tool_use(write_payload_with(cwd="C:/proj"))
+
+    assert "cwd" not in result.details
+
+
+test_the_session_working_directory_is_recorded()
+test_a_payload_without_a_working_directory_still_gets_a_claim()
+test_a_non_string_working_directory_raises_readable_error()
+test_the_working_directory_is_not_mixed_into_details()
 print("test passed")

@@ -20,7 +20,7 @@ from pathlib import Path
 from claude_adapter import ClaimedEdit
 from cli import format_local_time, format_summary, main
 from compare import ComparisonVerdict
-from completeflow import CompleteCompare
+from completeflow import CompleteCompare, Provenance
 from file_observer import ObservationStatus, ObservedFile
 from git_adapter import GitCaptureError
 from snapshot import Snapshot
@@ -193,7 +193,10 @@ INGEST_OBSERVED = ObservedFile(
 
 def ingest_record(verdict):
     return CompleteCompare(
-        claim=INGEST_CLAIM, observed=INGEST_OBSERVED, verdict=verdict
+        claim=INGEST_CLAIM,
+        observed=INGEST_OBSERVED,
+        verdict=verdict,
+        provenance=Provenance.CLAUDE,
     )
 
 
@@ -318,4 +321,18 @@ test_a_claim_that_does_not_hold_is_still_a_successful_run()
 test_malformed_json_is_reported_without_any_verdict()
 test_a_missing_payload_file_is_reported()
 test_a_tool_buildlens_cannot_check_is_reported()
+
+
+def test_ingest_prints_which_stream_the_change_came_from():
+    status, out, err = run_ingest(
+        ["cli.py", "ingest"],
+        record=ingest_record(ComparisonVerdict.CLAIM_HOLDS),
+        stdin_text=PAYLOAD_TEXT,
+    )
+
+    assert status == 0
+    assert "claude" in out
+
+
+test_ingest_prints_which_stream_the_change_came_from()
 print("test passed")

@@ -13,6 +13,11 @@ class ClaimedEdit:
     session_id: str
     tool_name: str
     details: Mapping[str, object]
+    # The directory the Claude session was working in. Optional: a payload from
+    # another Claude version, or relayed by another agent, may not send one, and
+    # refusing such a payload would cost a claim BuildLens could otherwise judge.
+    # Only the Stop reconciliation scan needs it, and only as a place to run Git.
+    session_cwd: str | None = None
 
 
 def _required_value(values: dict[str, object], field: str) -> object:
@@ -36,6 +41,18 @@ def _required_string(values: dict[str, object], field: str) -> str:
 def _required_text(values: dict[str, object], field: str) -> str:
     """Return a claimed string, allowing "" as a value the tool may really send."""
     value = _required_value(values, field)
+    if not isinstance(value, str):
+        raise ValueError("field must be a string: " + field)
+
+    return value
+
+
+def _optional_string(values: dict[str, object], field: str) -> str | None:
+    """Return a string the sender may omit, but must type correctly if sent."""
+    if field not in values:
+        return None
+
+    value = values[field]
     if not isinstance(value, str):
         raise ValueError("field must be a string: " + field)
 
@@ -96,4 +113,7 @@ def parse_post_tool_use(payload: object) -> ClaimedEdit | None:
         session_id=session_id,
         tool_name=tool_name,
         details=MappingProxyType(details),
+        # Read from the payload's top level, never from tool_input, so details
+        # keeps one source: the keys the tool itself claimed.
+        session_cwd=_optional_string(payload, "cwd"),
     )
