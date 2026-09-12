@@ -47446,3 +47446,102 @@ completeflow.py   _base_version_for(root, relative_path); CompleteCompare.base_v
 
 GATE OWED: a learner trace of the two Git calls in each of the four situations, plus explanation and
 transfer.
+
+### EV-P8-BASE-VERSION-454 — GATE (trace / explanation / transfer), 2026-09-12
+
+SYNTAX HELP FIRST. The learner opened with "what does return output or None mean", so the trace was
+set aside per the syntax-only rule and rebuilt from R0.
+
+```text
+R0   or returns one of its OPERANDS, not True/False
+     "abc" or None -> "abc"      correct
+     "" or None    -> None       correct
+     0 or "fallback"             "idk" -> after the falsy list was re-shown: "fallback"  correct
+R1   output = "a1b2c3d4" -> "outpus"(output)   output = "" -> None    both correct
+```
+
+WHY the line exists — first answer restated the mechanism only:
+
+```text
+"if output is not "" or None then it is output otherwise it would be None"
+```
+
+Driven to the consequence instead. With commit = "", asked whether `if commit is None` runs: "no".
+Then what the caller records: "i thikn this gets by and the status is committe but it is """. That
+is the whole point, reached by the learner: an empty string walks past `is None` and BuildLens
+records COMMITTED with empty ids for a repository that has never had a commit. Same shape as the
+real defect row 2 caught last session (an echoed argument rather than an empty string).
+
+TRACE — four situations, file notes/plan.md.
+
+```text
+A  committed yesterday, edited this morning (unstaged)
+   "2,0, comitted, yesterdays commit, blob from this morning"
+   calls/status/state/commit correct; BLOB WRONG. Asked what HEAD:<path> addresses; self-corrected
+   unprompted: "no[pe so the blob would be from yesterday as well"
+B  repo has commits, file never committed
+   first answer "1, 128, absent, "","" " — three misses: one call not two, 128 (plain rev-parse,
+   pre-fix) not 1, and "" not None immediately after the or-None work
+   rebuilt one call at a time -> "yes / absent from head, commit, None"  correct
+C  git init, nothing ever committed
+   "1 , 1, absent from head, None, None" — calls and values right, STATE WRONG: after one call the
+   only reachable return is the top one. Corrected to "it is no commits"
+D  file in no repository
+   "it is unavaiable and None None", then "zero / baseverson for / the repo root is None"  correct
+```
+
+REVEAL against real Git in a sandbox confirmed every row, including A: the recorded blob is
+byte-identical to the COMMITTED content (4b48dee) and unrelated to the working copy (66f48ea), and
+B and C return an IDENTICAL `exit=1 out=` for the file call.
+
+EXPLANATION.
+
+```text
+Q ordering  "head is the broader look for commits so if it comes back None then you know that Head
+            path will be None, vice versa would not make sense becasue you would be checking the
+            file first even if head has no commits"
+            Containment correct, but the reason given was WASTE. Asked to pick B or C from the file
+            call alone: answered "c" — wrong, the two are indistinguishable. Shown the identical
+            real output; then restated it, with one inversion (attributed the B/C split to the
+            second call). Corrected: call 1 splits C from A|B, call 2 splits A from B
+Q ownership "because it guards from a larger issue if there is no repo root that is different than
+            no commits or absent from head" — the semantic half. Completed with the knowledge half:
+            git_adapter never runs in D, so it is in no position to report anything
+Q routes    both named: "oserror", "gitcaptureerror"
+```
+
+TRANSFER — deploy tool recording which release a rollout was based on; registry answers "not found"
+identically for "never released" and "released without this artifact", and can also be unreachable.
+
+```text
+states      first answers restated the PROCEDURE, not the stored claim ("i would define the current
+            release and the id for it / and look to see if the release contains the artifact")
+worlds      enumerated on an irrelevant axis: "a new release, it contains api / an old relase, it
+            contains api / a new relase, no api / an old relase, no api" — age is not a distinction
+            the record can make. Re-anchored to ANSWER SHAPES; then three worlds correct
+4th world   missed twice ("no id but api is presnet" — an unreachable cell). Isolated to one
+            question: registry down, did Q1 answer "not found"? -> "no". Then, on why it cannot be
+            collapsed: "having no current release and the computer holding the release got thrown
+            into an sctive volcano as it erupted are 2 different things"
+ownership   "the registry client" -> shown the case where the registry is never contacted at all:
+            "oh just read the description it is the deploy tool"
+detail      "a record of what happend" — correct in spirit, sharpened to the failure reason itself
+ordering    reason again given as the saving; asked to answer B-or-C from Q2 alone: "we do not know"
+```
+
+MISCONCEPTIONS RECORDED (concept, not value):
+
+```text
+value_vs_absence_marker          "" passes `is None` and is recorded as a real answer — remediated
+working_tree_vs_commit_content   HEAD:<path> reads committed bytes, never the working copy — self-
+                                 corrected, due for delayed retrieval
+ambiguous_signal_needs_ordering  held in the Git surface but NOT transferred: the reason reverted to
+                                 "it saves a call" twice, in both domains. Recovered both times only
+                                 when asked to decide between two worlds from one signal
+state_vs_procedure               a state is a stored claim a later reader sees, not the steps taken
+enumerate_by_answer_shape        worlds come from the shapes of the answers, not the content
+caller_vs_callee_for_no_answer   who may produce "could not ask" — recovered via the never-invoked
+                                 case, not from first principles
+```
+
+GATE CLOSED for EV-P8-BASE-VERSION-454: trace, explanation and transfer all passed.

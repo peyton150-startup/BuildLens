@@ -4191,3 +4191,47 @@ GATE OWED for 454: trace the two Git calls across the four situations; then expl
 The ingest output does NOT show the base version — not asked for, not decided.
 
 Exact restart point: run the 454 gate.
+
+## Session 2026-09-12 — the 454 gate closed
+
+No code changed. The owed gate for the base-version patch was run in full and passed.
+
+```text
+trace         the two rev-parse calls across four situations, then verified against real Git in a
+              sandbox: A committed-then-edited, B never committed, C no commits, D no repository
+explanation   why HEAD is asked first; why UNAVAILABLE is the caller's state and not the adapter's
+transfer      a deploy tool recording which release a rollout was based on, with an ambiguous
+              "not found" and an unreachable registry — designed from the structure, no renaming
+```
+
+The reveal is worth keeping: in A the recorded blob is byte-identical to the COMMITTED content and
+unrelated to the working copy, and in B and C the file-level call returns an identical `exit=1 out=`,
+which is the mechanical reason HEAD must be asked first.
+
+Held after this gate:
+
+```text
+`or` returns an operand, not a boolean; `x or None` converts a falsy value into an explicit absence
+HEAD:<path> addresses committed bytes; the working copy is a separate field (observed.content_hash)
+one ambiguous signal forces the order of two questions
+a state is a stored claim a later reader sees, not the procedure that produced it
+```
+
+Still soft — ask again on a new surface:
+
+```text
+ambiguous_signal_needs_ordering   the ORDER is recalled, but the reason reverts to "it saves a call"
+                                  in both domains until the learner is asked to decide between two
+                                  worlds from one signal
+caller_vs_callee_for_no_answer    recovered from the never-invoked case, not from first principles
+enumerate_by_answer_shape         first enumeration was on an irrelevant attribute (release age)
+working_tree_vs_commit_content    self-corrected once; due for delayed retrieval
+```
+
+Counters unchanged: major 1/2, foundation 1/3 — neither due.
+
+Phase 8 remaining: the Stop reconciliation scan. Every plan field for the observed-version record is
+present and now defended.
+
+Exact restart point: the Stop reconciliation scan, starting from what it is supposed to catch that
+PostToolUse cannot see.
