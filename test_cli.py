@@ -9,12 +9,19 @@ and check what reaches stdout, stderr, and the returned status.
 """
 
 import io
+import json
 from datetime import datetime, timezone
 from zoneinfo import ZoneInfo
 from contextlib import redirect_stderr, redirect_stdout
 from unittest.mock import patch
 
+from pathlib import Path
+
+from claude_adapter import ClaimedEdit
 from cli import format_local_time, format_summary, main
+from compare import ComparisonVerdict
+from completeflow import CompleteCompare
+from file_observer import ObservationStatus, ObservedFile
 from git_adapter import GitCaptureError
 from snapshot import Snapshot
 from summarize import DiffSummary
@@ -164,4 +171,151 @@ test_a_stored_moment_is_shown_as_12_hour_time_in_the_given_zone()
 test_the_same_moment_is_shown_in_whatever_zone_is_asked_for()
 test_winter_moments_are_shown_in_standard_time_not_daylight_time()
 test_with_no_zone_the_machines_current_zone_is_used()
+
+# --- ingest -----------------------------------------------------------------
+
+INGEST_CLAIM = ClaimedEdit(
+    file_path="C:/proj/src/app.py",
+    session_id="session-1",
+    tool_name="Write",
+    details={"content": "hello\n"},
+)
+
+INGEST_OBSERVED = ObservedFile(
+    file_path="C:/proj/src/app.py",
+    status=ObservationStatus.READ,
+    file_bytes=b"hello\n",
+    content_hash="9b71d224bd62",
+    observed_at=datetime(2026, 9, 12, 1, 14, tzinfo=timezone.utc),
+    repository_relative_path="src/app.py",
+)
+
+
+def ingest_record(verdict):
+    return CompleteCompare(
+        claim=INGEST_CLAIM, observed=INGEST_OBSERVED, verdict=verdict
+    )
+
+
+PAYLOAD_TEXT = json.dumps(
+    {
+        "hook_event_name": "PostToolUse",
+        "session_id": "session-1",
+        "tool_name": "Write",
+        "tool_input": {
+            "file_path": "C:/proj/src/app.py",
+            "content": "hello" + chr(10),
+        },
+    }
+)
+
+
+def run_ingest(argv, record=None, error=None, stdin_text=""):
+    """Run main with start_flow patched and stdin prepared."""
+    out = io.StringIO()
+    err = io.StringIO()
+
+    if error is not None:
+        replacement = patch("completeflow.start_flow", side_effect=error)
+    else:
+        replacement = patch("completeflow.start_flow", return_value=record)
+
+    with replacement, patch("sys.stdin", io.StringIO(stdin_text)), \
+            redirect_stdout(out), redirect_stderr(err):
+        status = main(argv)
+
+    return status, out.getvalue(), err.getvalue()
+
+
+def test_ingest_reads_a_payload_file_and_prints_the_verdict(tmp_payload="payload_for_test.json"):
+    Path(tmp_payload).write_text(PAYLOAD_TEXT, encoding="utf-8")
+    try:
+        status, out, err = run_ingest(
+            ["cli.py", "ingest", tmp_payload],
+            record=ingest_record(ComparisonVerdict.CLAIM_HOLDS),
+        )
+    finally:
+        Path(tmp_payload).unlink()
+
+    assert status == 0
+    assert "claim holds" in out
+    assert "C:/proj/src/app.py" in out
+    assert "read" in out
+    assert err == ""
+
+
+def test_ingest_with_no_path_reads_standard_input():
+    status, out, err = run_ingest(
+        ["cli.py", "ingest"],
+        record=ingest_record(ComparisonVerdict.CLAIM_HOLDS),
+        stdin_text=PAYLOAD_TEXT,
+    )
+
+    assert status == 0
+    assert "claim holds" in out
+    assert err == ""
+
+
+def test_a_bash_payload_reports_that_there_is_nothing_to_check():
+    status, out, err = run_ingest(
+        ["cli.py", "ingest"], record=None, stdin_text=PAYLOAD_TEXT
+    )
+
+    assert status == 0
+    assert "nothing to check" in out
+    assert err == ""
+
+
+def test_a_claim_that_does_not_hold_is_still_a_successful_run():
+    status, out, err = run_ingest(
+        ["cli.py", "ingest"],
+        record=ingest_record(ComparisonVerdict.CLAIM_DOES_NOT_HOLD),
+        stdin_text=PAYLOAD_TEXT,
+    )
+
+    assert status == 0
+    assert "claim does not hold" in out
+
+
+def test_malformed_json_is_reported_without_any_verdict():
+    status, out, err = run_ingest(
+        ["cli.py", "ingest"],
+        record=ingest_record(ComparisonVerdict.CLAIM_HOLDS),
+        stdin_text="{not json at all",
+    )
+
+    assert status == 1
+    assert out == ""
+    assert err != ""
+
+
+def test_a_missing_payload_file_is_reported():
+    status, out, err = run_ingest(
+        ["cli.py", "ingest", "no_such_payload.json"],
+        record=ingest_record(ComparisonVerdict.CLAIM_HOLDS),
+    )
+
+    assert status == 1
+    assert err != ""
+
+
+def test_a_tool_buildlens_cannot_check_is_reported():
+    status, out, err = run_ingest(
+        ["cli.py", "ingest"],
+        error=ValueError("unsupported tool_name: Notebook"),
+        stdin_text=PAYLOAD_TEXT,
+    )
+
+    assert status == 1
+    assert out == ""
+    assert "Notebook" in err
+
+
+test_ingest_reads_a_payload_file_and_prints_the_verdict()
+test_ingest_with_no_path_reads_standard_input()
+test_a_bash_payload_reports_that_there_is_nothing_to_check()
+test_a_claim_that_does_not_hold_is_still_a_successful_run()
+test_malformed_json_is_reported_without_any_verdict()
+test_a_missing_payload_file_is_reported()
+test_a_tool_buildlens_cannot_check_is_reported()
 print("test passed")

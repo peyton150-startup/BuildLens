@@ -4103,3 +4103,42 @@ verdict; faults in the batch driver stop the run while faults confined to one it
 
 Still uncertain: which exception a failed Git launch produces; naming discipline (several names were
 chosen on shape rather than on what they produce); confidence tags were omitted on most answers.
+
+## Session 2026-09-12 — CLI slice landed (EV-P8-INGEST-447)
+
+`buildlens ingest` exists. One payload in, one verdict out.
+
+```text
+cli.py   main rebuilt on argparse SUBPARSERS: analyze takes no arguments, ingest takes an optional
+         payload path; stdin when the path is omitted
+         format_complete_compare(result) -> verdict.value / claim.file_path / status + local time
+         read_payload_text(path|None), ingest(path|None) -> int
+         status 0 whenever a verdict was produced (a finding is not a failure); 1 when none could
+         be produced (unreadable file, invalid JSON, a tool with no comparison); 2 stays argparse's
+test_cli.py   7 new tests, rows approved before writing; 21 in total
+```
+
+Full suite green across eleven files. Real runs verified from both a file and stdin.
+
+Measured this session (EV-P8-PAYLOAD-SIZE-444): the capture log is 100.5 MB for 81 records, and
+originalFile alone is 100.0 MB of it; what ClaimedEdit keeps is 0.2%. That is the argument, when
+persistence arrives, for storing the claim rather than the payload.
+
+The long zone name ("Eastern Daylight Time" rather than "EDT") was shown to the learner and accepted
+as is.
+
+ALL GATES CLOSED: trace 448, explanation 449, transfer 450 (a checklog command, mapped one-for-one).
+
+Remediated this session, due for later retrieval:
+
+```text
+json.loads checks SYNTAX (is this JSON at all); the adapter checks SHAPE and values. A truncated
+file never reaches the adapter — the learner had it arriving there
+analyze takes NO arguments (Phase 7 changed it from the Phase 6 diff path); ingest takes one optional
+the exit status describes BuildLens's run, not the claim: 0 whenever a verdict was produced
+```
+
+Phase 8 still open: the remaining record fields (session/worktree id, base commit/blob, provenance),
+and the Stop reconciliation scan. Cumulative counters: major 1/2, foundation 1/3 — neither due.
+
+Exact restart point: the learner picks between the record fields and the Stop scan.
