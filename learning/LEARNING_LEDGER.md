@@ -46939,3 +46939,112 @@ redundant with the per-function tests despite identical inputs and expected verd
 only tests that detect a misroute. Closes the thread the learner opened in 435.
 
 DISPATCHER GATE CLOSED.
+
+### EV-P8-COMPARE-EDIT-EXPLANATION-438
+
+LEARNER ANSWER (verbatim):
+
+```text
+. becasue the payload contains instead of contents an old string and new string field that cannot be read the same way as write. it checks if the old string is contained in new string and the status of the file read absent or unreadable. the old string being leftover is not a problem when the old string is contined inside the new string, either it replaces all of the occurances or none of them so we do not need to look at replace all, claim holds does not proce that the edit made the changes that are in the file at the moment.
+```
+
+PASS on fields 1, 3 and 5 — including, unprompted, the limit that CLAIM_HOLDS does not prove Claude
+made the change. Field 2 named the claim-side condition rather than the two FILE checks; field 4
+carried the recurring "or none".
+
+Narrowed: the two file checks came back correct (new_string in the file, old_string in the file). The
+"or none" persisted — the learner answered that no replacement happened when the verdict is
+CLAIM_DOES_NOT_HOLD, then "can't tell ... there could be another way that the file could have been
+changed": correct about the FILE, wrong about whether a replacement ever occurred.
+
+WORKED-EXAMPLE RESCUE (t1 file "hello world", t2 successful edit + record written, t3 something else
+rewrites the file, t4 observation): explained correctly — replacement at t2, divergence at t3,
+BuildLens sees only the state at the moment it looked.
+
+FRESH UNAIDED RETRIEVAL (config.py, DEBUG = True/False):
+
+```text
+.  yes 
+someone went in and edited it
+```
+
+PASS. The claim's existence establishes the replacement happened; the verdict describes the file
+later. Widened: the later writer need not be a person (a formatter, a script, git checkout, or Claude
+through Bash).
+
+### EV-P8-INSPECTION-TRANSFER-439
+
+Contractor/inspector surface. Field 1 PASS (blue tile present, cracked tile gone). Field 2 was a
+FACILITATOR PROMPT-DESIGN ERROR — a tile has no containment case; the sign example
+("OPEN" -> "OPEN LATE") was offered instead. Field 3 (what a passing check does not establish) drew
+"ok this is a nitpick i understan the concept lets move on"; request HONOURED, since the learner had
+already supplied that exact limit unprompted in 438.
+
+MILESTONE EV-P8-COMPARE-EDIT-432 / EV-P8-COMPARE-TOOL-NAME-436 COMPLETE:
+
+```text
+implementation       complete    automated tests   complete (34, red first)
+learner trace        433, 437    explanation       438
+transfer             439 (partial by agreement; the key limit was already held in 438)
+```
+
+## EV-P8-COMPLETEFLOW-440 — end-to-end coordinator
+
+DESIGN DECISIONS (all the learner's, across the specification):
+
+```text
+module        a NEW module — neither existing module should gain an "and" in its responsibility;
+              named completeflow.py by the learner after review.py / verify_claim.py were offered
+function      start_flow(payload)
+Bash payload  return None, for the adapter's own reason: a Bash command names no file to observe
+root          resolved from the file's PARENT DIRECTORY (a child process starts in a directory;
+              demonstrated live that cwd=<a file> raises NotADirectoryError)
+root failure  CAUGHT, not raised — both GitCaptureError and OSError. The learner first chose to
+              raise, then reversed it against their own 419 rule when shown a batch of three claims
+              in three folders: a deleted folder is a fact about ONE claim's file, so the other
+              claims keep their verdicts
+return        a RECORD, not a bare verdict — chosen when shown that a bare verdict makes the root
+              wiring invisible and untestable. "although ti is for labeling recording that it is
+              not there could be useful later"
+record        CompleteCompare(claim, observed, verdict) — holds all three because this is the only
+              place all three exist at once, and nothing persists yet
+```
+
+TEST ROWS: 7, approved by the learner.
+
+RED (verbatim): `ModuleNotFoundError: No module named 'completeflow'`
+
+GREEN: test_completeflow.py "test passed"; full suite green across ELEVEN files.
+
+The observation boundary is now joined end to end for the first time: payload -> claim -> observation
+-> verdict. Nothing calls start_flow yet; the CLI is the next slice.
+
+### EV-P8-COMPLETEFLOW-TRACE-441 — start_flow trace gate, PARTIAL, still OPEN
+
+PROMPT (exact): the landed _repository_root_for / start_flow, with a Write payload for
+C:/proj/gone/app.py, content "hello\n", the folder "gone" deleted after the write. Fields: which
+except clause runs and why; observed.status and observed.repository_relative_path; the verdict.
+
+LEARNER ANSWER (verbatim):
+
+```text
+. if it is there then it returns the repo root if not it catches the error and returns none
+no idea 
+yes
+```
+
+Field 1 gave the general rule rather than THIS case; field 2 "no idea"; field 3 not an answer.
+Fatigue was visible near the end of a long session, so the gate was narrowed to a single field
+already held (EV-P8-OBSERVER-TRACE-373, EV-P8-RELATIVE-PATH-GATE-389):
+
+```text
+. it is a write claim with absent
+```
+
+PASS on that field: ABSENT, and for a Write claim the verdict is FILE_ABSENT.
+
+STILL OWED next session, not to be treated as passed:
+- which except clause runs in _repository_root_for for a DELETED FOLDER (OSError, because Git never
+  starts: the directory does not exist — GitCaptureError would mean Git ran and reported no
+  repository);
+- observed.repository_relative_path for that case (None).

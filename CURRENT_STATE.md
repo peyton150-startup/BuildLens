@@ -4034,7 +4034,41 @@ raises by the 419 rule.
 The learner audited the proposed dispatcher test rows and caught two real problems (an asymmetric
 row, and that rows 1-8 duplicate existing per-function tests) — recorded in 435. All nine kept.
 
-Gates: compare_edit trace CLOSED (433). Dispatcher gate still owed, plus the explanation and transfer
-for this pair of patches if the milestone is to close as 421 did.
+Gates ALL CLOSED for this pair: traces 433 and 437, explanation 438, transfer 439 (field 3 waived by
+the learner, having already been supplied unprompted in 438). Committed as 6717fd5.
 
-Exact restart point: run the dispatcher gate. compare.py and test_compare.py have uncommitted changes.
+Watch item from 438: the idea that "no replacement may have happened" recurred three times (428
+follow-up, 431, 438). It needed a worked-example rescue and then passed fresh and unaided. The rule
+now held: a claim exists only for a call that succeeded, so the replacement DID happen; a
+CLAIM_DOES_NOT_HOLD verdict describes the file at the moment it was read, not the tool's action.
+
+### completeflow.py LANDED — EV-P8-COMPLETEFLOW-440
+
+The learner chose option B (wire the root through), and a finding redirected it: NOTHING called
+observe_file, so there was no caller to wire. They switched to A, the end-to-end coordinator, which
+contains the root wiring.
+
+```text
+completeflow.py   CompleteCompare(claim, observed, verdict)  — frozen dataclass
+                  _repository_root_for(file_path) -> str | None
+                      asks Git from the file's PARENT DIRECTORY; catches GitCaptureError (no
+                      repository) and OSError (Git never started, e.g. the folder is gone)
+                  start_flow(payload) -> CompleteCompare | None
+                      parse -> resolve root -> observe -> compare_tool_name; None for a Bash payload
+test_completeflow.py   7 tests, rows approved before writing, red first; real files and a real Git child
+```
+
+Full suite green across ELEVEN files. The observation boundary is joined end to end for the first
+time. Nothing calls start_flow yet.
+
+Gate PARTIAL and still OPEN (EV-P8-COMPLETEFLOW-441): the learner retrieved ABSENT / FILE_ABSENT for
+a deleted folder, but not which except clause runs there, nor that repository_relative_path is None.
+Both are owed next session and must not be treated as passed. The distinction to rebuild: OSError
+means Git never started (the directory is gone); GitCaptureError means Git ran and reported no
+repository.
+
+Also still owed for this milestone: the learner explanation and a transfer variant.
+
+Exact restart point: finish the start_flow gate (the two fields above), then the explanation and
+transfer. After that: the CLI slice reaching start_flow, the remaining record fields
+(session/worktree id, base commit/blob, provenance), or the Stop reconciliation scan.
