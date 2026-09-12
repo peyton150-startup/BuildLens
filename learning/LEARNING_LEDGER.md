@@ -47606,3 +47606,35 @@ CODE LANDED: reconcile.py (ChangeKind, Picture, UnclaimedChange, reconcile), tes
 rows, 1-6 approved before writing). Twelve suites green. Commits 507ef5c, f178413, afd57e9.
 
 GATE: trace PASSED. Explanation and transfer OWED.
+
+### EV-P8-RECONCILE-455 — explanation and transfer
+
+EXPLANATION.
+
+```text
+no provenance   "the pictures cannot prove any provance they only prove which file was changed that
+                is all" — correct, and the general form was added: a DEFAULTED field is
+                indistinguishable later from an EVIDENCE-BACKED one, so the default destroys the
+                reader's ability to tell what was known
+claimed guard   "we would be holding 2 values that may or may not match" — the consequence named
+                unaided. Needed the prompt to name CompleteCompare as the record that already covers
+                a claimed path, and the asymmetry was then supplied: CompleteCompare carries a
+                verdict and evidence-backed provenance, so a duplicate scan record would restate the
+                same event with less information and nothing to arbitrate a disagreement
+```
+
+TRANSFER — a warehouse night count against a system of scanned movements.
+
+```text
+B7 discrepancy   "it records that there are 15 units less than recorded at the last account and not
+                 that the units are missing" — the no-provenance principle, unaided, first try
+two moments      first answered with the two VALUES; on being asked what a March reader cannot judge:
+                 "the 55 could have then been after the 40 which makes no sense" — ordering. The
+                 SPAN argument was supplied (a 15-unit gap overnight versus over six months)
+C2 unknown shelf CREATED named immediately; then said both counts were absent and self-corrected
+                 when reminded the robot physically counted it. expected_count = None
+0 versus None    "because 0 would imply that is was supposed to be empty instead of there was no
+                 expectation for this c2" — the full distinction, in a domain with no Git in it
+```
+
+GATE CLOSED for EV-P8-RECONCILE-455: trace, explanation and transfer all passed.

@@ -4276,3 +4276,17 @@ why the loop walks the UNION: deletions exist only in the baseline
 ```
 
 Exact restart point: the explanation and transfer halves of the 455 gate.
+
+### 455 gate closed
+
+Explanation and transfer both passed. The transfer (a warehouse night count versus scanned
+movements) produced the no-provenance rule and the 0-versus-None distinction unaided.
+
+Held cold across three surfaces now: a value that looks like an answer must never stand in for the
+absence of one — `""` versus None, `0` versus None, ABSENT_FROM_HEAD versus NO_COMMITS.
+
+Needed prompting, retrieval due: that CompleteCompare is what already covers a claimed path; the
+SPAN argument for carrying two timestamps rather than one.
+
+Exact restart point: turning a real working tree into a Picture (`git ls-files` plus untracked
+paths), which is the last piece of Phase 8 before persistence.
