@@ -4076,3 +4076,30 @@ id, base commit/blob, provenance), and the Stop reconciliation scan. Cumulative 
 major 1/2, foundation 1/3.
 
 Exact restart point: the learner picks the next Phase 8 step.
+
+## Session close — 2026-09-11 (night)
+
+```text
+phase                     Phase 8, in progress
+landed this session       compare.py (compare_write, compare_edit, compare_tool_name),
+                          completeflow.py (start_flow, CompleteCompare), test_compare.py (34),
+                          test_completeflow.py (7)
+suites                    ELEVEN files, all green
+commits                   9313da0, 55fef2c, 6717fd5, 1c24452, b83b9c3
+milestones closed         421 (compare_write), 432/436 (compare_edit + dispatcher), 440 (completeflow)
+next retrieval due        the GitCaptureError versus OSError distinction; "a claim exists only for a
+                          successful call"; incomparable versus status not accepted
+next architecture reset   not due
+counters                  major 1/2, foundation 1/3 — neither due
+next step                 the learner picks: CLI slice calling start_flow, the remaining record
+                          fields (session/worktree id, base commit/blob, provenance), or the Stop
+                          reconciliation scan
+```
+
+Files the learner should be able to teach: `compare.py` (every decision in it is theirs) and
+`completeflow.py`. Concepts held cold by the end: containment versus equality; a verdict is about the
+claim, not a restatement of the observation; absence is evidence; a label's absence must not cost a
+verdict; faults in the batch driver stop the run while faults confined to one item are recorded.
+
+Still uncertain: which exception a failed Git launch produces; naming discipline (several names were
+chosen on shape rather than on what they produce); confidence tags were omitted on most answers.
