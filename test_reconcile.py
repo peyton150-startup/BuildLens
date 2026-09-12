@@ -14,14 +14,14 @@ from datetime import datetime, timezone
 from reconcile import ChangeKind, Picture, UnclaimedChange, reconcile
 
 BASELINE_TIME = datetime(2026, 9, 12, 9, 0, tzinfo=timezone.utc)
-OBSERVED_TIME = datetime(2026, 9, 12, 15, 0, tzinfo=timezone.utc)
+WITNESS_TIME = datetime(2026, 9, 12, 15, 0, tzinfo=timezone.utc)
 
 
-def scan(baseline_hashes, observed_hashes, claimed_paths=frozenset()):
+def scan(baseline_hashes, witness_hashes, claimed_paths=frozenset()):
     """Reconcile two pictures taken at the suite's two fixed moments."""
     return reconcile(
         Picture(BASELINE_TIME, baseline_hashes),
-        Picture(OBSERVED_TIME, observed_hashes),
+        Picture(WITNESS_TIME, witness_hashes),
         claimed_paths=set(claimed_paths),
     )
 
@@ -42,9 +42,9 @@ def test_changed_and_unclaimed_path_is_reported_as_modified():
             repository_relative_path="notes/plan.md",
             kind=ChangeKind.MODIFIED,
             hash_at_baseline="h1",
-            hash_at_observed="h2",
+            hash_at_witness="h2",
             baseline_time=BASELINE_TIME,
-            observed_time=OBSERVED_TIME,
+            witness_time=WITNESS_TIME,
         )
     ]
 
@@ -65,9 +65,9 @@ def test_path_only_in_the_later_picture_is_created():
             repository_relative_path="new.py",
             kind=ChangeKind.CREATED,
             hash_at_baseline=None,
-            hash_at_observed="h2",
+            hash_at_witness="h2",
             baseline_time=BASELINE_TIME,
-            observed_time=OBSERVED_TIME,
+            witness_time=WITNESS_TIME,
         )
     ]
 
@@ -81,9 +81,9 @@ def test_path_only_in_the_earlier_picture_is_deleted():
             repository_relative_path="gone.py",
             kind=ChangeKind.DELETED,
             hash_at_baseline="h1",
-            hash_at_observed=None,
+            hash_at_witness=None,
             baseline_time=BASELINE_TIME,
-            observed_time=OBSERVED_TIME,
+            witness_time=WITNESS_TIME,
         )
     ]
 

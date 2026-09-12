@@ -66,17 +66,21 @@ class UnclaimedChange:
     repository_relative_path: str
     kind: ChangeKind
     hash_at_baseline: str | None
-    hash_at_observed: str | None
+    hash_at_witness: str | None
     baseline_time: datetime
-    observed_time: datetime
+    witness_time: datetime
 
 
 def reconcile(
     baseline: Picture,
-    observed: Picture,
+    witness: Picture,
     claimed_paths: set[str],
 ) -> list[UnclaimedChange]:
     """Return every change between two pictures that no claim covers.
+
+    The BASELINE is what the tree held when it was last established as known;
+    the WITNESS is what it holds now. Both are observations; the word
+    "observed" is left to file_observer, where it means reading one file.
 
     Each picture maps a repository-relative path to the content hash found at
     the moment it was taken. A path missing from a picture did not exist then.
@@ -90,7 +94,7 @@ def reconcile(
     """
     changes = []
 
-    for path in sorted(baseline.hashes.keys() | observed.hashes.keys()):
+    for path in sorted(baseline.hashes.keys() | witness.hashes.keys()):
         if path in claimed_paths:
             # A claim already accounts for this path, and PostToolUse has
             # already produced a verdict for it. Reporting it again would state
@@ -98,9 +102,9 @@ def reconcile(
             continue
 
         hash_at_baseline = baseline.hashes.get(path)
-        hash_at_observed = observed.hashes.get(path)
+        hash_at_witness = witness.hashes.get(path)
 
-        if hash_at_baseline == hash_at_observed:
+        if hash_at_baseline == hash_at_witness:
             # Identical content. Note what this cannot see: a file changed and
             # then restored between the two pictures is indistinguishable from
             # one never touched, in either direction.
@@ -108,7 +112,7 @@ def reconcile(
 
         if hash_at_baseline is None:
             kind = ChangeKind.CREATED
-        elif hash_at_observed is None:
+        elif hash_at_witness is None:
             kind = ChangeKind.DELETED
         else:
             kind = ChangeKind.MODIFIED
@@ -118,9 +122,9 @@ def reconcile(
                 repository_relative_path=path,
                 kind=kind,
                 hash_at_baseline=hash_at_baseline,
-                hash_at_observed=hash_at_observed,
+                hash_at_witness=hash_at_witness,
                 baseline_time=baseline.taken_at,
-                observed_time=observed.taken_at,
+                witness_time=witness.taken_at,
             )
         )
 
