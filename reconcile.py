@@ -48,6 +48,10 @@ class Picture:
 
     taken_at: datetime
     hashes: dict[str, str]
+    # Present but not readable. Kept apart from hashes so its type stays honest:
+    # every value in hashes is a real fingerprint, and a caller looping over it
+    # cannot mistake a stand-in for one.
+    unreadable: frozenset[str] = frozenset()
 
 
 @dataclass(frozen=True)
@@ -71,11 +75,43 @@ class UnclaimedChange:
     witness_time: datetime
 
 
+@dataclass(frozen=True)
+class UndeterminedPath:
+    """Hold one path whose change, if any, could not be established.
+
+    This is not a finding about the tree; it is a finding about the scan's own
+    reach. Reporting it as DELETED would assert the file is gone, and reporting
+    nothing would assert the scan looked everywhere it claims to look.
+
+    Which side failed is kept, because "unreadable now" and "unreadable then"
+    lead a reader to different places.
+    """
+
+    repository_relative_path: str
+    unreadable_at_baseline: bool
+    unreadable_at_witness: bool
+    baseline_time: datetime
+    witness_time: datetime
+
+
+@dataclass(frozen=True)
+class ScanResult:
+    """Hold what one scan established, and what it could not establish.
+
+    Two lists rather than one: anything that counts or displays changes gets a
+    truthful count without having to know to filter, and a reader who wants the
+    gaps asks for them.
+    """
+
+    changes: list[UnclaimedChange]
+    undetermined: list[UndeterminedPath]
+
+
 def reconcile(
     baseline: Picture,
     witness: Picture,
     claimed_paths: set[str],
-) -> list[UnclaimedChange]:
+) -> ScanResult:
     """Return every change between two pictures that no claim covers.
 
     The BASELINE is what the tree held when it was last established as known;
@@ -93,12 +129,38 @@ def reconcile(
     about the repository.
     """
     changes = []
+    undetermined = []
 
-    for path in sorted(baseline.hashes.keys() | witness.hashes.keys()):
+    every_path = (
+        baseline.hashes.keys()
+        | witness.hashes.keys()
+        | baseline.unreadable
+        | witness.unreadable
+    )
+
+    for path in sorted(every_path):
         if path in claimed_paths:
             # A claim already accounts for this path, and PostToolUse has
             # already produced a verdict for it. Reporting it again would state
             # the same change twice under two different names.
+            continue
+
+        unreadable_at_baseline = path in baseline.unreadable
+        unreadable_at_witness = path in witness.unreadable
+
+        if unreadable_at_baseline or unreadable_at_witness:
+            # One side is unknown, so no comparison is possible. Falling through
+            # would read the missing hash as None and call the path CREATED or
+            # DELETED, which states as fact something never observed.
+            undetermined.append(
+                UndeterminedPath(
+                    repository_relative_path=path,
+                    unreadable_at_baseline=unreadable_at_baseline,
+                    unreadable_at_witness=unreadable_at_witness,
+                    baseline_time=baseline.taken_at,
+                    witness_time=witness.taken_at,
+                )
+            )
             continue
 
         hash_at_baseline = baseline.hashes.get(path)
@@ -128,4 +190,4 @@ def reconcile(
             )
         )
 
-    return changes
+    return ScanResult(changes=changes, undetermined=undetermined)

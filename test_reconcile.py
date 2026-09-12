@@ -11,17 +11,29 @@ verdict for a claim whose file is absent.
 
 from datetime import datetime, timezone
 
-from reconcile import ChangeKind, Picture, UnclaimedChange, reconcile
+from reconcile import (
+    ChangeKind,
+    Picture,
+    UnclaimedChange,
+    UndeterminedPath,
+    reconcile,
+)
 
 BASELINE_TIME = datetime(2026, 9, 12, 9, 0, tzinfo=timezone.utc)
 WITNESS_TIME = datetime(2026, 9, 12, 15, 0, tzinfo=timezone.utc)
 
 
-def scan(baseline_hashes, witness_hashes, claimed_paths=frozenset()):
+def scan(
+    baseline_hashes,
+    witness_hashes,
+    claimed_paths=frozenset(),
+    unreadable_at_baseline=frozenset(),
+    unreadable_at_witness=frozenset(),
+):
     """Reconcile two pictures taken at the suite's two fixed moments."""
     return reconcile(
-        Picture(BASELINE_TIME, baseline_hashes),
-        Picture(WITNESS_TIME, witness_hashes),
+        Picture(BASELINE_TIME, baseline_hashes, frozenset(unreadable_at_baseline)),
+        Picture(WITNESS_TIME, witness_hashes, frozenset(unreadable_at_witness)),
         claimed_paths=set(claimed_paths),
     )
 
@@ -30,14 +42,14 @@ def test_unchanged_path_is_not_reported():
     """A path whose hash is identical in both pictures changed nothing."""
     result = scan({"a.py": "h1"}, {"a.py": "h1"}, claimed_paths=set())
 
-    assert result == []
+    assert result.changes == []
 
 
 def test_changed_and_unclaimed_path_is_reported_as_modified():
     """The motivating case: a shell edit no claim accounts for."""
     result = scan({"notes/plan.md": "h1"}, {"notes/plan.md": "h2"}, claimed_paths=set())
 
-    assert result == [
+    assert result.changes == [
         UnclaimedChange(
             repository_relative_path="notes/plan.md",
             kind=ChangeKind.MODIFIED,
@@ -53,14 +65,14 @@ def test_changed_but_claimed_path_is_not_reported():
     """A claim already accounts for the change, so the scan stays silent."""
     result = scan({"a.py": "h1"}, {"a.py": "h2"}, claimed_paths={"a.py"})
 
-    assert result == []
+    assert result.changes == []
 
 
 def test_path_only_in_the_later_picture_is_created():
     """No entry at session start means the file did not exist then."""
     result = scan({}, {"new.py": "h2"}, claimed_paths=set())
 
-    assert result == [
+    assert result.changes == [
         UnclaimedChange(
             repository_relative_path="new.py",
             kind=ChangeKind.CREATED,
@@ -76,7 +88,7 @@ def test_path_only_in_the_earlier_picture_is_deleted():
     """The absent side stays absent rather than being filled with a stand-in."""
     result = scan({"gone.py": "h1"}, {}, claimed_paths=set())
 
-    assert result == [
+    assert result.changes == [
         UnclaimedChange(
             repository_relative_path="gone.py",
             kind=ChangeKind.DELETED,
@@ -90,14 +102,14 @@ def test_path_only_in_the_earlier_picture_is_deleted():
 
 def test_two_empty_pictures_report_nothing():
     """Nothing observed twice establishes nothing to reconcile."""
-    assert scan({}, {}, claimed_paths=set()) == []
+    assert scan({}, {}, claimed_paths=set()).changes == []
 
 
 def test_every_kind_is_reported_in_one_scan_in_path_order():
     """One scan reports each independent finding; order is stable for a reader."""
     result = scan({"gone.py": "h1", "same.py": "h1", "touched.py": "h1"}, {"same.py": "h1", "touched.py": "h2", "new.py": "h9"}, claimed_paths=set())
 
-    assert [(change.repository_relative_path, change.kind) for change in result] == [
+    assert [(change.repository_relative_path, change.kind) for change in result.changes] == [
         ("gone.py", ChangeKind.DELETED),
         ("new.py", ChangeKind.CREATED),
         ("touched.py", ChangeKind.MODIFIED),
@@ -108,7 +120,73 @@ def test_a_claim_does_not_silence_a_different_path():
     """Claims are matched per path, not taken as blanket coverage."""
     result = scan({"a.py": "h1", "b.py": "h1"}, {"a.py": "h2", "b.py": "h2"}, claimed_paths={"a.py"})
 
-    assert [change.repository_relative_path for change in result] == ["b.py"]
+    assert [change.repository_relative_path for change in result.changes] == ["b.py"]
+
+
+def test_a_path_unreadable_now_is_undetermined_rather_than_deleted():
+    """The failure that motivated the split: an unread file is not a gone file."""
+    result = scan({"plan.md": "h1"}, {}, unreadable_at_witness={"plan.md"})
+
+    assert result.changes == []
+    assert result.undetermined == [
+        UndeterminedPath(
+            repository_relative_path="plan.md",
+            unreadable_at_baseline=False,
+            unreadable_at_witness=True,
+            baseline_time=BASELINE_TIME,
+            witness_time=WITNESS_TIME,
+        )
+    ]
+
+
+def test_a_path_unreadable_at_the_baseline_is_undetermined_rather_than_created():
+    """The mirror case: no baseline hash does not establish that it was absent."""
+    result = scan({}, {"plan.md": "h2"}, unreadable_at_baseline={"plan.md"})
+
+    assert result.changes == []
+    assert [found.repository_relative_path for found in result.undetermined] == ["plan.md"]
+    assert result.undetermined[0].unreadable_at_baseline is True
+    assert result.undetermined[0].unreadable_at_witness is False
+
+
+def test_a_path_unreadable_in_both_pictures_is_undetermined_not_unchanged():
+    """Two failed reads say nothing about whether the content is the same."""
+    result = scan(
+        {}, {},
+        unreadable_at_baseline={"secret.key"},
+        unreadable_at_witness={"secret.key"},
+    )
+
+    assert result.changes == []
+    assert result.undetermined[0].unreadable_at_baseline is True
+    assert result.undetermined[0].unreadable_at_witness is True
+
+
+def test_a_claimed_path_that_is_unreadable_is_not_reported_at_all():
+    """PostToolUse already recorded what it could about a claimed file."""
+    result = scan(
+        {"a.py": "h1"}, {},
+        claimed_paths={"a.py"},
+        unreadable_at_witness={"a.py"},
+    )
+
+    assert result.changes == []
+    assert result.undetermined == []
+
+
+def test_claims_in_the_wrong_path_spelling_stop_matching():
+    """A claim spelled absolutely never matches a repository-relative picture key.
+
+    Nothing raises: the guard simply never fires, and every file Claude edited
+    legitimately is reported as though nothing had accounted for it.
+    """
+    result = scan(
+        {"notes/plan.md": "h1"},
+        {"notes/plan.md": "h2"},
+        claimed_paths={r"C:\\repo\\notes\\plan.md"},
+    )
+
+    assert [change.repository_relative_path for change in result.changes] == ["notes/plan.md"]
 
 
 test_unchanged_path_is_not_reported()
@@ -119,4 +197,9 @@ test_path_only_in_the_earlier_picture_is_deleted()
 test_two_empty_pictures_report_nothing()
 test_every_kind_is_reported_in_one_scan_in_path_order()
 test_a_claim_does_not_silence_a_different_path()
+test_a_path_unreadable_now_is_undetermined_rather_than_deleted()
+test_a_path_unreadable_at_the_baseline_is_undetermined_rather_than_created()
+test_a_path_unreadable_in_both_pictures_is_undetermined_not_unchanged()
+test_a_claimed_path_that_is_unreadable_is_not_reported_at_all()
+test_claims_in_the_wrong_path_spelling_stop_matching()
 print("test passed")
