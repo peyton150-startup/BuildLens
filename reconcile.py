@@ -37,6 +37,20 @@ class ChangeKind(Enum):
 
 
 @dataclass(frozen=True)
+class Picture:
+    """Hold what one look at a tree found, and when that look happened.
+
+    The moment belongs to the picture rather than to whoever reads it later.
+    A caller that inferred the moment from something else — "the session started
+    at 9, so the baseline is from 9" — would be silently wrong the first time a
+    baseline is re-taken mid-session.
+    """
+
+    taken_at: datetime
+    hashes: dict[str, str]
+
+
+@dataclass(frozen=True)
 class UnclaimedChange:
     """Hold one change the tree shows and no claim accounts for.
 
@@ -51,21 +65,24 @@ class UnclaimedChange:
 
     repository_relative_path: str
     kind: ChangeKind
-    hash_at_start: str | None
-    hash_at_stop: str | None
-    observed_at: datetime
+    hash_at_baseline: str | None
+    hash_at_observed: str | None
+    baseline_time: datetime
+    observed_time: datetime
 
 
 def reconcile(
-    picture_at_start: dict[str, str],
-    picture_at_stop: dict[str, str],
+    baseline: Picture,
+    observed: Picture,
     claimed_paths: set[str],
-    observed_at: datetime,
 ) -> list[UnclaimedChange]:
     """Return every change between two pictures that no claim covers.
 
-    Each picture maps a repository-relative path to the content hash observed at
-    that moment. A path missing from a picture did not exist when it was taken.
+    Each picture maps a repository-relative path to the content hash found at
+    the moment it was taken. A path missing from a picture did not exist then.
+
+    Both moments travel onto every record, so a later reader can see the span a
+    finding covers instead of having to assume one.
 
     Paths are walked in sorted order so one scan reads the same way twice; the
     dicts' own order reflects when files were encountered, which is not a fact
@@ -73,25 +90,25 @@ def reconcile(
     """
     changes = []
 
-    for path in sorted(picture_at_start.keys() | picture_at_stop.keys()):
+    for path in sorted(baseline.hashes.keys() | observed.hashes.keys()):
         if path in claimed_paths:
             # A claim already accounts for this path, and PostToolUse has
             # already produced a verdict for it. Reporting it again would state
             # the same change twice under two different names.
             continue
 
-        hash_at_start = picture_at_start.get(path)
-        hash_at_stop = picture_at_stop.get(path)
+        hash_at_baseline = baseline.hashes.get(path)
+        hash_at_observed = observed.hashes.get(path)
 
-        if hash_at_start == hash_at_stop:
+        if hash_at_baseline == hash_at_observed:
             # Identical content. Note what this cannot see: a file changed and
             # then restored between the two pictures is indistinguishable from
             # one never touched, in either direction.
             continue
 
-        if hash_at_start is None:
+        if hash_at_baseline is None:
             kind = ChangeKind.CREATED
-        elif hash_at_stop is None:
+        elif hash_at_observed is None:
             kind = ChangeKind.DELETED
         else:
             kind = ChangeKind.MODIFIED
@@ -100,9 +117,10 @@ def reconcile(
             UnclaimedChange(
                 repository_relative_path=path,
                 kind=kind,
-                hash_at_start=hash_at_start,
-                hash_at_stop=hash_at_stop,
-                observed_at=observed_at,
+                hash_at_baseline=hash_at_baseline,
+                hash_at_observed=hash_at_observed,
+                baseline_time=baseline.taken_at,
+                observed_time=observed.taken_at,
             )
         )
 
