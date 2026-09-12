@@ -4311,3 +4311,57 @@ Exact restart point: take_picture(repository) -> Picture, from a real working tr
 tracked plus untracked-non-ignored paths, ignored paths EXCLUDED (signal-to-noise; .claude-flow alone
 is 83 files). Reversal condition: watch specific ignored paths by explicit allowlist if the
 application actually reads one. Unreadable paths go in Picture.unreadable.
+
+## Session close — 2026-09-12
+
+```text
+phase                     Phase 8, one implementation item left
+code that exists          reconcile.py (ChangeKind, Picture, UnclaimedChange, UndeterminedPath,
+                          ScanResult, reconcile) and test_reconcile.py (13 rows), on top of
+                          claude_adapter / file_observer / git_adapter / compare / completeflow /
+                          snapshot / summarize / classify / session / cli
+execution path            PostToolUse payload -> claude_adapter -> git_adapter (root, base version)
+                          -> file_observer -> compare -> CompleteCompare, surfaced by `buildlens
+                          ingest`. reconcile() is built but NOT yet wired to any hook: no caller
+                          produces a Picture from a real tree
+gates closed              454 (base version), 455 (reconciliation), 456 (undetermined paths)
+commits                   507ef5c f178413 afd57e9 7dca7de + 4b0df5d b33102b 43bf187 173fbbc
+suites                    thirteen, all green
+```
+
+Known cold — five surfaces this session, three of them with no BuildLens code in them:
+
+```text
+a value that looks like an answer must never stand for the absence of one
+    "" vs None, 0 vs None, ABSENT_FROM_HEAD vs NO_COMMITS, omitted-path vs unreadable-path
+a record must assert only what was established; a defaulted field is indistinguishable later
+    from an evidence-backed one
+one ambiguous signal forces the ORDER of two questions
+the past is recoverable only if someone recorded it at the time
+```
+
+Uncertain, retrieval due:
+
+```text
+set `|` union vs `&` intersection — intersection needed element-by-element checking
+the REASON for call ordering: recalled as "it saves a call" twice before the ambiguity argument
+    was recovered, in two different domains
+that CompleteCompare is the record already covering a claimed path
+the SPAN argument for carrying two timestamps rather than one
+HEAD:<path> reads committed bytes, never the working copy (self-corrected once)
+```
+
+```text
+last knowledge gate        EV-P8-UNDETERMINED-456, closed
+next retrieval due         the five items above, on new surfaces
+next architecture reset    not due
+counters                   major 1/2, foundation 1/3 — neither due
+next implementation step   take_picture(repository) -> Picture
+```
+
+Files the learner should be able to teach: `reconcile.py` end to end (every decision in it is theirs),
+`compare.py`, `completeflow.py`.
+
+Open question for next session, already posed: `git ls-files` lists a tracked file even after it has
+been deleted from disk, so what does the picture do with a path Git lists but observe_file reports
+ABSENT?
