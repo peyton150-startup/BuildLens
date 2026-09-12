@@ -21,6 +21,7 @@ from claude_adapter import ClaimedEdit
 from cli import format_local_time, format_summary, main
 from compare import ComparisonVerdict
 from completeflow import CompleteCompare, Provenance
+from git_adapter import BaseVersion, BaseVersionStatus
 from file_observer import ObservationStatus, ObservedFile
 from git_adapter import GitCaptureError
 from snapshot import Snapshot
@@ -197,6 +198,7 @@ def ingest_record(verdict):
         observed=INGEST_OBSERVED,
         verdict=verdict,
         provenance=Provenance.CLAUDE,
+        base_version=BaseVersion(BaseVersionStatus.COMMITTED, "a" * 40, "b" * 40),
     )
 
 

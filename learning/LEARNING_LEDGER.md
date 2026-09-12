@@ -47385,3 +47385,64 @@ reported it: tool_input is what the tool was called with, cwd is what the sessio
 itself, which is why mixing them would blur "the tool didn't say" with "the session didn't say".
 
 GATE CLOSED for EV-P8-RECORD-FIELDS-A-452.
+
+## EV-P8-BASE-VERSION-454 — patch B, the base version
+
+DESIGN (all the learner's):
+
+```text
+states        BaseVersionStatus: COMMITTED / ABSENT_FROM_HEAD / NO_COMMITS / UNAVAILABLE.
+              UNAVAILABLE chosen over UNKNOWN with the learner's reason: "it is not that it is
+              unknown it is that we cannot get to git" — the UNREADABLE distinction again
+record        BaseVersion(status, commit, blob, detail=None), returned by git_adapter. This REVERSES
+              the Phase 7 plain-text decision, and the learner confirmed their own reversal condition
+              was met: the caller needs three values, not one string
+detail        added because the learner asked whether the failure would still be recordable once
+              persistence exists — Git's own message is kept so a later reader learns WHY
+who           CALLER: the adapter returns the three real states and raises on unexpected trouble;
+              completeflow maps a raise (or no repository at all) to UNAVAILABLE
+```
+
+PREDICTION (verbatim), before any Git was run:
+
+```text
+. shouldn't all of them be retunr 0 becasue the repo exsits but there are no commits to be seen by head
+```
+
+Two of three MISSED, and the misses are the substance of the patch:
+
+```text
+git rev-parse HEAD        (repo with commits)   exit 0
+git rev-parse HEAD:new.py (never committed)     exit 128  "exists on disk, but not in 'HEAD'"
+git rev-parse HEAD        (no commits at all)   exit 128  "ambiguous argument 'HEAD'"
+```
+
+Git reports two ordinary situations as failures — the same lesson as `diff --no-index` status 1.
+
+ORDERING: the learner could not derive it at first ("no idea"), then read it off a two-by-two table
+of the four runs: the file-level 128 is identical in both rows, so `rev-parse HEAD` must be asked
+first. They named a 128 from the file call as "the file you stated has no commits" =
+ABSENT_FROM_HEAD.
+
+RED (verbatim): `ImportError: cannot import name 'BaseVersionStatus' from 'git_adapter'` and
+`AttributeError: module 'git_adapter' has no attribute 'capture_base_version'`.
+
+A REAL DEFECT was caught by row 2 before the patch could be committed: plain `rev-parse` exits 128
+for a missing revision but STILL ECHOES its argument on stdout, so the first implementation recorded
+blob="HEAD:brand_new.txt" and called it COMMITTED. The facilitator's "empty stdout means missing"
+assumption was wrong. Fixed with `rev-parse --verify --quiet`, verified across all four situations:
+id and exit 0, or nothing and exit 1.
+
+GREEN: all eleven suites. 7 rows, approved before writing.
+
+CODE LANDED:
+
+```text
+git_adapter.py    BaseVersionStatus, BaseVersion, _capture_optional (accepts status 1),
+                  capture_base_version(repository, relative_path) — HEAD first, then HEAD:<path>
+completeflow.py   _base_version_for(root, relative_path); CompleteCompare.base_version;
+                  no Git is asked at all when the file is in no repository
+```
+
+GATE OWED: a learner trace of the two Git calls in each of the four situations, plus explanation and
+transfer.

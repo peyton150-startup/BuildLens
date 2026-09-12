@@ -1,6 +1,8 @@
 """Capture validated Git snapshot components without leaking Git into the core."""
 
 import subprocess
+from dataclasses import dataclass
+from enum import Enum
 from pathlib import Path
 
 
@@ -54,6 +56,71 @@ def _capture(
         raise GitCaptureError(
             label + ": Git output was not valid UTF-8 text"
         ) from None
+
+
+class BaseVersionStatus(Enum):
+    """What Git could say about the committed version a change was based on."""
+
+    COMMITTED = "committed"
+    ABSENT_FROM_HEAD = "absent from head"
+    NO_COMMITS = "no commits"
+    # Produced by the caller, not here: this function raises and lets the caller
+    # decide, because only the caller knows there was no repository to ask about.
+    UNAVAILABLE = "unavailable"
+
+
+@dataclass(frozen=True)
+class BaseVersion:
+    """Hold the commit and blob a change was based on, and which case applied.
+
+    detail carries Git's own message when the base version could not be read, so
+    a later reader is told WHY it is missing and not only that it is.
+    """
+
+    status: BaseVersionStatus
+    commit: str | None
+    blob: str | None
+    detail: str | None = None
+
+
+def _capture_optional(repository: Path, args: list[str], label: str) -> str | None:
+    """Return one revision id, or None when Git says there is no such revision.
+
+    Both "this repository has no commits" and "this path is not in HEAD" are
+    ordinary situations rather than faults, so a nonzero status is accepted here
+    and turned into None — the same shape as `diff --no-index`, where status 1
+    means "the files differ".
+
+    --verify --quiet is what makes the answer readable: plain `rev-parse` exits
+    128 for a missing revision but still ECHOES the argument on stdout, so
+    "HEAD:new.py" would be mistaken for an id. With these flags Git prints the id
+    and exits 0, or prints nothing and exits 1.
+    """
+    output = _capture(
+        repository,
+        ["rev-parse", "--verify", "--quiet"] + args,
+        label,
+        accepted_statuses=(0, 1),
+    ).strip()
+
+    return output or None
+
+
+def capture_base_version(repository: Path, relative_path: str) -> BaseVersion:
+    """Return the committed version one file's change was based on.
+
+    Asks about HEAD first: without a commit, no question about the file can be
+    answered, and a 128 from the file alone cannot tell the two cases apart.
+    """
+    commit = _capture_optional(repository, ["HEAD"], "BASE commit")
+    if commit is None:
+        return BaseVersion(BaseVersionStatus.NO_COMMITS, None, None)
+
+    blob = _capture_optional(repository, ["HEAD:" + relative_path], "BASE blob")
+    if blob is None:
+        return BaseVersion(BaseVersionStatus.ABSENT_FROM_HEAD, commit, None)
+
+    return BaseVersion(BaseVersionStatus.COMMITTED, commit, blob)
 
 
 def _diff_args(extra: list[str]) -> list[str]:

@@ -191,4 +191,59 @@ test_new_file_diff_presents_an_untracked_file_as_added_content()
 test_new_file_diff_of_an_empty_file_has_a_header_and_no_hunk()
 test_repository_root_is_the_repository_directory_itself()
 test_repository_root_reveals_an_ancestor_when_git_searches_upward()
+
+def test_a_committed_file_has_both_a_commit_and_a_blob():
+    from git_adapter import BaseVersionStatus, capture_base_version
+
+    with temporary_directory() as directory:
+        repository = new_repository(directory)
+
+        base = capture_base_version(repository, "tracked.txt")
+
+    assert base.status is BaseVersionStatus.COMMITTED
+    assert len(base.commit) == 40
+    assert len(base.blob) == 40
+
+
+def test_a_file_never_committed_is_absent_from_head():
+    from git_adapter import BaseVersionStatus, capture_base_version
+
+    with temporary_directory() as directory:
+        repository = new_repository(directory)
+        (repository / "brand_new.txt").write_bytes(b"claude just wrote this\n")
+
+        base = capture_base_version(repository, "brand_new.txt")
+
+    assert base.status is BaseVersionStatus.ABSENT_FROM_HEAD
+    assert len(base.commit) == 40
+    assert base.blob is None
+
+
+def test_a_repository_with_no_commits_has_no_base_version():
+    from git_adapter import BaseVersionStatus, capture_base_version
+
+    with temporary_directory() as directory:
+        repository = Path(directory)
+        run_git(repository, ["init", "--quiet", "."])
+        (repository / "first.txt").write_bytes(b"nothing committed yet\n")
+
+        base = capture_base_version(repository, "first.txt")
+
+    assert base.status is BaseVersionStatus.NO_COMMITS
+    assert base.commit is None
+    assert base.blob is None
+
+
+def test_base_version_status_names_the_four_situations():
+    from git_adapter import BaseVersionStatus
+
+    names = {member.name for member in BaseVersionStatus}
+
+    assert names == {"COMMITTED", "ABSENT_FROM_HEAD", "NO_COMMITS", "UNAVAILABLE"}
+
+
+test_a_committed_file_has_both_a_commit_and_a_blob()
+test_a_file_never_committed_is_absent_from_head()
+test_a_repository_with_no_commits_has_no_base_version()
+test_base_version_status_names_the_four_situations()
 print("test passed")

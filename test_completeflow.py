@@ -157,4 +157,44 @@ def test_provenance_names_both_streams_that_will_exist():
 
 test_a_claim_from_a_claude_hook_is_recorded_as_claude_provenance()
 test_provenance_names_both_streams_that_will_exist()
+
+def test_a_file_in_no_repository_gets_an_unavailable_base_version():
+    completeflow = importlib.import_module("completeflow")
+    git_adapter = importlib.import_module("git_adapter")
+
+    calls = []
+
+    def refuse(*args, **kwargs):
+        calls.append(args)
+        raise AssertionError("Git was asked for a base version with no repository root")
+
+    original = git_adapter.capture_base_version
+    git_adapter.capture_base_version = refuse
+    try:
+        with temporary_directory() as directory:
+            path = Path(directory) / "notes.md"
+            path.write_bytes(b"hello\n")
+
+            result = completeflow.start_flow(write_payload(path, "hello\n"))
+    finally:
+        git_adapter.capture_base_version = original
+
+    assert result.base_version.status is git_adapter.BaseVersionStatus.UNAVAILABLE
+    assert result.base_version.detail is not None
+    assert calls == []
+
+
+def test_a_file_in_this_repository_records_its_committed_base_version():
+    completeflow = importlib.import_module("completeflow")
+    git_adapter = importlib.import_module("git_adapter")
+
+    this_file = Path("compare.py").resolve()
+    result = completeflow.start_flow(write_payload(this_file, "not the real content\n"))
+
+    assert result.base_version.status is git_adapter.BaseVersionStatus.COMMITTED
+    assert len(result.base_version.commit) == 40
+
+
+test_a_file_in_no_repository_gets_an_unavailable_base_version()
+test_a_file_in_this_repository_records_its_committed_base_version()
 print("test passed")

@@ -4169,4 +4169,25 @@ ABSENT/UNREADABLE split again). Still to decide in B: the state names and the fo
 (committed / file not committed / repository has no commits / could not ask), where the Git capture
 lives (git_adapter), and how its failures are handled.
 
-Exact restart point: patch B — name the four base-version states, then tests red first.
+### Patch B LANDED — base version (EV-P8-BASE-VERSION-454)
+
+```text
+git_adapter.py    BaseVersionStatus  COMMITTED / ABSENT_FROM_HEAD / NO_COMMITS / UNAVAILABLE
+                  BaseVersion(status, commit, blob, detail=None)
+                  _capture_optional: `rev-parse --verify --quiet`, accepting status 1 as "no such
+                      revision" — plain rev-parse ECHOES its argument on stdout for a missing
+                      revision, which produced a real defect caught by a test before commit
+                  capture_base_version: HEAD first (128/1 -> NO_COMMITS), then HEAD:<path>
+                      (-> COMMITTED or ABSENT_FROM_HEAD); raises on unexpected trouble
+completeflow.py   _base_version_for maps a raise, or no repository at all, to UNAVAILABLE with
+                  Git's message in detail; CompleteCompare.base_version
+```
+
+All eleven suites green. Every plan field for the observed-version record is now present:
+content hash, observed-at, repository-relative path, session id + session_cwd, provenance, base
+commit/blob.
+
+GATE OWED for 454: trace the two Git calls across the four situations; then explanation and transfer.
+The ingest output does NOT show the base version — not asked for, not decided.
+
+Exact restart point: run the 454 gate.
