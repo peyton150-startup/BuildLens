@@ -1,5 +1,7 @@
 # BuildLens — Collaborative Editing Architecture
 
+> **Future feature, deferred beyond Core v0.1 (2026-09-13).** The active release scope in `../IMPLEMENTATION_PLAN.md` includes observation only. Do not implement the editor or its preparatory merge/conflict/stale-save primitives in Phase 9. The contract below applies when managed editing is introduced and must not be weakened into an unsafe shortcut. It is not a claim about existing v0.1 behavior.
+
 ## 1. Non-negotiable product contract
 
 BuildLens must let the learner:

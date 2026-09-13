@@ -1,5 +1,7 @@
 # BuildLens — Reference Projects for Evolving Exercises
 
+Core v0.1 retains this difficulty order for relevant transfer exercises. These repositories are practice domains, not integrations to build or a requirement to inspect all three for each release gate. Choose the smallest relevant source under the existing freshness rules; defer concurrency/editing topics with their features. See the active scope in `../IMPLEMENTATION_PLAN.md`.
+
 ## Purpose
 
 BuildLens should evolve from small synthetic Python exercises into transfer exercises based on real systems.

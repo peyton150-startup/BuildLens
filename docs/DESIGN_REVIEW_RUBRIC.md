@@ -1,5 +1,9 @@
 # BuildLens — Design Review & Oral Defense Rubric
 
+## Core v0.1 application
+
+Use this rubric manually for the release defense. Review implemented observation behavior, evidence boundaries, coverage limits, applicable failures, and an actual design decision. Do not require an implemented interview engine or a defense of unbuilt editing/API/database mechanisms. Mark unimplemented dimensions inapplicable rather than inventing evidence. Existing learning standards remain unchanged; the full future Phase 15 defense remains on the roadmap.
+
 ## Purpose
 
 Berkeley CS162 design reviews explicitly require students to know their own design document, discuss why they made design decisions, and reason about testing/edge cases.

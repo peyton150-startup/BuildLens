@@ -1,5 +1,15 @@
 # BuildLens — Curriculum Map
 
+## Core v0.1 curriculum boundary — 2026-09-13
+
+The active release scope in `IMPLEMENTATION_PLAN.md` controls what is built now. This document retains the full future knowledge sequence; do not treat every strand or academic phase anchor as a release checklist.
+
+Finish Phase 8's outstanding gate and cumulative review, then attach Phase 9 learning only to the actual single-process observation workflow and its failure/coverage decisions. Optimistic manual-save concurrency, three-way merge, transactions, HTTP, frontend state, RAG, and framework topics wait for the deferred features that need them. Existing retrieval obligations remain due.
+
+Phase 10 is an optional single tracing archetype with fresh variants, transfer, and human-reviewed reasoning. If it does not fit, use facilitator-run gates and the existing ledger. Do not claim automated mastery, durable product history, or full Phase 10 completion from this fallback. Static architecture work and a manual release defense concern implemented code; the full Phase 15 curriculum remains future work.
+
+Keep commitment before reveal, adaptive remediation, exact evidence, delayed retrieval, and cumulative-review counters. Narrow feature breadth rather than weakening these learning standards. Preserve original phase numbers and historical answers.
+
 ## Purpose
 
 This document answers:

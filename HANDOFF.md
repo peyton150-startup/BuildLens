@@ -1,5 +1,7 @@
 # BuildLens — Session Handoff
 
+> **Historical handoff — superseded for restart purposes on 2026-09-13.** Read `HANDOFF_NEXT_SESSION.md`, the live `CURRENT_STATE.md`, and the active release scope in `IMPLEMENTATION_PLAN.md`. The original material below is preserved as historical context; its next-step instructions are not current.
+
 Paste the block below into a new session.
 
 ---

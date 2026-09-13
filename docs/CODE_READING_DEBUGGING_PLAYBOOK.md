@@ -1,5 +1,7 @@
 # BuildLens — Code Reading & Debugging Playbook
 
+For Core v0.1, apply this playbook to the implemented Git/Claude observation paths and the planned single-process reconciliation workflow. Review known claimed-path coverage and capture failures before adding infrastructure. Future API, storage, editor, and interview layers are not prerequisites for release; see the active scope in `../IMPLEMENTATION_PLAN.md`.
+
 ## Purpose
 
 Use this whenever you open:

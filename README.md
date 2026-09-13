@@ -10,6 +10,8 @@ The project itself is intentionally built in the same order those ideas should b
 
 ## What BuildLens will let a developer do
 
+**Future roadmap:** the list below describes the full product, not the Core v0.1 release. The [active release scope](IMPLEMENTATION_PLAN.md#active-release-scope--core-v01-approved-2026-09-13) takes precedence for current work.
+
 At the end of the project, BuildLens should let a developer:
 
 1. observe meaningful Claude Code changes in near real time;
@@ -41,9 +43,15 @@ This list matches the End Game in `IMPLEMENTATION_PLAN.md`, which remains the au
 
 ## Current status
 
-**Phase 8 — Claude boundary (specification in progress; no Phase 8 product code yet).**
+**Phase 8 — Claude boundary implemented in substantial part; final learning gate and formal closure still pending.**
 
-Phase 7's Git-backed CLI vertical slice is complete. Phase 8 is defining how Claude Code hook events enter BuildLens, what information can be trusted, and what must be verified against authoritative repository state. `CURRENT_STATE.md` is authoritative for the exact completed code, retrieval commitments, and next step.
+The CLI supports `python cli.py analyze` (staged/unstaged counts) and `python cli.py ingest [payload.json]` (PostToolUse comparison; stdin when omitted). PreToolUse parsing, version metadata, working-tree pictures, and reconciliation also exist as Python code. Reconciliation has no CLI workflow yet; PreToolUse proposals are not routed through `ingest`.
+
+**Core v0.1 target:** finish a single-process baseline -> edits -> witness -> report workflow, then add one tracing archetype only if time permits. Learning gates, transfer, evidence recording, and oral defense can remain facilitator-run. No automatic SessionStart/Stop continuity, durable product history, API, dashboard, collaborative editor, or automated mastery/interview system is included.
+
+Known limits: comparisons establish observed content, not authorship; Edit checks fragments; pictures are not atomic. The current scan skips claimed paths and can miss later changes to them. Its coverage policy must be fixed or explicitly surfaced before release. `CURRENT_STATE.md` is authoritative for implementation status and remaining work.
+
+Verification on 2026-09-13: 12 test scripts passed; `test_cli.py` stopped because the available Python environment lacked `tzdata`. Reproducible Python/Git setup and time-zone test prerequisites remain release work; do not claim the whole suite currently passes in a fresh environment.
 
 The curriculum uses selected CMU and MIT material as an academic backbone while BuildLens implementation continues to determine when each concept is introduced.
 
@@ -63,6 +71,8 @@ predict
 Tests passing are necessary, but not sufficient.
 
 ## What you learn while building BuildLens
+
+The table is the full curriculum. For v0.1, reduce Phase 9 to the supported observation workflow, treat Phase 10 as a narrow optional extension, defer Phases 11–13, and perform architecture/defense work manually on implemented behavior. Deferred topics are not release prerequisites.
 
 The implementation and curriculum advance together. Each phase adds only the software needed to make the next ideas concrete.
 
@@ -105,6 +115,8 @@ See `docs/REFERENCE_PROJECTS.md`.
 
 
 ## Live editing
+
+**Deferred beyond Core v0.1.** The following is the future editing contract, not an existing release capability.
 
 The final BuildLens workspace is intentionally editable.
 

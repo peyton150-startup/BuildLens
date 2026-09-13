@@ -1,5 +1,56 @@
 # BuildLens — Learning-Driven Implementation Plan
 
+## Active release scope — Core v0.1 (approved 2026-09-13)
+
+This section controls the current release. The full end game and phase numbering below remain the future roadmap; they are not all release requirements. Do not renumber phases or mark deferred phases complete.
+
+**Release promise:** inspect a Git repository, check supported Claude reports against observed disk evidence, compare working-tree state within one running process, and support learning through a narrow exercise or facilitator-run gates.
+
+### Delivery order
+
+1. Close Phase 8: review the outstanding PreToolUse/tool-call-ID gate evidence, finish any missing trace/explanation/transfer, and formally close the phase. Do not rebuild the existing parsers. Run the due major cumulative review before significant Phase 9 work.
+2. Complete Phase 9's reduced observation workflow: baseline -> user edits -> witness -> report, with both pictures held in one process. Choose the smallest CLI interaction with the learner; no background service, event framework, queue, or cross-process relay is required.
+3. Only after that workflow is complete, attempt Phase 10's narrow extension: one source-grounded tracing archetype with fresh variants, a transfer variant, and human-reviewed reasoning. Automatically checking a predicted result is allowed; passing a value check alone is not passing a knowledge gate.
+4. Reserve the final working day for reproducible setup, verification, defects, accurate docs, a demo, a static architecture view, and a manual oral defense. Do not spend that reserve on a new framework.
+
+If the narrow learning extension does not fit, ship the observation core with facilitator-run knowledge gates and evidence recorded in the existing learning ledger. Describe that fallback honestly; do not claim an implemented learning engine or completion of Phase 10.
+
+### Keep, reduce, defer
+
+| Capability | Core v0.1 decision |
+|---|---|
+| Git staged/unstaged summaries, including untracked content | Keep existing behavior; summaries are counts, not a diff browser |
+| PostToolUse Write/Edit ingestion and comparison | Keep; findings describe observed content, not proven authorship |
+| PreToolUse parsing and tool-call IDs | Keep existing code; defer approval/denial and pairing infrastructure unless needed by the selected workflow |
+| Hashes, times, paths, session context, base-version metadata | Keep; do not delete tested metadata merely to shorten scope |
+| Pictures and reconciliation | Expose a usable single-process workflow and address coverage/failure cases |
+| Event/state modeling | Only state, ordering, and duplicate policies needed by that workflow; no general event framework |
+| Knowledge gates | One optional tracing archetype; manual reasoning review and manual fallback |
+| Mastery, spaced retrieval, misconceptions | Continue facilitator-run evidence and review; defer automated scoring/scheduling |
+| SQLite and SessionStart/Stop wiring | Defer together; no stopgap file store or durable product history |
+| FastAPI, React, live streaming/SSE | Defer |
+| Collaborative editor, managed dual worktrees, merge/conflict/stale-save machinery | Defer, including Phase 9's future editing primitives |
+| Architecture/interview automation | Defer; use static notes/diagrams and manual defense of implemented behavior |
+| Additional provider adapters, RAG, vector databases, agent frameworks | Out of release scope |
+
+### Required reliability and coverage decisions
+
+- The current `reconcile()` skips any path in `claimed_paths`. A later shell change to an already-claimed file can be hidden. Before claiming complete coverage of net changes within the watched scope, implement and test version-aware accounting against the last observation. If that does not fit, explicitly exclude these paths from the coverage promise and surface the limitation in the report/demo; do not imply that no findings proves no further changes.
+- Preserve the distinction between absent and unreadable, and refuse incomplete Git listings rather than inferring deletions. Keep repository-relative path handling and ensure pictures belong to the same intended working tree.
+- Define the supported input/lifecycle and relevant failure behavior before adding event types. A repeated payload may cause a fresh disk observation; deduplication must not silently erase new evidence. Tool-call identity alone does not prove observation identity.
+- Pictures are sequential reads, not atomic snapshots. Changes restored between pictures are invisible. Edit comparison checks fragments, not exact patch application. `provenance = CLAUDE` labels the report stream, not authorship of all observed bytes.
+- No automatic cross-process session continuity, persistent attempt history, enforced edit blocking, or collaborative-editing guarantee is promised by v0.1.
+
+### Release acceptance
+
+- A fresh environment has documented Python/Git prerequisites and test instructions, including the time-zone data needed by the CLI tests.
+- Existing `analyze` and `ingest` behavior remains tested. The new single-process workflow has a repeatable demo and tests for net changes, claimed-path coverage policy, unreadable paths, invalid inputs, and applicable capture failures.
+- If built, the tracing extension preserves commitment before reveal and supports transfer plus human review; exact formal evidence is recorded by the facilitator in `learning/LEARNING_LEDGER.md`. In-memory product records are not durable history or proof of mastery.
+- Required learner gates and due cumulative reviews are completed and recorded; documentation changes never count as learning evidence.
+- README/current state describe implemented capabilities, known limits, and deferred work accurately. The learner traces the actual runtime and defends a real decision manually.
+
+Time allocations are planning budgets, not guarantees derived from commit timestamps. Release readiness depends on working behavior and learning evidence, not reaching a phase number.
+
 ## 1. End Game
 
 BuildLens is a local learning/control-tower for AI-assisted software development.
@@ -1386,6 +1437,8 @@ Claude can help with exact hook schema implementation after you propose the boun
 
 ## Phase 9 — Event-Driven State and Reliability
 
+**Core v0.1 override:** build only the single-process observation workflow and its required state/failure handling described in the active release scope. The manual-editing version/merge primitives and headless merge proofs below are deferred with Phase 13. Gate events belong only to the optional learning extension if it needs them.
+
 ### High-level idea
 
 A stream of external events creates ordering, duplication, failure, and reconciliation concerns.
@@ -1503,6 +1556,8 @@ Claude should challenge your state design rather than choosing it.
 
 ## Phase 10 — Learning Engine and Knowledge Gates
 
+**Core v0.1 override:** optional after the observation workflow is complete. Start with one source-grounded tracing archetype, fresh primary/transfer variants, deterministic result checking, and human review of reasoning/principle. Automated free-form grading, mastery, scheduling, and the full directory/model structure below are deferred. The facilitator preserves exact evidence in the existing ledger. The manual-learning fallback does not complete this phase.
+
 ### High-level idea
 
 BuildLens now begins enforcing understanding rather than merely collecting changes.
@@ -1590,6 +1645,8 @@ EXAMINER.
 
 ## Phase 11 — Persistence
 
+**Deferred beyond Core v0.1.** This remains the home of durable state and automatic SessionStart/Stop wiring. No stopgap storage is required for the single-process release workflow.
+
 ### High-level idea
 
 Persistence exists because sessions, attempts, mastery, and decisions now need to survive restarts.
@@ -1669,6 +1726,8 @@ REVIEWER.
 ---
 
 ## Phase 12 — Local API
+
+**Deferred beyond Core v0.1.**
 
 ### High-level idea
 
@@ -1751,6 +1810,8 @@ REVIEWER / INTERVIEWER.
 ---
 
 ## Phase 13 — Real-Time Code Workspace and Safe Collaborative Editing
+
+**Deferred beyond Core v0.1, including its preparatory merge/stale-save primitives in Phase 9.** The safety contract remains mandatory if editing is later implemented; v0.1 offers no save, merge, or synchronization API.
 
 ### High-level idea
 
@@ -2131,6 +2192,8 @@ Claude should actively try to find lost-update races and ambiguous ownership.
 
 ## Phase 14 — Architecture Views and Decision Ledger
 
+**Automation deferred beyond Core v0.1.** Release preparation uses a static architecture view and concise decision notes about implemented behavior. The collaborative-editing ADR/defense below waits for that feature; do not require a defense of unbuilt code to release the observation core.
+
 ### High-level idea
 
 Architecture is a set of decisions serving requirements and quality attributes, not a diagram of folders.
@@ -2239,6 +2302,8 @@ HOSTILE REVIEWER.
 ---
 
 ## Phase 15 — Interview / Oral Defense Mode
+
+**Automated mode deferred beyond Core v0.1.** Conduct a manual release defense of the actual observation core and any learning extension. This does not mark the full Phase 15 curriculum complete.
 
 ### High-level idea
 
@@ -2753,6 +2818,8 @@ and a correct explanation of the underlying principle
 
 # 5F. Project Evolution Checkpoints
 
+For Core v0.1, target the reduced Checkpoint C and a manual release defense. A narrow in-memory gate only begins Checkpoint D: it does not satisfy preservation of learning history by the product. Checkpoints E/F and the full D remain roadmap destinations.
+
 Claude should tell the learner what the repository *should feel like* at each checkpoint.
 
 ```text
@@ -2928,6 +2995,8 @@ before treating the choice as understood.
 ---
 
 # 9. Definition of Done for BuildLens
+
+**The active release acceptance above defines Core v0.1 completion.** The following is the full future-product definition and is not a requirement to ship v0.1.
 
 The product is technically complete when it can reliably:
 

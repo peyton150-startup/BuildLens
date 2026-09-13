@@ -8,6 +8,8 @@ The learning goal is that the developer can explain and defend the code and arch
 
 ## Required reading before implementation
 
+For Core v0.1, the active release scope at the top of `IMPLEMENTATION_PLAN.md` controls feature work. The current Claude adapter is the only provider integration in this release; facilitator choice does not require another product adapter. Keep the future roadmap and original phase numbers, but defer editing/merge primitives, persistence, API/UI, and learning/interview automation outside that scope. Manual gates and evidence recording remain valid and mandatory; do not close phases or reset counters because scope was reduced. Use the live `CURRENT_STATE.md`, not archived snapshots or superseded handoffs, to resume work.
+
 Read, in this order:
 
 1. `IMPLEMENTATION_PLAN.md`

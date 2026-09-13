@@ -1,5 +1,13 @@
 # BuildLens — Learning Rules
 
+## Core v0.1 delivery boundary — 2026-09-13
+
+Follow the active release scope in `IMPLEMENTATION_PLAN.md`. These teaching rules remain in force even when their automation is deferred. A facilitator may run gates, review reasoning, record exact attempts in this ledger workflow, track misconceptions, and conduct delayed/cumulative retrieval manually.
+
+The optional product extension supports one source-grounded tracing archetype. An automatically correct value is not a gate pass: fresh transfer and principle explanation still require review. In-memory records are not persistent history, and one success never establishes mastery. Do not implement storage, scheduling, free-form grading, or a broad archetype engine merely to automate this document.
+
+Do not assign new prerequisite lessons for deferred features. Previously due gates and review counters remain due; this scope change does not close a phase or reset a counter. The manual release defense covers built behavior, not the full future Phase 15 feature set.
+
 These rules govern Claude while BuildLens is being built and later govern the knowledge-gate generator.
 
 ## Prime directive

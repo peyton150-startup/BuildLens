@@ -1,5 +1,7 @@
 # HANDOFF — Quiz Session 2 (for Sol / Codex)
 
+> **Historical handoff — superseded for restart purposes on 2026-09-13.** Read `HANDOFF_NEXT_SESSION.md`, the live `CURRENT_STATE.md`, and the active release scope in `IMPLEMENTATION_PLAN.md`. The original material below is preserved as historical context; its next-step instructions are not current.
+
 You are picking up a learning-first project mid-stream. Read `CLAUDE.md` first; it governs
 everything below and it overrides your defaults. `HANDOFF_QUIZ.md` is the previous handoff and is
 now partly stale — this file supersedes it.
