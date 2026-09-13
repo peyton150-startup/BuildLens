@@ -48708,3 +48708,21 @@ DEFERRED, with reason: "why compare is easy to test (hand-built observation valu
 recovered. It is not the gate's target (adapter boundary), the chain had drifted, and the learner has
 been answering cold for a long stretch. Recorded UNCERTAIN; retrieval due in the cumulative review.
 Returned to OWED item 2 (new versus unchanged modules).
+
+### EV-P8-PHASE-GATE-460 — OWED item 2: new versus unchanged modules
+
+FIRST COMMITTED ANSWER, verbatim (module list supplied in the prompt):
+
+```text
+new         "tern adapter"                                                      CORRECT
+unchanged   "file observer, git adapter, working treepicture, reconcile"        CORRECT
+changes / why / what keeps compare unchanged / confidence    not answered
+```
+
+Unclassified: cli, completeflow, compare, claude_adapter. Grading reference (not revealed):
+completeflow.py:102 calls claude_adapter.parse_post_tool_use directly and :121 hard-codes
+provenance=CLAUDE -> changes; cli ingest has a single route into start_flow -> likely changes (a way to
+say which source); compare unchanged only if the Tern adapter emits tool_name "Write"/"Edit" with the
+same details keys; claude_adapter unchanged. Open design wrinkle: ClaimedEdit is defined inside
+claude_adapter.py, so a Tern adapter importing it takes a Claude-named dependency. Re-asked: classify
+the four remaining modules.
