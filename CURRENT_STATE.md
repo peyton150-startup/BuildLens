@@ -66,7 +66,7 @@ The prior learning sessions recorded thirteen test scripts green. The separate 2
 
 Next, in order:
 
-1. Closure audit DONE (see PHASE 8 CLOSURE AUDIT in the ledger). One composite cold phase gate is owed: an unfamiliar non-Claude payload — what stops and what crosses the adapter, which BuildLens type it becomes (named unaided), suggestion/validation/deterministic execution/truth, and new versus unchanged modules. Close Phase 8 only if it passes.
+1. Composite phase gate EV-P8-PHASE-GATE-460 is IN PROGRESS (paused 2026-09-13). The first cold attempt answered a trace of today's code instead of the adapter design (framing error by the facilitator); remediation rungs 1–4 on the "Tern" payload recovered stops/crosses, claim-versus-disk trust, the report type, and shape-validation-versus-truth, partly with sentence frames. Resume at the OWED list under "SESSION PAUSED" at the end of the ledger: the post-adapter step order, then new versus unchanged modules, then a fresh proposal-shaped non-Claude payload answered cold. Close Phase 8 only if that fresh payload passes.
 2. Closing Phase 8 makes the major counter due (1/2 -> 2/2): run the cumulative review before significant Phase 9 work.
 3. Then Phase 9's reduced single-process workflow, with the learner proposing the design.
 

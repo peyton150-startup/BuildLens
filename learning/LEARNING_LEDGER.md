@@ -48090,3 +48090,320 @@ STILL OWED against the plan's PHASE-LEVEL gate
 DECISION: one composite cold gate closes both gaps — an unfamiliar non-Claude payload asking what stops
 and what crosses, which BuildLens type it becomes, suggestion / validation / deterministic execution /
 truth, and new versus unchanged modules. Phase 8 closes only if it passes.
+
+### EV-P8-PHASE-GATE-460 — composite cold phase gate, 2026-09-13, OPEN
+
+UNPROMPTED TRACE before the gate (learner asked "what decides whether we go to parse post tool or parse
+pre tool"; answered: nothing routes — completeflow.py:102 always calls parse_post_tool_use, and
+parse_pre_tool_use has no caller). Learner then traced a PreToolUse payload through ingest, verbatim:
+
+```text
+"so this line will have a value error because checked = _checked_event(payload, "PostToolUse") this
+line in parsepost tool will rasie the value error which will get all the way back to completeflow which
+then returns 1"
+```
+
+CORRECT except the catch site: the try/except is in cli.py ingest (line 114), not completeflow;
+start_flow has no except for ValueError. Learner accepted: "your right ingest is in cli".
+
+GATE PROMPT: a non-Claude agent "Tern" payload (source, event "action.completed", run, step_id,
+workspace, model, usage tokens, thought, action {kind "replace_in_file", target, search, replacement,
+every_match false}, outcome {ok true, file_after}); "Call: BuildLens receives this payload"; fields —
+stops / crosses / BuildLens type / why that type not the other / what the model suggested or asserted /
+what must be validated / which code validates / deterministic code after the adapter / where truth
+lives / new modules / unchanged modules / confidence.
+
+FIRST COMMITTED ANSWER, verbatim:
+
+```text
+"it stops at cli in ingest with a value error
+none of the fields match the ones we have guards for
+it becomes an unknown type
+because we have no defifniton for it  it is not edit or write
+it asserts an action being completed but that does not signify an edit or write
+nothing needs to be validated since it is an invalid payload
+not sure about the rest i think i am think of something esle"
+```
+
+Confidence: not given.
+
+RESULT: NOT YET ANSWERED AT TARGET — the learner answered "what does TODAY's code do with this payload"
+(a trace), not "what would a Tern adapter do" (the design question). As a trace it is essentially right:
+_checked_event finds no hook_event_name and raises ValueError, caught in cli.py ingest, exit 1.
+Precision: no object of any type is built — it raises before construction, so not "an unknown type".
+The learner flagged the mismatch themselves ("i think i am think of something esle").
+
+FACILITATOR ERROR: "Call: BuildLens receives this payload", directly after a trace discussion of
+ingest, invited a trace of current code. The premise — a new adapter is being written for Tern — was
+never stated.
+
+PRIMARY BLOCKER: frame (current-code trace versus adapter design), not the boundary model itself.
+REMEDIATION posed (lower rung, one concept): premise stated explicitly; sort each Tern field into
+CROSSES / STOPS and state the rule used. Type naming, suggestion/validation/truth, and new/unchanged
+modules follow as climbing rungs, then a fresh target-level payload.
+
+### EV-P8-PHASE-GATE-460 — rung 1: CROSSES / STOPS sort
+
+Premise stated: a new tern_adapter.py turns Tern JSON into a value the existing downstream modules
+already use; they never see Tern JSON. Sort each field; note any the adapter READS without crossing.
+
+FIRST COMMITTED ANSWER, verbatim (mapped in prompt order):
+
+```text
+source              "corsses"               defensible: read to identify the source; at most its
+                                            meaning crosses as provenance
+event               "crosses"               PARTIAL: the adapter READS it to choose report vs
+                                            proposal; the raw string does not cross
+run                 "stops"                 WRONG: plays the session-identity role; crosses renamed
+step_id             "stops"                 WRONG: plays the per-call pairing role; crosses renamed
+workspace           "crosses"               CORRECT
+model               "stops"                 CORRECT
+usage               "stops"                 CORRECT
+thought             "potnetially crosses"   WRONG: model prose, nothing downstream can check it; stops
+action.kind         "potentially crosses"   PARTIAL: read and translated into the tool-kind vocabulary
+action.target       "crossese"              CORRECT
+action.search       "crossese"              CORRECT
+action.replacement  "crossese"              CORRECT
+action.every_match  "croseses"              CORRECT
+outcome.ok          "crosses"               PARTIAL: read to decide it is a completed report; it is
+                                            Tern's assertion, not a checked fact
+outcome.file_after  "crosses"               WRONG, and the most important miss: Tern's assertion about
+                                            the file's contents, shaped like an observation
+rule                ". if it would be useful to the other functions to display the information"
+confidence          not given
+```
+
+Seven correct, three partial (all "adapter reads, does not cross"), four wrong. The read-without-
+crossing option in the prompt was not used.
+
+PRIMARY BLOCKER: the rule is USEFULNESS FOR DISPLAY, not TRUST plus DOWNSTREAM NEED. Under it,
+outcome.file_after crosses because it is informative — the Phase 8 non-negotiable
+(MODEL OUTPUT != AUTHORITATIVE APPLICATION STATE) is not being applied to a field that looks like
+observed truth. run/step_id were judged by their Tern names rather than the role they play; held for
+rung 2 (mapping onto BuildLens fields) so the type can still be named unaided.
+
+REMEDIATION posed (R1, one concept, new surface — backup-job report): is a reported value something
+the checker observed or something the sender said; may it answer "what is on the drive"; what does the
+checker do instead. Then near-transfer back to outcome.file_after.
+
+### EV-P8-PHASE-GATE-460 — R1 backup-report micro-problem
+
+FIRST COMMITTED ANSWER, verbatim:
+
+```text
+produced by      "backupscript"                                                   CORRECT
+use as answer?   "no"                                                             CORRECT
+why              "because it says the amount of bytes not the actual bytes on    PARTIAL: reason is
+                 file"                                                            the FORM (a count,
+                                                                                  not contents), not
+                                                                                  the SOURCE (said,
+                                                                                  not observed)
+instead          "take that number and check based on the file bytes to see if   CORRECT: observe,
+                 it is accurate"                                                  then compare
+confidence       not given
+```
+
+The verdict and the action are right: read the drive, then compare. The stated reason would not survive
+a sender that reported full contents instead of a count, which is exactly the shape of Tern's
+outcome.file_after. REMEDIATION posed (same rung, one variable changed): the script now sends the
+file's full contents; can the checker use them as the answer, and why.
+
+### EV-P8-PHASE-GATE-460 — R1 variant: full contents reported
+
+FIRST COMMITTED ANSWER, verbatim:
+
+```text
+produced by      "backup"                                                          CORRECT
+use + why        "no, it is a claim and still needs to be checked against the      CORRECT
+                 actual file btyes"
+confidence       not given (second time this gate)
+```
+
+Reason moved from FORM to SOURCE unprompted by any label: a sender's report is a claim whatever its
+shape; only the checker's own read of the bytes answers the question. Recovered at R1 with one variable
+changed. NEAR-TRANSFER posed: re-sort outcome.file_after, outcome.ok and thought on the Tern payload,
+with a rule stated from scratch; the read-without-crossing hint removed.
+
+### EV-P8-PHASE-GATE-460 — near-transfer: file_after / ok / thought
+
+FIRST COMMITTED ANSWER, verbatim (six lines for eight fields; mapped by the only coherent reading —
+the "real contents" field was answered inside outcome.ok's why):
+
+```text
+file_after       "crosses"
+why              "this is the claim as to what the file looks like adfter which needs to be chekced
+                 against the locla file"
+outcome.ok       "stops"
+why              "the real contnects come fro mthe file on local"
+thought          "stops"
+why              "it is just a thought, my thinking is that it could be printed or recoreded later
+                 just in case"
+rule             "not sure about the riule"
+confidence       not given (third time)
+```
+
+GRADING:
+- file_after CROSSES — DEFENSIBLE, reason CORRECT. It is explicitly handled as a CLAIM to check against
+  the disk, never as the observation. A whole-file claim is a legitimate thing to compare. FACILITATOR
+  CORRECTION: rung 1 marked file_after "WRONG" as if STOPS were the only answer; the rung-1 miss was the
+  REASON (display usefulness), not the placement. Remaining cost, owed later: today's Edit comparison
+  checks fragments and has no slot for a claimed whole file, so crossing it changes compare.
+- real contents come from the local file — CORRECT.
+- outcome.ok STOPS — acceptable placement; the "adapter reads it first" point (the hint) not addressed.
+  Held for rung 2 with event and action.kind, where reading decides the type.
+- thought STOPS — CORRECT; recording it as metadata is fine provided it is never treated as evidence.
+- rule — not stated.
+
+The trust concept is now applied correctly three times in a row (count, full contents, file_after).
+Stating the rule from scratch is still missing — the recorded pattern (cases before principle). Scaffold
+posed: the learner's own answers side by side, then one sentence covering them.
+
+### EV-P8-PHASE-GATE-460 — rule from the side-by-side table
+
+FIRST COMMITTED ANSWER, verbatim:
+
+```text
+"we do not trust the backup script we only trust the local file bytes, 20, this can only be information
+that will actually be used by build lens to compare the edit to the bytes on file in order to push the
+compare forward if it is redundant or irrelevant information it stops."
+```
+
+GRADING:
+- trust rule — CORRECT principle, still worded for one surface (names the backup script rather than any
+  sender). Generalization requested.
+- crossing rule — CORRECT and stated unaided: a field crosses only when downstream BuildLens code uses it;
+  redundant or irrelevant information stops. Precision owed: "used to compare" is too narrow — fields a
+  record needs (which session; which tool call, for pairing) also cross, although compare never reads
+  them. That gap is exactly run/step_id from rung 1.
+- confidence 20 — underconfident: both halves are substantively right.
+
+Case-to-principle step reached with the table scaffold (same scaffold that worked in 459); fade it next
+time. RUNG 2 posed: which downstream need, if any, run and step_id serve under the learner's own rule;
+the trust rule reworded for any sender.
+
+### EV-P8-PHASE-GATE-460 — rung 2: run and step_id
+
+Facts supplied: every observation records its session; BuildLens can pair a proposal with the later
+report of the same call, needing a per-call id.
+
+FIRST COMMITTED ANSWER, verbatim:
+
+```text
+"ok so run is session id and stepid is the tool use id, ok so they both pass"
+```
+
+CORRECT: run -> session_id, step_id -> tool_use_id, both cross under BuildLens names. The rung-1 miss
+(judging by Tern's names rather than the role) recovered once the downstream needs were stated.
+NOT ANSWERED: both reworded rules, confidence. Re-asked alone, without the side-by-side table (fade).
+
+### EV-P8-PHASE-GATE-460 — both rules, table removed
+
+FIRST COMMITTED ANSWER, verbatim:
+
+```text
+"every payload must state which session id it came from
+and if there are a propasal and a claimed edit then the tool use id is needed"
+```
+
+RESULT: NOT YET AT TARGET. Both lines restate the two supplied facts as cases; no general crossing rule
+was formed, and the first line is a demand on the SENDER, not a rule for the adapter. Trust rule and
+confidence not given. Fading the table was one step too far — the recorded cases-before-principle
+pattern. (The phrase "claimed edit" here refers back to the pairing fact, not to naming Tern's type;
+not counted toward the unaided type-naming rung.)
+
+ADAPT DOWN: two sentence frames, one blank each ("A field crosses the adapter when ___"; "A value a
+sender reports is ___ ; only ___ is truth"), confidence inside the same block.
+
+### EV-P8-PHASE-GATE-460 — sentence frames
+
+FIRST COMMITTED ANSWER, verbatim:
+
+```text
+crosses when   "it can be used to either hold the claim or be information that is needed for the calim"
+reported is    "a claim"
+truth is       "the files on disk"
+confidence     not given (fourth time)
+```
+
+CORRECT on both, at frame level. Crossing: fields that ARE the claim (target, search, replacement,
+every_match) or that downstream code needs ABOUT the claim (session, call id, workspace); everything
+else stops. Precision: truth is BuildLens's own read of the files on disk, at observation time.
+Assistance level recorded honestly: principle stated with sentence frames, not from scratch; retrieve
+unscaffolded later.
+
+PRIMING NOTE for the type-naming rung: the learner's own vocabulary ("claim", "claimed edit") and the
+supplied pairing fact (proposal vs later report) make the report-shaped Tern type easy to name. The
+fresh target-level payload that closes the gate must therefore be PROPOSAL-shaped (not yet run) so
+naming the type requires discrimination, not recall of this thread.
+
+RUNG 3 posed: what the adapter decides by READING event / outcome.ok / action.kind, which BuildLens
+type the Tern payload becomes, and why not the other.
+
+### EV-P8-PHASE-GATE-460 — rung 3: read-only fields and the type
+
+FIRST COMMITTED ANSWER, verbatim:
+
+```text
+event + ok     "it decides if the action was completed , but that is a claim and is not needed so it
+               stops there"
+action.kind    "kind gives us the action that was actually claimed"
+type           "it becomes a posttooluse or claimededit"
+why            "if the outcome was starting then it would be a proposal but it is claimjng that it is
+               complete"
+confidence     not given (fifth time)
+```
+
+GRADING:
+- event + ok — CORRECT: read to decide completed-vs-not, raw value stops. Precision: it is needed BY THE
+  ADAPTER (it selects the type) even though nothing downstream receives it.
+- action.kind — PARTIAL: right idea, not translated; it becomes BuildLens's tool kind Edit (search /
+  replacement / every_match -> old_string / new_string / replace_all).
+- type — ClaimedEdit CORRECT (primed; see note above). "posttooluse" is WRONG as a type: PostToolUse is
+  Claude's event vocabulary, which must stop at the Claude adapter; a Tern adapter never produces it.
+- why — CORRECT discrimination: completed report -> claim; not-yet-run -> proposal.
+
+RUNG 4 posed: structural validation versus truth — a malformed field (target 42) versus a well-formed
+payload whose claim the disk contradicts; which code catches each; what passing the adapter proves;
+deterministic code after the adapter, in order.
+
+### EV-P8-PHASE-GATE-460 — rung 4: validation versus truth
+
+FIRST COMMITTED ANSWER, verbatim:
+
+```text
+A caught by    "the adapter checks, it is an incorrect field but does not claim any incorrect
+               information, i assume value error"
+B caught by    "reading the file and comparing, because it is incorrect information it is not an
+               incorrect field or type"
+passing proves "that all of the fields are correct and the values are the correct type"
+steps in order not answered
+confidence     not given (sixth time)
+```
+
+GRADING:
+- A — CORRECT: malformed shape, adapter raises ValueError before any type is built.
+- B — CORRECT: well-formed but false; only observing the disk and comparing catches it. Unaided.
+- passing proves — CORRECT with precision: required fields PRESENT and WELL-TYPED; "all of the fields
+  are correct" must not be read as "true" (the B answer shows the learner does not mean that).
+- deterministic steps — NOT ANSWERED; re-asked alone.
+
+The Phase 8 LLM-anchor split (validation of shape vs truth on disk) is now stated unaided.
+
+### EV-P8-PHASE-GATE-460 — SESSION PAUSED (learner changing location), gate still OPEN
+
+OWED, in order:
+
+```text
+1. rung 4 leftover (posed, unanswered): what runs after tern_adapter.py returns a ClaimedEdit for
+   server.toml — steps in order, and where the verdict ends up
+2. rung 5: new versus unchanged modules for a Tern integration, including whether completeflow and cli
+   stay unchanged (completeflow.py:102 calls claude_adapter.parse_post_tool_use directly) and the cost
+   of crossing outcome.file_after as a whole-file claim (compare has no slot for it)
+3. fresh target-level payload, cold and unscaffolded, PROPOSAL-shaped (not yet run), non-Claude, not
+   Tern: stops/crosses, type named unaided, suggestion/validation/deterministic execution/truth,
+   new/unchanged modules. Phase 8 closes only if it passes.
+4. then the due major cumulative review before Phase 9 work
+```
+
+Retrieval owed from this gate: crossing and trust rules stated WITHOUT sentence frames; confidence has
+not been given on any answer in this gate — ask for it inside the answer block.
