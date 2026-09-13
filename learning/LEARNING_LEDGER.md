@@ -48547,3 +48547,19 @@ missing evidence versus observed absence; this is the representation side of it.
 
 REMEDIATION (R0, non-code surface): an inspector's note "room 12: empty" — does the note exist, can it
 be read, what does it say; then map note -> ObservedFile, room -> server.toml.
+
+R0 INSPECTOR ANSWER, verbatim:
+
+```text
+note exists?        "yes"                          CORRECT
+manager can read?   "yes"                          CORRECT
+note or room empty  "the room is claimed empty"    CORRECT (the room); precision: the inspector's note
+                                                   is an OBSERVATION, not a claim
+note in BuildLens   "server.toml"                  WRONG (swapped)
+room in BuildLens   "the observed file"            WRONG (swapped)
+confidence          not given
+```
+
+The non-code distinction is correct; the mapping onto BuildLens is inverted in both rows. Possibly an
+order slip, possibly the real blocker (which side is the record); not assumed. ADAPT DOWN: pair four
+items by one property — "written by the one who looked" versus "the thing that was looked at".
