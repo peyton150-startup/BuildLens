@@ -48777,3 +48777,14 @@ Reasoning added, verbatim: "it just takes the payload and calls other module to 
 TRUE as a description of orchestration, and it is the exact reason it changes: it calls ONE named module,
 claude_adapter, for every payload. The trace question isolates "which module, and what does it do with
 Tern".
+
+TRACE ANSWER, verbatim:
+
+```text
+"claude adapter, so we would need to add in to complete flow a line for tern adapter"
+```
+
+CORRECT: line 102 always calls claude_adapter; tern_adapter is never reached; completeflow changes to
+route a Tern payload to the Tern adapter. Recovered after the side-by-side and the one-line trace.
+Not yet stated: line 121's provenance=CLAUDE would mislabel a Tern claim (second reason it changes).
+Posed as a single item before OWED item 3.
