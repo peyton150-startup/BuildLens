@@ -47678,3 +47678,67 @@ CODE: Picture.unreadable, UndeterminedPath, ScanResult(changes, undetermined); r
 ScanResult and unions four sets. 13 rows, thirteen suites green. Commit 7dca7de.
 
 GATE CLOSED for EV-P8-UNDETERMINED-456.
+
+## EV-P8-NUL-PATHS-457 — untracked paths read NUL-separated
+
+TRIGGER found by the facilitator while reading capture_untracked_paths for take_picture, then
+VERIFIED before being claimed: plain `ls-files --others` prints "caf\303\251.txt" (quoted,
+octal-escaped) for café.txt; with -z it prints the real name. observe_file on the quoted form would
+report ABSENT, and reconcile would record a false CREATED or DELETED.
+
+SCOPE (the learner's): fix this FIRST as its own patch (1a), then take_picture in its own sequencing
+module (2b) rather than adding I/O to the pure reconcile.py.
+
+PREDICTION before the parsing line was written — "notes/new.py\0readme.md\0".split("\0"):
+
+```text
+first answer   "it needs to make the \0 into a new line" — would undo the fix
+               asked whether a filename can contain a newline: "no". Correct on Windows, wrong on
+               Linux/macOS; the facilitator supplied the cross-platform fact
+R0 split       "a,b,".split(",") -> answered "a" "b"; actual ['a', 'b', '']
+design         asked which pieces are dropped: "the second option" (misread a layout as a choice),
+               then "check to see if there is any text after the second \0" (count-specific),
+               then generalized: "check after the final \0 when there is no text after delete the
+               last entry". ADOPTED over "drop every empty": only the trailing piece can
+               legitimately be empty, so an empty piece elsewhere must surface rather than be hidden
+```
+
+RED: mocked `result != ["notes/new.py", "readme.md"]`; real Git `paths != ["café.txt"]`.
+GREEN: all suites. Commit 238f327. snapshot.py inherits the fix.
+
+TRACE — remediation chain, three blockers in sequence:
+
+```text
+RETURN_VALUE      output "" -> "popped and it woule return None for paths"; corrected to []
+LOOP_ITERATION    `for path in []` predicted 1 run, `for path in None` predicted 0; actual 0 runs
+                  and TypeError. Then ["a"] once, ["a","b","c"] 3, [""] once — all correct
+DATA_REPRESENTATION  three-file split answered "3 items" while also saying the if runs — a
+                  contradiction; resolved it the WRONG way ("so if does not run"). Revealed 4.
+                  Then "|" as a separator collided with the union operator: "so this is not a union
+                  anymore" — the facilitator's poor example choice. Switched to ";".
+                  "x;y;" -> "one seperator, 2 pices"; dropped to R0 character-by-character on "q;":
+                  "q" / "" correct; "x;y;" -> "3 items and the if would run to remove the thrid"
+TARGET            fresh "src/app.py\0docs/guide.md\0notes.txt\0" unscaffolded: 4 items, if runs,
+                  three paths returned — CORRECT
+```
+
+EXPLANATION first answer INVERTED: "a filename from git can contain \0 but not a new line". On
+re-asking: "/ or NUL cannot be in the filename ... we can cut on \0". Accepted; sharpened that / is
+inside every path and so is no candidate.
+
+TRANSFER (a text file split on "\n" with a trailing newline): 4 items correct; fix "remove the last
+line if it is empty" correct; predicted `"".upper()` fails — it does NOT, it silently prints a blank
+fourth line, which was named as the more dangerous outcome.
+
+MISCONCEPTIONS:
+
+```text
+pieces_equals_separators    pieces = separators + 1, trailing piece empty. Missed THREE times across
+                            "," "|" ";" before recovering at R0; retrieval due on a new surface
+empty_list_vs_none          [] is a real collection that loops zero times; None is not iterable
+loop_runs_once_per_item     recovered at R1
+same_symbol_two_meanings    "|" in quotes is text; between sets it is union
+separator_safety_inverted   which character a filename can never hold — recovered, retrieval due
+```
+
+GATE CLOSED for EV-P8-NUL-PATHS-457.

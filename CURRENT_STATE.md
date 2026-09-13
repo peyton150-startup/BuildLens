@@ -4365,3 +4365,22 @@ Files the learner should be able to teach: `reconcile.py` end to end (every deci
 Open question for next session, already posed: `git ls-files` lists a tracked file even after it has
 been deleted from disk, so what does the picture do with a path Git lists but observe_file reports
 ABSENT?
+
+### Patch 1a — NUL-separated untracked paths (EV-P8-NUL-PATHS-457)
+
+```text
+git_adapter.py   capture_untracked_paths runs `ls-files --others --exclude-standard -z`, splits on
+                 "\0", and removes ONLY a trailing empty piece
+tests            mocked exact-argument test updated; real-Git test with café.txt added
+commit           238f327, all suites green
+```
+
+Gate closed after substantial remediation. Due for retrieval on a new surface: a trailing separator
+leaves an empty final piece (missed three times); [] versus None in a for loop; why NUL is the only
+safe separator for paths.
+
+Exact restart point: patch 2b, take_picture(repository) -> Picture, in its own module that runs no
+Git itself. Needs a tracked-path listing in git_adapter, which must ALSO use -z from the start. Rows
+already agreed: tracked or untracked readable -> hashes; ignored -> absent; tracked but ABSENT ->
+neither; UNREADABLE -> unreadable; taken_at captured once, before any read, and the picture is not
+atomic.
