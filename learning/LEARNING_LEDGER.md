@@ -48479,3 +48479,19 @@ having new string and old string and write having only contnet"
   and picks a comparison; nothing compares two tool names.
 - R0 prediction (which object's kind is read; desk has no kind) — NOT ANSWERED; re-asked as the single
   deciding question.
+
+R0 ANSWER, verbatim:
+
+```text
+whose kind     "ticket"                                                                   CORRECT
+matters?       "no"                                                                       CORRECT
+(extra line)   "if the ticket name is pciked then the only thing you could test for is if
+               the contnetns are in the correct format/syntax"                            UNCLEAR, not
+                                                                                          asked; not
+                                                                                          graded
+confidence     not given
+```
+
+Routing-by-one-object's-field recovered at R0. NEAR-TRANSFER posed back to BuildLens: can
+compare_tool_name run in a test with no server.toml on disk, and why. Grounding for grading:
+test_compare.py builds ObservedFile values by hand (lines 41, 52); no file is written or read there.
