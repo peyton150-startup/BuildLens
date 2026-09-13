@@ -48529,3 +48529,21 @@ observed as something that RUNS; it is a value that is LOOKED AT, and its status
 This matches the earlier blocker (compare "uses the file observer"): the learner may picture observation
 happening inside compare. Micro-check posed: is observed a function that runs or a value that is read;
 and the verdict for ABSENT.
+
+MICRO-CHECK ANSWER, verbatim:
+
+```text
+observed is   "neither it is an absent file that was not read but if it was read it would be a value
+              whose fields are read"                                                    WRONG
+verdict       "absent"                                                                  CORRECT
+              (FILE_ABSENT)
+confidence    not given
+```
+
+PRIMARY BLOCKER: the observation RECORD is conflated with the FILE it describes. An ABSENT observation
+is still a value — an ObservedFile whose status field says ABSENT — and compare_write read that field to
+return FILE_ABSENT (the learner's own correct verdict came from reading it). Related known-cold concept:
+missing evidence versus observed absence; this is the representation side of it.
+
+REMEDIATION (R0, non-code surface): an inspector's note "room 12: empty" — does the note exist, can it
+be read, what does it say; then map note -> ObservedFile, room -> server.toml.
