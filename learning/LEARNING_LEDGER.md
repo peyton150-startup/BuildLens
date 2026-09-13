@@ -48465,3 +48465,17 @@ tool naeme"
 
 REMEDIATION (syntax-only help mode): explain only what the name means, one R0 routing micro-example
 unrelated to BuildLens, learner predicts, then rebuild to the no-disk question.
+
+RESPONSE after the name explanation (R0 handle_by_kind fields not filled), verbatim:
+
+```text
+"ok so it comapres the edit vs write tool name because both payloads look a little different with edit
+having new string and old string and write having only contnet"
+```
+
+- WHY routing exists — CORRECT and unprompted: Edit and Write claims carry different details
+  (old_string/new_string versus content), so each needs its own check.
+- wording "compares the edit vs write tool name" — still PARTIAL: it CHECKS which tool the claim names
+  and picks a comparison; nothing compares two tool names.
+- R0 prediction (which object's kind is read; desk has no kind) — NOT ANSWERED; re-asked as the single
+  deciding question.
