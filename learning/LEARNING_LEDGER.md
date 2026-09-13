@@ -48495,3 +48495,21 @@ confidence     not given
 Routing-by-one-object's-field recovered at R0. NEAR-TRANSFER posed back to BuildLens: can
 compare_tool_name run in a test with no server.toml on disk, and why. Grounding for grading:
 test_compare.py builds ObservedFile values by hand (lines 41, 52); no file is written or read there.
+
+NEAR-TRANSFER ANSWER, verbatim:
+
+```text
+can it run     "yes"                                                        CORRECT
+why            "becasue we are just piskcing whether it is write or edit"   WRONG reason
+observed from  "it does not matter because for this it is not needed"       WRONG
+confidence     not given
+```
+
+OVERCORRECTION caused by the routing remediation: the learner now believes compare only routes and
+never uses observed. Actual: the chosen compare_write / compare_edit computes the verdict FROM observed
+(status, then content/hash). The right reason for "yes": observed is a VALUE handed in, compare reads no
+disk, so a test builds the observation by hand (test_compare.py 41, 52). Facilitator note: the R0 desk
+example ("desk just gets passed along") under-stressed that the chosen function uses the second value.
+
+REMEDIATION (block-scoped): show the part of compare_write that reads observed; ask what it reads and
+what the verdict would be for a hand-built observation.
