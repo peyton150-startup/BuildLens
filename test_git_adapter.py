@@ -129,15 +129,17 @@ def test_capture_staged_diff_rejects_unexpected_status_with_its_own_label():
             raise AssertionError("capture_staged_diff did not reject status 128")
 
 
-def test_capture_untracked_paths_runs_expected_command_and_splits_lines():
-    prepared = completed(stdout=b"notes/new.py\nreadme.md\n")
+def test_capture_untracked_paths_runs_expected_command_and_splits_on_nul():
+    # -z ends every path with a NUL byte, which no filename can contain, so a
+    # name holding a newline, a quote or a non-ASCII letter arrives unaltered.
+    prepared = completed(stdout=b"notes/new.py\0readme.md\0")
 
     with patch("git_adapter.subprocess.run", return_value=prepared) as fake_run:
         result = capture_untracked_paths(REPOSITORY)
 
     assert result == ["notes/new.py", "readme.md"]
     fake_run.assert_called_once_with(
-        ["git", "ls-files", "--others", "--exclude-standard"],
+        ["git", "ls-files", "--others", "--exclude-standard", "-z"],
         cwd=REPOSITORY,
         capture_output=True,
         timeout=10,
@@ -283,7 +285,7 @@ test_capture_repository_root_rejects_unexpected_status()
 test_capture_rejects_undecodable_output_with_its_component_label()
 test_capture_staged_diff_runs_expected_command_and_returns_stdout()
 test_capture_staged_diff_rejects_unexpected_status_with_its_own_label()
-test_capture_untracked_paths_runs_expected_command_and_splits_lines()
+test_capture_untracked_paths_runs_expected_command_and_splits_on_nul()
 test_capture_untracked_paths_returns_empty_list_when_none_exist()
 test_capture_untracked_paths_rejects_unexpected_status()
 print("test passed")

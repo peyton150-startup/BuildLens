@@ -109,6 +109,20 @@ def test_untracked_discovery_reports_an_empty_new_file():
         assert capture_untracked_paths(repository) == ["placeholder.py"]
 
 
+def test_untracked_discovery_returns_a_non_ascii_name_exactly_as_it_is_on_disk():
+    # Without -z, Git prints this name as "caf\303\251.txt", quotes included.
+    # A path spelled that way does not exist, so observing it would report the
+    # file ABSENT and a scan would record a deletion that never happened.
+    with temporary_directory() as directory:
+        repository = new_repository(directory)
+        (repository / "café.txt").write_bytes(b"bonjour\n")
+
+        paths = capture_untracked_paths(repository)
+
+        assert paths == ["café.txt"]
+        assert (repository / paths[0]).exists()
+
+
 def test_a_latin_1_working_tree_file_is_rejected_not_silently_mangled():
     with temporary_directory() as directory:
         repository = new_repository(directory)
@@ -186,6 +200,7 @@ test_a_modified_tracked_file_appears_in_unstaged_and_not_in_staged()
 test_staging_moves_the_change_from_unstaged_to_staged()
 test_untracked_discovery_finds_a_file_that_was_never_added()
 test_untracked_discovery_reports_an_empty_new_file()
+test_untracked_discovery_returns_a_non_ascii_name_exactly_as_it_is_on_disk()
 test_a_latin_1_working_tree_file_is_rejected_not_silently_mangled()
 test_new_file_diff_presents_an_untracked_file_as_added_content()
 test_new_file_diff_of_an_empty_file_has_a_header_and_no_hunk()

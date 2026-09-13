@@ -169,10 +169,25 @@ def capture_repository_root(repository: Path) -> str:
 
 
 def capture_untracked_paths(repository: Path) -> list[str]:
-    """Return repository-relative paths of untracked, non-ignored files."""
+    """Return repository-relative paths of untracked, non-ignored files.
+
+    -z makes Git end every path with a NUL instead of a newline, and stop quoting
+    names. Without it, "café.txt" arrives as the literal text "caf\\303\\251.txt",
+    a path that does not exist on disk. NUL is the one character no filename can
+    contain, so it is the only separator that can never fall inside a name.
+    """
     output = _capture(
         repository,
-        ["ls-files", "--others", "--exclude-standard"],
+        ["ls-files", "--others", "--exclude-standard", "-z"],
         "UNTRACKED discovery",
     )
-    return output.splitlines()
+    paths = output.split("\0")
+
+    # Every path is FOLLOWED by a NUL, so the piece after the last one is always
+    # empty — and with no untracked files, the whole output is that one empty
+    # piece. Only the last piece is removed: an empty piece anywhere else would
+    # mean the output was not what -z promises, and must not be hidden.
+    if paths[-1] == "":
+        paths.pop()
+
+    return paths
