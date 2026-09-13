@@ -48438,3 +48438,14 @@ can compare run with no file on disk at all.
 
 Not revealed to the learner, held for rung 5: line 121 hard-codes provenance=CLAUDE, and line 102 calls
 the Claude parser directly — both bear on new versus unchanged modules for Tern.
+
+RESPONSE to the correction (before the R1 fields were filled), verbatim:
+
+```text
+"ok so compare is handed the file from start flow which called file observer"
+```
+
+ORDER now CORRECT: start_flow calls observe_file, then hands the result to compare. Precision: compare
+receives an OBSERVATION VALUE (ObservedFile — status, bytes, hash, time), not the file itself. The R1
+fields that test the consequence (what compare receives; can compare run in a test with no file on
+disk) were not answered; re-asked alone.
