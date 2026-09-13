@@ -48747,3 +48747,17 @@ directly and line 121 stamps provenance CLAUDE — not because of new types.
 
 REMEDIATION (one concept): two ClaimedEdit values side by side, one built by each adapter, identical;
 can compare tell them apart; does compare change.
+
+SIDE-BY-SIDE ANSWER, verbatim:
+
+```text
+"no so compare was out ok i was not totaly confindent on this list other than cli and complete flow"
+```
+
+- Tern field names reach compare? "no" — CORRECT
+- compare changes? revised to unchanged ("compare was out") — CORRECT, ASSISTED (after seeing the two
+  identical values)
+- self-reported confidence: low on the list except cli and completeflow (no number)
+- which adapter translates; can compare tell; why completeflow changes — not answered
+
+Re-asked the one deciding item: why completeflow changes, given compare does not.
