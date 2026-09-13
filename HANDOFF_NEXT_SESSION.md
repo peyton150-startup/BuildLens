@@ -4,7 +4,7 @@ Updated 2026-09-13 for the approved Core v0.1 scope. Follow `AGENTS.md` / `CLAUD
 
 ## Resume here
 
-Phase 8 is open. Gate EV-P8-PRETOOLUSE-459 is CLOSED (trace, explanation, transfer — see the end of the ledger). The composite cold phase gate EV-P8-PHASE-GATE-460 is in progress and paused mid-remediation; resume at the OWED list under "SESSION PAUSED" at the end of the ledger (post-adapter step order → new versus unchanged modules → fresh proposal-shaped non-Claude payload, cold). Close the phase only if that fresh payload passes. Both parsers and tool-call IDs already exist; do not rebuild them.
+Phase 8 is open. Gate EV-P8-PRETOOLUSE-459 is CLOSED (trace, explanation, transfer — see the end of the ledger). The composite cold phase gate EV-P8-PHASE-GATE-460 is in progress and paused mid-remediation; OWED items 1–2 are recovered (see the end of the ledger); only item 3 remains — a fresh proposal-shaped payload from a source that is neither Claude nor Tern, answered cold, no frames or hints. Close the phase only if that fresh payload passes. Both parsers and tool-call IDs already exist; do not rebuild them.
 
 Closing Phase 8 makes the major counter due (1/2 -> 2/2). Run the cumulative review before significant Phase 9 work. Foundation remains 1/3. Do not reset either counter based on this documentation update.
 

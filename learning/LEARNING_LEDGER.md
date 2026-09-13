@@ -48788,3 +48788,25 @@ CORRECT: line 102 always calls claude_adapter; tern_adapter is never reached; co
 route a Tern payload to the Tern adapter. Recovered after the side-by-side and the one-line trace.
 Not yet stated: line 121's provenance=CLAUDE would mislabel a Tern claim (second reason it changes).
 Posed as a single item before OWED item 3.
+
+PROVENANCE ANSWER, verbatim:
+
+```text
+records     "claude"                                                                      CORRECT
+wrong why   "it is not a tern claim so we would need to build in a way to get the tern    CORRECT
+            provanance from tern adapter, i would assume just calling tern adapter would   (mislabel);
+            be enough"                                                                     PARTIAL fix
+confidence  not given
+```
+
+- the mislabel — CORRECT.
+- "just calling tern adapter would be enough" — PARTIAL: line 121 is a hard-coded constant, so routing to
+  the Tern adapter alone still stamps CLAUDE. Whichever branch chooses the adapter must also choose the
+  provenance, and Provenance (completeflow.py:26-32: CLAUDE, HUMAN) has no TERN member yet. Neither
+  ClaimedEdit nor the adapter carries provenance today.
+
+OWED item 2 (new versus unchanged modules) RECOVERED WITH ASSISTANCE: new tern_adapter; unchanged
+file_observer, git_adapter, working_tree_picture, reconcile, claude_adapter, compare; changed completeflow
+(route + provenance) and cli. The compare placement and completeflow reason needed side-by-side and
+trace scaffolds. REMAINING: OWED item 3 — fresh non-Claude, non-Tern, PROPOSAL-shaped payload, cold, no
+frames or hints. Learner offered: now or next session.
