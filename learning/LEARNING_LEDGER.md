@@ -48726,3 +48726,24 @@ say which source); compare unchanged only if the Tern adapter emits tool_name "W
 same details keys; claude_adapter unchanged. Open design wrinkle: ClaimedEdit is defined inside
 claude_adapter.py, so a Tern adapter importing it takes a Claude-named dependency. Re-asked: classify
 the four remaining modules.
+
+FOUR-MODULE ANSWER (hint: "which currently refers to Claude by name"), verbatim:
+
+```text
+claude_adapter   "unchanged"   CORRECT
+compare          "changes"     WRONG
+completeflow     "changes"     CORRECT placement, wrong reason
+cli              "cli"         unclear; read as "changes" — defensible
+why              "they have to change for the new types and fields the hook for tern will claim"
+confidence       not given
+```
+
+PRIMARY BLOCKER — the gate's core: the learner expects Tern's types and fields to reach downstream
+modules. The adapter's job is the opposite: it TRANSLATES into the existing ClaimedEdit (tool_name
+"Edit", details old_string/new_string/replace_all), so compare receives exactly what it receives from
+Claude and cannot tell the source. This contradicts the learner's own rung-3 answers (translation of
+action.kind, renamed fields). completeflow does change, but because line 102 calls the Claude parser
+directly and line 121 stamps provenance CLAUDE — not because of new types.
+
+REMEDIATION (one concept): two ClaimedEdit values side by side, one built by each adapter, identical;
+can compare tell them apart; does compare change.
