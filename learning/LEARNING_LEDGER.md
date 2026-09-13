@@ -48449,3 +48449,19 @@ ORDER now CORRECT: start_flow calls observe_file, then hands the result to compa
 receives an OBSERVATION VALUE (ObservedFile — status, bytes, hash, time), not the file itself. The R1
 fields that test the consequence (what compare receives; can compare run in a test with no file on
 disk) were not answered; re-asked alone.
+
+RE-ASK ANSWER, verbatim:
+
+```text
+"it recived the claim and the obverved something i ma not sure because the observed does not have a
+tool naeme"
+```
+
+- receives claim and observed — CORRECT
+- no-disk test — NOT ANSWERED; blocker is SYNTAX_READING of a function NAME: the learner reads
+  compare_tool_name as "compare the tool names of claim and observed", so it seems to need a tool_name
+  on the observation. Actual (compare.py:131-147): it reads claim.tool_name only, to route to
+  compare_write or compare_edit; no file reads anywhere in compare.py (grep: no open/read_bytes).
+
+REMEDIATION (syntax-only help mode): explain only what the name means, one R0 routing micro-example
+unrelated to BuildLens, learner predicts, then rebuild to the no-disk question.
