@@ -48609,3 +48609,22 @@ This names the underlying blocker: the learner expects NO FILE to mean NO OBSERV
 file_observer.py:60-68: no file on disk, but observe_file still RETURNS an ObservedFile with
 status=ABSENT, file_bytes=None, content_hash=None, and observed_at and path set. Absence is recorded as
 a fact, not as nothing. Direct check posed next: predict the ObservedFile fields for a missing file.
+
+MISSING-FILE CHECK ANSWER, verbatim:
+
+```text
+how many values          "1"                                                   CORRECT
+status                   "absent"                                              CORRECT
+compare_write gets       "no"                                                  WRONG — contradicts
+something to read?                                                             the learner's own "1"
+why it matters           "because we then assume that hte file was deleted"   WRONG — over-infers
+confidence               not given
+```
+
+- LABEL COLLISION again (facilitator): "something to read" likely read as "file bytes to read"; the
+  value exists and its status is readable, the bytes are None.
+- OVER-INFERENCE: ABSENT establishes only "not there at observed_at"; it does not establish deletion
+  (it may never have been created). Connects to known-cold "records assert only what was established".
+
+Re-posed without the colliding word: does compare_write receive the one ObservedFile; which of its
+fields can it use; does ABSENT say deleted or only not-there-when-looked.
