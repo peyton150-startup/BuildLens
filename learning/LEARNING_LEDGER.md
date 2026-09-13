@@ -48628,3 +48628,18 @@ confidence               not given
 
 Re-posed without the colliding word: does compare_write receive the one ObservedFile; which of its
 fields can it use; does ABSENT say deleted or only not-there-when-looked.
+
+RE-POSED ANSWER, verbatim:
+
+```text
+receives the value   "yes"                                            CORRECT
+field checked        "yes"                                            not answered (the learner named
+                                                                      "the status" earlier in this chain;
+                                                                      not re-drilled)
+ABSENT tells us      "the file was not these when buildlens looked"   CORRECT
+confidence           not given
+```
+
+Recovered: an ABSENT observation is a value compare receives, and it asserts only not-there-at-
+observed_at. CLIMB: back to the stalled near-transfer — compare_tool_name in a test with no file on
+disk, and where the test's observed value comes from.
