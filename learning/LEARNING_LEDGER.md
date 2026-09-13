@@ -48407,3 +48407,34 @@ OWED, in order:
 
 Retrieval owed from this gate: crossing and trust rules stated WITHOUT sentence frames; confidence has
 not been given on any answer in this gate — ask for it inside the answer block.
+
+### EV-P8-PHASE-GATE-460 — OWED item 1: steps after the adapter (answered after the pause commit)
+
+FIRST COMMITTED ANSWER, verbatim:
+
+```text
+"it hands it over to compare which then uses the file observer to get the file or files on disk to
+compare to the claim to see if ti holds, this is run in start flow and when the verdict is calculated
+it is retunred under start flow"
+```
+
+Confidence not given.
+
+ACTUAL (completeflow.py:102-122): parse -> _repository_root_for(claim.file_path) ->
+file_observer.observe_file(...) -> compare.compare_tool_name(claim, observed) -> _base_version_for(...)
+-> CompleteCompare(claim, observed, verdict, base_version, provenance=CLAUDE) returned; cli ingest prints
+it.
+
+GRADING:
+- all of it runs inside start_flow, and the result returns from start_flow — CORRECT
+- compare judges whether the claim holds against observed file content — CORRECT
+- "compare ... uses the file observer" — WRONG ownership/order: start_flow observes FIRST and hands
+  compare two finished values; compare never touches the disk (imports only ObservationStatus)
+- repository-root and base-version (Git context) steps omitted; print in cli omitted — minor
+
+PRIMARY BLOCKER: who performs the observation (the side effect) versus who only compares values.
+REMEDIATION posed (R1, one concept, block shown): which line reads the disk; what compare receives;
+can compare run with no file on disk at all.
+
+Not revealed to the learner, held for rung 5: line 121 hard-codes provenance=CLAUDE, and line 102 calls
+the Claude parser directly — both bear on new versus unchanged modules for Tern.
