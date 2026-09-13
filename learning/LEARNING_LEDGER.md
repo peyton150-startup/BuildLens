@@ -48643,3 +48643,22 @@ confidence           not given
 Recovered: an ABSENT observation is a value compare receives, and it asserts only not-there-at-
 observed_at. CLIMB: back to the stalled near-transfer — compare_tool_name in a test with no file on
 disk, and where the test's observed value comes from.
+
+CLIMB ANSWER, verbatim:
+
+```text
+can it run             "yes"                                                       CORRECT
+compare reads disk?    "no"                                                        CORRECT
+observed comes from    "from compare write which returns absent"                   WRONG — INPUT
+                                                                                   confused with
+                                                                                   OUTPUT
+why easy to test       "becasue an absent file is comparing nothing to something"  WRONG — not the
+                                                                                   testability reason
+confidence             not given
+```
+
+PRIMARY BLOCKER: argument versus return value — observed is handed IN; FILE_ABSENT comes OUT.
+Repeated difficulty across this chain, so WORKED-EXAMPLE RESCUE (allowed once): the real
+test_missing_file_contradicts_the_claim (test_compare.py:94-100) with its helper
+observation_without_bytes (51-59). Then: learner explains the solved steps -> completes one missing step
+-> fresh example unaided.
