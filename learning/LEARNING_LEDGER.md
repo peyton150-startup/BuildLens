@@ -48563,3 +48563,24 @@ confidence          not given
 The non-code distinction is correct; the mapping onto BuildLens is inverted in both rows. Possibly an
 order slip, possibly the real blocker (which side is the record); not assumed. ADAPT DOWN: pair four
 items by one property — "written by the one who looked" versus "the thing that was looked at".
+
+Learner on the claim wording, verbatim: "i read that wrong it is not a claim my bad".
+
+SORT ANSWER, verbatim:
+
+```text
+inspector's note   "was looked at and was written down"   defensible (the manager reads it); written down
+room 12            "was looked at"                        CORRECT
+server.toml        "written down"                         WRONG
+ObservedFile       "was looked at"                        WRONG
+confidence         not given
+```
+
+The swap repeated, so it is NOT an order slip. Two causes, both partly the facilitator's:
+- LABEL COLLISION: "written down" also describes server.toml (Tern's edit WROTE it) and "looked at"
+  also describes the note (the manager reads it). The labels were ambiguous on exactly this surface.
+- NAME READING (likely primary): "ObservedFile" read literally as "the file that was observed" — the
+  learner earlier wrote "the observed file". The class is a record ABOUT a file.
+
+ADAPT DOWN: explain only what the name ObservedFile means; then sort by unambiguous physical
+properties — exists on disk after the program exits / exists only in the program's memory.
