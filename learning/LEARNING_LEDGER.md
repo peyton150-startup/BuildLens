@@ -48584,3 +48584,17 @@ The swap repeated, so it is NOT an order slip. Two causes, both partly the facil
 
 ADAPT DOWN: explain only what the name ObservedFile means; then sort by unambiguous physical
 properties — exists on disk after the program exits / exists only in the program's memory.
+
+PHYSICAL-PROPERTY SORT ANSWER, verbatim:
+
+```text
+server.toml     "still on disk"                  CORRECT
+ObservedFile    "gone with programs memory"      CORRECT
+mapping         "not is server / room is observed file"   still inverted against the analogy
+confidence      not given
+```
+
+The concept is right (the file persists on disk; the ObservedFile is an in-memory value). The
+inspector analogy is what keeps failing — three mappings, same inversion. Decision: DROP the analogy
+(it now tests the metaphor, not the concept) and check the concept directly in BuildLens terms: which
+existed before file_observer ran, which did file_observer produce, which does compare receive.
