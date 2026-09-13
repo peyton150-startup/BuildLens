@@ -8,6 +8,24 @@ The eventual product will observe Claude Code development, show meaningful chang
 
 The project itself is intentionally built in the same order those ideas should be learned.
 
+## What BuildLens will let a developer do
+
+At the end of the project, BuildLens should let a developer:
+
+1. observe meaningful Claude Code changes in near real time;
+2. inspect the relevant diff without immediately receiving an explanation;
+3. predict what the code will do;
+4. trace important values and state transitions;
+5. draw or reconstruct the execution/data flow;
+6. complete a source-grounded knowledge gate generated from an exercise archetype;
+7. explain the changed code aloud or in writing;
+8. connect the patch to the system architecture;
+9. record and defend important design decisions;
+10. review the same ideas later through different-looking transfer exercises;
+11. enter an interview mode where Claude attacks the implementation, failure modes, and design decisions.
+
+This list matches the End Game in `IMPLEMENTATION_PLAN.md`, which remains the authoritative version.
+
 ## Start here
 
 1. `IMPLEMENTATION_PLAN.md`

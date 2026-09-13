@@ -1301,6 +1301,8 @@ Start with:
 
 Do not rely only on `FileChanged`: it is useful for observation but cannot block a file change. Claude can also alter files through Bash/PowerShell, so `Stop` must compare Git state against BuildLens's last observed snapshot.
 
+Phase 8 builds the reconciliation **machinery** and proves it end to end in one process: a picture of the working tree, a comparison of two pictures, and the claimed-path guard. It does **not** wire `SessionStart` and `Stop` to call it. Each hook runs as its own short-lived process, so the session-start baseline cannot survive until `Stop` without persistence. That wiring waits for Phase 11, where persistence is introduced. Do not add a stopgap store here.
+
 For every observed file version record at least:
 
 ```text
@@ -1432,6 +1434,8 @@ Do not add the visual editor yet. First prove headlessly that:
 - overlapping edits return `CONFLICT`;
 - stale expected hashes are rejected;
 - neither original version is destroyed during reconciliation.
+
+Exercise the Phase 8 `Stop` scan the same headless way: take the baseline and witness pictures inside one process and reconcile them, including a shell edit no hook reported, an unreadable path, and a claimed path. Storing the baseline durably between hook processes is still Phase 11's job; Phase 9 tests the behavior, not the wiring.
 
 ### You learn
 
@@ -1603,9 +1607,12 @@ events
 attempts
 mastery
 architecture decisions
+working-tree baseline pictures
 ```
 
 Keep persistence behind narrow repositories/interfaces.
+
+The Phase 8 `Stop` reconciliation scan is one concrete driver for this phase: its session-start baseline picture must outlive the `SessionStart` hook process in order to be compared at `Stop`. Wire `SessionStart` to store a picture, and `Stop` to load it, take a witness picture, and reconcile. Store the picture's hashes, unreadable paths, and `taken_at` — not file bytes. The condition under which bytes would be needed is recorded in `reconcile.py`.
 
 ### You learn
 

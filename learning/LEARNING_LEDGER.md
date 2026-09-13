@@ -47796,3 +47796,18 @@ picture_vs_reconcile_output     where take_picture puts a path vs what reconcile
 ```
 
 GATE CLOSED for EV-P8-WORKING-TREE-PICTURE-458.
+
+## CORRECTION — persistence is Phase 11, not Phase 9 (2026-09-13)
+
+Facilitator error, recorded rather than rewritten. EV-P8-RECONCILE-455 says the learner "ruled
+cross-process storage into Phase 9". The learner's ruling was that storage does not belong in the
+Phase 8 patch and needs persistence; the phase NUMBER came from the facilitator's question, which
+framed the alternative as "Phase 9's job". IMPLEMENTATION_PLAN.md places persistence in Phase 11
+(Phase 9 is Event-Driven State and Reliability; Phase 10 is the Learning Engine).
+
+The learner chose to keep the plan's order after being shown the tradeoff: moving persistence first
+would store events and attempts before they are modeled, and would put every earlier "Phase 9"
+reference in this ledger permanently at odds with the plan. Notes were added to Phases 8, 9 and 11
+instead.
+
+Misconception attributed to the FACILITATOR, not the learner: phase_label_asserted_without_checking.

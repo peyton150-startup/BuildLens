@@ -4400,3 +4400,37 @@ between two separate hook processes: persistence, which the learner has ruled be
 
 Retrieval due: capture_repository_root walks up to the folder holding .git; unreadable is a set of
 paths with no hashes; where take_picture puts a path versus what reconcile concludes about it.
+
+### CORRECTION — which phase persistence belongs to (2026-09-13)
+
+Four statements written this session named persistence as "Phase 9". That label is WRONG and was
+introduced by the facilitator, not the learner: asked where cross-process storage belonged, the
+facilitator framed the choice as "this patch, or Phase 9's job", and the learner answered within
+that framing. IMPLEMENTATION_PLAN.md has always said:
+
+```text
+Phase 9    Event-Driven State and Reliability
+Phase 10   Learning Engine and Knowledge Gates
+Phase 11   Persistence — "Introduce SQLite only now"
+```
+
+The learner's REASONING stands unchanged: SessionStart and Stop run as separate processes, so the
+Stop scan's baseline picture cannot survive to be compared without persistence. Read "Phase 9" as
+"Phase 11" in the persistence sense at these places; the originals are left as written:
+
+```text
+CURRENT_STATE.md   "Phase 9 is now EARNED rather than assumed" (455 section)
+CURRENT_STATE.md   "persistence, which the learner has ruled belongs to Phase 9" (458 section)
+LEARNING_LEDGER    EV-P8-RECONCILE-455, scope: "ruled cross-process storage into Phase 9"
+LEARNING_LEDGER    the 455 session narrative repeating the same label
+```
+
+Older references to Phase 9 as the home of hook-versus-write ORDERING and DUPLICATION are correct and
+untouched.
+
+DECISION (the learner's, 2026-09-13): keep the plan's phase order. Notes added to the plan: Phase 8
+built the reconciliation machinery and defers hook wiring; Phase 9 exercises the Stop scan headlessly
+with pictures held in one process; Phase 11 names the Stop baseline as a driver for persistence and
+is where SessionStart and Stop get wired. Renumbering was rejected: Phase 11 persists events and
+attempts that Phases 9 and 10 model first, and historical ledger entries would contradict a
+renumbered plan permanently.
