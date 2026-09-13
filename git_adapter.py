@@ -168,26 +168,46 @@ def capture_repository_root(repository: Path) -> str:
     return output.strip()
 
 
-def capture_untracked_paths(repository: Path) -> list[str]:
-    """Return repository-relative paths of untracked, non-ignored files.
+def _split_nul_terminated(output: str) -> list[str]:
+    """Split `ls-files -z` output into paths.
 
     -z makes Git end every path with a NUL instead of a newline, and stop quoting
     names. Without it, "café.txt" arrives as the literal text "caf\\303\\251.txt",
     a path that does not exist on disk. NUL is the one character no filename can
     contain, so it is the only separator that can never fall inside a name.
     """
+    paths = output.split("\0")
+
+    # Every path is FOLLOWED by a NUL, so the piece after the last one is always
+    # empty — and with no paths, the whole output is that one empty piece. Only
+    # the last piece is removed: an empty piece anywhere else would mean the
+    # output was not what -z promises, and must not be hidden.
+    if paths[-1] == "":
+        paths.pop()
+
+    return paths
+
+
+def capture_untracked_paths(repository: Path) -> list[str]:
+    """Return repository-relative paths of untracked, non-ignored files."""
     output = _capture(
         repository,
         ["ls-files", "--others", "--exclude-standard", "-z"],
         "UNTRACKED discovery",
     )
-    paths = output.split("\0")
+    return _split_nul_terminated(output)
 
-    # Every path is FOLLOWED by a NUL, so the piece after the last one is always
-    # empty — and with no untracked files, the whole output is that one empty
-    # piece. Only the last piece is removed: an empty piece anywhere else would
-    # mean the output was not what -z promises, and must not be hidden.
-    if paths[-1] == "":
-        paths.pop()
 
-    return paths
+def capture_tracked_paths(repository: Path) -> list[str]:
+    """Return paths Git tracks, relative to the folder Git runs in.
+
+    These come from the INDEX, not the disk: a tracked file deleted from the
+    working tree is still listed until its deletion is staged. A caller that
+    needs to know what is actually there has to look.
+    """
+    output = _capture(
+        repository,
+        ["ls-files", "-z"],
+        "TRACKED discovery",
+    )
+    return _split_nul_terminated(output)

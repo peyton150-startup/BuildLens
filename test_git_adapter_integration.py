@@ -21,6 +21,7 @@ from git_adapter import (
     capture_new_file_diff,
     capture_repository_root,
     capture_staged_diff,
+    capture_tracked_paths,
     capture_unstaged_diff,
     capture_untracked_paths,
 )
@@ -123,6 +124,25 @@ def test_untracked_discovery_returns_a_non_ascii_name_exactly_as_it_is_on_disk()
         assert (repository / paths[0]).exists()
 
 
+def test_tracked_discovery_still_lists_a_file_deleted_from_disk():
+    # The index keeps the path until the deletion is staged. That is why a picture
+    # must ask the disk what is there, and cannot trust Git's list alone.
+    with temporary_directory() as directory:
+        repository = new_repository(directory)
+        (repository / "tracked.txt").unlink()
+
+        assert capture_tracked_paths(repository) == ["tracked.txt"]
+
+
+def test_tracked_discovery_returns_a_non_ascii_name_exactly_as_it_is_on_disk():
+    with temporary_directory() as directory:
+        repository = new_repository(directory)
+        (repository / "café.txt").write_bytes(b"bonjour\n")
+        run_git(repository, ["add", "café.txt"])
+
+        assert capture_tracked_paths(repository) == ["café.txt", "tracked.txt"]
+
+
 def test_a_latin_1_working_tree_file_is_rejected_not_silently_mangled():
     with temporary_directory() as directory:
         repository = new_repository(directory)
@@ -201,6 +221,8 @@ test_staging_moves_the_change_from_unstaged_to_staged()
 test_untracked_discovery_finds_a_file_that_was_never_added()
 test_untracked_discovery_reports_an_empty_new_file()
 test_untracked_discovery_returns_a_non_ascii_name_exactly_as_it_is_on_disk()
+test_tracked_discovery_still_lists_a_file_deleted_from_disk()
+test_tracked_discovery_returns_a_non_ascii_name_exactly_as_it_is_on_disk()
 test_a_latin_1_working_tree_file_is_rejected_not_silently_mangled()
 test_new_file_diff_presents_an_untracked_file_as_added_content()
 test_new_file_diff_of_an_empty_file_has_a_header_and_no_hunk()

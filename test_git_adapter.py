@@ -17,6 +17,7 @@ from git_adapter import (
     capture_new_file_diff,
     capture_repository_root,
     capture_staged_diff,
+    capture_tracked_paths,
     capture_unstaged_diff,
     capture_untracked_paths,
 )
@@ -171,6 +172,29 @@ def test_capture_untracked_paths_rejects_unexpected_status():
             raise AssertionError("capture_untracked_paths did not reject status 129")
 
 
+def test_capture_tracked_paths_runs_expected_command_and_splits_on_nul():
+    prepared = completed(stdout=b"app.py\0notes/plan.md\0")
+
+    with patch("git_adapter.subprocess.run", return_value=prepared) as fake_run:
+        result = capture_tracked_paths(REPOSITORY)
+
+    assert result == ["app.py", "notes/plan.md"]
+    fake_run.assert_called_once_with(
+        ["git", "ls-files", "-z"],
+        cwd=REPOSITORY,
+        capture_output=True,
+        timeout=10,
+        shell=False,
+    )
+
+
+def test_capture_tracked_paths_returns_empty_list_when_nothing_is_tracked():
+    prepared = completed(stdout=b"")
+
+    with patch("git_adapter.subprocess.run", return_value=prepared):
+        assert capture_tracked_paths(REPOSITORY) == []
+
+
 def test_capture_repository_root_runs_expected_command_and_strips_newline():
     prepared = completed(stdout=b"C:/projects/example\n")
 
@@ -288,4 +312,6 @@ test_capture_staged_diff_rejects_unexpected_status_with_its_own_label()
 test_capture_untracked_paths_runs_expected_command_and_splits_on_nul()
 test_capture_untracked_paths_returns_empty_list_when_none_exist()
 test_capture_untracked_paths_rejects_unexpected_status()
+test_capture_tracked_paths_runs_expected_command_and_splits_on_nul()
+test_capture_tracked_paths_returns_empty_list_when_nothing_is_tracked()
 print("test passed")
