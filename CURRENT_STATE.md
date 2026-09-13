@@ -4384,3 +4384,19 @@ Git itself. Needs a tracked-path listing in git_adapter, which must ALSO use -z 
 already agreed: tracked or untracked readable -> hashes; ignored -> absent; tracked but ABSENT ->
 neither; UNREADABLE -> unreadable; taken_at captured once, before any read, and the picture is not
 atomic.
+
+### Patch 2b — take_picture (EV-P8-WORKING-TREE-PICTURE-458)
+
+```text
+git_adapter.py            _split_nul_terminated (shared), capture_tracked_paths (`ls-files -z`)
+working_tree_picture.py   take_picture(repository) -> Picture: root first, tracked + untracked,
+                          READ/UNREADABLE/ABSENT mapped, unknown status raises, no partial picture
+commit                    ee81862, thirteen suites green
+```
+
+Gate closed. The reconciliation MACHINERY of Phase 8 is complete and was verified end to end.
+What remains — SessionStart and Stop actually calling it — needs the baseline picture to survive
+between two separate hook processes: persistence, which the learner has ruled belongs to Phase 9.
+
+Retrieval due: capture_repository_root walks up to the folder holding .git; unreadable is a set of
+paths with no hashes; where take_picture puts a path versus what reconcile concludes about it.

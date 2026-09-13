@@ -47742,3 +47742,57 @@ separator_safety_inverted   which character a filename can never hold — recove
 ```
 
 GATE CLOSED for EV-P8-NUL-PATHS-457.
+
+## EV-P8-WORKING-TREE-PICTURE-458 — take_picture from real Git and real disk
+
+DESIGN (the learner's): module name chosen from three candidates — "directory_picture" first, then
+challenged that a directory also holds ignored files and .git/, which the picture leaves out; the
+learner kept "picture" and took working_tree_picture. Rows 1-8 approved: "i cannot think of any other
+cases so approved". On row 8: "i like the no partail picture".
+
+VERIFIED BEFORE BUILDING: `git ls-files` still lists a tracked file after it is deleted from disk
+(sandbox run), which is what makes row 4 necessary.
+
+CODE: git_adapter._split_nul_terminated (the learner's trailing-piece rule, now shared),
+capture_tracked_paths (`ls-files -z`); working_tree_picture.take_picture resolves the ROOT first,
+lists tracked + untracked from there, observes each path, maps READ -> hashes, UNREADABLE ->
+unreadable, ABSENT -> neither, and RAISES on any other status. 8 real-Git rows + 2 mocked + 2
+integration. All thirteen suites green. Commit ee81862.
+
+END-TO-END RUN (baseline, shell-style changes, witness taken from a SUBFOLDER, reconcile): café.txt
+created, notes/plan.md modified, old.txt deleted, config.ini undetermined, claimed app.py silent,
+ignored debug.log never looked at. Every row held together.
+
+TRACE — take_picture(repo/src), four observed statuses:
+
+```text
+hashes / unreadable   first answered as COUNTS ("2", "1") — right counts, not contents
+hashes                {src/main.py : "m1" , src/draft.py : "d1"}  correct
+unreadable            "{None}" (ambiguous), then "i am not sure what the hashses will be for
+                      unreadable" — expected hashes in the set. Shown the type frozenset[str]:
+                      paths only, which was the learner's own design reason. Then
+                      {assets/logo.png}  correct
+README.md             "it wiqll end up in deleted" — conflated take_picture with reconcile;
+                      separated, then "neither"  correct
+src/ prefix           "that is the repo root for the file" — right idea, mechanism missing; did not
+                      recall capture_repository_root walks UP to the folder holding .git. Shown its
+                      docstring, then: root = repo, ls-files runs in repo, keys like src/main.py
+```
+
+EXPLANATION (why raise on an unknown status): first answer aimed at wrong-path risk. Walked the chain
+the learner already held from README.md: neither -> DELETED -> not true. Passed.
+
+TRANSFER (backup tool handed DCIM/100CANON/ instead of the card's top level): the learner found a
+REAL failure the facilitator had not intended — sibling folders are never listed. The key-mismatch
+half (IMG_001.jpg vs DCIM/100CANON/IMG_001.jpg) was added. Passed.
+
+MISCONCEPTIONS:
+
+```text
+answers_counts_for_contents     twice this gate; ask for contents explicitly
+unreadable_holds_hashes         recovered by pointing at frozenset[str]
+capture_repository_root_walks_up   forgotten from an earlier phase; retrieval due
+picture_vs_reconcile_output     where take_picture puts a path vs what reconcile later concludes
+```
+
+GATE CLOSED for EV-P8-WORKING-TREE-PICTURE-458.
