@@ -48672,3 +48672,19 @@ misses on WHO calls observe_file and on argument-versus-return are cold-retrieva
 ones. FACILITATOR SELF-CHECK: the remediation chain drifted from the gate's target (adapter boundary,
 new/unchanged modules) into compare internals; keep the worked-example step short and return to OWED
 item 2 promptly.
+
+WORKED-EXAMPLE EXPLANATION (code shown), verbatim:
+
+```text
+"the compare value is calling importlib.importmodue whic h i assume is the module we will be comparing
+to the observation, then we have the observation which is absent and then the verdict which calls
+compare write to compare hello to absent which asserts verdict fileabsent"
+```
+
+- importlib.import_module("compare") — WRONG reading, peripheral: it loads compare.py so the test can
+  call its functions; nothing is compared to it. Corrected briefly, not drilled.
+- observation ABSENT; claim "hello\n" and observed go IN to compare_write; FILE_ABSENT comes OUT and the
+  assert checks it — CORRECT, input/output order now right.
+- where observed comes from (built by hand) and why notes.md never needs to exist — not stated.
+
+Worked-example rescue step 2 posed: complete ONE missing step (the source of observed and why no disk).
