@@ -48598,3 +48598,14 @@ The concept is right (the file persists on disk; the ObservedFile is an in-memor
 inspector analogy is what keeps failing — three mappings, same inversion. Decision: DROP the analogy
 (it now tests the metaphor, not the concept) and check the concept directly in BuildLens terms: which
 existed before file_observer ran, which did file_observer produce, which does compare receive.
+
+LEARNER QUESTION, verbatim (asked before the direct check was posed):
+
+```text
+"my questiuon is that if there is no server.toml is there no file?"
+```
+
+This names the underlying blocker: the learner expects NO FILE to mean NO OBSERVATION. Answered from
+file_observer.py:60-68: no file on disk, but observe_file still RETURNS an ObservedFile with
+status=ABSENT, file_bytes=None, content_hash=None, and observed_at and path set. Absence is recorded as
+a fact, not as nothing. Direct check posed next: predict the ObservedFile fields for a missing file.
