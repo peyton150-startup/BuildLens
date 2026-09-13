@@ -48772,3 +48772,8 @@ No fields filled, no reasoning. OVERCORRECTION after the compare flip: "the adap
 generalized to completeflow, which is the one module that NAMES the Claude adapter. Not revealed.
 ADAPT DOWN to a single trace the learner already did correctly at the start of this session: what line
 102 (claude_adapter.parse_post_tool_use) does with the Tern payload, which has no hook_event_name.
+
+Reasoning added, verbatim: "it just takes the payload and calls other module to deal with it"
+TRUE as a description of orchestration, and it is the exact reason it changes: it calls ONE named module,
+claude_adapter, for every payload. The trace question isolates "which module, and what does it do with
+Tern".
