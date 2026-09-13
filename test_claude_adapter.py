@@ -720,4 +720,70 @@ test_row_3_a_bash_proposal_names_no_file_and_returns_none()
 test_row_4_each_parser_rejects_the_other_event()
 test_row_5_a_proposal_without_a_tool_use_id_raises()
 test_row_6_a_real_captured_edit_proposal_parses()
+
+
+# --- tool_use_id on ClaimedEdit: OPTIONAL, the learner's ruling -----------------
+#
+# A report's verdict never reads tool_use_id, so refusing a report without one
+# would cost a verdict to protect only a pairing. Absent is recorded as None, a
+# visible gap, never a stand-in id. ProposedEdit keeps it required: a proposal has
+# no verdict to lose.
+
+
+def post_write_payload(**top_level):
+    payload = {
+        "session_id": "session-9",
+        "hook_event_name": "PostToolUse",
+        "tool_name": "Write",
+        "tool_input": {"file_path": "C:\\repo\\notes.txt", "content": "hi\n"},
+    }
+    payload.update(top_level)
+    return payload
+
+
+def test_a_report_records_its_tool_use_id():
+    claude_adapter = importlib.import_module("claude_adapter")
+
+    claim = claude_adapter.parse_post_tool_use(post_write_payload(tool_use_id="toolu_abc"))
+
+    assert claim.tool_use_id == "toolu_abc"
+
+
+def test_a_report_without_a_tool_use_id_still_gets_a_claim():
+    claude_adapter = importlib.import_module("claude_adapter")
+
+    claim = claude_adapter.parse_post_tool_use(post_write_payload())
+
+    assert claim is not None
+    assert claim.tool_use_id is None
+
+
+def test_a_non_string_tool_use_id_on_a_report_raises():
+    claude_adapter = importlib.import_module("claude_adapter")
+
+    expect_value_error(
+        claude_adapter.parse_post_tool_use,
+        post_write_payload(tool_use_id=42),
+        "tool_use_id",
+    )
+
+
+def test_a_proposal_and_its_report_share_one_tool_use_id():
+    claude_adapter = importlib.import_module("claude_adapter")
+    tool_input = {"file_path": "C:\\repo\\notes.txt", "content": "hi\n"}
+
+    proposal = claude_adapter.parse_pre_tool_use(
+        pre_payload("Write", tool_input, tool_use_id="toolu_pair")
+    )
+    claim = claude_adapter.parse_post_tool_use(
+        pre_payload("Write", tool_input, hook_event_name="PostToolUse", tool_use_id="toolu_pair")
+    )
+
+    assert proposal.tool_use_id == claim.tool_use_id == "toolu_pair"
+
+
+test_a_report_records_its_tool_use_id()
+test_a_report_without_a_tool_use_id_still_gets_a_claim()
+test_a_non_string_tool_use_id_on_a_report_raises()
+test_a_proposal_and_its_report_share_one_tool_use_id()
 print("test passed")

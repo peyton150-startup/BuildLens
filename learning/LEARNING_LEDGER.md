@@ -47912,3 +47912,44 @@ Recovered in both directions: a PreToolUse present does not prove the edit ran; 
 prove the file unchanged; a missing PostToolUse does not prove it either. Hook events are SIGNALS;
 the disk is AUTHORITY. Pattern noted: the learner enumerates cases rather than stating the principle
 until shown the outcomes side by side — the table is the scaffold that works; fade it next time.
+
+### EV-P8-PRETOOLUSE-459 — the parser, and tool_use_id on ClaimedEdit
+
+DESIGN A vs B (verbatim): "so we go with B becasue we need to differentiate between the 2 hooks" —
+a label; asked for the mechanism. Trace under A: compare's verdict "did not hold"; is it true? "it
+could still be true if we approve the permission and the edit passes". Then the real reason: "honestly
+it is a bout responsilbity ofr me, claimed edit is the claim the edit is saying it made and propsoed
+edit is the edit we can approve or deny, they have two differnt reposinbilitys and functions".
+ACCEPTED. Downside (shared parsing) "not sure"; reversal "if they had a similar responsiblity" —
+vague, carried into the gate.
+
+ROWS 1-7 approved; row 5 (PreToolUse with no tool_use_id): "rasie".
+
+EVIDENCE gathered first: tool_input keys are IDENTICAL between a proposal and its report, for both a
+Write and a real successful Edit captured today.
+
+CODE: ProposedEdit (tool_use_id required), parse_pre_tool_use, and one shared _tool_call_fields
+behind both parsers. Commit c78b1b6; thirteen suites green.
+
+LEARNER-FOUND GAP before the gate: "wait what about the tool use id for posttoooluse". ClaimedEdit had
+none, so pairing was impossible. Evidence: 101 of 101 real PostToolUse payloads carry tool_use_id;
+the hand-trimmed fixture and hand-written test payloads carry none.
+
+RULING, changed after challenge — the full exchange, verbatim:
+
+```text
+first     "required"
+defense   "so if there is a relay that dropps tooluse id then we are cooked but out of all the
+          posttool paylloads we have all of them had the posttoolid and this is needed be caseu it
+          makes it possible for us to match pre and post tool payloads"
+          — evidence, quality, and downside all present. Challenged: compare never reads the id, so
+          REQUIRED costs a verdict to protect a pairing
+counter   "ok so you might be right optional does make more sense but my counter question is that
+          does the missing tool id signify that something is wrong if it is not intnetally dropped"
+          — a strong counter. Answered: truncation fails json.loads first (EV-447); other damage
+          usually loses required fields; the undetermined pattern keeps the result AND the gap
+final     "ok so optional it is"
+```
+
+Asymmetry recorded: ProposedEdit.tool_use_id REQUIRED (no verdict to lose); ClaimedEdit.tool_use_id
+OPTIONAL (None when absent, a visible gap).

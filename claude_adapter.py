@@ -29,6 +29,11 @@ class ClaimedEdit:
     # refusing such a payload would cost a claim BuildLens could otherwise judge.
     # Only the Stop reconciliation scan needs it, and only as a place to run Git.
     session_cwd: str | None = None
+    # Pairs this report with the proposal of the same tool call. Optional, unlike
+    # on ProposedEdit: the verdict never reads it, so refusing a report without one
+    # would cost a verdict to protect only a pairing. None is a visible gap, not a
+    # stand-in id. Every one of 101 real PostToolUse payloads carried it.
+    tool_use_id: str | None = None
 
 
 @dataclass(frozen=True)
@@ -160,11 +165,13 @@ def _tool_call_fields(payload: dict[str, object]) -> dict[str, object] | None:
 
 def parse_post_tool_use(payload: object) -> ClaimedEdit | None:
     """Return a claimed edit, or None when no file is directly observed."""
-    fields = _tool_call_fields(_checked_event(payload, "PostToolUse"))
+    checked = _checked_event(payload, "PostToolUse")
+
+    fields = _tool_call_fields(checked)
     if fields is None:
         return None
 
-    return ClaimedEdit(**fields)
+    return ClaimedEdit(tool_use_id=_optional_string(checked, "tool_use_id"), **fields)
 
 
 def parse_pre_tool_use(payload: object) -> ProposedEdit | None:
