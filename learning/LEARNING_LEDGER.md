@@ -48761,3 +48761,14 @@ SIDE-BY-SIDE ANSWER, verbatim:
 - which adapter translates; can compare tell; why completeflow changes — not answered
 
 Re-asked the one deciding item: why completeflow changes, given compare does not.
+
+COMPLETEFLOW ANSWER (lines 102 and 121 shown), verbatim:
+
+```text
+"maybe complete floiw does not change"
+```
+
+No fields filled, no reasoning. OVERCORRECTION after the compare flip: "the adapter shields everything"
+generalized to completeflow, which is the one module that NAMES the Claude adapter. Not revealed.
+ADAPT DOWN to a single trace the learner already did correctly at the start of this session: what line
+102 (claude_adapter.parse_post_tool_use) does with the Tern payload, which has no hook_event_name.
