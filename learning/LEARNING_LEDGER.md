@@ -48810,3 +48810,116 @@ file_observer, git_adapter, working_tree_picture, reconcile, claude_adapter, com
 (route + provenance) and cli. The compare placement and completeflow reason needed side-by-side and
 trace scaffolds. REMAINING: OWED item 3 — fresh non-Claude, non-Tern, PROPOSAL-shaped payload, cold, no
 frames or hints. Learner offered: now or next session.
+
+### EV-P8-PHASE-GATE-460 — OWED item 3: fresh cold target payload ("Kestrel"), POSED
+
+Learner chose to continue in this session ("no lets do it here"). Premise stated explicitly (fixing the
+first framing error): a new kestrel_adapter.py is being added; not a trace of today's code. No frames,
+no hints, no module list.
+
+PROMPT PAYLOAD (exact):
+
+```text
+{
+  "agent": "kestrel",
+  "type": "tool_call.requested",
+  "conversation": "c-19b2",
+  "call_id": "call-88",
+  "cwd": "/srv/blog",
+  "llm": { "name": "kestrel-mini", "temperature": 0.2 },
+  "rationale": "The README is missing install steps, so I will write a new one.",
+  "tool": {
+    "name": "create_or_overwrite",
+    "path": "/srv/blog/README.md",
+    "text": "# Blog\n\nRun make install.\n"
+  },
+  "expected_effect": "README.md will contain install steps",
+  "self_reported_risk": "low"
+}
+```
+
+FIELDS: stops / crosses and under which BuildLens names / BuildLens type / why that type and not the
+other / what the model suggested or asserted / what must be validated / which code validates / what
+deterministic code runs after the adapter today / where truth lives and when it can be checked / new
+modules / unchanged modules / changed modules and why / confidence.
+
+GRADING REFERENCE (not revealed): type ProposedEdit (requested, not run); tool.name -> Write, path ->
+file_path, text -> details content, conversation -> session_id, call_id -> tool_use_id (REQUIRED on a
+proposal), cwd -> session_cwd; stops: agent (read to pick the adapter), type (read to pick the type),
+llm, rationale, expected_effect, self_reported_risk. expected_effect and self_reported_risk are model
+assertions — never validation, never truth. Adapter checks shape only. After the adapter TODAY nothing
+consumes a proposal (no compare against disk — the edit has not happened); truth is the disk, checkable
+only after a later report of the same call_id is observed. Modules: new kestrel_adapter; completeflow
+and cli change (routing, provenance); compare/file_observer/git_adapter/reconcile/working_tree_picture/
+claude_adapter unchanged.
+
+FIRST COMMITTED ANSWER, part 1 of the fields (verbatim; learner sent the first two fields only):
+
+```text
+stops     "llm, rationale, expected effect, risk, type"
+crosses   "agent for provanance, conversation or session id, call id or tool use id, cwd, tool.name or
+          toolname, tool.path or file path, text or content"
+```
+
+No feedback given yet (cold gate: grading before the remaining fields would leak them). Remaining fields
+requested without comment.
+
+FIRST COMMITTED ANSWER, remaining fields (verbatim, one message; mapped in field order):
+
+```text
+"proposededit
+it is a tool call requested which changes my answer so type crosseses as hook name pre or post, it will
+create or overwrite the fiel, that the tool call has not yet chnaged a file, and it would be approved or
+denied based on that, the compare does the comparing that then can make it possible for start flow to
+return a verdict, the rest of the flow runs after the adapter today, truth lives in the file on disk and
+it is checkced in start flow, kestraladapter
+startflow has to change becouse we need to update the provanance and the parce line to account for the
+new payload, cli changes, 70"
+```
+
+GRADING (confidence 70):
+
+```text
+stops (part 1)          llm, rationale, expected_effect, risk, type        CORRECT as first given
+crosses (part 1)        conversation->session_id, call_id->tool_use_id,     CORRECT; agent "for provenance"
+                        cwd, path->file_path, text->content, tool.name     defensible; tool.name not
+                                                                            translated to Write (partial)
+type                    ProposedEdit                                        CORRECT, UNAIDED, on a
+                                                                            proposal-shaped payload
+why                     "tool call requested"                              CORRECT reason
+  revision              "type crosses as hook name pre or post"            WRONG — REPEAT of rung 3:
+                                                                            Claude event vocabulary as an
+                                                                            internal field; type is read
+                                                                            to choose the type, then stops
+suggested/asserted      "it will create or overwrite the file"             PARTIAL — the suggestion;
+                                                                            expected_effect and risk not
+                                                                            named as model assertions
+must be validated       "that the tool call has not yet changed a file,    WRONG — validation is shape
+                        and it would be approved or denied based on that"  (fields present, typed, call_id
+                                                                            required); approval is a later
+                                                                            phase and not a validation
+which code validates    "the compare does the comparing ... start flow     WRONG — the adapter validates;
+                        to return a verdict"                               compare never receives proposals
+deterministic after     "the rest of the flow runs after the adapter       WRONG — today nothing consumes
+adapter today           today"                                              a ProposedEdit
+truth                   "file on disk"                                      CORRECT
+when checkable          "checked in start flow"                            WRONG — a proposal's effect
+                                                                            cannot be checked yet; only
+                                                                            after a later report of the
+                                                                            same call_id is observed
+new modules             kestrel adapter                                     CORRECT
+unchanged modules       not answered
+changes and why         completeflow (provenance, parse line), cli         CORRECT
+```
+
+RESULT: GATE NOT PASSED. Phase 8 remains OPEN. Boundary, field mapping, type naming and modules are now
+solid cold. The two audit gaps from 340 recur exactly: WHAT MUST BE VALIDATED (shape, by the adapter)
+and WHERE/WHEN TRUTH CAN BE CHECKED for a proposal.
+
+PRIMARY BLOCKER: the proposal is routed mentally through the report pipeline (start_flow -> compare ->
+verdict), although the learner's own 459 design reason was that nothing judging claims against disk may
+be handed a proposal. Secondary (repeat): Claude hook-event name treated as crossing.
+
+REMEDIATION posed (R1, one concept): at the moment this proposal arrives, what would observing README.md
+tell about whether the proposal's edit worked; can compare judge it now; what later event makes checking
+possible.
