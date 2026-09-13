@@ -48662,3 +48662,13 @@ Repeated difficulty across this chain, so WORKED-EXAMPLE RESCUE (allowed once): 
 test_missing_file_contradicts_the_claim (test_compare.py:94-100) with its helper
 observation_without_bytes (51-59). Then: learner explains the solved steps -> completes one missing step
 -> fresh example unaided.
+
+LEARNER CONTEXT, verbatim: "i am also doing this without looking at code at all and wrote this code a
+few days ago"
+
+EVIDENCE CONDITION for this entire gate chain: every answer was given from memory with no code open;
+the code under question (compare.py, completeflow.py, test_compare.py) was written days earlier. The
+misses on WHO calls observe_file and on argument-versus-return are cold-retrieval misses, not assisted
+ones. FACILITATOR SELF-CHECK: the remediation chain drifted from the gate's target (adapter boundary,
+new/unchanged modules) into compare internals; keep the worked-example step short and return to OWED
+item 2 promptly.
