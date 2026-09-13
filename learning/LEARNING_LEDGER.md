@@ -47984,3 +47984,33 @@ returns? if fields is None?), name the line a raise would come from, and say why
 was predicted to raise.
 
 Also still owed: can the learner read `**fields`; the downside and reversal condition for B.
+
+### EV-P8-PRETOOLUSE-459 — trace remediation, completed
+
+B check by check: "so a bash command will trace through parse post tool and return None"; then each
+of the three steps raises? "no / no / no". Rule named: a check raises only when its condition fails.
+
+`**` SYNTAX (OPERATOR_MEANING / SYNTAX_READING) — a long chain, recorded honestly:
+
+```text
+R1 greet(**info)                         "Ada from leeds"  correct
+target (hypothetical tidy-up where fields ALSO holds tool_use_id)
+  spread written as one tool_use_id; "once"; "proposed edit"  — WRONG: twice, TypeError (revealed)
+greet(city="Paris", **{..city..}) etc.   answered counts ("2 names" / "one name"), not results
+asked "is the **field the **{city} part" — yes: **fields spreads a variable, **{...} an inline dict
+misread "adding **fields to the end of a return would make some values return twice" — corrected:
+  only a name written explicitly AND present as a dict key arrives twice; it is about call arguments
+asked to SEE both cases — worked-example rescue: real ProposedEdit built once vs TypeError
+asked "where does the call do that?" — Python's argument collection at the call line, no BuildLens
+  code; explicit args, then dict keys, stop on a taken name
+PARAMETERS vs ARGUMENTS confused ("in the paramaeters if it is there and in the call line") — split
+explicit/dict presence: "it is city=paris / it is city -> leeds"  correct
+mapped greet onto the real code; "no, so it arrives once" for fields lacking tool_use_id  correct
+learner spotted the real call and the first greet call DIFFER — correct, and the key insight
+"wait was all this a hypothetical?" — FACILITATOR ERROR: the tidy-up what-if was not flagged as
+  hypothetical clearly enough, and it cost confusion. Real vs hypothetical then separated explicitly
+final unaided: "TypeError, works \"Ada from Paris\""  CORRECT, verified by running
+```
+
+TRACE (gate part 1): PASSED after remediation. Explanation (downside of B, reversal condition) and
+transfer still owed.
