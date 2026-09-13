@@ -1,0 +1,13 @@
+{
+  "session_id": "session-sample",
+  "cwd": "C:\\repo",
+  "hook_event_name": "PreToolUse",
+  "tool_name": "Edit",
+  "tool_input": {
+    "file_path": "C:\\repo\\hook_probe.txt",
+    "old_string": "alpha",
+    "new_string": "beta",
+    "replace_all": false
+  },
+  "tool_use_id": "toolu_019jdKPf6Rm1QeKHXXQvo67D"
+}

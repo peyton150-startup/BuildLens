@@ -47896,3 +47896,19 @@ rejecting its own input before hooks run — was NOT verified and is recorded as
 Consequence for the design: proposals are not complete coverage either. A tool call can fail with no
 PreToolUse at all, so a missing proposal proves nothing, exactly as a missing report proves nothing.
 Only observation of the file decides — and here it did.
+
+### EV-P8-PRETOOLUSE-459 — open question resolved
+
+```text
+missing PreToolUse proves   first "that the edit failed before the hook fires"; then "that the edit
+                            through the hook method failed or it was through a sed -i" — stories
+                            kept being added. Switched to the file-state table: rejected input
+                            "no", sed -i "yes", untouched "no". Then: "nothing about whether the
+                            file changed"  correct
+Pre fired => edit ran?      "no"; reason after one prompt: "the permission check we deny"  correct
+```
+
+Recovered in both directions: a PreToolUse present does not prove the edit ran; missing does not
+prove the file unchanged; a missing PostToolUse does not prove it either. Hook events are SIGNALS;
+the disk is AUTHORITY. Pattern noted: the learner enumerates cases rather than stating the principle
+until shown the outcomes side by side — the table is the scaffold that works; fade it next time.

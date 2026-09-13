@@ -601,4 +601,123 @@ test_the_session_working_directory_is_recorded()
 test_a_payload_without_a_working_directory_still_gets_a_claim()
 test_a_non_string_working_directory_raises_readable_error()
 test_the_working_directory_is_not_mixed_into_details()
+
+
+# --- PreToolUse: a PROPOSAL, not a report (EV-P8-PRETOOLUSE-459) -------------
+#
+# Rows 1-7 were approved before any of this was written. A proposal arrives
+# before the tool runs, so it says nothing about the disk: it gets its own type,
+# and nothing that judges claims against the disk can be handed one.
+
+
+def pre_payload(tool_name, tool_input, **top_level):
+    payload = {
+        "session_id": "session-9",
+        "cwd": "C:\\repo",
+        "hook_event_name": "PreToolUse",
+        "tool_name": tool_name,
+        "tool_input": tool_input,
+        "tool_use_id": "toolu_test",
+    }
+    payload.update(top_level)
+    return payload
+
+
+def expect_value_error(parse, payload, fragment):
+    try:
+        parse(payload)
+    except ValueError as error:
+        assert fragment in str(error), str(error)
+    else:
+        raise AssertionError("expected ValueError mentioning " + fragment)
+
+
+def test_row_1_a_write_proposal_becomes_a_proposed_edit():
+    claude_adapter = importlib.import_module("claude_adapter")
+    payload = pre_payload("Write", {"file_path": "C:\\repo\\notes.txt", "content": "hi\n"})
+
+    result = claude_adapter.parse_pre_tool_use(payload)
+
+    assert isinstance(result, claude_adapter.ProposedEdit)
+    assert not isinstance(result, claude_adapter.ClaimedEdit)
+    assert result.file_path == "C:\\repo\\notes.txt"
+    assert result.session_id == "session-9"
+    assert result.tool_name == "Write"
+    assert result.details == {"content": "hi\n"}
+    assert result.tool_use_id == "toolu_test"
+    assert result.session_cwd == "C:\\repo"
+
+
+def test_row_2_an_edit_proposal_holds_the_proposed_strings_and_flag():
+    claude_adapter = importlib.import_module("claude_adapter")
+    payload = pre_payload(
+        "Edit",
+        {
+            "file_path": "C:\\repo\\plan.md",
+            "old_string": "alpha",
+            "new_string": "beta",
+            "replace_all": False,
+        },
+    )
+
+    result = claude_adapter.parse_pre_tool_use(payload)
+
+    assert result.details == {"old_string": "alpha", "new_string": "beta", "replace_all": False}
+
+
+def test_row_3_a_bash_proposal_names_no_file_and_returns_none():
+    claude_adapter = importlib.import_module("claude_adapter")
+    payload = pre_payload("Bash", {"command": "sed -i 's/alpha/beta/' plan.md"})
+
+    assert claude_adapter.parse_pre_tool_use(payload) is None
+
+
+def test_row_4_each_parser_rejects_the_other_event():
+    claude_adapter = importlib.import_module("claude_adapter")
+    tool_input = {"file_path": "C:\\repo\\notes.txt", "content": "hi\n"}
+
+    expect_value_error(
+        claude_adapter.parse_pre_tool_use,
+        pre_payload("Write", tool_input, hook_event_name="PostToolUse"),
+        "PostToolUse",
+    )
+    expect_value_error(
+        claude_adapter.parse_post_tool_use,
+        pre_payload("Write", tool_input),
+        "PreToolUse",
+    )
+
+
+def test_row_5_a_proposal_without_a_tool_use_id_raises():
+    # tool_use_id is the only field that can ever pair a proposal with its report.
+    claude_adapter = importlib.import_module("claude_adapter")
+    payload = pre_payload("Write", {"file_path": "C:\\repo\\notes.txt", "content": "hi\n"})
+    del payload["tool_use_id"]
+
+    expect_value_error(claude_adapter.parse_pre_tool_use, payload, "tool_use_id")
+
+
+def test_row_6_a_real_captured_edit_proposal_parses():
+    # Captured from a live PreToolUse on 2026-09-13; paths and session trimmed the
+    # same way as fixtures_post_tool_use_edit.json.
+    import json
+    from pathlib import Path
+
+    claude_adapter = importlib.import_module("claude_adapter")
+    fixture = Path(__file__).with_name("fixtures_pre_tool_use_edit.json")
+    payload = json.loads(fixture.read_text(encoding="utf-8"))
+
+    result = claude_adapter.parse_pre_tool_use(payload)
+
+    assert result.file_path == "C:\\repo\\hook_probe.txt"
+    assert result.details == {"old_string": "alpha", "new_string": "beta", "replace_all": False}
+    assert result.tool_use_id == "toolu_019jdKPf6Rm1QeKHXXQvo67D"
+
+
+test_row_1_a_write_proposal_becomes_a_proposed_edit()
+test_row_2_an_edit_proposal_holds_the_proposed_strings_and_flag()
+test_row_3_a_bash_proposal_names_no_file_and_returns_none()
+test_row_4_each_parser_rejects_the_other_event()
+test_row_5_a_proposal_without_a_tool_use_id_raises()
+test_row_6_a_real_captured_edit_proposal_parses()
 print("test passed")
