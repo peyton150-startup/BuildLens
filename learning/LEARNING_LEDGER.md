@@ -48513,3 +48513,19 @@ example ("desk just gets passed along") under-stressed that the chosen function 
 
 REMEDIATION (block-scoped): show the part of compare_write that reads observed; ask what it reads and
 what the verdict would be for a hand-built observation.
+
+BLOCK TRACE ANSWER (hand-built ABSENT observation), verbatim:
+
+```text
+field read first   "the status"                                                          CORRECT
+(next line)        "so observed will only be called after we confirm the file is read"   PARTIAL /
+                                                                                          UNCLEAR
+verdict / disk? / source   not answered
+confidence                 not given
+```
+
+Charitable reading true: observed.content_hash is only reached when status is READ. But "called" treats
+observed as something that RUNS; it is a value that is LOOKED AT, and its status is read on every call.
+This matches the earlier blocker (compare "uses the file observer"): the learner may picture observation
+happening inside compare. Micro-check posed: is observed a function that runs or a value that is read;
+and the verdict for ABSENT.
