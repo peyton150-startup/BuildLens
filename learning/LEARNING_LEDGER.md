@@ -47953,3 +47953,34 @@ final     "ok so optional it is"
 
 Asymmetry recorded: ProposedEdit.tool_use_id REQUIRED (no verdict to lose); ClaimedEdit.tool_use_id
 OPTIONAL (None when absent, a visible gap).
+
+### EV-P8-PRETOOLUSE-459 — gate part 1 (trace), IN PROGRESS
+
+ClaimedEdit.tool_use_id landed first (bb92ba5): optional, None when absent; thirteen suites green.
+
+WALKTHROUGH first, verbatim: "post too starts with the tool name to make sure it is posttooluse, then
+it checks to see if fields is None and if it is none it returns none otherwise it returns claimededit
+object, then we move to pre tool, that checks the input name and then the tool use id which is
+required here, then if fields is non it returns None or if not it returns the prorosededit object"
+— accurate order, one slip: the first check is the hook EVENT name, not the tool name. A walkthrough
+is not a trace; asked to run two concrete payloads through it.
+
+TRACE — both payloads Bash, both with NO tool_use_id:
+
+```text
+A (PreToolUse)   line 1 _checked_event   predicted "raises"   actual PASSES        WRONG
+                 line 2 tool_use_id      predicted "rasies"   actual raises        correct
+                 reaches Bash check?     predicted "no"       actual no            correct
+                 parse_pre_tool_use(A)   predicted "raises"   actual ValueError:
+                                                              missing required field: tool_use_id
+B (PostToolUse)  parse_post_tool_use(B)  predicted "rasies"   actual returned None WRONG
+                 tool_use_id looked at?  predicted "no"       actual no            correct
+```
+
+Both misses share one blocker: predicting a raise where no check fails (CONDITION_EVALUATION). B's
+two answers contradict each other: tool_use_id not looked at, the tool is Bash, yet it raises.
+Remediation question posed, answer OWED: walk B check by check (event matches? _tool_call_fields
+returns? if fields is None?), name the line a raise would come from, and say why A's matching event
+was predicted to raise.
+
+Also still owed: can the learner read `**fields`; the downside and reversal condition for B.

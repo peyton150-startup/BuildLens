@@ -4468,3 +4468,26 @@ Not built yet: a parser for PreToolUse payloads. Samples now exist to build it f
 
 Phase 8 closure still makes the MAJOR cumulative-review counter due (1/2 -> 2/2): run that review
 before significant Phase 9 work.
+
+### Restart point — 2026-09-13, mid-gate (EV-P8-PRETOOLUSE-459)
+
+```text
+landed    ProposedEdit + parse_pre_tool_use + shared _tool_call_fields   c78b1b6
+          ClaimedEdit.tool_use_id OPTIONAL (learner changed from required after challenge)   bb92ba5
+          fixtures_pre_tool_use_edit.json from a real captured proposal
+          PreToolUse capture hook in .claude/settings.local.json (machine-local, git-excluded)
+suites    thirteen, all green
+```
+
+GATE for 459 is at part 1 (trace), mid-remediation. Owed, in order:
+
+```text
+1  B check by check: _checked_event(B, "PostToolUse") matches? _tool_call_fields -> ? if fields is
+   None -> ? ; which line would a raise come from; why was A's matching event predicted to raise
+2  can the learner read `**fields`  (syntax-only help mode if not)
+3  a fresh target-level trace after remediation
+4  explanation: downside of B (answer: the shared helper) and a concrete reversal condition
+5  transfer
+```
+
+Phase 8 closing afterwards makes the MAJOR cumulative review due before significant Phase 9 work.
