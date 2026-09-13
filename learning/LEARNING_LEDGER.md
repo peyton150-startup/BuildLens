@@ -48688,3 +48688,23 @@ compare write to compare hello to absent which asserts verdict fileabsent"
 - where observed comes from (built by hand) and why notes.md never needs to exist — not stated.
 
 Worked-example rescue step 2 posed: complete ONE missing step (the source of observed and why no disk).
+
+STEP-2 ANSWER, verbatim:
+
+```text
+step 1 blank           "fileobserver"   PARTIAL — the ObservedFile CLASS is imported from file_observer
+                                        (test_compare.py:16), but the builder is the test helper
+                                        observation_without_bytes calling that class directly
+observe_file runs?     "no"             CORRECT (and in tension with step 1)
+why no notes.md        "no idea"
+confidence             not given
+```
+
+BLOCKER: module/class/function conflation — file_observer.py defines both the ObservedFile SHAPE (a
+constructor makes a value, no disk) and observe_file (reads the disk, then fills that shape). The test
+uses only the shape. Explained directly once.
+
+DEFERRED, with reason: "why compare is easy to test (hand-built observation values, no disk)" not
+recovered. It is not the gate's target (adapter boundary), the chain had drifted, and the learner has
+been answering cold for a long stretch. Recorded UNCERTAIN; retrieval due in the cumulative review.
+Returned to OWED item 2 (new versus unchanged modules).
