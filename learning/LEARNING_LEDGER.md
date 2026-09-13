@@ -48062,3 +48062,31 @@ explanation (after R1 scaffolding and a choice-based reversal), transfer (unaide
 
 Retrieval due: CONDITION_EVALUATION; `**` with an explicit duplicate; declaration versus check;
 reversal conditions stated from scratch rather than chosen.
+
+## PHASE 8 CLOSURE AUDIT — 2026-09-13
+
+Every EV-P8 entry marked open, pending or partial was read to its end before any closure claim.
+
+```text
+RESOLVED (stale headers — the entries themselves record the pass)
+  332 HASH-VS-GIT          owed items delivered in 333 (determinism, direction, provenance trap) and
+                           334 (checksum transfer, applied back unaided)
+  397 EMPTY-WRITE          PASS on all three fields
+  407 RUNTIME-INPUTS       miss recovered; chain 406-413 CLOSED at 413
+  431 REPLACE-ALL          target retry PASS at 90
+  441 COMPLETEFLOW-TRACE   CLOSED after remediation (GitCaptureError versus OSError)
+  pipeline chain (~39368)  shared proposal/control/effect principle PASS (39622); email transfer
+  non-Claude transfer      abstract surface saturated by the learner's own report; applied to real
+  (~40225)                 code; the invariant held (tool_input content never observed truth)
+
+STILL OWED against the plan's PHASE-LEVEL gate
+  338/341  adapter reasoning PASSED cold, but the representation that LEAVES the adapter was never
+           named unaided — the name was supplied (and the types have since changed)
+  340      tool-proposal gate: "what must be validated" answered vaguely, "where truth lives" wrong on
+           a trading surface; later surfaces covered the principle but those two questions were never
+           re-asked cold on a familiar surface
+```
+
+DECISION: one composite cold gate closes both gaps — an unfamiliar non-Claude payload asking what stops
+and what crosses, which BuildLens type it becomes, suggestion / validation / deterministic execution /
+truth, and new versus unchanged modules. Phase 8 closes only if it passes.

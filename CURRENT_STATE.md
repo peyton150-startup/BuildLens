@@ -66,7 +66,7 @@ The prior learning sessions recorded thirteen test scripts green. The separate 2
 
 Next, in order:
 
-1. Review Phase 8's PHASE-LEVEL closure obligations in `IMPLEMENTATION_PLAN.md` (the Phase 8 knowledge gate and its transfer expectation) against the ledger; run whatever is missing. Close Phase 8 formally only when evidence supports it.
+1. Closure audit DONE (see PHASE 8 CLOSURE AUDIT in the ledger). One composite cold phase gate is owed: an unfamiliar non-Claude payload — what stops and what crosses the adapter, which BuildLens type it becomes (named unaided), suggestion/validation/deterministic execution/truth, and new versus unchanged modules. Close Phase 8 only if it passes.
 2. Closing Phase 8 makes the major counter due (1/2 -> 2/2): run the cumulative review before significant Phase 9 work.
 3. Then Phase 9's reduced single-process workflow, with the learner proposing the design.
 
