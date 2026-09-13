@@ -47811,3 +47811,88 @@ reference in this ledger permanently at odds with the plan. Notes were added to 
 instead.
 
 Misconception attributed to the FACILITATOR, not the learner: phase_label_asserted_without_checking.
+
+## EV-P8-PRETOOLUSE-459 — a proposal is not a report
+
+DESIGN QUESTIONS AND VERBATIM ANSWERS (VERY LOW assistance, per the plan):
+
+```text
+timing        PreToolUse fires ___ / PostToolUse ___  ->  "before" / "after"  correct
+disk at Pre   "no"  correct
+what it is    "it is a fact that some sort of claude edit or write will be starting nothing else"
+              — careful, but still over-claims: the edit may never start. Asked for a way it never
+              runs: "so the edit has been proposed but not edit run yet", then "it gets densied".
+              A PreToolUse payload is a PROPOSAL; PostToolUse is a REPORT
+```
+
+The learner asked "is that true we could deny an edit fro mthe pretoolhook?" — VERIFIED against
+code.claude.com/docs/en/hooks rather than asserted: exit 2, or hookSpecificOutput.permissionDecision
+"deny", cancels the tool call and tells Claude why; it holds even when permissions are bypassed;
+PostToolUse cannot block ("the tool already ran"); PreToolUse input has no tool_response; with
+several hooks the most restrictive decision wins. The docs call hook matching on shell commands
+best-effort, which is why the plan already calls PreToolUse blocking defense in depth only.
+
+RULINGS:
+
+```text
+1  "in phase 8 no" — BuildLens never denies in Phase 8. First reason: "becasue we cannot reocrod that
+   yet, also there is another reason i just cannot think of it". CONFLICT (Phase 13 vocabulary) was
+   supplied by name; the learner confirmed that state does not exist in BuildLens today. Full reason:
+   a deny overrides Claude and is justified only by a nameable harm; none exists yet
+2  a proposal with no PostToolUse — first: "it was denied or post toolhook failed silently / it was
+   only denied" (refused a single story, correctly). Given the verified fact that PostToolUse fires
+   only after a tool call SUCCEEDS, the cases became "deined / approved but failded / approved no
+   report"; for the last, disk state "changred". Missing PostToolUse tells whether the file changed:
+   "no it does not". What decides: "the observe file portion"  correct
+```
+
+CAPTURE HOOK: the PostToolUse capture in .claude/settings.local.json was found; the learner approved
+adding an identical PreToolUse entry ("yes add the capture hook"). Settings validated as JSON.
+
+PREDICTION on a failing capture command without `|| true`: PostToolUse — "the edit will not go through
+but the claim will still hold" (WRONG: nothing can be blocked after the tool ran); PreToolUse — "no sure".
+
+FACILITATOR ERROR in that question, found by measuring: a failed append exits 1, which docs define as
+a NON-blocking error, so the disk-full premise could never block. The real hazard is a SYNTAX ERROR in
+the hook command: bash exits 2 (measured), exit 2 blocks on PreToolUse, and `|| true` cannot rescue a
+command that never parses.
+
+MISCONCEPTIONS:
+
+```text
+proposal_vs_report              recovered
+missing_report_is_evidence      recovered: only observation decides
+posttooluse_can_block           wrong; retrieval due
+exit_2_vs_other_nonzero         new, taught with measured exit codes
+```
+
+Next: samples captured from a real Write (proposal + report pair), then a deliberately failing Edit
+to test whether a proposal can exist with no report — the learner's ruling-2 case, predicted first.
+
+### EV-P8-PRETOOLUSE-459 — the failing-Edit experiment
+
+Capture verified first: one Write to a scratch file produced a PreToolUse and a PostToolUse sharing
+tool_use_id toolu_01HfXKKwTm83uif3GYt5yqKG; the proposal lacked tool_response and duration_ms.
+
+PREDICTION (verbatim), before an Edit asking to replace "beta" in a file holding only "alpha":
+
+```text
+pairing field   "the tooluse id"  correct
+PreToolUse      "yes"
+PostToolUse     "no"
+reason          "the edit will be approveed and the edit will run but it will fail so no post tooluse
+                hook to be sent"
+```
+
+RESULT: the Edit returned "String to replace not found in file". Captured payloads for the probe file:
+ONLY the earlier Write pair. NO PreToolUse and NO PostToolUse for the failed Edit. File observed on
+disk afterwards: b'alpha
+', unchanged.
+
+PostToolUse prediction CORRECT; PreToolUse prediction WRONG. What is established is only what was
+observed: this failed Edit never reached the PreToolUse hook. The likely mechanism — the Edit tool
+rejecting its own input before hooks run — was NOT verified and is recorded as a hypothesis.
+
+Consequence for the design: proposals are not complete coverage either. A tool call can fail with no
+PreToolUse at all, so a missing proposal proves nothing, exactly as a missing report proves nothing.
+Only observation of the file decides — and here it did.

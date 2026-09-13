@@ -4434,3 +4434,37 @@ with pictures held in one process; Phase 11 names the Stop baseline as a driver 
 is where SessionStart and Stop get wired. Renumbering was rejected: Phase 11 persists events and
 attempts that Phases 9 and 10 model first, and historical ledger entries would contradict a
 renumbered plan permanently.
+
+## Session 2026-09-13 (afternoon) — PreToolUse, in progress (EV-P8-PRETOOLUSE-459)
+
+No product code changed. Design and evidence only.
+
+```text
+rulings (the learner's)   a PreToolUse payload is a PROPOSAL, not a fact about the disk
+                          Phase 8 NEVER denies: a deny needs a nameable harm (CONFLICT, Phase 13)
+                          a missing PostToolUse proves nothing about the file; observation decides
+verified in docs          PreToolUse can block (exit 2, or permissionDecision "deny"); PostToolUse
+                          cannot; PreToolUse fires before permission checks; exit 2 blocks, other
+                          nonzero exits are non-blocking errors
+measured                  a bash syntax error exits 2, so a typo in a PreToolUse hook command would
+                          block every edit; `|| true` cannot rescue a command that never parses
+capture                   PreToolUse capture hook ADDED to .claude/settings.local.json (approved by
+                          the learner). That file is git-excluded, so the change lives only on this
+                          machine. Same command as the PostToolUse capture; same samples file
+experiment 1              a Write produced a PreToolUse + PostToolUse pair sharing tool_use_id
+experiment 2              an Edit with an impossible old_string produced NO payload at all; file
+                          observed unchanged
+```
+
+OPEN QUESTION, answer owed (the learner over-generalized "everything has to be good before we can
+send the pretoolhook"; shown that the permission check still happens AFTER the hook):
+
+```text
+a missing PreToolUse proves ___ about the file
+a PreToolUse that DID fire guarantees the edit ran?   yes / no   ___
+```
+
+Not built yet: a parser for PreToolUse payloads. Samples now exist to build it from.
+
+Phase 8 closure still makes the MAJOR cumulative-review counter due (1/2 -> 2/2): run that review
+before significant Phase 9 work.
