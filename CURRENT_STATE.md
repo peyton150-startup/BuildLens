@@ -62,15 +62,13 @@ The prior learning sessions recorded thirteen test scripts green. The separate 2
 
 ## Learning evidence and exact restart point
 
-**Last completed gate:** EV-P8-WORKING-TREE-PICTURE-458. **Current gate:** EV-P8-PRETOOLUSE-459, trace part in progress, mid-remediation. See the exact attempt and pending question at the end of the learning ledger; do not reveal its answer in a restart message.
+**Last completed gate:** EV-P8-PRETOOLUSE-459 (trace, explanation, transfer) — closed 2026-09-13; exact evidence at the end of the learning ledger. **No per-patch gate is open.**
 
-Next teaching interaction, in order:
+Next, in order:
 
-1. Resume the pending condition-evaluation remediation for the two Bash payload traces. Ask for the check-by-check prediction and reasoning before revealing outcomes.
-2. Check whether the learner can read `**fields`; use syntax-only help if needed.
-3. Require a fresh target-level trace after recovery.
-4. Finish the explanation, concrete downside/reversal condition, and transfer.
-5. Review remaining Phase 8 closure obligations, then formally close only when evidence supports it. Run the major cumulative review before significant Phase 9 implementation.
+1. Review Phase 8's PHASE-LEVEL closure obligations in `IMPLEMENTATION_PLAN.md` (the Phase 8 knowledge gate and its transfer expectation) against the ledger; run whatever is missing. Close Phase 8 formally only when evidence supports it.
+2. Closing Phase 8 makes the major counter due (1/2 -> 2/2): run the cumulative review before significant Phase 9 work.
+3. Then Phase 9's reduced single-process workflow, with the learner proposing the design.
 
 Known cold from prior evidence, not newly assessed here:
 
@@ -80,8 +78,8 @@ Known cold from prior evidence, not newly assessed here:
 
 Uncertain / due for retrieval:
 
-- CONDITION_EVALUATION: predicting a raise without identifying a failed check; the active blocker in gate 459.
-- `**fields`, and the parser design's downside/reversal condition: still owed.
+- CONDITION_EVALUATION: predicting a raise without identifying a failed check; recovered in gate 459, retrieval due.
+- `**` with an explicit duplicate argument; declaration versus runtime check (`file_path: str`); stating a reversal condition from scratch rather than choosing one.
 - Proposal versus report, missing hooks versus disk authority, hook failure/exit behavior: recovered with assistance; fade scaffolding and retrieve later.
 - Set union/intersection, trailing NUL split behavior, HEAD versus working-tree bytes, Git root discovery, picture placement versus reconciliation conclusions, and the time-span reason for two timestamps.
 

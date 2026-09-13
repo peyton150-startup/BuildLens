@@ -48014,3 +48014,51 @@ final unaided: "TypeError, works \"Ada from Paris\""  CORRECT, verified by runni
 
 TRACE (gate part 1): PASSED after remediation. Explanation (downside of B, reversal condition) and
 transfer still owed.
+
+### EV-P8-PRETOOLUSE-459 — explanation and transfer; GATE CLOSED
+
+EXPLANATION — downside of design B (two types):
+
+```text
+first         "i have no idea"
+R1 reading    which function name is in both parsers' fields line? "toolcallfields"  correct
+climb         a file_path rule change needs how many edits? "i would have to edit both climaed and
+              proped edit"; then after grep of all four file_path lines: "23 48 144 and 156" —
+              WRONG: treats type declarations as rules. Blocker: declaration versus check
+restatement   "so your point is that both claimed edit and proposed edit have the same fields and
+              those fields have the same helpers" — accepted with precision: the types only HOLD
+              values; _tool_call_fields is the one place they are checked (line 144)
+```
+
+Deferred for retrieval, not taught to completion: whether a type annotation like `file_path: str`
+checks anything at runtime.
+
+REVERSAL CONDITION — first "had similar responsilbities as the other, i do not knw"; adapted to a
+choice between A (Phase 13 gate approves proposals while compare checks reports) and B (compare
+dropped, everything appended to one log identically):
+
+```text
+"B / because at that point all of the data is going into the same log so there is no ppint in
+seperating them it would make that process even harder instead it would makes sense to have it all
+in claimed edit"
+```
+
+CORRECT. Stated condition: merge when no part of BuildLens handles a proposal differently from a
+report. Precision added: a merged type should not keep the name ClaimedEdit.
+
+TRANSFER — parcel tracking, OUT_FOR_DELIVERY vs DELIVERED with identical fields:
+
+```text
+types + consumer   "two types, the information in one is a claim that we started and is compared
+                   against nothing and the other is deleivered which is compared to the photo they
+                   take and the customer confirming the package has arrived"  correct; precision:
+                   the courier's photo is still the courier's report; customer confirmation is the
+                   observation — signal versus authority
+no DELIVERED       "it cannot conclude anything but speculate"  correct
+```
+
+GATE CLOSED for EV-P8-PRETOOLUSE-459: trace (after condition-evaluation and ** remediation),
+explanation (after R1 scaffolding and a choice-based reversal), transfer (unaided).
+
+Retrieval due: CONDITION_EVALUATION; `**` with an explicit duplicate; declaration versus check;
+reversal conditions stated from scratch rather than chosen.

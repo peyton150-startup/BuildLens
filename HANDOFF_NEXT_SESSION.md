@@ -4,7 +4,7 @@ Updated 2026-09-13 for the approved Core v0.1 scope. Follow `AGENTS.md` / `CLAUD
 
 ## Resume here
 
-Phase 8 is open. EV-P8-PRETOOLUSE-459 is mid-remediation in its trace gate. Read the latest ledger entry and ask the pending condition-evaluation question without revealing its answer. Then check `**fields` readability, require a fresh trace, explanation/downside/reversal condition, and transfer. Both parsers and tool-call IDs already exist; do not rebuild them.
+Phase 8 is open. Gate EV-P8-PRETOOLUSE-459 is CLOSED (trace, explanation, transfer — see the end of the ledger). Next: review Phase 8's phase-level closure obligations against the ledger and run anything missing, then close the phase. Both parsers and tool-call IDs already exist; do not rebuild them.
 
 Closing Phase 8 makes the major counter due (1/2 -> 2/2). Run the cumulative review before significant Phase 9 work. Foundation remains 1/3. Do not reset either counter based on this documentation update.
 
