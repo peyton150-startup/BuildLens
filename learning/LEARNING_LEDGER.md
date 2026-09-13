@@ -48932,3 +48932,15 @@ R1 ANSWER, verbatim:
 
 CORRECT on the core: the disk cannot show whether an unrun write worked, so the value is only a proposal
 (compare "no" implied). Not stated: the later event that makes checking possible. Re-asked alone.
+
+LATER-EVENT ANSWER, verbatim:
+
+```text
+"compare cannot give a verdict and when the edit or overwrite hook comes in then we can check it"
+```
+
+- compare cannot give a verdict now — CORRECT, stated explicitly.
+- later event — PARTIAL, right idea: a later message saying the write happened. "hook" is Claude
+  vocabulary again (Kestrel sends a completion message, not a hook).
+- not stated: that message becomes a ClaimedEdit; call_id (tool_use_id) pairs it with the proposal;
+  BuildLens then observes README.md and compares. Re-asked as two short items.
