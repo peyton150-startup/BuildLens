@@ -2,11 +2,18 @@
 
 Run it with:
 
-    python test_cli.py
+    python tests/test_cli.py
 
 cli.py owns the process boundary only, so these patch snapshot.capture_snapshot
 and check what reaches stdout, stderr, and the returned status.
 """
+
+import sys
+from pathlib import Path
+
+# Put the repository root first on the import search path, so the product
+# modules it holds import by bare name when this file runs as a script.
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import io
 import json
@@ -15,7 +22,6 @@ from zoneinfo import ZoneInfo
 from contextlib import redirect_stderr, redirect_stdout
 from unittest.mock import patch
 
-from pathlib import Path
 
 from claude_adapter import ClaimedEdit
 from cli import format_local_time, format_summary, main

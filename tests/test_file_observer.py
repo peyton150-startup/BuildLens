@@ -2,19 +2,25 @@
 
 Run it with:
 
-    python test_file_observer.py
+    python tests/test_file_observer.py
 
 These write real files to a throwaway directory and read them back. The point
 of this module is to observe the file system, so a stand-in would prove nothing
 about what the file system actually does.
 """
 
+import sys
+from pathlib import Path
+
+# Put the repository root first on the import search path, so the product
+# modules it holds import by bare name when this file runs as a script.
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
 import hashlib
 import importlib
 import tempfile
 from datetime import datetime, timedelta, timezone
 from dataclasses import FrozenInstanceError
-from pathlib import Path
 
 
 def temporary_directory():

@@ -2,8 +2,15 @@
 
 Run it with:
 
-    python test_session.py
+    python tests/test_session.py
 """
+
+import sys
+from pathlib import Path
+
+# Put the repository root first on the import search path, so the product
+# modules it holds import by bare name when this file runs as a script.
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from session import Session
 

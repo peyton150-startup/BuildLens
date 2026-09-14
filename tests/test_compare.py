@@ -2,11 +2,18 @@
 
 Run it with:
 
-    python test_compare.py
+    python tests/test_compare.py
 
 Every case here was specified before any of it was written: see EV-P8-TEST-ROWS-420
 in learning/LEARNING_LEDGER.md, where the expected result of each row was decided.
 """
+
+import sys
+from pathlib import Path
+
+# Put the repository root first on the import search path, so the product
+# modules it holds import by bare name when this file runs as a script.
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import hashlib
 import importlib

@@ -50802,3 +50802,244 @@ retrieval). Decision: separate tests from product modules in a dedicated patch.
 RETRIEVAL DUE (not mastered after one pass): unaided two-path architecture redraw; ObservedFile/observe_file
 unprompted on a fresh surface; argument vs return value unprompted; CONDITION_EVALUATION on another surface;
 naming concrete validation checks; confidence still frequently omitted.
+
+---
+
+### EV-LAYOUT-PREDICT-468 — module search path when tests move to tests/ — 2026-09-14
+
+BUILD CONTEXT:
+Architecture-reset layout patch (EV-CR2-ARCH-467 decision), before Phase 9. Pre-patch statement given in
+session: move the 13 test scripts and 2 JSON fixtures to tests/; product modules stay at the root; no
+product behavior change; out of scope src/ packaging, pytest, pyproject, Phase 9.
+
+EXERCISE TYPE:
+PREDICT (implementation-adjacent)
+
+PROMPT (verbatim):
+Prediction: running a test from its new folder
+
+After the move, `tests/test_reconcile.py` still starts with:
+
+```
+from reconcile import (
+    ChangeKind,
+    ...
+)
+```
+
+`reconcile.py` stays in the repository root. You are in the repository root and run:
+
+```
+python tests/test_reconcile.py
+```
+
+Fill in every field:
+
+```
+Runs and prints "test passed", or fails =
+If it fails, the error type =
+Which folder you think Python searches first for "reconcile", and why =
+Confidence =
+```
+
+It's fine to be wrong here. This is a prediction, and we'll check it by actually running the command.
+
+LEARNER FIRST COMMITTED ANSWER (verbatim):
+. doesnt the import need to jump out of the tests folder to the root becasue they are not in the same directory anymore
+
+EVALUATION:
+Committed in question form: predicts the bare-name import does not reach the root because the test and
+module no longer share a directory — i.e. it fails, with the search starting from the test's own folder.
+CORRECT in substance. Error type and confidence not given.
+
+EVIDENCE (scratchpad probe, not the repository): root/reconcile.py + root/tests/test_reconcile.py; run
+from root `python tests/test_reconcile.py` printed sys.path[0] = ...\import_probe\tests, then
+ModuleNotFoundError: No module named 'reconcile' (exit 1). Python puts the RUNNING SCRIPT'S folder first on
+sys.path, not the folder you run the command from.
+
+Next: near-transfer prediction for `python -m tests.test_reconcile` (where sys.path[0] points then), then the
+learner chooses the import fix.
+
+NEAR-TRANSFER PREDICTION PROMPT (verbatim):
+```
+python -m tests.test_reconcile
+```
+Run from the repository root, with the same layout.
+```
+Runs, or ModuleNotFoundError =
+The folder you think sys.path[0] points to =
+Confidence =
+```
+
+LEARNER ANSWER (verbatim):
+. runs 
+no idea
+
+EVALUATION:
+Outcome CORRECT (runs). sys.path[0] location: not known (honest "no idea"). Confidence not given.
+EVIDENCE (scratchpad probe): `python -m tests.test_reconcile` from the probe root printed sys.path[0] = the
+probe root (the current directory), then "found", exit 0. Rule: `python path/to/script.py` puts the
+script's folder first; `python -m package.module` puts the current directory first.
+Next: learner chooses the import fix (run with -m from the root / sys.path insert in each test / pytest,
+out of scope) with a reason and a downside.
+
+DESIGN CHOICE PROMPT (verbatim, abridged options A/B/C shown in session):
+```
+Your choice =
+Why, in one sentence =
+One real downside of your choice =
+Confidence =
+```
+
+LEARNER ANSWER (verbatim):
+. B males the most sense, also you mean that i could then run the test by its path
+
+SYNTAX PREDICTION PROMPT (verbatim):
+```
+For C:\Users\nicol\BuildLens_Project\tests\test_reconcile.py, Path(__file__).resolve().parent =
+And .parent.parent =
+Why the insert must come before the from reconcile import line =
+One real downside of B =
+Confidence =
+```
+
+LEARNER ANSWER (verbatim):
+. the tests folder
+the repo root
+becasue reconcile is in the root and not the test folder 
+you have to do what we are doing right now but it will make the repo much cleaner so i will not miss any files inside the wall of tests
+
+EVALUATION:
+Choice B (per-test sys.path insert; run by path from anywhere). parent = tests folder: CORRECT. parent.parent
+= repository root: CORRECT. Ordering reason: PARTIAL — names that reconcile lives in the root; the missing
+half is that statements run top to bottom, so the root must already be on sys.path when the import line
+executes. Downside: WEAK — names the one-time migration effort, then argues the benefit. Real downsides of B
+(not drilled): the same boilerplate repeated in every test file, and every NEW test must remember it;
+editing sys.path is a process-wide side effect hidden at the top of a file. Confidence not given.
+DECISION RECORDED: option B.
+
+PATCH EVIDENCE — tests/ layout (option B) — 2026-09-14:
+- Baseline before the move: 13/13 test scripts passed at the root (test_cli.py included on this machine).
+- `git mv` of 13 test_*.py and 2 fixtures_*.json into tests/.
+- Before the edit, in the real repository: `python tests/test_reconcile.py` -> ModuleNotFoundError: No module
+  named 'reconcile' (exit 1) — the learner's prediction reproduced.
+- Edit (scratchpad script, not committed): at each test's first import, insert `import sys`,
+  `from pathlib import Path`, a two-line comment, and
+  `sys.path.insert(0, str(Path(__file__).resolve().parent.parent))`; remove the later duplicate
+  `from pathlib import Path` in 7 files; docstring run line -> `python tests/test_x.py`. Line endings preserved
+  per file.
+- DISCOVERY: from inside tests/, test_completeflow.py failed (AssertionError at repository_relative_path ==
+  "compare.py"). Cause: `Path("compare.py").resolve()` resolves against the CURRENT folder, a hidden
+  dependency on the working directory that existed before the move but was invisible while everything ran
+  from the root. Fixed at both uses: `Path(__file__).resolve().parent.parent / "compare.py"`. Same principle as
+  the import fix: anchor to the file's own location, not to where the command was typed.
+- After: 13/13 passed from the repository root, from tests/, and from an unrelated folder (scratchpad).
+- Product modules unchanged.
+
+KNOWLEDGE GATE (pending): explain why the moved tests import correctly, and name the command that runs one.
+Transfer candidate: the test_completeflow.py cwd discovery.
+
+KNOWLEDGE GATE PROMPT — tests/ layout (verbatim):
+```
+Why tests/test_reconcile.py can now import reconcile, step by step =
+Why test_completeflow.py broke from inside tests/ even though its imports were fine =
+The command that runs test_cli.py from the repository root =
+Confidence =
+```
+
+LEARNER ANSWER (verbatim):
+. you added the line import sys from pathlib import Path  sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+that makes it so that if the file is inside the folder it will now look outside the folder so in this case the parent of the parent is the root so it will now look there 
+
+becase the insert tells the module where to look for imports so if they were before then it would still look to import from tests whic h reconcile is not there
+
+every test file needs this line now till the end of time
+
+EVALUATION:
+Import mechanism: CORRECT — Path(__file__).resolve().parent.parent is the repository root and the insert puts
+it on the search path, so `reconcile` is found. Ordering (completes the earlier partial): CORRECT — if the
+import ran before the insert, the search would still start in tests/ where reconcile is not. Downside of B
+(improves the earlier weak answer): CORRECT — every test file, including every future one, must carry the
+block. Not answered: why test_completeflow.py broke from tests/ (Path("compare.py") resolves against the
+current folder) and the run command (`python tests/test_cli.py`). The answer lines map to the previous
+prompt's fields. Gate: PARTIAL — two lines outstanding. Confidence not given.
+The learner then asked for a root-cause investigation of claude-flow hooks that keep returning.
+
+GATE FOLLOW-UP PROMPT (verbatim):
+```
+Why test_completeflow.py broke from inside tests/ even though its imports were fine =
+The command that runs test_cli.py from the repository root =
+Confidence =
+```
+
+LEARNER ANSWER (verbatim):
+. it looked up path(compare.py) which depends on the folder you are in but since it is no longer in the same folder, it now has the same idea as the import fix though, can you produce the line for the fix
+test.
+
+EVALUATION:
+completeflow reason: CORRECT — Path("compare.py") resolved against the current folder; the fix anchors it to
+the file's own location, the same principle as the sys.path insert (learner named the shared idea unaided).
+Run command: NOT ANSWERED ("test." only). Learner asked to see the fix line; shown as before/after.
+
+RUN-COMMAND PROMPT (verbatim):
+```
+The command that runs test_cli.py from the repository root =
+Confidence =
+```
+
+LEARNER ANSWER (verbatim):
+.  python test.test_cli.py
+
+EVALUATION:
+INCORRECT. Blends the two start forms: dotted module syntax (from `python -m tests.test_reconcile`) with a
+`.py` file suffix and no `-m`; folder name also `test` for `tests`. Correct: `python tests/test_cli.py`
+(file path form, which option B supports) — or `python -m tests.test_cli`. Blocker: file path form vs module
+name form. Next: R1 contrast — classify each of four command shapes as path or module and whether it is valid.
+
+R1 CONTRAST PROMPT: path form `python <folders>/<file>.py` vs module form `python -m <folders>.<file>`;
+classify 1 `python tests/test_cli.py`, 2 `python -m tests.test_cli`, 3 `python test.test_cli.py`,
+4 `python -m tests/test_cli.py`; fields: valid ones / path or module / command to run test_cli.py by path /
+confidence.
+
+LEARNER ANSWER (verbatim):
+. so it would be tests.test_cli.py
+
+EVALUATION:
+INCORRECT, second attempt; folder name now correct (`tests`). Still dots as the folder separator with a
+`.py` suffix; micro fields not filled. Blocker narrowed to the separator in a FILE PATH (`/`, as in the
+Windows folder tree) versus the dot in a MODULE NAME. Repeated difficulty -> worked-example rescue with the
+neighbouring command `python tests/test_reconcile.py`, then the learner writes test_cli's; fresh retrieval later.
+
+WORKED-EXAMPLE RESCUE PROMPT: `python tests/test_reconcile.py` annotated (folder / file with .py); fields:
+file on disk for test_cli.py / command by file path / why a dot can't separate tests and test_cli in a path /
+confidence.
+
+LEARNER ANSWER (verbatim):
+. with a -m
+
+EVALUATION:
+Read as answering the third field: the dotted form belongs with `-m` (module form) — CORRECT distinction.
+File-path command still not written. Next: ask for the path-form command alone.
+
+PATH-FORM PROMPT (verbatim):
+```
+python tests/test_reconcile.py     <- solved example
+The file path command for test_cli.py =
+Confidence =
+```
+
+LEARNER ANSWER (verbatim):
+. python tests/test_cli.py
+
+EVALUATION:
+CORRECT (after worked-example rescue).
+
+LAYOUT KNOWLEDGE GATE RESULT — 2026-09-14: PASSED WITH ASSISTANCE.
+- sys.path insert mechanism (parent.parent = root, put first on the search path): correct unaided.
+- Insert must precede the import (statements run top to bottom): correct after one prompt.
+- Real downside of option B (every current and future test needs the block): correct.
+- test_completeflow.py cwd dependency and its shared principle with the import fix: correct unaided.
+- Run command: `python tests/test_cli.py` reached after two misses (dotted path with .py) via R1 contrast and a
+  worked example; learner independently identified that dotted names belong to `-m`.
+RETRIEVAL DUE: file path form vs module name form (`python tests/x.py` vs `python -m tests.x`) on a fresh
+surface, unprompted.

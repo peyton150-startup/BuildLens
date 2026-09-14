@@ -2,8 +2,15 @@
 
 Run it with:
 
-    python test_classify.py
+    python tests/test_classify.py
 """
+
+import sys
+from pathlib import Path
+
+# Put the repository root first on the import search path, so the product
+# modules it holds import by bare name when this file runs as a script.
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from classify import classify_diff_line
 

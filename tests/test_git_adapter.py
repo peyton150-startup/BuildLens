@@ -2,14 +2,20 @@
 
 Run it with:
 
-    python test_git_adapter.py
+    python tests/test_git_adapter.py
 
 The subprocess stand-in returns BYTES, because git_adapter asks subprocess.run
 for raw output and performs the decode itself.
 """
 
-import subprocess
+import sys
 from pathlib import Path
+
+# Put the repository root first on the import search path, so the product
+# modules it holds import by bare name when this file runs as a script.
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
+import subprocess
 from unittest.mock import patch
 
 from git_adapter import (

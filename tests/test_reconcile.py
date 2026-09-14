@@ -2,12 +2,19 @@
 
 Run it with:
 
-    python test_reconcile.py
+    python tests/test_reconcile.py
 
 Rows 1-6 were approved before any of this was written; row 7 (a claimed path in
 neither picture) was ruled out of scope, since PostToolUse already gives a
 verdict for a claim whose file is absent.
 """
+
+import sys
+from pathlib import Path
+
+# Put the repository root first on the import search path, so the product
+# modules it holds import by bare name when this file runs as a script.
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from datetime import datetime, timezone
 

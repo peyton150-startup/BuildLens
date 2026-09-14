@@ -2,7 +2,7 @@
 
 Run it with:
 
-    python test_git_adapter_integration.py
+    python tests/test_git_adapter_integration.py
 
 These launch actual Git child processes against throwaway repositories, so they
 are slower than test_git_adapter.py and require Git on PATH. They exist to prove
@@ -12,9 +12,15 @@ BuildLens sends, and what Git actually writes to stdout.
 Keep exact-argument and prepared-result assertions in test_git_adapter.py.
 """
 
+import sys
+from pathlib import Path
+
+# Put the repository root first on the import search path, so the product
+# modules it holds import by bare name when this file runs as a script.
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
 import subprocess
 import tempfile
-from pathlib import Path
 
 from git_adapter import (
     GitCaptureError,

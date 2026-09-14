@@ -51,7 +51,7 @@ The CLI supports `python cli.py analyze` (staged/unstaged counts) and `python cl
 
 Known limits: comparisons establish observed content, not authorship; Edit checks fragments; pictures are not atomic. The current scan skips claimed paths and can miss later changes to them. Its coverage policy must be fixed or explicitly surfaced before release. `CURRENT_STATE.md` is authoritative for implementation status and remaining work.
 
-Verification on 2026-09-13: 12 test scripts passed; `test_cli.py` stopped because the available Python environment lacked `tzdata`. Reproducible Python/Git setup and time-zone test prerequisites remain release work; do not claim the whole suite currently passes in a fresh environment.
+Tests live in `tests/`; run any one by path, for example `python tests/test_reconcile.py`, from any folder. Verification on 2026-09-14: all 13 test scripts passed on the development machine. On 2026-09-13 a separate environment lacked `tzdata` for `test_cli.py`. Reproducible Python/Git setup and time-zone test prerequisites remain release work; do not claim the whole suite currently passes in a fresh environment.
 
 The curriculum uses selected CMU and MIT material as an academic backbone while BuildLens implementation continues to determine when each concept is introduced.
 

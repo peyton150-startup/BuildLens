@@ -2,18 +2,24 @@
 
 Run it with:
 
-    python test_working_tree_picture.py
+    python tests/test_working_tree_picture.py
 
 Rows 1-8 were approved before any of this was written. Every test uses a real
 repository and a real disk, because the claims under test — what Git lists and
 what the file system holds — are exactly what a stand-in cannot establish.
 """
 
+import sys
+from pathlib import Path
+
+# Put the repository root first on the import search path, so the product
+# modules it holds import by bare name when this file runs as a script.
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
 import hashlib
 import subprocess
 import tempfile
 from datetime import datetime, timezone, timedelta
-from pathlib import Path
 
 from git_adapter import GitCaptureError
 from working_tree_picture import take_picture

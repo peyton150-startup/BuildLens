@@ -2,15 +2,21 @@
 
 Run it with:
 
-    python test_completeflow.py
+    python tests/test_completeflow.py
 
 These use real files and a real Git child, because the point of this module is
 to join the real pieces together. Every row was specified before it was written.
 """
 
+import sys
+from pathlib import Path
+
+# Put the repository root first on the import search path, so the product
+# modules it holds import by bare name when this file runs as a script.
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
 import importlib
 import tempfile
-from pathlib import Path
 
 
 def temporary_directory():
@@ -82,7 +88,7 @@ def test_a_file_inside_a_repository_is_labelled_with_its_relative_path():
 
     # compare.py lives in this repository, so the root must reach observe_file
     # for this label to appear at all.
-    this_file = Path("compare.py").resolve()
+    this_file = Path(__file__).resolve().parent.parent / "compare.py"
     result = completeflow.start_flow(write_payload(this_file, "not the real content\n"))
 
     assert result.observed.repository_relative_path == "compare.py"
@@ -188,7 +194,7 @@ def test_a_file_in_this_repository_records_its_committed_base_version():
     completeflow = importlib.import_module("completeflow")
     git_adapter = importlib.import_module("git_adapter")
 
-    this_file = Path("compare.py").resolve()
+    this_file = Path(__file__).resolve().parent.parent / "compare.py"
     result = completeflow.start_flow(write_payload(this_file, "not the real content\n"))
 
     assert result.base_version.status is git_adapter.BaseVersionStatus.COMMITTED
