@@ -2,7 +2,7 @@
 
 Last updated: 2026-09-14 — major cumulative review 2 passed; major counter reset; architecture reset decided to separate tests from product modules.
 
-This file is the current snapshot. The [prior accumulated state notes](docs/history/CURRENT_STATE-before-core-v0.1-2026-09-13.md) are preserved byte-for-byte for historical context, not current instructions. Exact historical prompts and learner answers remain in `learning/LEARNING_LEDGER.md`; none were changed by this scope revision.
+This file is the current snapshot. The [prior accumulated state notes](history/CURRENT_STATE-before-core-v0.1-2026-09-13.md) are preserved byte-for-byte for historical context, not current instructions. Exact historical prompts and learner answers remain in `learning/LEARNING_LEDGER.md`; none were changed by this scope revision.
 
 ## Phase and active release
 
@@ -67,7 +67,7 @@ Tests live in `tests/` (moved 2026-09-14, EV-LAYOUT-PREDICT-468). Each test scri
 Next, in order:
 
 1. **Major cumulative review 2 — PASSED 2026-09-14** after adaptive remediation (EV-CR2-Q1-461 .. EV-CR2-ARCH-467; see "MAJOR CUMULATIVE COUNTER RESET — 2026-09-14" in the ledger). Phase 8 -> 9 architecture reset completed with scaffolding.
-2. **Layout patch — tests moved to `tests/`** (2026-09-14, option B chosen by the learner: a `sys.path` insert at the top of each test). The learner predicted the bare-name import failure and the `-m` success; both were verified. The move exposed a hidden dependency on the current folder in `test_completeflow.py` (`Path("compare.py")`), now anchored to the repository root. **Knowledge gate passed with assistance** (2026-09-14): import mechanism, ordering, downside and the cwd fix correct; the run command `python tests/test_cli.py` needed a worked example. Retrieval due: file path form versus `-m` module name form. **Also requested:** a separate docs patch to group root Markdown files (keep `CLAUDE.md`, `AGENTS.md`, `README.md` at root; do not rewrite paths in the ledger or `docs/history/`).
+2. **Layout patch — tests moved to `tests/`** (2026-09-14, option B chosen by the learner: a `sys.path` insert at the top of each test). The learner predicted the bare-name import failure and the `-m` success; both were verified. The move exposed a hidden dependency on the current folder in `test_completeflow.py` (`Path("compare.py")`), now anchored to the repository root. **Knowledge gate passed with assistance** (2026-09-14): import mechanism, ordering, downside and the cwd fix correct; the run command `python tests/test_cli.py` needed a worked example. Retrieval due: file path form versus `-m` module name form. **Docs grouping done** (2026-09-14, EV-DOCS-LAYOUT-469): plan, current state and handoff moved to `docs/`; old handoffs and `QUIZZES.md` moved to `learning/`; `CLAUDE.md`, `AGENTS.md`, `README.md` stay at the root. Archived handoffs and plans keep their original, now-stale paths as verbatim records.
 3. Then Phase 9's reduced single-process workflow, with the learner proposing the design. Q6 seeded (not approved) a claimed-path policy: skip a claimed path only when its verdict-time hash equals the witness hash.
 
 Known cold from prior evidence, not newly assessed here:

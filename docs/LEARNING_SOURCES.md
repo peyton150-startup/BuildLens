@@ -1,6 +1,6 @@
 # BuildLens — Learning and Engineering Sources
 
-Core v0.1 uses only sources needed by its active implementation and due retrieval. This catalog remains a future reference, not a requirement to study or implement every listed technology before release. Source-grounded manual gates follow the same fidelity rules as the optional tracing extension; see `../IMPLEMENTATION_PLAN.md`.
+Core v0.1 uses only sources needed by its active implementation and due retrieval. This catalog remains a future reference, not a requirement to study or implement every listed technology before release. Source-grounded manual gates follow the same fidelity rules as the optional tracing extension; see `IMPLEMENTATION_PLAN.md`.
 
 This document keeps source material separate from the implementation plan.
 

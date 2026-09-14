@@ -8,12 +8,12 @@ The learning goal is that the developer can explain and defend the code and arch
 
 ## Required reading before implementation
 
-For Core v0.1, the active release scope at the top of `IMPLEMENTATION_PLAN.md` controls feature work. The current Claude adapter is the only provider integration in this release; facilitator choice does not require another product adapter. Keep the future roadmap and original phase numbers, but defer editing/merge primitives, persistence, API/UI, and learning/interview automation outside that scope. Manual gates and evidence recording remain valid and mandatory; do not close phases or reset counters because scope was reduced. Use the live `CURRENT_STATE.md`, not archived snapshots or superseded handoffs, to resume work.
+For Core v0.1, the active release scope at the top of `docs/IMPLEMENTATION_PLAN.md` controls feature work. The current Claude adapter is the only provider integration in this release; facilitator choice does not require another product adapter. Keep the future roadmap and original phase numbers, but defer editing/merge primitives, persistence, API/UI, and learning/interview automation outside that scope. Manual gates and evidence recording remain valid and mandatory; do not close phases or reset counters because scope was reduced. Use the live `docs/CURRENT_STATE.md`, not archived snapshots or superseded handoffs, to resume work.
 
 Read, in this order:
 
-1. `IMPLEMENTATION_PLAN.md`
-2. `CURRENT_STATE.md`
+1. `docs/IMPLEMENTATION_PLAN.md`
+2. `docs/CURRENT_STATE.md`
 3. `docs/CURRICULUM.md`
 4. `learning/LEARNING_RULES.md`
 5. `docs/CODE_READING_DEBUGGING_PLAYBOOK.md`
@@ -58,7 +58,7 @@ For source-grounded exercises:
 - generate a second transfer variant;
 - ask what deep principle both variants share.
 
-When the learner fails, record the misconception in `CURRENT_STATE.md` and generate a new surface form later.
+When the learner fails, record the misconception in `docs/CURRENT_STATE.md` and generate a new surface form later.
 
 For every teaching interaction, Claude- and Codex-style sessions must follow this operational sequence:
 
@@ -221,7 +221,7 @@ Never use Trellis concurrency as an early tracing exercise.
 
 ## Session close
 
-Update `CURRENT_STATE.md` with:
+Update `docs/CURRENT_STATE.md` with:
 
 - phase;
 - exact code that exists;

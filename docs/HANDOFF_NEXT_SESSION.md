@@ -19,4 +19,4 @@ Do not build storage, automatic SessionStart/Stop continuity, API/UI, an editor,
 
 Verification limitation: the scope-review run passed 12 scripts; the CLI script stopped on missing `tzdata`. A fresh-environment setup/test procedure remains release work. No product changes or learning-gate completion occurred during the scope documentation update.
 
-The [previous handoff](docs/history/HANDOFF_NEXT_SESSION-before-core-v0.1-2026-09-13.md) is archived historical context, not a restart instruction.
+The [previous handoff](history/HANDOFF_NEXT_SESSION-before-core-v0.1-2026-09-13.md) is archived historical context, not a restart instruction.

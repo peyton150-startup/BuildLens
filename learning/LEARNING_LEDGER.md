@@ -51043,3 +51043,188 @@ LAYOUT KNOWLEDGE GATE RESULT — 2026-09-14: PASSED WITH ASSISTANCE.
   worked example; learner independently identified that dotted names belong to `-m`.
 RETRIEVAL DUE: file path form vs module name form (`python tests/x.py` vs `python -m tests.x`) on a fresh
 surface, unprompted.
+
+---
+
+### EV-DOCS-LAYOUT-469 — docs grouping patch: design choice and relative-path prediction — 2026-09-14
+
+BUILD CONTEXT:
+Housekeeping patch requested by the learner after the tests/ move. Pre-patch statement given in session:
+no behavior change; move root Markdown files; CLAUDE.md, AGENTS.md (local-only, excluded), README.md stay at
+root; ledger, docs/history/ and old plans are not rewritten; knowledge gate = predict how a relative link
+changes when its target or its own file moves.
+
+DESIGN PROMPT (verbatim fields):
+```
+A or B =
+Old handoffs go to =
+QUIZZES.md goes to =
+One reason for your A/B choice =
+One downside of your A/B choice =
+Confidence =
+```
+(A: active docs stay at root, only old records move. B: active docs move into docs/, old records move too.)
+
+LEARNER ANSWER (verbatim):
+. B
+if we need multiple folders for old docs that is ok but i want old handoffs and quizzes in one folder
+
+DECISION RECORDED:
+Option B — IMPLEMENTATION_PLAN.md, CURRENT_STATE.md, HANDOFF_NEXT_SESSION.md -> docs/. HANDOFF.md,
+HANDOFF_QUIZ.md, HANDOFF_QUIZ_2.md, QUIZZES.md together in one folder: docs/history/ (the existing archive,
+chosen by facilitator default since the learner did not name one). Reason, downside and confidence not given.
+
+LEARNER MESSAGE (verbatim):
+. quizzes in learning
+
+DECISION UPDATED:
+Old handoffs and QUIZZES.md stay together in one folder, now learning/ (not docs/history/): HANDOFF.md,
+HANDOFF_QUIZ.md, HANDOFF_QUIZ_2.md, QUIZZES.md -> learning/. Active docs still -> docs/. Relative-path
+prediction prompt posted and still unanswered.
+
+PREDICTION PROMPT (verbatim):
+Prediction: relative paths after the move
+
+Today, `docs/CODE_READING_DEBUGGING_PLAYBOOK.md` says:
+
+```
+see the active scope in `../IMPLEMENTATION_PLAN.md`
+```
+
+And `CLAUDE.md`, at the root, says:
+
+```
+1. `IMPLEMENTATION_PLAN.md`
+```
+
+After the move, the plan lives at `docs/IMPLEMENTATION_PLAN.md`.
+
+Fill in every field:
+
+```
+What ../ means in the playbook's path today =
+The playbook's path after the move =
+CLAUDE.md's path after the move =
+Why the two files need different new paths for the same target =
+Confidence =
+```
+
+LEARNER FIRST COMMITTED ANSWER (verbatim):
+.  that it is in a folder 
+stays the same 
+some are going from one folder to another
+
+EVALUATION:
+INCORRECT/PARTIAL. `../` = "go up one folder from the folder this file sits in" — answered vaguely ("it is in
+a folder"). Playbook path "stays the same": INCORRECT — the playbook and the plan will share docs/, so the
+path becomes `IMPLEMENTATION_PLAN.md`; keeping `../` would point at the root, where the plan no longer is.
+CLAUDE.md path not given (`docs/IMPLEMENTATION_PLAN.md`). Why they differ: partial ("going from one folder to
+another") — misses that each path starts from its OWN file's folder. Confidence not given.
+Blocker: `..` as "parent of this file's folder". Next: syntax-only R1 on `..` with a tiny non-BuildLens tree.
+
+R1 MICRO (recipes/ tree: recipes/shopping.md, recipes/desserts/cake.md, recipes/desserts/pie.md; cake.md
+links `../shopping.md` and `pie.md`; fields: folder cake.md sits in / where ../ goes / what ../shopping.md
+points at / what pie.md points at / link if shopping.md moved into desserts/ / confidence).
+
+LEARNER ANSWER (verbatim):
+. its a folder inside of a folder
+
+EVALUATION:
+Fields not filled; describes the tree shape (desserts/ is inside recipes/) — true but does not evaluate any
+path. Next: R0, one step at a time, single field.
+
+R0 STEP 1 PROMPT: "Which folder is cake.md directly inside: recipes or desserts ="
+LEARNER ANSWER (verbatim):
+/recipies/desserts/cake.md
+EVALUATION: CORRECT — gives the full path, placing cake.md directly inside desserts/. Next: R0 step 2, where `..` goes from desserts/.
+
+R0 STEP 2 PROMPT: "Going up one folder from desserts/ lands you in = / So ../shopping.md, written inside cake.md, points at the file ="
+LEARNER MESSAGE (verbatim):
+. so you are saying for the /docs/hstory folder some of the files will need to go theer
+EVALUATION: Not an answer to step 2; a question about the move plan (possible confusion between the recipes
+example and the real layout). Clarified: nothing moves into docs/history/; the archives go to learning/ per
+the learner's decision; the recipes tree is only a practice example for reading `..`. Step 2 re-asked.
+
+R0 STEP 2 re-asked. LEARNER ANSWER (verbatim):
+. reciepres
+recipes/shopping
+EVALUATION: CORRECT (spelling not graded) — `..` from desserts/ lands in recipes/; ../shopping.md points at
+recipes/shopping.md. Next: climb one rung — predict the new link when a target moves into / out of the
+linking file's folder.
+
+CLIMB PROMPT: link from cake.md if shopping.md moves INTO desserts/ / if pie.md moves UP into recipes/ / confidence.
+LEARNER ANSWER (verbatim):
+.  just shopping.md so the reference needs to change
+EVALUATION: First field CORRECT — same folder, so `shopping.md` with no `../`, and the learner states the
+reference must change. Second field (pie.md moved up -> `../pie.md`) not answered. Asked alone.
+
+PROMPT: cake.md's link to pie.md after pie.md moves up into recipes/ =
+LEARNER ANSWER (verbatim):
+. recipes/pie.md
+EVALUATION: INCORRECT — names where pie.md lives from the top of the tree, not a path starting from cake.md's
+folder. Written inside cake.md, `recipes/pie.md` would resolve to desserts/recipes/pie.md (does not exist).
+Correct: `../pie.md`. Blocker: the starting point of a relative path (the linking file's folder). Next: ask the
+learner to resolve their own link from desserts/ step by step.
+
+SELF-RESOLVE PROMPT: starting in desserts/, recipes/pie.md looks for a folder named recipes inside = / does it exist = / link that reaches recipes/pie.md from desserts/ =
+LEARNER ANSWER (verbatim):
+. no
+not correct
+EVALUATION: CORRECT that the folder does not exist and the link is wrong (self-detected). Correct link not
+produced. Next: worked-example bridge — the learner already resolved ../shopping.md, and pie.md now sits beside
+shopping.md.
+
+BRIDGE PROMPT: pie.md beside shopping.md; cake.md reaches shopping.md with ../shopping.md; cake.md's link to pie.md = / confidence.
+LEARNER ANSWER (verbatim):
+. /recipes/pie.md
+EVALUATION: INCORRECT (third attempt) — a path from the top of the tree (leading `/`), not relative to cake.md's
+folder. Pattern: the learner locates the target from the top rather than walking from the linking file.
+Repeated difficulty -> worked-example rescue: show `../pie.md` solved, learner explains each part, then applies
+the rule to the real playbook link (fresh target).
+
+WORKED EXAMPLE SHOWN: ../pie.md from desserts/ -> .. to recipes/ -> pie.md. Explain-back fields: what .. does /
+why start at desserts/ / why ../pie.md and ../shopping.md look alike / confidence.
+LEARNER ANSWER (verbatim):
+. it means one folder below
+EVALUATION: Direction word "below" conflicts with the diagram (recipes/ is drawn above desserts/), though the
+learner earlier resolved `..` from desserts/ to recipes/ correctly — possibly wording (some picture the top
+folder as the bottom). Other two fields not answered. Next: a one-field check separating "the folder that
+contains this one" from "a folder inside this one".
+
+ONE-FIELD CHECK: from desserts/, .. goes to (a) recipes/, the folder that holds desserts/, or (b) a folder inside desserts/.
+LEARNER ANSWER (verbatim):
+. a
+what
+EVALUATION: CORRECT (a) — `..` is the containing folder; "below" was wording. "what" read as confusion about
+the exercise's purpose. Scaffolding removed; return to the target: the real playbook and CLAUDE.md links.
+
+TARGET PROMPT: playbook's link after the move / CLAUDE.md's link after the move / confidence (tree: root
+CLAUDE.md; docs/PLAYBOOK with ../IMPLEMENTATION_PLAN.md; docs/IMPLEMENTATION_PLAN.md after the move).
+LEARNER ANSWER (verbatim):
+. will need to be just IMPLEMENTATION_PLAN.md
+../claude.md
+
+EVALUATION:
+Playbook link: CORRECT — same folder, `IMPLEMENTATION_PLAN.md` (fresh target, unaided after the practice).
+CLAUDE.md link: INCORRECT — `../claude.md` points up and at CLAUDE.md itself; the required link, written inside
+root CLAUDE.md, to the plan in docs/ is `docs/IMPLEMENTATION_PLAN.md`. Either the question was misread as
+"link to CLAUDE.md" or the descending case (into a subfolder) is unpracticed. Next: re-ask with the direction
+made explicit, no hint.
+
+RE-ASKED PROMPT: link written inside CLAUDE.md that reaches the plan (root -> docs/IMPLEMENTATION_PLAN.md) / confidence.
+LEARNER ANSWER (verbatim):
+. ok so /docs/implementation plan
+
+EVALUATION:
+CORRECT direction and folder — descends into docs/ to the plan (name spelling/case not graded). Precision: no
+leading `/` (a leading slash starts at the top of the disk); the link is `docs/IMPLEMENTATION_PLAN.md`.
+
+DOCS LAYOUT KNOWLEDGE GATE RESULT — 2026-09-14: PASSED WITH ASSISTANCE.
+- Same-folder link drops `../` (playbook -> `IMPLEMENTATION_PLAN.md`): correct on the fresh target, unaided
+  after practice.
+- `..` = the containing folder: recovered via R0 steps (initial "below" was wording).
+- Descending link from the root (`docs/IMPLEMENTATION_PLAN.md`): correct after the direction was clarified;
+  leading-slash habit persists (appeared twice).
+- Ascending link written from a subfolder (`../pie.md`): needed a worked example.
+RETRIEVAL DUE: writing a relative link from the linking file's own folder, especially upward (`../x`) and
+without a leading `/`, on a fresh surface.

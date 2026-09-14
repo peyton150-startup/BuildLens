@@ -2,7 +2,7 @@
 
 ## Core v0.1 delivery boundary — 2026-09-13
 
-Follow the active release scope in `IMPLEMENTATION_PLAN.md`. These teaching rules remain in force even when their automation is deferred. A facilitator may run gates, review reasoning, record exact attempts in this ledger workflow, track misconceptions, and conduct delayed/cumulative retrieval manually.
+Follow the active release scope in `../docs/IMPLEMENTATION_PLAN.md`. These teaching rules remain in force even when their automation is deferred. A facilitator may run gates, review reasoning, record exact attempts in this ledger workflow, track misconceptions, and conduct delayed/cumulative retrieval manually.
 
 The optional product extension supports one source-grounded tracing archetype. An automatically correct value is not a gate pass: fresh transfer and principle explanation still require review. In-memory records are not persistent history, and one success never establishes mastery. Do not implement storage, scheduling, free-form grading, or a broad archetype engine merely to automate this document.
 
