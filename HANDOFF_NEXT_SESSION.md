@@ -4,13 +4,13 @@ Updated 2026-09-13 for the approved Core v0.1 scope. Follow `AGENTS.md` / `CLAUD
 
 ## Resume here
 
-Phase 8 is open. Gate EV-P8-PRETOOLUSE-459 is CLOSED (trace, explanation, transfer — see the end of the ledger). The composite cold phase gate EV-P8-PHASE-GATE-460 is in progress and paused mid-remediation; OWED items 1–2 are recovered; item 3 (the cold "Kestrel" proposal payload) did NOT pass — validation and proposal-truth timing were wrong. Resume the remediation at the end of the ledger, then give a new fresh proposal-shaped payload cold. Close the phase only if that fresh payload passes. Both parsers and tool-call IDs already exist; do not rebuild them.
+**Phase 8 is CLOSED** (2026-09-13): composite gate EV-P8-PHASE-GATE-460 passed; see "GATE PASSED; PHASE 8 CLOSED" at the end of the ledger. Both parsers and tool-call IDs already exist; do not rebuild them.
 
-Closing Phase 8 makes the major counter due (1/2 -> 2/2). Run the cumulative review before significant Phase 9 work. Foundation remains 1/3. Do not reset either counter based on this documentation update.
+**Next: the major cumulative review is DUE** (counter 2/2) before any significant Phase 9 work, together with the Phase 8 -> 9 architecture reset. Build it from the ledger's RETRIEVAL DUE list and `CURRENT_STATE.md`'s uncertain items; reset only the major counter after it passes. Foundation remains 1/3.
 
 ## Remaining release work
 
-1. Finish Phase 8 gates and due review.
+1. Run the due major cumulative review (Phase 8 gates are done).
 2. Specify and build a single-process baseline -> edits -> witness -> report workflow, using existing picture/reconciliation machinery. Address the claimed-path suppression limitation or explicitly expose a narrower coverage contract. Let the learner propose the detailed design.
 3. Only if the observation workflow is complete and time remains, add one source-grounded tracing archetype, fresh transfer, and human-reviewed reasoning. Manual facilitator-run gates are the fallback; preserve exact evidence in the ledger.
 4. Reserve the final day for setup, tests/defects, accurate docs, a demo, static architecture view, and manual defense.

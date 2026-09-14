@@ -1,14 +1,14 @@
 # BuildLens — Current State
 
-Last updated: 2026-09-13 — Core v0.1 scope revision authorized by the user.
+Last updated: 2026-09-13 — Phase 8 closed by composite gate EV-P8-PHASE-GATE-460.
 
 This file is the current snapshot. The [prior accumulated state notes](docs/history/CURRENT_STATE-before-core-v0.1-2026-09-13.md) are preserved byte-for-byte for historical context, not current instructions. Exact historical prompts and learner answers remain in `learning/LEARNING_LEDGER.md`; none were changed by this scope revision.
 
 ## Phase and active release
 
-**Phase 8 remains OPEN.** Phase 7 is complete. The latest recorded product commits are `c78b1b6` (PreToolUse parser) and `bb92ba5` (optional PostToolUse tool-call ID); `c8bb04e` records the gate in progress.
+**Phase 8 is CLOSED** (2026-09-13, composite gate EV-P8-PHASE-GATE-460). Phases 7 and 8 are complete. **Phase 9 has not started**: the major cumulative review is due first. The latest recorded product commits are `c78b1b6` (PreToolUse parser) and `bb92ba5` (optional PostToolUse tool-call ID); no product code changed while the gate ran.
 
-The active scope at the top of `IMPLEMENTATION_PLAN.md` is authoritative: finish the observation core and a single-process reconciliation workflow, then attempt one tracing archetype only if time permits. Facilitator-run gates are the release fallback. Persistence, API/UI, collaborative editing (including Phase 9 merge primitives), automated mastery, and automated interviews are deferred. Phase numbers are preserved. No phase was closed or counter reset in this documentation session.
+The active scope at the top of `IMPLEMENTATION_PLAN.md` is authoritative: finish the observation core and a single-process reconciliation workflow, then attempt one tracing archetype only if time permits. Facilitator-run gates are the release fallback. Persistence, API/UI, collaborative editing (including Phase 9 merge primitives), automated mastery, and automated interviews are deferred. Phase numbers are preserved. No counter was reset.
 
 ## Exact code that exists
 
@@ -62,13 +62,12 @@ The prior learning sessions recorded thirteen test scripts green. The separate 2
 
 ## Learning evidence and exact restart point
 
-**Last completed gate:** EV-P8-PRETOOLUSE-459 (trace, explanation, transfer) — closed 2026-09-13; exact evidence at the end of the learning ledger. **No per-patch gate is open.**
+**Last completed gate:** EV-P8-PHASE-GATE-460, the Phase 8 composite phase gate — PASSED 2026-09-13 across non-Claude surfaces Tern (remediated), Kestrel, Wren, Osprey, Heron and a closing check; exact prompts, verbatim answers, grading corrections and facilitator errors are at the end of the learning ledger. **No gate is open.**
 
 Next, in order:
 
-1. Composite phase gate EV-P8-PHASE-GATE-460 is IN PROGRESS (paused 2026-09-13). The first cold attempt answered a trace of today's code instead of the adapter design (framing error by the facilitator); remediation rungs 1–4 on the "Tern" payload recovered stops/crosses, claim-versus-disk trust, the report type, and shape-validation-versus-truth, partly with sentence frames. OWED items 1 (post-adapter step order) and 2 (new versus unchanged modules) are now recovered with assistance; see the end of the ledger. OWED item 3 was attempted cold on the "Kestrel" proposal payload and did NOT pass (Phase 8 stays open): stops/crosses, field mapping, ProposedEdit named unaided, and new/changed modules were correct; what must be validated (shape, by the adapter), which code validates, what consumes a proposal today (nothing), and when a proposal's effect can be checked (only after a later report of the same call id is observed) were wrong — the exact 340 gaps. The learner routed the proposal through start_flow and compare. Remediation is in progress at the end of the ledger; after it, give another fresh proposal-shaped payload cold. Recurring: Claude's hook event name treated as an internal field. New uncertain items from this chain: ObservedFile class versus observe_file function and why compare is testable without a disk; argument versus return value.
-2. Closing Phase 8 makes the major counter due (1/2 -> 2/2): run the cumulative review before significant Phase 9 work.
-3. Then Phase 9's reduced single-process workflow, with the learner proposing the design.
+1. **Major cumulative review — DUE now** (counter 2/2), before any significant Phase 9 work, plus the architecture reset due at the Phase 8 -> 9 transition. Build it from the RETRIEVAL DUE list at the end of the ledger and the uncertain items below; fresh surfaces; confidence inside every answer block.
+2. Then Phase 9's reduced single-process workflow, with the learner proposing the design.
 
 Known cold from prior evidence, not newly assessed here:
 
@@ -78,6 +77,8 @@ Known cold from prior evidence, not newly assessed here:
 
 Uncertain / due for retrieval:
 
+- From gate 460: validate (shape, adapter) versus verify (truth, observe + compare) inside a composite question; an event/lifecycle field is read by the adapter then stops (relapsed 4x); argument versus return value; `ObservedFile` class versus `observe_file`; why compare is testable without a disk; stating rules without sentence frames.
+
 - CONDITION_EVALUATION: predicting a raise without identifying a failed check; recovered in gate 459, retrieval due.
 - `**` with an explicit duplicate argument; declaration versus runtime check (`file_path: str`); stating a reversal condition from scratch rather than choosing one.
 - Proposal versus report, missing hooks versus disk authority, hook failure/exit behavior: recovered with assistance; fade scaffolding and retrieve later.
@@ -85,11 +86,11 @@ Uncertain / due for retrieval:
 
 ## Counters and next work
 
-- Major counter: **1/2**; closing Phase 8 makes **2/2**, due before significant Phase 9 work.
+- Major counter: **2/2 — DUE** (Phase 8 closed); run the cumulative review before significant Phase 9 work, then reset only this counter.
 - Foundation counter: **1/3**; unchanged.
-- Next retrieval: active gate remediation first, then the overdue/weak concepts above through fresh surfaces and the due cumulative review.
+- Next retrieval: the due cumulative review, covering the uncertain concepts above through fresh surfaces.
 - Next architecture reset: required at the Phase 8 -> 9 major transition; the seven-active-day clock was not newly verified. No reset is claimed here.
 - Next implementation step after the gates: learner specification for the single-process baseline/edit/witness/report workflow and claimed-path coverage policy. No exact command name, event hierarchy, or implementation design has been approved by this scope decision.
 - Final release reserve: setup, tests/defects, documentation, demo, static architecture view, manual defense. Phase 10's narrow extension begins only after the observation workflow is ready.
 
-Files the learner should be able to teach: `compare.py`, `completeflow.py`, `reconcile.py`, and `working_tree_picture.py`. `claude_adapter.py`'s new PreToolUse/shared-parser path still has an open gate; do not call it mastered.
+Files the learner should be able to teach: `compare.py`, `completeflow.py`, `reconcile.py`, and `working_tree_picture.py`. `claude_adapter.py`'s adapter boundary is gated (459, 460) but not mastered; retrieval is due.

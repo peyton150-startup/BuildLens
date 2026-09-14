@@ -48944,3 +48944,607 @@ LATER-EVENT ANSWER, verbatim:
   vocabulary again (Kestrel sends a completion message, not a hook).
 - not stated: that message becomes a ClaimedEdit; call_id (tool_use_id) pairs it with the proposal;
   BuildLens then observes README.md and compares. Re-asked as two short items.
+
+COMPLETED-MESSAGE QUESTION (payload shown with "type": "tool_call.completed", call_id call-88), answer
+verbatim:
+
+```text
+type            "kestralproposaledit"                                              WRONG
+matching field  "proposaledit"                                                     WRONG — a type, not
+                                                                                   a field
+next step       "nothing becasue it cannot find the truth till it is approved and  WRONG for this
+                the post tool hook whatever name it has for it runs"               message — describes
+                                                                                   the proposal
+confidence      not given
+```
+
+PRIMARY BLOCKER: the learner answered for the PROPOSAL, not the COMPLETED message — the one changed field
+("requested" -> "completed") was not noticed; the answer's own content ("till ... the post tool hook ...
+runs") describes this very message as still in the future. Session length/fatigue likely a factor.
+SECONDARY (held): a per-source type name ("kestrel proposal edit") contradicts the adapter principle —
+every adapter emits the same shared BuildLens types.
+
+REMEDIATION (one concept): the two type lines side by side; which message is this, and has the tool run.
+Recording only in the working tree per the user's request (commit when asked).
+
+SIDE-BY-SIDE ANSWER, verbatim: "yes / report / yes / 80"
+
+ALL CORRECT, confidence 80 (first calibrated number in a while): the tool has run, it is a report, and
+the disk can now say something about it. CLIMB: new type or an existing shared type (held secondary),
+which one, the pairing field in both vocabularies, and the next step.
+
+CLIMB ANSWER, verbatim (three lines for four fields):
+
+```text
+new or existing   "we might need to change the fields but it should be exsting"   CORRECT (existing);
+                                                                                   precision: no field
+                                                                                   change — the adapter
+                                                                                   translates into the
+                                                                                   existing fields
+type              "claimed edit and proposededit"                                  CORRECT as the pair:
+                                                                                   report -> ClaimedEdit,
+                                                                                   earlier proposal ->
+                                                                                   ProposedEdit
+pairing field     not answered (the learner mapped call_id -> tool_use_id unaided in the cold part 1)
+next step         "it observes a file and comapres"                                CORRECT
+confidence        not given
+```
+
+Secondary (per-source type) recovered: shared existing types. The report-versus-proposal pipeline split is
+now correct: proposal -> nothing yet; report -> observe, then compare. Pairing field asked as one line.
+
+PAIRING ANSWER, verbatim: "call id becomes tool use id, 85" — CORRECT, confidence 85.
+
+Remediation chain for the Kestrel miss COMPLETE: proposal cannot be checked now; compare gives no verdict
+for it; a later completion report (ClaimedEdit, paired by call_id -> tool_use_id) is observed and
+compared. Still owed at target level: "what must be validated, by which code" was not re-asked in the
+remediation — the fresh payload tests it cold.
+
+### EV-P8-PHASE-GATE-460 — second fresh cold target payload ("Wren"), POSED
+
+Learner continued in-session (no request for a new session). Proposal-shaped again (the failed gaps are
+proposal-specific), with different vocabulary so the type must be reasoned, plus a model-assertion trap
+("verified": true before execution). No frames or hints; same fields as Kestrel.
+
+PROMPT PAYLOAD (exact):
+
+```text
+{
+  "client": "wren",
+  "stage": "pre_execution",
+  "awaiting": "user_approval",
+  "thread": "t-5510",
+  "op_id": "op-3",
+  "root": "/work/api",
+  "reasoning_summary": "The timeout is too short for slow uploads.",
+  "model_confidence": 0.93,
+  "verified": true,
+  "operation": {
+    "verb": "patch_text",
+    "file": "/work/api/settings.py",
+    "find": "TIMEOUT = 5",
+    "replace_with": "TIMEOUT = 30"
+  }
+}
+```
+
+GRADING REFERENCE (not revealed): ProposedEdit (pre_execution, awaiting approval); thread -> session_id,
+op_id -> tool_use_id (required), root -> session_cwd, file -> file_path, verb patch_text -> tool_name
+Edit, find/replace_with -> old_string/new_string; stops: client (read to pick adapter/provenance), stage and
+awaiting (read to pick the type), reasoning_summary, model_confidence, verified. "verified": true and
+model_confidence are model assertions — not validation, not truth (nothing could be verified before it
+ran). Validation = shape checks in wren_adapter (fields present, strings, op_id required). After the
+adapter today: nothing consumes a ProposedEdit. Truth: settings.py on disk, checkable only after a later
+completion report with op-3 is observed and compared. Modules: new wren_adapter; completeflow and cli
+change; the rest unchanged.
+
+FIRST COMMITTED ANSWER, verbatim (one message):
+
+```text
+"awaiting, reasoning summary, verified, model confidence
+client=provanance, stage = hook name, thread = session id, opid= tool use id, root = cwd, verb=toolname,
+file= filepath, find= old string, replacewith= newstring,  it becomes a proposededit, it is preexecution
+so we have not done anything yet so nothing to observe and compare, no idea what you are asking, nothing
+needed to be validated yet, it is a pre execution run so there is no compare so no verdict no observe, it
+will return None, it lives in the file bytes and can be observed if a post execution hook arrives,
+wrenadapter.py, the module that change are cli and start flow for provanance and a new adapter line for
+parsing, 80"
+```
+
+GRADING (confidence 80):
+
+```text
+stops                 awaiting, reasoning_summary, verified,       CORRECT — including the "verified"
+                      model_confidence                             trap
+crosses               thread->session_id, op_id->tool_use_id,      CORRECT; client for provenance
+                      root->cwd, file->file_path, find/replace     defensible; verb not translated to
+                      ->old_string/new_string, verb->tool_name     Edit (partial)
+  stage               "stage = hook name"                          WRONG — THIRD occurrence: Claude event
+                                                                   vocabulary as a crossing field; stage
+                                                                   is read to choose the type, then stops
+type                  ProposedEdit                                 CORRECT, unaided
+why                   pre-execution, nothing to observe/compare    CORRECT
+suggested/asserted    "no idea what you are asking"                NOT ANSWERED — field wording unclear
+                                                                   to the learner (verified/confidence
+                                                                   were placed in stops, the right
+                                                                   handling, but not named as assertions)
+must be validated     "nothing needed to be validated yet"         WRONG — THIRD miss on this gap
+which code            "pre execution so no compare/verdict/        WRONG — the adapter's shape checks were
+                      observe"                                     not named
+after adapter today   "it will return None"                        idea CORRECT (nothing observes or
+                                                                   compares); precision WRONG — the parser
+                                                                   returns a ProposedEdit; None is only
+                                                                   for a tool that names no file
+truth / when          file bytes; observable when a                CORRECT (improved from Kestrel)
+                      post-execution message arrives
+new modules           wren adapter                                 CORRECT
+unchanged             not answered
+changes / why         cli; completeflow for provenance and the     CORRECT
+                      new parse line
+```
+
+RESULT: GATE NOT PASSED; Phase 8 remains OPEN. Big improvement over Kestrel: truth timing and "nothing
+consumes a proposal" are now correct COLD. Remaining failures:
+- VALIDATION: the learner equates "validate" with "check against the disk", so a proposal seems to need
+  none. Rung 4 (target 42 caught by the adapter) was correct WITH a scaffold; the word "validated" is not
+  connected to shape checks unaided. PRIMARY BLOCKER.
+- stage/type -> "hook name": persistent misconception (3x). Next target after validation.
+- "what the model asserted": rephrase in plain words.
+
+REMEDIATION posed (one concept): a malformed Wren proposal (op_id missing), nothing has run — what
+happens, which code, so is there validation before execution.
+
+MALFORMED-PROPOSAL ANSWER, verbatim:
+
+```text
+"it has no claim so in start flow it will return None"
+```
+
+WRONG. Two linked errors:
+- the ADAPTER step is skipped entirely: the learner jumps to start_flow, so the place where checking
+  happens is invisible to them — the same blocker behind "nothing needs validating".
+- missing required field -> "return None": None is only for a tool that names no file; a missing required
+  field raises ValueError (claude_adapter.py:58-62 _required_value; :180 tool_use_id required on
+  proposals). The learner traced exactly this correctly in 459 ("missing required field: tool_use_id").
+
+ADAPT DOWN (R1, block-scoped, their own Claude code): parse_pre_tool_use lines 177-180 plus
+_required_value 58-62; PreToolUse payload with no tool_use_id — what happens, which function, did it need
+the disk. Then map op_id onto it.
+
+R1 ANSWER, verbatim: "raises / value error / no"
+
+- raises — CORRECT
+- which function — answered the exception type (ValueError) rather than the function (_required_value);
+  minor, not drilled
+- needed disk or execution — "no", CORRECT
+
+NEAR-TRANSFER posed (no frames): the op_id-less Wren proposal again — what happens, which code, and one
+sentence on what DOES get validated for a proposal.
+
+NEAR-TRANSFER ANSWER, verbatim: "rasies value error / requireed value / that there is an opid"
+
+- raises ValueError — CORRECT
+- which code — a required-value check, i.e. inside the adapter — CORRECT
+- what gets validated — "that there is an opid": CORRECT but a single CASE, not the principle (the
+  recorded cases-before-principle pattern). Validation happens before execution, in the adapter:
+  confirmed. CLIMB posed: two other checks the adapter would make, whether any check truth, then the
+  principle in one sentence.
+
+CLIMB ANSWER, verbatim (three lines for five fields):
+
+```text
+other check     "the mapping is required"         PARTIAL/defensible — read as "operation must be an
+                                                  object" (_required_object: "field must be an object")
+second check    not given
+tells truth?    "no"                              CORRECT
+rule            "the tool use id and the mapping" NOT the principle — two cases again
+confidence      not given
+```
+
+Cases-before-principle persists after fading. ADAPT DOWN to recognition: four candidate rules (file
+exists / required fields present with the right types / the change is correct / the model is confident),
+pick one, then say why each other one is not the adapter's job.
+
+RECOGNITION ANSWER, verbatim:
+
+```text
+pick     "B"                                                                           CORRECT
+not A    "that is the file observers job and this is just a propsoal so nothing can   CORRECT (existence
+         be observed yet becasue nothing has been claimed"                            is observation)
+not C    "the claim has not been made so no change is possible from this hook         PARTIAL — right idea
+         sequence"                                                                    (unknowable until it
+                                                                                      runs); "hook" vocab
+not D    "the model has no confidnece score and the proposal has no way of being      principle CORRECT
+         trusted"                                                                     (a self-report is not
+                                                                                      trust); fact WRONG —
+                                                                                      Wren sent
+                                                                                      model_confidence 0.93
+confidence  not given
+```
+
+VALIDATION gap RECOVERED at recognition level with correct reasons for excluding observation, correctness
+and model self-report. Still owed before closing Phase 8:
+1. state the validation rule in own words, unscaffolded (delayed)
+2. remediate "stage/type crosses as hook name" (3 occurrences)
+3. reword the "what the model suggested or asserted" field in plain words
+4. a NEW fresh cold payload (not Claude, Tern, Kestrel or Wren); pass required on all fields
+Facilitator recommended stopping here (very long session).
+
+Confidence for the recognition answer, sent separately right after it: "90" — well calibrated for B and
+the A/C reasons; slightly high given D's factual slip.
+
+VALIDATION RULE, learner's own words (volunteered), verbatim:
+
+```text
+"you need to validate that it is a complete payload with fields and vlaues that are the correct types,"
+```
+
+CORRECT and in the learner's words ("complete" = required fields present). Caveat recorded honestly: given
+IMMEDIATELY after the facilitator's summary stated the same rule, so it is a restatement, not a delayed
+unscaffolded retrieval. Still-owed item 1 is PARTIALLY met: retrieve it cold in the next session, on a
+new surface, before the fresh payload. Items 2–4 unchanged.
+
+Addendum, verbatim: "and the tool use id" — CORRECT as a case already inside "complete payload" (a
+required field). Precision to retrieve later: required on a ProposedEdit, OPTIONAL on a ClaimedEdit (the
+459 asymmetry), so "complete" means complete for that type.
+
+Learner, verbatim: "i want to finish phase 8 now". Continuing in-session. Plan: still-owed item 2
+(hook-name vocabulary) remediated next; items 1, 3 and 4 combined into one fresh cold payload from a
+fifth source — its "what must be validated" field serves as the cold, new-surface retrieval of the
+validation rule (after a time delay within the session), and the "model suggested or asserted" field is
+reworded in plain words. Phase 8 closes only if that payload passes on every field.
+
+HOOK-NAME REMEDIATION posed (R1, block-scoped): the ProposedEdit field list; which field would hold
+"pre_execution"; how BuildLens still knows the value is a proposal.
+
+R1 ANSWER, verbatim:
+
+```text
+"preexecution would be the signifier of a propoasededit, it would be like pretoolhook , because of the
+preexecution name, is read by the adapter signifies it is a proposal and then stops from there"
+```
+
+- stage: read by the adapter, signals a proposal, then STOPS — CORRECT (the 3x misconception corrected
+  with the field list in view)
+- which field holds it — not "no field" explicitly; analogy to PreToolUse is apt
+- how BuildLens knows afterwards — PARTIAL: the adapter knows from the name; downstream knows because the
+  value's TYPE is ProposedEdit (no field needed). Stated as precision, not drilled.
+confidence not given.
+
+### EV-P8-PHASE-GATE-460 — third fresh cold target payload ("Osprey"), POSED
+
+Deliberately REPORT-shaped (two proposals in a row invite guessing "proposal"; this tests discrimination
+and that "nothing runs" is not overgeneralized). Traps: self_check "passed", reported_sha256_after (the
+agent's own hash — not an observation). The "model suggested or asserted" field reworded in plain words.
+The validation field doubles as the cold retrieval of the validation rule.
+
+PROMPT PAYLOAD (exact):
+
+```text
+{
+  "product": "osprey",
+  "lifecycle": "step_finished",
+  "exit_code": 0,
+  "chat_id": "ch-2207",
+  "invocation": "inv-41",
+  "project_dir": "/code/shop",
+  "model_notes": "Added the missing tax rate.",
+  "self_check": "passed",
+  "reported_sha256_after": "9f2c41aa07e1",
+  "edit": {
+    "op": "string_replace",
+    "target_file": "/code/shop/tax.py",
+    "old": "RATE = None",
+    "new": "RATE = 0.07",
+    "all_occurrences": false
+  }
+}
+```
+
+GRADING REFERENCE (not revealed): ClaimedEdit (finished, exit 0). chat_id -> session_id; invocation ->
+tool_use_id (optional on a claim); project_dir -> session_cwd; target_file -> file_path; op -> tool_name
+Edit; old/new/all_occurrences -> old_string/new_string/replace_all. Stops: product (read: adapter /
+provenance), lifecycle and exit_code (read: a finished report), model_notes, self_check,
+reported_sha256_after (the agent's statements; the hash may at most be kept as a labeled claim, never as
+the observation). Validated: shape — required fields present, right types — by osprey_adapter. After the
+adapter (once routed): observe tax.py -> compare (Edit fragment check) -> verdict with base version and
+provenance; cli prints. Truth: tax.py's bytes on disk, checkable NOW, as of observed_at. Modules: new
+osprey_adapter; completeflow (route + provenance) and cli change; claude_adapter, compare, file_observer,
+git_adapter, reconcile, working_tree_picture unchanged.
+
+FIRST COMMITTED ANSWER, verbatim (ten lines for thirteen fields):
+
+```text
+"model notes, self check, all oucourances, exitcode, reportd sha256
+product = provanance, lifeclycle = posttoolhook, chat id = session id, invocation=tooluseid,
+projdir=cwd, op = toolname, target file = file path, old = old string, new=newstring,
+claimededit
+old and new claim that the file has been changed and it was a string replace from op.
+the claims must be compared to an observed file on disk
+the observed file observes the fiel comapre compares the 2 and then the verdict is returned by start flow
+the start flow runs to the retunr of the completecompare
+truth lives in the file on disk and it is observed after we parse the payload
+osprey_adapter.py
+cli and start flow for provanance and a new parse line for the new adapter"
+```
+
+GRADING (mapped by content; "own statements" field folded into the stops line; unchanged modules and
+confidence not given):
+
+```text
+stops              model_notes, self_check, exit_code,         CORRECT incl. both traps (self_check,
+                   reported_sha256                             reported hash); all_occurrences WRONG —
+                                                               it crosses as replace_all
+crosses            chat_id, invocation, project_dir, op,       CORRECT (op not translated to Edit —
+                   target_file, old, new; product=provenance   partial)
+  lifecycle        "lifeclycle = posttoolhook"                 WRONG — FOURTH occurrence, minutes after
+                                                               the R1 fix ("read ... then stops")
+type               ClaimedEdit                                 CORRECT, unaided, report discriminated
+                                                               after two proposals
+why                "old and new claim the file has been        PARTIAL — reason should be that the step
+                   changed ... string replace"                 finished (lifecycle / exit_code 0)
+must be validated  "the claims must be compared to an          WRONG — FOURTH miss; cold retrieval of the
+                   observed file on disk"                      validation rule FAILED: validation merged
+                                                               with verification against the disk
+which code         file observer + compare, returned by        WRONG for validation (it is the adapter)
+                   start_flow
+after adapter      observe -> compare -> verdict ->            CORRECT
+                   CompleteCompare returned by start_flow
+truth / when       file on disk, observed after parsing        CORRECT
+new modules        osprey_adapter.py                           CORRECT
+unchanged          not answered
+changes / why      cli; completeflow provenance + parse line   CORRECT
+```
+
+RESULT: GATE NOT PASSED; Phase 8 remains OPEN.
+
+SOLID COLD across Kestrel/Wren/Osprey: field mapping, model self-reports stop, report-vs-proposal type
+choice, what runs after the adapter for each, truth location and timing, new/changed modules.
+
+NOT STABLE:
+1. VALIDATION versus VERIFICATION. Correct when isolated (rung 4, recognition B, own-words rule), lost
+   inside the composite gate on BOTH surfaces: on a proposal it became "nothing", on a report "compare
+   against disk". Hypothesis for the next session: the WORD "validated" is bound to "checked against the
+   truth". Remediate with explicit contrasting vocabulary — VALIDATE = shape, in the adapter, always;
+   VERIFY = truth, by observe + compare, only for reports — then retrieve cold.
+2. Event/lifecycle field named as a Claude hook and listed as crossing (4x), relapsed right after an R1
+   fix. Remediate with a delay, on a new surface.
+
+Session length is a likely contributor. Facilitator recommends stopping; next session starts with (1),
+then (2), then a fresh cold payload from a sixth source.
+
+Learner, verbatim: "no i want this done ask the question". Continuing in-session at the learner's explicit
+choice. Order kept (remediation before a fresh target, per the adaptive rules): (1) validate-versus-verify
+now; (2) event field; (3) sixth-source payload.
+
+VALIDATE-VERSUS-VERIFY posed (one concept, explicit contrasting vocabulary): six checks sorted VALIDATE
+(shape, adapter) or VERIFY (truth, observe + compare), then which of the two a proposal and a report get.
+
+LEARNER CHALLENGE to the Osprey grade, verbatim:
+
+```text
+"i though we were not doing replace all anymore becasue it either replaces all oucourances or one or none
+but either way we know"
+```
+
+UPHELD — GRADING CORRECTION. compare.py:83-92 never reads replace_all (a refused non-unique edit writes
+no record, so old_string should be gone either way). Under the learner's own crossing rule (cross only
+what downstream uses), all_occurrences STOPPING is DEFENSIBLE, not wrong. Nuance: claude_adapter.py:152-153
+still validates it as a boolean and keeps it in details when sent (details = the keys the tool sent) —
+a record-fidelity choice, not a compare need. The Osprey result stands on its other two failures.
+The sort question's item 6 remains a valid VALIDATE example for an adapter that keeps the field.
+
+Learner, verbatim: "no give me the cold so i can complete this phase 8"
+
+DEVIATION RECORDED: the learner declined the validate-versus-verify sort and the event-field remediation
+and asked for the cold target directly. The adaptive rules call for remediation first; the learner's
+explicit choice is honored. The PASS STANDARD IS UNCHANGED: every field substantively correct, and in
+particular validation (shape, adapter), the event field stopping, type, after-adapter behavior, and truth
+timing. If this attempt fails, the skipped remediation is still owed.
+
+### EV-P8-PHASE-GATE-460 — fourth fresh cold target payload ("Heron"), POSED
+
+Proposal-shaped (last was a report), Write-like op, new vocabulary. Traps: "safe": true and
+"sandbox_result": "tests passed" (the agent's own environment, not BuildLens's disk). No frames, no hints,
+no definitions; same thirteen fields as Osprey.
+
+PROMPT PAYLOAD (exact):
+
+```text
+{
+  "vendor": "heron",
+  "state": "needs_confirmation",
+  "session_ref": "s-8830",
+  "action_id": "a-17",
+  "workdir": "/repo/docs",
+  "explanation": "Rewriting the changelog header.",
+  "safe": true,
+  "sandbox_result": "tests passed",
+  "action": {
+    "type": "write_file",
+    "path": "/repo/docs/CHANGELOG.md",
+    "body": "# Changelog\n\n## 2.0\n"
+  }
+}
+```
+
+GRADING REFERENCE (not revealed): ProposedEdit (needs confirmation — not run). session_ref -> session_id;
+action_id -> tool_use_id (REQUIRED); workdir -> session_cwd; action.path -> file_path; action.type
+write_file -> tool_name Write; body -> details content. Stops: vendor (read: adapter/provenance), state
+(read: proposal, then stops), explanation, safe, sandbox_result (Heron's own statements; a sandbox is not
+BuildLens's disk). Validated: shape — required fields present with the right types, action_id required —
+by heron_adapter, before anything runs. After the adapter today: nothing consumes a ProposedEdit; no
+observe, no compare. Truth: CHANGELOG.md bytes on disk, checkable only after a later completion report
+paired by action_id is observed and compared. Modules: new heron_adapter; completeflow (route +
+provenance) and cli change; claude_adapter, compare, file_observer, git_adapter, reconcile,
+working_tree_picture unchanged.
+
+FIRST COMMITTED ANSWER, verbatim:
+
+```text
+"state, explination, safe, sandboxresult,
+vendor = provanance, sessionref=session id, actionid= tooluseid, workdir=cwd, type=toolname,
+path=filepath, body -= content
+claimededit
+state is needsconfirmation which is read but does not pass the adapter
+body but it is the work that needs to be compared against the file bytes on disk
+check the payload's shape. The adapter does it, for every payload.
+the start flow runs to completecompare and returns a verdict depending on the file on sidk
+truth is the file on disk
+heron_adapter.py
+cli and start flow for provanance and the new parse line for the adapter
+90"
+```
+
+GRADING (confidence 90):
+
+```text
+stops              state, explanation, safe, sandbox_result    CORRECT incl. both traps
+crosses            session_ref, action_id, workdir, path,      CORRECT (type not translated to Write —
+                   body; vendor=provenance; type=tool_name     partial, minor)
+type               ClaimedEdit                                 WRONG — "needs_confirmation" means not yet
+                                                               run -> ProposedEdit. CRITICAL; cascades
+why                "state ... is read but does not pass the    event field STOPS — FIXED (was 4x wrong);
+                   adapter"                                    no reason given for the type itself
+own statements     "body ... needs to be compared against the  PARTIAL — body is the proposed content;
+                   file bytes"                                 safe / sandbox_result / explanation are
+                                                               the self-statements (already in stops)
+must be validated  "check the payload's shape. The adapter     CORRECT content; NOTE: word-for-word the
++ which code       does it, for every payload."                facilitator's sentence from the Osprey
+                                                               feedback, still visible in the
+                                                               conversation — counts as correct but NOT
+                                                               as independent recall
+after adapter      start_flow -> CompleteCompare -> verdict    WRONG for a proposal (follows from type)
+truth / when       file on disk; when not stated               location CORRECT; timing missing / wrong by
+                                                               implication
+new modules        heron_adapter.py                            CORRECT
+unchanged          not answered
+changes / why      cli; completeflow provenance + parse line   CORRECT
+```
+
+RESULT: GATE NOT PASSED; Phase 8 remains OPEN.
+
+Progress: the event field now stops; validation stated correctly (though mirroring the facilitator's
+words). New failure: the TYPE — the "needs confirmation" cue was read as a finished step; everything
+downstream (start_flow, verdict, truth now) followed from that one misread. Earlier proposal cues
+("requested", "pre_execution") were read correctly; this cue had no before/after word in it.
+Calibration: 90 against a critical miss.
+
+REMEDIATION (one concept): does "needs_confirmation" mean the write has happened; then type, what runs
+after the adapter, and when truth can be checked — on this same payload. A further fresh payload is still
+required to pass.
+
+LEARNER CHALLENGE, verbatim:
+
+```text
+"i thought it meant we were waiting to confim the edits it made, the name was imbigous so treat it as if it
+was a claimed edit"
+```
+
+UPHELD — FACILITATOR ERROR. "needs_confirmation" is genuinely ambiguous: it can mean "awaiting approval
+to run" OR "ran, awaiting confirmation of the result"; nothing else in the payload disambiguates (no exit
+code; "sandbox_result": "tests passed" even suggests something ran). Under the learner's stated reading the
+answer is INTERNALLY CONSISTENT AND CORRECT: ClaimedEdit -> start_flow observes and compares -> verdict;
+truth on disk, checkable now.
+
+RE-GRADE of Heron under that reading: stops (incl. traps), crosses, type, event field stops, after-adapter,
+truth, new and changed modules — CORRECT. Remaining gaps: (a) validation was stated in the facilitator's
+exact words, so independent recall is unproven; (b) unchanged modules have never been listed cold;
+(c) own-statements field partial.
+
+CLOSURE RATIONALE: across Kestrel, Wren, Osprey and Heron every gate element has now been answered correctly
+COLD at least once — stops incl. model self-reports (all four), type discrimination (Kestrel, Wren, Osprey,
+Heron-as-read), after-adapter for a proposal (Wren) and a report (Osprey, Heron), truth timing (Wren,
+Osprey), event field stops (Heron), new/changed modules (all four) — except (a) and (b). A final CLOSING
+CHECK targets exactly those, in a form that cannot be copied from earlier text: an application question
+(a malformed field versus a false claim on a report) plus unchanged modules, plus one design-defense
+question the ambiguity itself raised (what an adapter author should do with a state value whose meaning
+is unknown). Phase 8 closes if the closing check passes.
+
+CLOSING CHECK ANSWER, verbatim:
+
+```text
+A          "the parse catches it and it rasises a value error"
+B          "the compare would catch that and the verdict would be claim does not hold"
+why        "action id is tool id which is required for a propoasl and b is the payloads claim that it is 2.0
+           but the observed file verifies that it is 1.9"
+unchanged  "heron adapter is added and cli and completeflow are changed"
+parked     "it will raise a value error becasue it is not an expected state or event"
+downside   "it is not recored but the stderr message will show what went wrong"
+```
+
+GRADING (confidence not given):
+
+```text
+A          CORRECT — the adapter's parser rejects a wrongly typed field with ValueError. Validation at the
+           adapter recalled by APPLICATION, not copied wording: gap (a) CLOSED
+B          CORRECT — observe, then compare: CLAIM_DOES_NOT_HOLD
+why        PARTIAL — B right ("observed file verifies"). A's reason is off: this is a REPORT, where the id
+           is optional; A fails because a sent value has the WRONG TYPE (shape), not because it is
+           required. Mechanism right, reason imprecise
+unchanged  NOT ANSWERED — gave new and changed again; gap (b) still open
+parked     CORRECT, strong: reject an unknown state rather than guess (same stance as unsupported
+           tool_name raising)
+downside   CORRECT: a possibly real report produces no record or verdict; only stderr explains
+```
+
+RESULT: closing check passes on everything except gap (b). Asked as the single remaining field.
+
+UNCHANGED-MODULES ANSWER, verbatim: "all the other modules not named from the changes answer"
+
+LOGICALLY CORRECT as a complement: the changed set (heron_adapter new; cli, completeflow changed) was right,
+so "everything else" is exactly the unchanged set. Not graded on naming files (identifier recall is not the
+model). The one model point the complement leaves untested cold is compare — marked "changes" earlier this
+session on Tern and recovered only with the side-by-side scaffold. Final one-line check: does "everything
+else" include compare, and why does compare not change.
+
+COMPARE ANSWER, verbatim:
+
+```text
+"yes
+compare only looks at the payloads after they have been vetted by the other modules it is not the
+responsiblity of compare to make sure they are the corrrect values or types only to comparte the file on
+disk to the claim"
+```
+
+CORRECT, cold: compare is unchanged; validation (shape) belongs upstream, compare only verifies the claim
+against the disk — the validate/verify split stated in the learner's own words. Precision added, not
+drilled: compare receives a ClaimedEdit, not a payload — the same type every adapter emits — so no
+Heron-specific name ever reaches it; that source-independence is the other half of why it is unchanged.
+
+### EV-P8-PHASE-GATE-460 — GATE PASSED; PHASE 8 CLOSED — 2026-09-13
+
+Composite evidence across the non-Claude surfaces Tern (remediated), Kestrel, Wren, Osprey, Heron and the
+closing check. Each gate element was answered correctly COLD at least once:
+
+```text
+what stops, incl. model self-reports and traps     Kestrel, Wren, Osprey, Heron
+what crosses, under BuildLens names                Kestrel, Wren, Osprey, Heron
+type named unaided, report vs proposal             Kestrel, Wren (proposals); Osprey, Heron-as-read
+                                                   (reports)
+event/lifecycle field read then stops              Heron (after 4 misses)
+what must be validated, by which code              closing check A (by application); compare answer
+                                                   (own words)
+deterministic execution after the adapter          Wren (proposal: nothing); Osprey, Heron (report:
+                                                   observe -> compare -> verdict)
+where truth lives and when it can be checked       Wren, Osprey, Heron; closing check B
+new / changed / unchanged modules                  all four; unchanged via complement + compare cold
+design defense (unknown state)                     closing check: reject, with a real downside
+```
+
+Plan gate (IMPLEMENTATION_PLAN Phase 8): adapter responsibility, the representation that leaves the
+adapter, new versus unchanged parts, suggestion / validation / deterministic execution / truth, and
+transfer to non-Claude integrations — MET. Audit gaps 338/341 (type named unaided) and 340 (validation;
+where truth lives) — CLOSED.
+
+Honest limits: several elements needed remediation before they held; the facilitator made framing and
+payload-ambiguity errors (recorded above); the learner skipped the validate/verify sort and event-field
+remediation by choice. Not mastered after one pass — retrieval due.
+
+RETRIEVAL DUE (feed the cumulative review): validate versus verify inside a composite question; event field
+stops (relapse-prone); argument versus return value; ObservedFile class versus observe_file; why compare is
+testable without a disk; stating rules without frames; CONDITION_EVALUATION; `**` duplicate argument;
+declaration versus runtime check. Confidence was often omitted — ask for it inside answer blocks.
+
+COUNTERS: Phase 8 is a major phase -> major counter 1/2 -> 2/2, DUE before significant Phase 9 work.
+Foundation counter 1/3, unchanged. Architecture reset due at the Phase 8 -> 9 transition. Nothing reset.
