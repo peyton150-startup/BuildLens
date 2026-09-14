@@ -78,7 +78,15 @@ Next, in order:
    - D6 claimed-path coverage policy: skip a claimed path only when a Write claim holds at witness time (whole-file equality); report every other changed path, including Edit-claimed ones (containment checks only two fragments — traced with an unreported appended line that an Edit CLAIM_HOLDS would otherwise hide).
    - D6 downside, named by the learner: expected Claude Edit changes still appear as reported changes (noise); change-and-restore stays invisible.
    - D7 report wording for a changed path with a claim: state the change window, the claim and its witness-time verdict with what it covers, and that other changes are not ruled out; never attribute the change or say "no unexpected changes" (the learner first chose an authorship-claiming wording at confidence 90, then recovered).
-   - **Resume at:** `CLAIM_HOLDS_AFTER_NORMALIZE` under D6, several claims on one path, then the witness trigger, malformed/partial last capture line, missing capture file, `cwd`/repository filter, converting claimed `file_path` to repository-relative paths, failure behavior, the "no stopgap file store" constraint, and the test list. Still open: witness trigger, malformed/partial last line, missing capture file, `cwd`/repository filter, converting claimed `file_path` to repository-relative paths, failure behavior, the plan's "no stopgap file store" constraint, and tests.
+   - D6a `CLAIM_HOLDS_AFTER_NORMALIZE` paths are reported, marked line-endings-only (learner's reason: the bytes still differ; downside: noise where many files are converted).
+   - Learning ledger split per phase on 2026-09-14: `learning/LEARNING_LEDGER.md` is now an index; Phase 9 evidence goes in `learning/LEARNING_LEDGER_PHASE_9.md`.
+   - D8 several claims on one path: the latest claim by capture-file line order decides D6 (an older superseded claim is reported only as "does not hold as of witness").
+   - D9 the user triggers the witness picture from find's own terminal (Claude's Stop hook is a separate per-turn process and is not used): "Press Enter to end the session and get a detailed report", then "Are you sure? (y/n)"; n returns to waiting.
+   - D10 Ctrl+C while waiting asks y (take the witness and report) / n (return to waiting).
+   - D11 Ctrl+C during the witness picture: no report; say the picture was interrupted (a partial witness would make unread files look DELETED).
+   - D12 an unparseable capture line in the read range is skipped and named in the output as not valid JSON, for a reason find cannot verify; its file's change is then reported without a claim (over-reporting, never hiding).
+   - D13a capture file missing at baseline counts as position 0; at witness every line is read. D13b capture file present at baseline but missing at witness: stop with a message, no report (claims may exist but cannot be read).
+   - **Resume at:** `cwd`/repository filter and converting a claimed `file_path` to a repository-relative path, then Git/picture failure behavior, the plan's "no stopgap file store" constraint against D2, and the test list. Witness trigger, half-written capture lines, and a missing capture file are decided (D9-D13).
 
 Known cold from prior evidence, not newly assessed here:
 

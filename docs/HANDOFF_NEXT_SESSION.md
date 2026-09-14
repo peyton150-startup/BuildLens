@@ -6,7 +6,7 @@ Updated 2026-09-13 for the approved Core v0.1 scope. Follow `AGENTS.md` / `CLAUD
 
 **Phase 8 is CLOSED** (2026-09-13): composite gate EV-P8-PHASE-GATE-460 passed; see "GATE PASSED; PHASE 8 CLOSED" at the end of the ledger. Both parsers and tool-call IDs already exist; do not rebuild them.
 
-**Major cumulative review 2 PASSED** (2026-09-14; major counter 0/2, foundation 1/3). Tests moved to `tests/` and docs grouped into `docs/` and `learning/` (both done). **Phase 9 STARTED 2026-09-14.** Resume the learner-led workflow design review from `CURRENT_STATE.md` item 3 (decisions D1-D5 under review, not approved; next: what judging claims only at witness time cannot see, then claimed-path coverage policy). Claude assistance level is REVIEWER: challenge the design, do not choose it.
+**Major cumulative review 2 PASSED** (2026-09-14; major counter 0/2, foundation 1/3). Tests moved to `tests/` and docs grouped into `docs/` and `learning/` (both done). **Phase 9 STARTED 2026-09-14.** Resume the learner-led workflow design review from `CURRENT_STATE.md` item 3 (decisions D1-D13 under review, not approved; next: `cwd` filter and repository-relative claim paths, Git/picture failure behavior, the "no stopgap file store" constraint, then the test list). The learning ledger is split per phase: `learning/LEARNING_LEDGER.md` is the index; append Phase 9 evidence to `learning/LEARNING_LEDGER_PHASE_9.md`. Claude assistance level is REVIEWER: challenge the design, do not choose it.
 
 ## Remaining release work
 
