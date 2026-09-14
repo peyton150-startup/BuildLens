@@ -1,6 +1,6 @@
 # BuildLens — Current State
 
-Last updated: 2026-09-13 — Phase 8 closed by composite gate EV-P8-PHASE-GATE-460.
+Last updated: 2026-09-14 — major cumulative review 2 passed; major counter reset; architecture reset decided to separate tests from product modules.
 
 This file is the current snapshot. The [prior accumulated state notes](docs/history/CURRENT_STATE-before-core-v0.1-2026-09-13.md) are preserved byte-for-byte for historical context, not current instructions. Exact historical prompts and learner answers remain in `learning/LEARNING_LEDGER.md`; none were changed by this scope revision.
 
@@ -66,8 +66,9 @@ The prior learning sessions recorded thirteen test scripts green. The separate 2
 
 Next, in order:
 
-1. **Major cumulative review — IN PROGRESS** (started 2026-09-14, "MAJOR CUMULATIVE REVIEW 2" in the ledger; counter still 2/2, nothing reset). Q1–Q4 recovered (Q4 with assistance). **Resume at Q5 (EV-CR2-Q5-465, Finch adapter):** re-display it in full and take the first committed answer. Then a rule/reversal-condition question without frames, then the Phase 8 -> 9 architecture reset. Confidence inside every answer block.
-2. Then Phase 9's reduced single-process workflow, with the learner proposing the design.
+1. **Major cumulative review 2 — PASSED 2026-09-14** after adaptive remediation (EV-CR2-Q1-461 .. EV-CR2-ARCH-467; see "MAJOR CUMULATIVE COUNTER RESET — 2026-09-14" in the ledger). Phase 8 -> 9 architecture reset completed with scaffolding.
+2. **Next: layout patch.** Architecture reset decision: separate tests from product modules (the flat layout hid `working_tree_picture.py`, meeting the reversal condition from EV-CUM-FND-190). Before patching: pre-patch statement, and the learner predicts how bare-name imports in `python test_x.py` scripts behave once tests live in another folder. Tests have no pyproject/conftest/sys.path setup today.
+3. Then Phase 9's reduced single-process workflow, with the learner proposing the design. Q6 seeded (not approved) a claimed-path policy: skip a claimed path only when its verdict-time hash equals the witness hash.
 
 Known cold from prior evidence, not newly assessed here:
 
@@ -86,10 +87,11 @@ Uncertain / due for retrieval:
 
 ## Counters and next work
 
-- Major counter: **2/2 — DUE** (Phase 8 closed); run the cumulative review before significant Phase 9 work, then reset only this counter.
+- Major counter: **0/2** (reset 2026-09-14 after major cumulative review 2 passed).
 - Foundation counter: **1/3**; unchanged.
-- Next retrieval: the due cumulative review, covering the uncertain concepts above through fresh surfaces.
-- Next architecture reset: required at the Phase 8 -> 9 major transition; the seven-active-day clock was not newly verified. No reset is claimed here.
+- Next retrieval: unaided two-path architecture redraw (ingest path and picture/reconcile path, with data on arrows); ObservedFile vs observe_file unprompted on a fresh surface; argument vs return value unprompted; CONDITION_EVALUATION on another surface; naming concrete validation checks. Ask for confidence inside every answer block — still often omitted.
+- Architecture reset study targets (EV-CR2-ARCH-467): `take_picture` calls `git_adapter` (root, tracked + untracked listings) then `file_observer.observe_file` per path; `git_adapter` and `file_observer` are shared by both paths; `claimed_paths` is reconcile's third input; `reconcile` calls no other BuildLens module; no session-end trigger exists.
+- Next architecture reset: by the seven-active-day clock or the next major transition.
 - Next implementation step after the gates: learner specification for the single-process baseline/edit/witness/report workflow and claimed-path coverage policy. No exact command name, event hierarchy, or implementation design has been approved by this scope decision.
 - Final release reserve: setup, tests/defects, documentation, demo, static architecture view, manual defense. Phase 10's narrow extension begins only after the observation workflow is ready.
 
