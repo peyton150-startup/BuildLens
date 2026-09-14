@@ -1,12 +1,12 @@
 # BuildLens — Current State
 
-Last updated: 2026-09-14 — major cumulative review 2 passed; major counter reset; architecture reset decided to separate tests from product modules.
+Last updated: 2026-09-14 — major cumulative review 2 passed; tests and docs layout patches done; Phase 9 started (idempotence lesson done, learner-led workflow design in progress).
 
 This file is the current snapshot. The [prior accumulated state notes](history/CURRENT_STATE-before-core-v0.1-2026-09-13.md) are preserved byte-for-byte for historical context, not current instructions. Exact historical prompts and learner answers remain in `learning/LEARNING_LEDGER.md`; none were changed by this scope revision.
 
 ## Phase and active release
 
-**Phase 8 is CLOSED** (2026-09-13, composite gate EV-P8-PHASE-GATE-460). Phases 7 and 8 are complete. **Phase 9 has not started**: the major cumulative review is due first. The latest recorded product commits are `c78b1b6` (PreToolUse parser) and `bb92ba5` (optional PostToolUse tool-call ID); no product code changed while the gate ran.
+**Phase 8 is CLOSED** (2026-09-13, composite gate EV-P8-PHASE-GATE-460). Phases 7 and 8 are complete. **Phase 9 STARTED 2026-09-14** (reduced Core v0.1 scope); no Phase 9 product code yet. The latest recorded product commits are `c78b1b6` (PreToolUse parser) and `bb92ba5` (optional PostToolUse tool-call ID); no product code changed while the gate ran.
 
 The active scope at the top of `IMPLEMENTATION_PLAN.md` is authoritative: finish the observation core and a single-process reconciliation workflow, then attempt one tracing archetype only if time permits. Facilitator-run gates are the release fallback. Persistence, API/UI, collaborative editing (including Phase 9 merge primitives), automated mastery, and automated interviews are deferred. Phase numbers are preserved. No counter was reset.
 
@@ -68,7 +68,17 @@ Next, in order:
 
 1. **Major cumulative review 2 — PASSED 2026-09-14** after adaptive remediation (EV-CR2-Q1-461 .. EV-CR2-ARCH-467; see "MAJOR CUMULATIVE COUNTER RESET — 2026-09-14" in the ledger). Phase 8 -> 9 architecture reset completed with scaffolding.
 2. **Layout patch — tests moved to `tests/`** (2026-09-14, option B chosen by the learner: a `sys.path` insert at the top of each test). The learner predicted the bare-name import failure and the `-m` success; both were verified. The move exposed a hidden dependency on the current folder in `test_completeflow.py` (`Path("compare.py")`), now anchored to the repository root. **Knowledge gate passed with assistance** (2026-09-14): import mechanism, ordering, downside and the cwd fix correct; the run command `python tests/test_cli.py` needed a worked example. Retrieval due: file path form versus `-m` module name form. **Docs grouping done** (2026-09-14, EV-DOCS-LAYOUT-469): plan, current state and handoff moved to `docs/`; old handoffs and `QUIZZES.md` moved to `learning/`; `CLAUDE.md`, `AGENTS.md`, `README.md` stay at the root. Archived handoffs and plans keep their original, now-stale paths as verbatim records.
-3. Then Phase 9's reduced single-process workflow, with the learner proposing the design. Q6 seeded (not approved) a claimed-path policy: skip a claimed path only when its verdict-time hash equals the witness hash.
+3. **Phase 9 in progress.** Idempotence lesson done (EV-P9-IDEMPOTENCE-470 .. EV-P9-DEDUP-TRANSFER-472): an ID names a thing, not an event; ID-only dedup is safe only when the id is unique per real event and reused by its retries. **Learner-led design, under review, not approved** (EV-P9-DESIGN-473):
+   - D1 `python cli.py find`, a new subcommand.
+   - D2 claims come from the hook capture file `payload_samples.jsonl` read at witness time (hooks write to disk in separate processes; `find` cannot receive payloads in memory).
+   - D3 scope = the file position remembered at baseline; only lines appended before the witness are read (payloads carry no timestamp; session_id rejected by the learner because a new Claude session would be excluded).
+   - D4 PreToolUse lines are ignored; only PostToolUse lines become claims.
+   - D5 a repeated PostToolUse in range needs no dedup: all claims are judged against one witness-time observation and `claimed_paths` is a set.
+   - Settled with the learner: judging claims at witness time makes a later rewrite visible as a failed claim (without attribution); change-and-restore stays invisible; no report-time hash exists (payloads carry none, the capture hook observes nothing, and storing per-report observations is deferred persistence), so the Q6 hash idea does not apply.
+   - D6 claimed-path coverage policy: skip a claimed path only when a Write claim holds at witness time (whole-file equality); report every other changed path, including Edit-claimed ones (containment checks only two fragments — traced with an unreported appended line that an Edit CLAIM_HOLDS would otherwise hide).
+   - D6 downside, named by the learner: expected Claude Edit changes still appear as reported changes (noise); change-and-restore stays invisible.
+   - D7 report wording for a changed path with a claim: state the change window, the claim and its witness-time verdict with what it covers, and that other changes are not ruled out; never attribute the change or say "no unexpected changes" (the learner first chose an authorship-claiming wording at confidence 90, then recovered).
+   - **Resume at:** `CLAIM_HOLDS_AFTER_NORMALIZE` under D6, several claims on one path, then the witness trigger, malformed/partial last capture line, missing capture file, `cwd`/repository filter, converting claimed `file_path` to repository-relative paths, failure behavior, the "no stopgap file store" constraint, and the test list. Still open: witness trigger, malformed/partial last line, missing capture file, `cwd`/repository filter, converting claimed `file_path` to repository-relative paths, failure behavior, the plan's "no stopgap file store" constraint, and tests.
 
 Known cold from prior evidence, not newly assessed here:
 
@@ -92,7 +102,7 @@ Uncertain / due for retrieval:
 - Next retrieval: unaided two-path architecture redraw (ingest path and picture/reconcile path, with data on arrows); ObservedFile vs observe_file unprompted on a fresh surface; argument vs return value unprompted; CONDITION_EVALUATION on another surface; naming concrete validation checks. Ask for confidence inside every answer block — still often omitted.
 - Architecture reset study targets (EV-CR2-ARCH-467): `take_picture` calls `git_adapter` (root, tracked + untracked listings) then `file_observer.observe_file` per path; `git_adapter` and `file_observer` are shared by both paths; `claimed_paths` is reconcile's third input; `reconcile` calls no other BuildLens module; no session-end trigger exists.
 - Next architecture reset: by the seven-active-day clock or the next major transition.
-- Next implementation step after the gates: learner specification for the single-process baseline/edit/witness/report workflow and claimed-path coverage policy. No exact command name, event hierarchy, or implementation design has been approved by this scope decision.
+- Next implementation step: finish the learner's design review (see item 3 above), then tests first. No design is approved yet. Retrieval due from Phase 9 so far: event identity vs thing identity; relative links from the linking file's folder; file path form vs `-m`.
 - Final release reserve: setup, tests/defects, documentation, demo, static architecture view, manual defense. Phase 10's narrow extension begins only after the observation workflow is ready.
 
 Files the learner should be able to teach: `compare.py`, `completeflow.py`, `reconcile.py`, and `working_tree_picture.py`. `claude_adapter.py`'s adapter boundary is gated (459, 460) but not mastered; retrieval is due.
