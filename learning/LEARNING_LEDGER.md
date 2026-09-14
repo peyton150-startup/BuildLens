@@ -49548,3 +49548,792 @@ declaration versus runtime check. Confidence was often omitted — ask for it in
 
 COUNTERS: Phase 8 is a major phase -> major counter 1/2 -> 2/2, DUE before significant Phase 9 work.
 Foundation counter 1/3, unchanged. Architecture reset due at the Phase 8 -> 9 transition. Nothing reset.
+
+## MAJOR CUMULATIVE REVIEW 2 (Phase 7-8 -> 9 transition) — 2026-09-14
+
+Triggered by the major counter (2/2). Built from the RETRIEVAL DUE list after EV-P8-PHASE-GATE-460 and the
+uncertain items in CURRENT_STATE.md. Deep review, about 8 questions, one at a time, fresh surfaces, confidence
+inside every answer block. The Phase 8 -> 9 architecture reset follows the questions.
+
+### EV-CR2-Q1-461 — CONDITION_EVALUATION on a fresh validator surface — 2026-09-14
+
+SOURCE PHASES:
+Phase 8 (claude_adapter._checked_event / _required_string ordered checks); gate 459 remediation.
+
+ACADEMIC SOURCE:
+`PY-CONTRACTS-VALIDATION`
+
+DEEP SKILL:
+Evaluate each guard in order by substituting the actual argument values, stop at the first guard whose
+condition is true, and name the checks that are never reached.
+
+EXERCISE TYPE:
+CUMULATIVE_RETRIEVAL
+
+SCAFFOLD RUNG:
+R5 — four ordered guards, one case-sensitive string trap, a later guard that would also fire; no hints.
+
+PROMPT (verbatim):
+Question 1: trace which check decides this call
+
+```
+def checked_ticket(ticket: object, expected_queue: str) -> dict:
+    if not isinstance(ticket, dict):
+        raise ValueError("ticket must be an object")
+
+    if "queue" not in ticket:
+        raise ValueError("missing queue")
+
+    if ticket["queue"] != expected_queue:
+        raise ValueError("wrong queue: " + ticket["queue"])
+
+    if ticket.get("priority", 0) > 3:
+        raise ValueError("priority too high")
+
+    return ticket
+```
+
+Call:
+
+```
+checked_ticket({"queue": "billing", "priority": 5}, "Billing")
+```
+
+Fill in every field:
+
+```
+Checks that pass, in order =
+First check that fails (quote its condition) =
+Raises or returns =
+Exact message or return value =
+Checks never evaluated =
+Why the one you named fails =
+Confidence =
+```
+
+For "Why the one you named fails", give the actual values on both sides of the comparison.
+
+LEARNER FIRST COMMITTED ANSWER (verbatim):
+. first it checks to see if there is a ticket dict, if not it rasies a value error, then it checks that queue is in ticket and if it is not it rasies a value error, then it checks inside of queue to make sure the values inside are the expected queue values if not value error, then it checks to see the priority and the range is 0 to 2, so for 5 it would be a priority too high, it would rasie at the prioritry 5, 90
+
+CONFIDENCE:
+90
+
+RESULT:
+INCORRECT. The third guard fires: ticket["queue"] is "billing", expected_queue is "Billing"; string
+comparison is case-sensitive, so "billing" != "Billing" is True and ValueError("wrong queue: billing") is
+raised. The priority guard is never evaluated.
+
+MISCONCEPTION:
+Primary blocker: CONDITION_EVALUATION relapse — the learner described what each guard is FOR instead of
+substituting the call's actual values into each condition, so the queue guard was assumed to pass and the
+visibly-wrong priority was chosen. Secondary (not targeted yet): `> 3` read as "the range is 0 to 2"; the
+threshold itself (3 passes) was not evaluated either. Fields were not answered separately. High confidence
+(90) on an unevaluated trace.
+
+REMEDIATION CHAIN:
+R1 micro: evaluate isolated comparisons with literal values (case-sensitive string !=, boundary >), then
+return to the Q1 guards value by value, then a fresh target-level validator.
+
+DELAYED RETRIEVAL STATUS:
+Due (gate 459 recovery) — relapsed on first delayed attempt.
+
+TRANSFER CONTEXT:
+Non-BuildLens ticket-queue validator.
+
+REMEDIATION STEP 1 — R1 micro-check (verbatim prompt):
+Micro-check: evaluate each comparison on its own
+
+```
+"Red" != "red"
+"red" != "red"
+3 > 3
+5 > 3
+```
+
+Fill in every field:
+
+```
+"Red" != "red" is True or False =
+"red" != "red" is True or False =
+3 > 3 is True or False =
+5 > 3 is True or False =
+In an `if cond: raise ...` guard, the raise happens when cond is =
+Confidence =
+```
+
+Give only True or False for each comparison, with no explanation of what the code is for.
+
+LEARNER ANSWER (verbatim):
+. i was definetly looking at that while you were loading, billing adn Billing do not match on the b being lowercase and the B being uppercase, so it would stop execution at the value error for that hceck, i am a little confused about the priority, becasue if i am not mistaken the 0 means if there is no prioirty then it is 0
+
+EVALUATION:
+Micro fields not filled. Learner self-corrected the Q1 target after the "not the priority check" signal was
+implied by the step-down: queue guard fires on case mismatch and stops execution — correct, but assisted
+(the remediation prompt contained a case-sensitive string pair). Learner correctly reads
+`ticket.get("priority", 0)` as defaulting to 0 when the key is missing. Remaining blocker: what `> 3`
+admits — the first answer read the threshold as "range 0 to 2". Syntax-only help on `.get(key, default)`
+plus `>` threshold; next step R1 value-substitution on three dicts.
+
+REMEDIATION STEP 2 — R1 value substitution on `ticket.get("priority", 0) > 3` for three dicts (missing,
+3, 4); fields: value get returns / condition True or False for each, smallest priority that raises,
+confidence. (Prompt as displayed in session.)
+
+LEARNER ANSWER (verbatim):
+. so it lets anything lower than 3 through so if billing was correct the next error would have been here
+
+EVALUATION:
+PARTIAL. Correct: with the queue fixed, priority 5 would raise at the priority guard (the Q1 counterfactual).
+Incorrect boundary: "anything lower than 3" — `3 > 3` is False, so 3 also passes; the smallest raising
+priority is 4. Per-value fields again unfilled, so no substituted values were produced. Primary blocker
+narrowed to the strict-greater-than boundary (the equal case). Next: R0 single expression `3 > 3`.
+
+REMEDIATION STEP 3 — R0 single expression `3 > 3`; fields: True or False / does priority 3 raise /
+smallest whole-number priority that raises / confidence.
+
+LEARNER ANSWER (verbatim):
+. false 
+no 
+so it is 3 to 0
+90
+
+EVALUATION:
+CORRECT on the boundary: `3 > 3` is False, priority 3 does not raise. Third field answered as the passing
+range ("3 to 0") rather than the smallest raising value (4); the range reading is consistent with the
+correct boundary, so the equal case is recovered at R0. (Negative priorities also pass; not drilled.)
+Next: fresh target-level CONDITION_EVALUATION problem, `>=` boundary this time, different surface.
+
+FRESH TARGET-LEVEL RETRY — Question 1b (verbatim prompt):
+Question 1b: trace which check decides this call
+
+```
+def checked_shipment(shipment: object, max_weight: int) -> dict:
+    if not isinstance(shipment, dict):
+        raise ValueError("shipment must be an object")
+
+    if "weight" not in shipment:
+        raise ValueError("missing weight")
+
+    if shipment["weight"] >= max_weight:
+        raise ValueError("too heavy")
+
+    if shipment.get("carrier", "ups") != "ups":
+        raise ValueError("unsupported carrier")
+
+    return shipment
+```
+
+Call:
+
+```
+checked_shipment({"weight": 20, "carrier": "UPS"}, 20)
+```
+
+Fill in every field:
+
+```
+Check 1, True or False =
+Check 2, True or False =
+Check 3 with the values substituted in =
+Check 3, True or False =
+Raises or returns =
+Exact message or return value =
+Checks never evaluated =
+Confidence =
+```
+
+Stop filling in check lines at the first check that is True.
+
+LEARNER FIRST COMMITTED ANSWER (verbatim):
+. it stops at max weight becasue they are the same and nothing after that runs
+
+CONFIDENCE:
+not given
+
+RESULT:
+CORRECT (unaided, fresh surface, `>=` boundary). Check 3 fires because 20 >= 20 is True; the carrier check
+is never evaluated. Omissions: exact message ("too heavy") and ValueError not named, fields and confidence
+not filled. The carrier guard would also have failed ("UPS" != "ups") — the learner did not pick the
+visibly-wrong later value this time, which was the Q1 error pattern.
+
+CONDITION_EVALUATION: recovered at target level after R1 -> R0 -> fresh retry. Not mastered; retrieve again
+later on another surface.
+
+### EV-CR2-Q2-462 — `**` unpacking with a duplicate keyword; argument versus return value — 2026-09-14
+
+SOURCE PHASES:
+Phase 8 (claude_adapter.parse_post_tool_use / parse_pre_tool_use `**fields` construction).
+
+ACADEMIC SOURCE:
+`PY-CONTRACTS-VALIDATION` (Python call semantics: keyword arguments and `**` unpacking)
+
+DEEP SKILL:
+Expand `**mapping` into the keyword arguments it stands for, detect a keyword supplied twice, and
+distinguish a call's return value from its use as another call's argument.
+
+EXERCISE TYPE:
+CUMULATIVE_RETRIEVAL
+
+SCAFFOLD RUNG:
+R5 — frozen dataclass, helper call nested as an argument, `**` with a colliding key, a non-colliding
+contrast line, and BuildLens application field.
+
+PROMPT (verbatim):
+Question 2: unpacking a dict into a call
+
+```
+from dataclasses import dataclass
+
+@dataclass(frozen=True)
+class Reading:
+    sensor: str
+    value: float
+    unit: str
+
+def _unit(raw: dict) -> str:
+    return raw.get("unit", "C")
+
+fields = {"sensor": "t1", "value": 21.5, "unit": "C"}
+```
+
+Call:
+
+```
+first = Reading(unit=_unit({}), **fields)
+second = Reading(unit=_unit({}), sensor="t1", value=21.5)
+```
+
+Fill in every field:
+
+```
+What the first line does, exactly =
+Why =
+Value of second.unit =
+Is _unit({}) an argument, a return value, or both, and to what =
+In parse_post_tool_use, why ClaimedEdit(tool_use_id=..., **fields) does not hit the first line's problem =
+Confidence =
+```
+
+Assume the first line's outcome does not stop the second line from running.
+
+LEARNER FIRST COMMITTED ANSWER (verbatim):
+. so in the modukle it first defines the dataclass for class reading then it def unit which returns the unit and the lookupvalue with default being C, the fields are sensor value and unit in the reading class, first is a reading class object that reads out the fields and is the fields fields = {"sensor": "t1", "value": 21.5, "unit": "C"}, and second is a reading class object and it reads out the same unit but it explicitly writes out the same sensor and value.
+
+CONFIDENCE:
+not given
+
+RESULT:
+INCORRECT. `first` raises TypeError (Reading.__init__ got multiple values for keyword argument 'unit'):
+`unit=` is passed explicitly AND `**fields` supplies unit="C". `second` succeeds; second.unit == "C".
+_unit({}) returns "C" (return value of _unit) which is passed as the unit argument to Reading (both).
+BuildLens field unanswered.
+
+MISCONCEPTION:
+Primary blocker: `**fields` not expanded into its keyword arguments, so the duplicate `unit` was invisible;
+learner read `**fields` as "the object reads out the fields". Pattern: narrated the module line by line
+instead of tracing the call (same description-over-evaluation mode as Q1). Correct pieces: _unit returns
+raw.get("unit", "C") with default "C"; second supplies sensor and value explicitly.
+
+REMEDIATION CHAIN:
+R1 syntax-only: write out a `**d` call as explicit keyword arguments on a tiny non-dataclass function and
+count keywords; then return to Reading.
+
+DELAYED RETRIEVAL STATUS:
+Due (`**` duplicate argument, argument vs return value) — relapsed.
+
+TRANSFER CONTEXT:
+Sensor reading dataclass.
+
+REMEDIATION STEP 1 — R1 syntax-only (verbatim prompt core):
+`**d` explained as passing each key/value as key=value; micro-check:
+
+```
+def show(a, b):
+    return a + b
+
+d = {"b": 2}
+show(a=1, **d)
+show(b=9, **d)
+```
+
+Fields: each call written out without **, count of keyword b in each, can one call give a parameter two
+values, confidence.
+
+LEARNER ANSWER (verbatim):
+. it would say a=1 and b=2, i understand the **fields maybe i just worded it incorrectly, so it would be 1+2, and the second show owould rasie an error
+
+EVALUATION:
+CORRECT at R1: first call expands to show(a=1, b=2) and returns 1 + 2; second call raises. Reason for the
+raise (b supplied twice) and the error type not stated; confidence not given. Learner reports the Q2 miss
+as wording rather than model — plausible given the correct expansion here, but the Q2 answer never named
+the error, so require it at target level. Next: fresh target-level `**` problem plus the BuildLens field.
+
+Question 2b posted (Badge dataclass: a = Badge(team=_team({"team": "red"}), **base); b = Badge(level=_team({}),
+**base); base = {"name": "Ada", "level": 2}; plus _tool_call_fields return dict and the ClaimedEdit(**fields)
+line; fields: a raises or builds / a values / b raises or builds / b error type and reason / _team({}) value /
+return value vs argument / why ClaimedEdit never passes a keyword twice / confidence).
+
+LEARNER MESSAGE AFTER Q2b WAS POSTED (verbatim):
+.  it rasies because it is b written twice in the same function call
+
+EVALUATION:
+Read as completing the R1 micro-check's missing reason (show(b=9, **d) supplies b twice) — CORRECT, the
+duplicate-keyword reason stated unaided. Not treated as the Q2b first committed answer: in Q2b the
+colliding keyword is `level`, not `b`, and no Q2b field was addressed. Q2b answer requested.
+
+Q2b code re-displayed in full on request (Badge block + _tool_call_fields return dict + whole
+parse_post_tool_use), same fields.
+
+LEARNER FIRST COMMITTED ANSWER TO Q2b (verbatim):
+. a is all good and b raises becasue it calls level twice
+
+RESULT:
+CORRECT core, unaided on a fresh surface: `a` builds; `b` raises because `level` is supplied twice (explicit
+`level=` and `**base`). Duplicate `**` keyword: RECOVERED at target level after R1. Unanswered: a's values,
+error type (TypeError), _team({}) value (None), argument vs return value, the BuildLens no-collision field,
+confidence. Follow-up asks only the two due-concept fields (argument vs return value; ClaimedEdit).
+
+FOLLOW-UP (verbatim prompt fields):
+```
+In b, _team({}) is a return value, an argument, or both — and of what =
+Why ClaimedEdit(tool_use_id=..., **fields) never passes a keyword twice =
+Confidence =
+```
+For the second line, look at which keys the dict returned by `_tool_call_fields` contains.
+
+LEARNER ANSWER (verbatim):
+. it is a return value but in team you can have an argument for what team should be 
+because tooluseid is not returned by the clasude adatper it is only in the retunr for claimededit so fields is  "file_path": file_path,
+        "session_id": session_id,
+        "tool_name": tool_name,
+        "details": MappingProxyType(details),
+        "session_cwd": _optional_string(payload, "cwd"),
+
+EVALUATION:
+ClaimedEdit field: CORRECT — the dict returned by _tool_call_fields has no tool_use_id key, so the explicit
+tool_use_id= keyword cannot collide with **fields. (Minor wording: "not returned by the claude adapter"
+means not returned by _tool_call_fields; tool_use_id is added only at the ClaimedEdit call.)
+Argument vs return value: INCORRECT/PARTIAL — named "return value" only, then attached the argument idea to
+_team's `raw`/team rather than to Badge. Missed: in b, _team({}) returns None, and that returned value is
+passed as the `level` argument to Badge (both). `**` / BuildLens application: RECOVERED.
+Blocker: nested call — a call's result becoming the next call's argument. Next: R1 micro on double(4) inside
+print, then re-apply to b. Confidence not given.
+
+REMEDIATION STEP (R1 micro posted: double(4) inside print — argument to double / return of double(4) /
+argument print receives / return value, argument or both / confidence).
+
+LEARNER MESSAGE (verbatim):
+. what i meant is that a value can go level=_team({in here and this is what team will be, team: red})
+
+EVALUATION:
+Micro not answered; clarification of the earlier field. Correct: the dict inside _team(...) is _team's
+argument, and _team({"team": "red"}) returns "red". Misconception made visible: the learner says the value
+"is what team will be" for level=_team(...) — i.e. believes the result lands in Badge's `team` field because
+the helper is named _team / the dict key is "team". Actual rule: the keyword to the LEFT of `=` in the
+call (level=) chooses the receiving parameter; the right side only computes the value. Primary blocker
+re-identified as keyword-argument binding, not return-value vocabulary. Next: syntax-only R1 on `name=expr`
+with a deliberately mismatched helper name. double(4) micro superseded.
+
+LEARNER MESSAGE (verbatim):
+. this is what i meant by this: That helps. You're right that the dict inside _team(...) is the argument to _team, and that _team({"team": "red"}) returns "red".
+
+FACILITATOR CORRECTION:
+The learner states the prior message meant only argument-to-_team / return-of-_team, not that the value
+binds to Badge's `team` field. Upheld: the "keyword-binding misconception" recorded in the previous entry is
+WITHDRAWN as unconfirmed (inferred from wording, not demonstrated). Facilitator error: over-read informal
+wording. Still unevidenced: the "both" half — that in b the returned None becomes Badge's `level` argument.
+Binding micro-check replaced by one line asking which value `level` receives in b.
+
+PROMPT (verbatim):
+```
+b = Badge(level=_team({}), **base)
+```
+```
+Value Badge's level parameter receives from _team({}) =
+So _team({}) is a return value, an argument, or both =
+Confidence =
+```
+Assume for this one that the duplicate `level` from `**base` isn't there.
+
+LEARNER ANSWER (verbatim):
+it is a None becasue of the error
+
+EVALUATION:
+Value CORRECT (None); reason INCORRECT — None is not produced by the TypeError (the prompt removed the
+duplicate). It is _team's return value: raw.get("team") on {} with no default returns None. "Both" field
+unanswered. Blocker: source of None — `dict.get(key)` with no default returns None (contrast Q1, where the
+learner correctly read get's explicit default 0). Next: R1 micro on get with and without a default, plus the
+"both" line.
+
+LEARNER MESSAGE (verbatim, sent mid-turn):
+. team is both
+
+EVALUATION:
+CORRECT — _team({}) is both: _team's return value, passed as Badge's level argument. Argument vs return
+value: recovered (assisted by the one-line prompt; retrieve later unprompted). Open: source of None
+(get without default).
+
+R1 MICRO (verbatim):
+```
+{}.get("team")
+{}.get("team", "none")
+{"team": "red"}.get("team")
+```
+Fields: value of each / what get returns for a missing key with no default / confidence.
+
+LEARNER ANSWER (verbatim):
+. None 
+None 
+red
+
+EVALUATION:
+Lines 1 and 3 CORRECT (None; "red"). Line 2 given as None; actual value is the string "none" (the supplied
+default). FACILITATOR ERROR: the default "none" is a lookalike of None, adding a string-vs-None distinction
+to a one-concept micro — the miss cannot be separated from that ambiguity. Not graded as a get
+misconception; re-check with a non-lookalike default. No-default rule (line 1) recovered.
+
+RE-CHECK POSTED (verbatim):
+```
+{}.get("team", "blue") evaluates to =
+Confidence =
+```
+
+LEARNER MESSAGES (verbatim, in order):
+. none
+the lower case
+
+EVALUATION:
+The learner clarifies that "none" refers to the lowercase string — i.e. line 2 of the R1 micro,
+{}.get("team", "none"), evaluates to the string "none", the supplied default. CORRECT; the earlier
+capital-N "None" on line 2 is a capitalization slip in transcription, not a get misconception, and the
+facilitator's lookalike default caused the ambiguity. The "blue" re-check was not needed and is not graded.
+get with and without a default: RECOVERED. Source of b's None (get with no default on {}): RECOVERED.
+
+Q2 SUMMARY: `**` duplicate keyword RECOVERED at target level (R1 -> fresh Q2b). BuildLens application
+(no tool_use_id key in _tool_call_fields' dict) CORRECT unaided. Argument vs return value ("both") recovered
+with a one-line prompt — retrieve unprompted later. Confidence omitted throughout Q2.
+
+LEARNER MESSAGE (verbatim, answering the "blue" re-check after Q3 was posted):
+. blue
+
+EVALUATION:
+CORRECT — {}.get("team", "blue") is "blue". Confirms get-with-default on a fresh value. Q3 posted
+(Sample dataclass, make_sample(42, "hot"), _required_string block; annotation vs runtime check), awaiting
+answer.
+
+### EV-CR2-Q3-463 — declaration (annotation) versus runtime check — 2026-09-14
+
+SOURCE PHASES:
+Phase 5-8 (annotations on dataclass fields; claude_adapter._required_string runtime validation).
+
+ACADEMIC SOURCE:
+`PY-CONTRACTS-VALIDATION`; `MIT-6102-2026`
+
+DEEP SKILL:
+An annotation communicates a contract and is not enforced at runtime; only executed code (isinstance guard)
+rejects a wrong type.
+
+EXERCISE TYPE:
+CUMULATIVE_RETRIEVAL
+
+SCAFFOLD RUNG:
+R5 — annotated function and frozen dataclass with wrong-typed arguments, contrasted with the real
+BuildLens runtime guard.
+
+PROMPT (verbatim):
+Question 3: a type annotation versus a runtime check
+
+```
+from dataclasses import dataclass
+
+@dataclass(frozen=True)
+class Sample:
+    sensor: str
+    value: float
+
+def make_sample(sensor: str, value: float) -> Sample:
+    return Sample(sensor=sensor, value=value)
+```
+
+Call:
+
+```
+s = make_sample(42, "hot")
+```
+
+BuildLens code from `claude_adapter.py`:
+
+```
+def _required_string(values: dict[str, object], field: str) -> str:
+    value = _required_value(values, field)
+    if not isinstance(value, str):
+        raise ValueError("field must be a string: " + field)
+
+    if value == "":
+        raise ValueError("empty required field: " + field)
+
+    return value
+```
+
+Fill in every field:
+
+```
+Raises or builds =
+s.sensor =
+s.value =
+What `sensor: str` does when this call runs =
+One line that would make make_sample reject 42, and where it goes =
+In claude_adapter, which line stops a file_path of 42 from reaching ClaimedEdit =
+Confidence =
+```
+
+Put the exact values in `s.sensor` and `s.value`, including their types.
+
+LEARNER FIRST COMMITTED ANSWER (verbatim):
+. it takes the module that creates the dataclass class sample that includes senor and value, it then returns a sample class object , s = a sample class object with (sensor = 42, value ="hot"), then it gets caught in the if not because it is a int and we are looking for a string so it rasies value error
+
+CONFIDENCE:
+not given
+
+RESULT:
+PARTIAL / AMBIGUOUS. Correct: make_sample returns a Sample with sensor=42 (int) and value="hot" (str) —
+the annotations did not stop it. Ambiguous: "then it gets caught in the if not ... raises value error"
+could mean (a) _required_string would reject 42 in claude_adapter (correct) or (b) the make_sample call
+itself raises (incorrect — no guard runs there). Not answered: what `sensor: str` does at runtime, the
+guard line to add. Clarification requested with two short fields before grading the concept.
+
+CLARIFICATION PROMPT (verbatim):
+```
+Does s = make_sample(42, "hot") finish with s holding a Sample, yes or no =
+Is there any isinstance check anywhere inside make_sample or Sample, yes or no =
+What `sensor: str` does when the call runs =
+Where the "if not isinstance ... raise ValueError" you described actually runs =
+Confidence =
+```
+
+LEARNER ANSWER (verbatim):
+. it should finsihs the :str and : flaot are annotation correct?
+
+EVALUATION:
+CORRECT on the core, stated as a commitment with a check-back: the call finishes, because `: str` and
+`: float` are annotations (implying they do not enforce the type). Resolves the ambiguity toward reading (a)
+for the earlier "caught in the if not" clause, pending the location field. Still unanswered: where the
+isinstance guard runs (claude_adapter._required_string, not make_sample) and a guard line for make_sample.
+
+LOCATION PROMPT (verbatim):
+```
+File and function where the isinstance check that raises ValueError actually lives =
+The line you would add to make_sample so it rejects 42, and where it goes =
+Confidence =
+```
+
+LEARNER ANSWER (verbatim):
+. i was then calling the build lens code based on the returned sample object
+
+EVALUATION:
+Explains the first answer: the learner read the displayed _required_string block as the next step applied
+to the returned Sample, so "caught in the if not ... raises value error" described the BuildLens guard
+rejecting the int 42 — reading (a). FACILITATOR NOTE: the prompt placed the BuildLens block directly under
+the call without stating it was a separate, unconnected context, which invited that reading.
+
+Q3 RESULT: CORRECT (after one clarification). Call finishes with sensor=42 (int), value="hot" (str) because
+annotations are not enforced; the executed isinstance guard (_required_string) is what rejects a
+wrong type. Declaration versus runtime check: RECOVERED. Not produced: the concrete guard line for
+make_sample (application, not drilled). Confidence omitted.
+
+### EV-CR2-Q4-464 — ObservedFile class vs observe_file; why compare is testable without a disk — 2026-09-14
+
+SOURCE PHASES:
+Phase 8 (file_observer.ObservedFile / observe_file; compare.compare_write; test_compare.py).
+
+ACADEMIC SOURCE:
+`MIT-6102-2026` (testing: isolating pure logic from I/O)
+
+DEEP SKILL:
+Separate the record type (data) from the function that performs I/O to build it; logic that takes the
+record as an argument can be tested by constructing the record directly, without the I/O.
+
+EXERCISE TYPE:
+CUMULATIVE_RETRIEVAL
+
+SCAFFOLD RUNG:
+R5 — non-BuildLens structural isomorph (weather API) with trace, test-isolation question, and explicit
+mapping back to BuildLens names.
+
+PROMPT (verbatim):
+Question 4: a class versus a function, and testing without the outside world
+
+```
+from dataclasses import dataclass
+
+@dataclass(frozen=True)
+class WeatherReading:
+    city: str
+    temperature_c: float | None
+    status: str
+
+def fetch_reading(city: str) -> WeatherReading:
+    try:
+        temp = _call_weather_api(city)
+    except ConnectionError:
+        return WeatherReading(city=city, temperature_c=None, status="unreachable")
+    return WeatherReading(city=city, temperature_c=temp, status="ok")
+
+def advise(reading: WeatherReading) -> str:
+    if reading.status != "ok":
+        return "unknown"
+    if reading.temperature_c >= 30:
+        return "hot"
+    return "fine"
+
+def test_advise_hot():
+    reading = WeatherReading(city="Lima", temperature_c=31.0, status="ok")
+    assert advise(reading) == "hot"
+```
+
+Call:
+
+```
+advise(WeatherReading(city="Oslo", temperature_c=None, status="unreachable"))
+```
+
+Fill in every field:
+
+```
+Which of WeatherReading / fetch_reading is a class and which is a function =
+What fetch_reading does that WeatherReading never does =
+Value the Oslo call returns =
+Does test_advise_hot contact the weather API, yes or no, and why =
+BuildLens name matching WeatherReading =
+BuildLens name matching fetch_reading =
+BuildLens name matching advise =
+Why test_compare.py can check verdicts with no real file on disk =
+Confidence =
+```
+
+Assume `_call_weather_api` really does make a network request.
+
+LEARNER FIRST COMMITTED ANSWER (verbatim):
+. dataclass class weatherreading with city,temp,and status, fetch reading returns all of the weather reading values fro m the api and retunrs the city and temp = None and status = unreachabel on a connectionerror, it is in celsious, advise if called then takes the weatherreading object and reads the status if it is not ok then it is retunred unknown if it is ok then it reads the temp and if it is 30 or hotter than it is hot otherwise it iretuns fine, the test is not going to account for connection but it tests if everything else works with status ok and temp in the hot range with the city lima and then asserts hot so if evrything works correctly there will be no assertion error
+
+CONFIDENCE:
+not given
+
+RESULT:
+PARTIAL. Correct: WeatherReading is a dataclass (record of city/temperature/status); fetch_reading calls the
+API and builds a reading, "unreachable" with None on ConnectionError; advise's rule including the >= 30
+boundary and the status-first short circuit; the test builds an ok/31.0 reading and asserts "hot"; "not
+going to account for connection". Not answered: the Oslo value as a value (rule implies "unknown"); WHY the
+test avoids the API (it never calls fetch_reading — it constructs WeatherReading directly); all three
+BuildLens mappings; why test_compare.py needs no disk. The due concepts (class vs function under BuildLens
+names; compare testable without disk) are not yet evidenced. Pattern: narrated the module instead of filling
+fields. Follow-up asks only the unanswered lines.
+
+FOLLOW-UP PROMPT (verbatim):
+```
+Value the Oslo call returns =
+The test never contacts the API because it never calls =
+BuildLens names for WeatherReading / fetch_reading / advise =
+Why test_compare.py can check verdicts with no real file on disk =
+Confidence =
+```
+For the BuildLens names, look in `file_observer.py` and `compare.py`.
+
+LEARNER ANSWER (verbatim):
+.  oslo call returns unknown
+the test never calls fetchreading becasue ti has the test reading already 
+claimed edit, fetch reading is comparewrite or compare edit are the advise functions, this would then be the parseposttool which would fetch the paytload and retunr the claimededit
+
+EVALUATION:
+Oslo value "unknown": CORRECT. Test isolation: CORRECT — never calls fetch_reading because it constructs
+the reading directly. advise -> compare_write / compare_edit: CORRECT.
+WeatherReading -> ClaimedEdit and fetch_reading -> parse_post_tool_use: INCORRECT for this isomorph (intended
+ObservedFile and observe_file). The learner's pairing is coherent at the "record + function that builds it"
+level, but misses the distinguishing features: fetch_reading performs outside I/O that can fail and records
+the failure as a status with a None value — observe_file reads the disk (ABSENT/UNREADABLE, file_bytes None);
+parse_post_tool_use reads a dict already in memory and raises rather than recording a status. The hint
+(file_observer.py) was not used. Why test_compare.py needs no disk: NOT ANSWERED.
+Blocker: which BuildLens record/function pair corresponds to the I/O boundary (ObservedFile / observe_file).
+Next: R2 — show ObservedFile fields and observe_file's except branch beside WeatherReading; match the
+status + None feature; ask where parse_post_tool_use's input comes from.
+
+R2 PROMPT: ObservedFile fields + observe_file (FileNotFoundError -> ABSENT, file_bytes=None) shown beside
+parse_post_tool_use; fields: status/None match in ObservedFile / which function reaches outside and to what /
+what parse_post_tool_use does with bad input instead of recording a status / BuildLens name for
+WeatherReading / for fetch_reading / why test_compare.py needs no disk / confidence.
+
+LEARNER MESSAGE (verbatim):
+. the thing that threw me off was the connection error becase iguess you would see that as a oserror but iwas thinking that claude had a hook failure for the error
+
+EVALUATION:
+Self-diagnosis of the Q4 mapping miss: the learner read ConnectionError as a Claude hook failure (the report
+channel failing), hence ClaimedEdit / parse_post_tool_use; the learner also notes it "would be seen as an
+OSError" — factually correct (ConnectionError is a subclass of OSError, verified), which maps it to
+observe_file's `except OSError` -> UNREADABLE. Clarifying distinction offered: a hook failure produces no
+ClaimedEdit at all (no payload, or the parser raises), whereas fetch_reading/observe_file record the failure
+INSIDE the returned object as a status with a None value. R2 fields still unanswered.
+
+SHORT PROMPT (verbatim):
+```
+BuildLens name for WeatherReading =
+BuildLens name for fetch_reading =
+Why test_compare.py can check verdicts with no real file on disk =
+Confidence =
+```
+
+LEARNER ANSWER (verbatim):
+. Observedfilke 
+observe file 
+becasue ti can make up a claimed edit and a observedfile pobject and compare,
+
+EVALUATION:
+CORRECT on all three. WeatherReading -> ObservedFile; fetch_reading -> observe_file; test_compare.py builds
+ClaimedEdit and ObservedFile objects directly and passes them to compare, never calling observe_file or
+open() (verified: test_compare.py constructs ClaimedEdit at lines 23/32/204/341 and ObservedFile at 41/52;
+no observe_file or open call). Confidence omitted.
+
+Q4 RESULT: ObservedFile class vs observe_file and "compare testable without a disk": RECOVERED WITH
+ASSISTANCE (R2 side-by-side + the learner's own ConnectionError/OSError insight + hook-failure distinction).
+Not independent at target level — retrieve on a fresh surface later, unprompted.
+
+### EV-CR2-Q5-465 — adapter boundary on a non-Claude surface (Finch); validate vs verify — POSTED, UNANSWERED
+
+PROMPT (verbatim):
+Question 5: what crosses the Finch adapter, and what checks the claim
+
+A coding agent called Finch sends this after it saves a file:
+
+```
+{
+  "event": "after_write",
+  "run_id": "r-77",
+  "target": "src/app.py",
+  "text": "print('hi')\n",
+  "agent_note": "Saved successfully, file is correct."
+}
+```
+
+BuildLens gets a new `finch_adapter.py` that turns this payload into the same `ClaimedEdit` the Claude adapter produces.
+
+Fill in every field:
+
+```
+Type that leaves finch_adapter =
+Payload fields that cross, each written as payload name -> ClaimedEdit field =
+Payload fields that are read or ignored and then stop at the adapter =
+What the adapter does with "event" =
+Why agent_note does not cross =
+Two things the adapter must validate (shape) =
+Which modules decide whether the claim is true, in order =
+Where the truth about src/app.py lives =
+Confidence =
+```
+
+Handle `event` on its own line; don't just list it among the fields.
+
+SESSION PAUSED (learner break, 2026-09-14) before any answer. On resume, re-display Q5 in full and take the
+first committed answer. Review status so far: Q1 CONDITION_EVALUATION recovered (R1->R0->fresh 1b); Q2 `**`
+duplicate recovered, argument vs return value recovered with a one-line prompt; Q3 declaration vs runtime
+check recovered after one clarification; Q4 ObservedFile vs observe_file and compare-without-disk recovered
+with assistance. Remaining: Q5 (event field stops; validate vs verify composite), stating a rule / reversal
+condition without frames, then the Phase 8 -> 9 architecture reset. Major counter still 2/2 DUE; nothing reset.

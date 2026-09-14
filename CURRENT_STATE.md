@@ -66,7 +66,7 @@ The prior learning sessions recorded thirteen test scripts green. The separate 2
 
 Next, in order:
 
-1. **Major cumulative review — DUE now** (counter 2/2), before any significant Phase 9 work, plus the architecture reset due at the Phase 8 -> 9 transition. Build it from the RETRIEVAL DUE list at the end of the ledger and the uncertain items below; fresh surfaces; confidence inside every answer block.
+1. **Major cumulative review — IN PROGRESS** (started 2026-09-14, "MAJOR CUMULATIVE REVIEW 2" in the ledger; counter still 2/2, nothing reset). Q1–Q4 recovered (Q4 with assistance). **Resume at Q5 (EV-CR2-Q5-465, Finch adapter):** re-display it in full and take the first committed answer. Then a rule/reversal-condition question without frames, then the Phase 8 -> 9 architecture reset. Confidence inside every answer block.
 2. Then Phase 9's reduced single-process workflow, with the learner proposing the design.
 
 Known cold from prior evidence, not newly assessed here:
