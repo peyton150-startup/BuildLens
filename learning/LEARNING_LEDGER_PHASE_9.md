@@ -2265,6 +2265,232 @@ expected lines needed per-file R0 twice, and the must-NOT line needed a contrast
 must-NOT line on a fresh scenario without a per-file breakdown.
 D8 (several claims on one path) not yet in any test.
 
+CHECKPOINT: committed and pushed e215214 at the learner's request.
+
+### Test 5 — D8, several claims on one path
+
+TEST 5 STEP 1 PROMPT: 10:00 baseline e.py; line 41 Write claim V1; line 45 Write claim V2; witness e.py exactly V2.
+Deciding claim / its verdict / skipped or reported / confidence.
+FACILITATOR ERROR in the prompt: it said the capture-file line order "doesn't match the order of the times listed". It
+does match (line 41 at 10:10, line 45 at 10:20). The intended point: find orders claims by line number because
+payloads carry no timestamps (D3). Corrected to the learner.
+LEARNER ANSWER (verbatim):
+```
+.  line 45 
+claim holds 
+skipped
+```
+EVALUATION: CORRECT on all three: the latest line decides; its Write claim holds; skipped under D6. Confidence
+omitted. Open design gap exposed: D8 says the superseded line-41 claim is reported as "does not hold as of witness",
+but under D6 e.py is skipped, so it is not decided whether the old claim appears anywhere. Next: put this gap to the
+learner.
+
+D8 GAP PROMPT: e.py skipped (D6), line 41 does not hold as of witness (D8); should the old claim appear anywhere / why /
+where / confidence.
+LEARNER DESIGN ANSWER (verbatim):
+```
+. no 
+becasue it was overwritten and the claim no longer holds
+```
+EVALUATION: A defensible decision. The reason is sound: a later Write claim that holds accounts for every byte, so the
+superseded claim adds no information about the witness state. Not stated: a downside. Confidence omitted.
+D8a (learner's, under review): when the latest claim on a path is a holding Write claim (the path is skipped), older
+superseded claims are not reported. D8's "does not hold as of witness" line applies only to paths that are reported.
+Next: challenge the downside of D8a.
+
+D8a DOWNSIDE PROMPT: line 41 Write V1 with a hard-coded password; user runs it; line 45 Write V2 removes it; witness
+V2. Does the report mention e.py or V1 / one downside / which accepted limit it resembles / confidence.
+LEARNER DESIGN ANSWER (verbatim):
+```
+. no 
+so we should have a place to save the claim so that we know how many changes were made and maybe a place to look at the file versons
+```
+EVALUATION: "no": CORRECT. Downside: IMPLIED rather than stated (the intermediate V1 is invisible to the user); the
+learner jumped to a fix. The proposed fix, a place to save claims and file versions, is durable product history, which
+the plan defers ("no stopgap file store or durable product history", Phase 11). Missed: the claims are already saved,
+because line 41 of the capture file holds the Write payload including V1's full text, so listing superseded claims
+needs no new store. The similar accepted limit (change-and-restore invisible) was not named. Confidence omitted. Next:
+ask where V1's text exists right now.
+
+V1-LOCATION PROMPT: line 41 tool_input.content = V1; line 45 = V2; where V1's text is on disk at 10:30 / does find
+already read it / would listing an earlier claim need a new store / confidence.
+LEARNER ANSWER (verbatim):
+```
+. so we would only need to look at the payload for the file verson, but this would be a claim
+```
+EVALUATION: CORRECT: V1 is in the capture-file payload, which find already reads, so no new store is needed. The
+learner added, unprompted, the key caveat: V1 there is only what Claude claimed to write, not an observation that e.py
+held V1. This is the proposal-versus-observation distinction, applied correctly. Confidence omitted. Next: the learner
+decides whether to keep D8a or report superseded claims on skipped paths, labelled as claims.
+
+D8a-vs-2 PROMPT: option 1 keep D8a (silent) / option 2 list "e.py: earlier claim at capture line 41, superseded; not
+verified"; choice / quality protected / downside / reversal condition / confidence.
+LEARNER DESIGN ANSWER (verbatim):
+```
+. 2 
+from skipping a change claim that could be used later
+```
+EVALUATION: Choice 2. Quality protected: not hiding a claim that could matter later (transparency, in keeping with
+D12's over-report-never-hide). Downside and reversal condition unanswered; confidence omitted.
+D8a REVISED (learner's, under review): a path skipped under D6 still lists its superseded earlier claims by capture line,
+labelled superseded and not verified.
+Next: ask the downside alone.
+
+DOWNSIDE PROMPT: config.py Write-claimed 30 times, the last (line 140) holds and the path is skipped; how many
+superseded lines under option 2 / one downside / confidence.
+LEARNER ANSWER (verbatim):
+```
+. 30
+if we have a lot of claims then a lot of claims are shown, is there a way to make it a drop down
+```
+EVALUATION: Count "30": INCORRECT by one. The latest claim (line 140) is the deciding one, not superseded, so 29 lines
+are listed (off-by-one: counting the deciding claim as superseded). Downside, noise from many listed claims: CORRECT.
+Drop-down proposal: find is a terminal CLI and UI is deferred (FastAPI/React out of v0.1), so the idea needs a CLI
+form. Confidence omitted. Next: recount, and ask for a terminal-only way to keep the list short.
+
+RECOUNT/TERMINAL PROMPT: number of superseded claims / terminal way to keep it short without hiding / confidence.
+LEARNER ANSWER (verbatim):
+```
+.  it would show each claim with the alleged changes so 29
+not sure
+```
+EVALUATION: 29: CORRECT on recount. "With the alleged changes": option 2 lists a capture line and a label, not claim
+content; minor. Terminal alternative: "not sure". Blocker: summarizing many items in plain text. Confidence omitted.
+Next: R0 on a different surface (a phone lock screen with 29 messages from one chat), then map back.
+
+R0 LOCK-SCREEN PROMPT: 29 messages from one group chat on a locked phone; what it shows / hidden that they exist / how
+to see all / confidence.
+LEARNER ANSWER (verbatim):
+```
+. it shows the number of messages 
+no 
+if you click on it
+```
+EVALUATION: CORRECT on all three: a count, nothing hidden, details on request. Confidence omitted. Next: map back to
+find, with a one-line summary for config.py and a terminal way (no clicking) to see the details.
+
+MAP-BACK PROMPT: write the one summary line for config.py's 29 superseded claims / how a terminal user sees all 29 /
+confidence.
+LEARNER ANSWER (verbatim):
+```
+. yes 
+they would type a command to print out the other claims
+```
+EVALUATION: Summary line: NOT ANSWERED ("yes" does not fit the field). A command that prints the other claims: CORRECT
+as an idea. Hidden problem to challenge: a separate command runs after find exits, so it is a new process without
+find's baseline position (cross-process state again). Confidence omitted. Next: ask for the summary line alone, then
+challenge the separate-command idea.
+
+SUMMARY-LINE PROMPT: the one line printed for config.py's superseded claims / confidence.
+LEARNER DESIGN ANSWER (verbatim):
+```
+.  The file filename* has numberofclaims* superseded claims that are visible, press i to see them
+```
+EVALUATION: A good template: a count plus a way to see details. "Press i" keeps find in the same process, which avoids
+the cross-process problem of a separate command (possibly unintended). Gaps: "that are visible" is unclear, and the
+line drops "not verified". Earlier the learner stated that payload content is only a claim, and the line should say
+so. "Press i" also means find must stay running after printing the report; when find exits is undecided. Confidence
+omitted. Next: ask which label the line lost, and when find exits after the report.
+
+LABEL/EXIT PROMPT: phrase to add so the user knows old claims were never checked / how the user tells find they are
+done / confidence.
+LEARNER ANSWER (verbatim):
+```
+. so add in uncked superseded claims
+```
+EVALUATION: "unchecked superseded claims": CORRECT. The exit question was unanswered. Confidence omitted. Next: ask
+the exit question alone.
+
+EXIT PROMPT: how the user tells find they are done / what find shows at the bottom so the user knows / confidence.
+LEARNER DESIGN ANSWER (verbatim):
+```
+. if they press enter to conintue
+```
+EVALUATION: Enter to finish: a workable choice. "Continue" is misleading, because Enter exits. The bottom-of-report
+prompt text was not written. Confidence omitted.
+D17 (learner's, under review): after printing the report, find stays open; "i" shows unchecked superseded claims and
+Enter exits.
+Next: retrieval of the learner's own rule "confirm only steps that cannot be undone" on this new surface: does Enter
+after the report need a confirmation?
+
+CONFIRM-RULE RETRIEVAL PROMPT: the rule for which steps get a confirmation / can the user press i after exit / does
+Enter need a confirmation / why / confidence.
+LEARNER DESIGN ANSWER (verbatim):
+```
+. no check for i but for enter we will say press enter again or i to see the superseded claims
+```
+EVALUATION: APPLICATION CORRECT: no confirmation for i (harmless, repeatable) and a confirmation for Enter (exit is
+final) that offers i again, consistent with D9/D15c. The rule itself and the why were not stated, so the retrieval
+shows the rule applied, not yet named. Confidence omitted.
+D17 REVISED: Enter after the report asks "Press Enter again to exit, or i to see the unchecked superseded claims."
+Next: ask the learner to name the rule in one sentence.
+
+RULE PROMPT: the rule for which steps get a confirmation, in one sentence / confidence.
+LEARNER ANSWER (verbatim):
+```
+. if the accidental pressing would be a large inconveience or it would start a long process or end the session/long proccess where you would have to restart the sesison it needs a confirmation step
+```
+EVALUATION: CORRECT, in the learner's own words: confirm when an accidental keypress is costly, meaning it ends the
+session or starts or ends a long process that forces a restart. It is consistent with D9 (Enter ends the window),
+D15c (n loses the baseline, y costs a short wait), and D17 (Enter exits, i is harmless). The "starts a long process"
+clause is the learner's extension and is defensible. Confidence omitted. Retrieval of the confirmation rule:
+application correct unaided; statement correct when asked.
+Next: Test 5 expected lines (config.py/e.py, D8a revised + D17) as a retrieval of scenario-specific must-NOT lines
+without a per-file breakdown.
+
+TEST 5 PROMPT (no per-file breakdown): baseline e.py, f.py; line 41 Write e.py V1; line 45 Write e.py V2; line 50 Write
+f.py W1; line 55 Write f.py W2; a shell command appends a line to f.py; witness e.py = V2, f.py = W2 + the line. Setup
+/ action / must contain / must NOT contain / confidence.
+LEARNER ANSWER (verbatim):
+```
+.  so baseline is captured
+multiple write claimes for e.py and f.py
+so e.py would calim holds but we would also reportthat it has a superseded claim and same for f.py but the claim would not hold due to the shell command we would still have the superseded claims regardless.
+must not contian write claims with no superseded claims
+```
+EVALUATION: Setup: PARTIAL, an event again rather than the starting files (third time). Action: INCOMPLETE; it omits
+the shell append to f.py, the event that makes f.py's latest claim fail. Must contain: MOSTLY CORRECT. e.py: latest
+claim holds plus 1 unchecked superseded claim. f.py: latest claim does not hold, with its superseded claim. Not made
+explicit: e.py is skipped as a changed path (D6) while f.py is reported as changed. Must NOT "write claims with no
+superseded claims": INCORRECT / UNCLEAR, since it names nothing a broken find would print in this scenario. The
+retrieval of scenario-specific must-NOT lines is NOT yet stable. Confidence omitted. Next: a broken-find probe (e.py
+listed as a changed path) against the learner's must-NOT.
+
+BROKEN-FIND PROBE (Test 5): broken report lists "e.py changed ... Write claim (line 45): holds" plus both
+superseded-claim summaries and f.py's entry; which line violates D6 / does the must-NOT catch it / rewrite / confidence.
+LEARNER ANSWER (verbatim):
+```
+.  e.py has 1 
+no
+a file change that was not a claim at all like a shell command
+```
+EVALUATION: Violating line "e.py has 1 [unchecked superseded claim]": INCORRECT. That summary is required by D8a. The
+violation is "e.py changed between 10:00 and 10:30", because a path whose latest Write claim holds is skipped as a
+changed path (D6). "no": CORRECT. Rewrite "a file change that was not a claim, like a shell command": INCORRECT, since
+shell changes must be reported (f.py's appended line; D6, D12). Blocker: which e.py lines D6 and D8a each allow.
+Declining accuracy late in a long session. Confidence omitted. Next: an R0 allowed/not-allowed check on e.py's two
+lines, with a pause offered.
+
+R0 ALLOWED PROMPT (pause offered): line A "e.py changed between 10:00 and 10:30" allowed? (D6: a holding Write claim is
+___) / line B "e.py has 1 unchecked superseded claim. Press i to see it." allowed? (D8a) / must-NOT line.
+LEARNER ANSWER (verbatim):
+```
+. skipped  not allowed 
+allowed
+```
+EVALUATION: CORRECT on both: line A not allowed (a holding Write claim is skipped), line B allowed. The must-NOT line
+was not written; it follows directly from the line A answer. Recovered at R0.
+
+TEST 5 (learner's, under review) — several claims on one path (D8, D8a, D17):
+- setup: a repository with e.py and f.py.
+- action: capture lines 41 and 45 Write e.py (V1, V2); lines 50 and 55 Write f.py (W1, W2); a shell command appends
+  a line to f.py; witness.
+- expected contains: "e.py has 1 unchecked superseded claim. Press i to see it."; f.py changed, Write claim (line 55)
+  does not hold as of witness; "f.py has 1 unchecked superseded claim. Press i to see it."
+- expected must NOT contain: e.py as a changed path.
+Evidence: must contain mostly right unaided; must-NOT retrieval FAILED unaided twice (vague, then inverted) and
+recovered only at R0 allowed/not-allowed. Still due: scenario-specific must-NOT on a fresh surface, early in a session.
+
 SESSION EVIDENCE SUMMARY (Challenge 15/15b, 2026-09-15): target-level first answer partial; recovered through R0
 (count pictures; step order) and climb-backs. Transfer (budget app, "do not show $0") CORRECT unprompted. Principle
 stated as the action rule rather than the general rule (NEARLY). MISCONCEPTION recorded: claims and verdicts believed
