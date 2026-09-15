@@ -1030,3 +1030,133 @@ message: a defensible fail-closed choice; the alternative (report with a promine
 not considered; reason not given.
 DESIGN D13b (learner's, under review): capture file present at baseline but missing at witness -> find stops with a
 message instead of reporting.
+
+### Challenge 14 — matching claim paths to picture paths — 2026-09-15
+
+EVIDENCE SHOWN: 222 real PostToolUse file_path values, all absolute with backslashes (e.g.
+C:\Users\nicol\BuildLens_Project\hook_probe.txt); cwd 218 x repository root, 4 x the tests\ subfolder; pictures key
+paths Git-style relative to the root ("hook_probe.txt", "tests/test_cli.py").
+PROMPT (verbatim fields):
+```
+If claimed_paths holds the raw file_path, does "hook_probe.txt" in claimed_paths come out True or False =
+Under D6, what would that do to a file with a holding Write claim =
+If find kept only payloads whose cwd equals the repository root, what happens to the 4 with cwd ending in \tests =
+What find should check instead, to keep only claims about files in this repository =
+Confidence =
+```
+LEARNER ANSWER (verbatim):
+. the only thing i would be skeptical about is the slashes are the ydifferent
+EVALUATION: PARTIAL — notices one real difference (backslash vs forward slash) but misses the larger one: the claim path
+is absolute (C:\Users\nicol\BuildLens_Project\ prefix) while picture paths are relative to the root. Fields not
+answered. Next: R0 string-equality check on the two spellings, naming every difference.
+
+R0 PROMPT: "hook_probe.txt" vs "C:\Users\nicol\BuildLens_Project\hook_probe.txt" — equal? / every difference / equal if
+only slashes flipped? / confidence.
+LEARNER ANSWER (verbatim):
+. they are not equal on its the filkename and the other is the complete path
+no
+RESULT: CORRECT — not equal; one is the bare relative name, the other the complete absolute path; flipping slashes alone
+would not make them equal. Recovered at R0. Next: return to the target — D6 consequence of never matching, and the
+existing code that already converts an absolute path to a repository-relative one.
+
+CONVERSION PROMPT: _relative_to_root block shown; fields "hook_probe.txt" in claimed_paths if unconverted / D6 skip or
+report / _relative_to_root(BuildLens path, BuildLens root) / _relative_to_root(Datum path, BuildLens root) / what find
+should use to keep only this repository's claims / confidence.
+LEARNER ANSWER (verbatim):
+. noyt equal
+repoted
+hook_probe.txt
+vlaue error
+the realtive to root
+EVALUATION: Never matches (False): CORRECT. D6 consequence "reported": CORRECT — unconverted paths make the Write skip
+never fire (over-reporting, not hiding). BuildLens path -> "hook_probe.txt": CORRECT. Datum path -> "value error":
+INCORRECT — Path.relative_to raises ValueError inside the try, but the except catches it and the function RETURNS
+None. Use relative-to-root: CORRECT direction. Primary blocker: try/except turns a raise into a return value.
+cwd-filter field (the 4 tests\ payloads) was not asked in this round. Next: R0 on the except branch.
+
+R0 TRY/EXCEPT PROMPT: safe_half with try/except ValueError returning None; fields safe_half("8") / safe_half("eight") /
+does the caller see a ValueError / so _relative_to_root for the Datum path returns / confidence.
+LEARNER ANSWER (verbatim):
+. it still returns None
+RESULT: CORRECT on the target — the caught ValueError becomes a None return (Datum path -> None). Micro-example fields
+(4, None, no) not filled; key concept stated, so scaffolding faded. Next: settle D14 — cwd filter vs relative-to-root.
+
+FILTER-CHOICE PROMPT: report with cwd = ...\BuildLens_Project\tests and file_path ...\tests\test_cli.py; fields cwd-equals-
+root filter keep/drop / is test_cli.py inside the repository / relative-to-root filter keep/drop and resulting path /
+decision / confidence.
+LEARNER DESIGN ANSWER (verbatim):
+. it does not equal the repo root so it would keep 
+yes it is 
+i would keep but find a way to make sure tests or other folders can be included similar to the paretn.parent import line
+EVALUATION: Filter 1 INCORRECT application — "cwd equals the repository root" is false for this report, so that filter
+DROPS it (a real in-repository claim lost). Inside the repository: CORRECT. Filter 2: keeps it — CORRECT — but the
+learner believes subfolders need extra handling; relative_to already handles nested paths and returns
+"tests/test_cli.py". Resulting path not stated. Next: R0 on the nested relative_to result and re-applying filter 1.
+
+R0 PROMPT: cwd-equals-root filter keep/drop for a tests\ cwd / what Path(...tests/test_cli.py).relative_to(root).as_posix()
+returns / does filter 2 need extra subfolder code / confidence.
+LEARNER ANSWER (verbatim):
+.  keep 
+the folder being pt down to the repo root
+no
+ok so in relative to it would then reutnr /tests/test_cli.py?
+EVALUATION: Filter 1 "keep": INCORRECT again — the filter keeps only reports whose cwd equals the root; this one's does
+not, so it is dropped. Blocker: what "keep only when <condition>" does when the condition is False. relative_to
+prediction "/tests/test_cli.py": NEARLY — correct folder and file, but a stray leading "/" (the leading-slash habit
+from EV-DOCS-LAYOUT-469). No extra subfolder code needed: CORRECT. Verified by running the line.
+
+RUN OBSERVED: relative_to line printed 'tests/test_cli.py' (no leading slash; matches picture keys).
+FILTER R0 PROMPT: reports = ["root","tests","root"]; kept = [r for r in reports if r == "root"]; fields "tests"=="root" /
+kept or dropped / kept / confidence.
+LEARNER ANSWER (verbatim):
+.  false 
+dropped 
+root
+90
+EVALUATION: CORRECT on the concept — condition False, so "tests" is dropped. kept stated as "root" rather than
+["root", "root"] (both root reports survive) — minor. Filter semantics recovered at R0. Next: apply back — the
+cwd-equals-root filter would drop the real tests\test_cli.py claim; learner states the D14 decision.
+
+APPLY-BACK PROMPT: real tests\ report; filter 1 outcome / filter 2 outcome and claimed_paths entry / decision / confidence.
+LEARNER ANSWER (verbatim):
+. it is not kept 
+value error and it retunrs None
+EVALUATION: Filter 1 drops the real claim: CORRECT. Filter 2: INCORRECT — applies the out-of-repository (Datum) outcome
+to an in-repository path; relative_to succeeds here and returns "tests/test_cli.py" (the learner saw this exact run
+output one step earlier). Blocker: WHEN relative_to raises — only for a path outside the root. Decision not stated.
+Next: R0 contrasting the two paths side by side with their outcomes.
+
+SIDE-BY-SIDE PROMPT: path A (inside root, ran -> 'tests/test_cli.py'), path B (Datum, outside); fields inside? / result
+for A / inside? / result for B / decision / confidence.
+LEARNER ANSWER (verbatim):
+. yes 
+tests/test_cli.py
+no
+None
+RESULT: CORRECT on all four — inside -> relative path; outside -> None. Recovered at R0 contrast. Decision line not yet
+stated.
+
+DECISION PROMPT: which filter and what enters claimed_paths / what to do with a None result / confidence.
+LEARNER DESIGN ANSWER (verbatim):
+. filter 2 looks only at paths that are in the repo root and rejects all others with a None retunr, which is what we want evven if they are in folders
+RESULT: Decision stated with its mechanism and the subfolder case, after rejecting filter 1 on real evidence.
+DESIGN D14 (learner's, under review): find converts each claim's file_path with _relative_to_root against the
+repository root; a claim returning None (outside the repository) is excluded; a kept claim enters claimed_paths as the
+repository-relative Git-style path (e.g. "tests/test_cli.py"). cwd is not used as a filter (it would drop real claims
+made while Claude worked in a subfolder).
+Open detail: whether excluded out-of-repository claims are counted in the output.
+
+### Challenge 15 — Git fails — POSTED, UNANSWERED (session paused 2026-09-15, learner changing location)
+
+PROMPT (verbatim fields; take_picture calls git_adapter without catching GitCaptureError/OSError; case 1: find run in a
+folder that is not a Git repository, failing at baseline; case 2: baseline worked at 10:00, Git listing fails at the
+10:30 witness):
+```
+Case 1: what find should do =
+Case 1: has the user lost any work or time, yes or no =
+Case 2: should find report using the baseline alone, yes or no =
+Case 2: why =
+Case 2: what find should tell the user =
+Confidence =
+```
+On resume: re-display Challenge 15 in full and take the first committed answer.

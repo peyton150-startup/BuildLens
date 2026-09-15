@@ -86,7 +86,8 @@ Next, in order:
    - D11 Ctrl+C during the witness picture: no report; say the picture was interrupted (a partial witness would make unread files look DELETED).
    - D12 an unparseable capture line in the read range is skipped and named in the output as not valid JSON, for a reason find cannot verify; its file's change is then reported without a claim (over-reporting, never hiding).
    - D13a capture file missing at baseline counts as position 0; at witness every line is read. D13b capture file present at baseline but missing at witness: stop with a message, no report (claims may exist but cannot be read).
-   - **Resume at:** `cwd`/repository filter and converting a claimed `file_path` to a repository-relative path, then Git/picture failure behavior, the plan's "no stopgap file store" constraint against D2, and the test list. Witness trigger, half-written capture lines, and a missing capture file are decided (D9-D13).
+   - D14 claim filter: convert each claim's absolute `file_path` with `_relative_to_root` against the repository root; `None` (outside the repository) is excluded; kept claims enter `claimed_paths` as Git-style relative paths (e.g. `tests/test_cli.py`). `cwd` is not a filter — real payloads show Claude working in `tests\` (4 of 222), which a cwd-equals-root rule would wrongly drop.
+   - **Resume at:** Challenge 15 (Git fails at baseline vs at witness) — posted, unanswered; re-display it in full. Then the plan's "no stopgap file store" constraint against D2, and the test list. Witness trigger, half-written capture lines, and a missing capture file are decided (D9-D13).
 
 Known cold from prior evidence, not newly assessed here:
 
