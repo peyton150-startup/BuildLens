@@ -1160,3 +1160,603 @@ Case 2: what find should tell the user =
 Confidence =
 ```
 On resume: re-display Challenge 15 in full and take the first committed answer.
+
+RESUMED 2026-09-15; Challenge 15 re-displayed in full with take_picture lines 42-45 and the _capture raise block.
+LEARNER ANSWER (verbatim, first committed):
+```
+. raise  and give an error message 
+no we just started the sesison 
+retunr 1 or 2 and record where the failure happend and maybe state where it happend for the user to go look
+```
+EVALUATION (provisional): Case 1 action "raise and give an error message": direction CORRECT (stop, no baseline), but
+it is unclear whether "raise" means the exception escapes to the user as a traceback or find stops with its own
+message. Case 1 lost work "no, we just started the session": CORRECT. Case 2: three lines were expected and one was
+given, so the "report using the baseline alone" yes/no and "why" are unanswered. The third line reads as the
+user-message field (say where the failure happened); "return 1 or 2" is unclear. Confidence not given. Next: ask for the
+missing fields and what "return 1 or 2" means, without revealing the answer.
+
+FOLLOW-UP PROMPT: Case 1 "raise" (a) traceback reaches user / (b) find catches and prints its own message; Case 2 report
+from baseline alone yes/no; Case 2 why; "return 1 or 2" means; confidence.
+LEARNER ANSWER (verbatim):
+```
+. B 
+yes, we cannot give a partail picture, i was mearly stating that we could find a way to make the user know what went wrong and where 
+nvm on the retunr statmens
+```
+EVALUATION: Case 1 (b): CORRECT. Case 2: the yes/no ("yes") and the reason ("we cannot give a partial picture")
+contradict each other. The reason points to no report, but the answer given is yes. "Return 1 or 2" withdrawn.
+Confidence still not given. Blocker to check: whether the learner can say what a baseline-only report would compare the
+baseline against. Next: an R0 mechanism question, then restate the yes/no.
+
+MECHANISM PROMPT: baseline {"README.md": hash_A, "cli.py": hash_B}, witness none (failed); Q1 compare hash_B against
+what / Q2 does find have it / Case 2 restated yes/no / confidence.
+LEARNER ANSWER (verbatim):
+```
+. ok so then we have no pictures at all
+```
+EVALUATION: INCORRECT. The baseline exists (taken at 10:00); only the witness is missing. The fields were not
+answered. Blocker: keeping the two pictures apart (which one failed and which one survived). Next: an R0 question that
+only counts pictures.
+
+R0 COUNT PROMPT: 10:00 picture succeeds, 10:30 picture fails; how many succeeded / which one / which is missing / how
+many needed to see a change / confidence.
+LEARNER ANSWER (verbatim):
+```
+. one picture 
+it needs 2 pictures to find a change
+```
+EVALUATION: "one picture": CORRECT. "Needs 2 pictures": CORRECT, and this is the core mechanism. Which picture
+survived and which is missing were not named; confidence was not given. Next: name the surviving picture, then climb
+back to Case 2.
+
+CLIMB-BACK PROMPT: surviving picture / Case 2 report from baseline alone yes/no / why using "2 pictures" / confidence.
+LEARNER ANSWER (verbatim):
+```
+. baseline
+how would you find the report if you have nothing to compare against
+```
+EVALUATION: "baseline": CORRECT. Case 2: the answer, a rhetorical question, means no, and its reason (nothing to compare
+against) is CORRECT. The yes/no was not stated explicitly, and confidence was not given. Recovered with scaffolding
+(R0 count, then climb), so NOT independent yet. Next: a transfer variant on a different surface, then a fresh
+target-level problem on what find tells the user and whether the 30 minutes can be saved.
+
+TRANSFER PROMPT (budget app): balance $500 read at 9:00; at 17:00 the second balance read times out; what "Today's
+spending" shows / why / one thing NOT to show and why / shared principle with find Case 2 / confidence.
+LEARNER ANSWER (verbatim):
+```
+.  it shows nothing 
+becasue we cannot make spending up that would be a huge error and or guess 
+it should not show zero becasue that would make it seem like you spent nothing that day even if you did
+```
+EVALUATION: Shows nothing: CORRECT. Why (no guessing): CORRECT. Not zero, because it would falsely say nothing was
+spent: CORRECT, unprompted, and it names the key failure: a missing measurement presented as a measured "nothing
+happened". Shared principle and confidence not given. Next: ask for the shared principle only.
+
+PRINCIPLE PROMPT: the principle find Case 2 and the budget app share, in one sentence without Git or banks / confidence.
+LEARNER ANSWER (verbatim):
+```
+. it hould print a failure message that has nothing to do with contnet, it should only state the second picture failed
+```
+EVALUATION: NEARLY. The rule of action is CORRECT: report the failure and give no content-based result. It is stated as
+what to do in find, not as the general principle behind it (a missing observation must be reported as missing, never
+shown as a result such as "no changes" or $0). Confidence omitted for the fifth prompt in a row. Principle stated by
+Claude after this committed answer. Next: a fresh target-level problem, Challenge 15b: the baseline is still in memory
+after a witness failure, so can find retry the witness instead of exiting?
+
+### Challenge 15b — Retry the witness after a Git failure
+
+PROMPT (verbatim fields; baseline at 10:00 still in memory; Git fails at the 10:30 witness because of a temporary lock):
+```
+Case 2: if find exits, what does the user lose =
+could find try the witness picture again without taking a new baseline, yes or no =
+why is the 10:00 baseline still valid for a retry (or why is it not) =
+what find should ask or tell the user after the witness fails =
+one risk of retrying automatically without asking =
+Confidence (0-100) =
+```
+LEARNER ANSWER (verbatim, first committed):
+```
+. we could say it failed and have a try again message and save everything and wait for the retry
+```
+EVALUATION: Direction CORRECT: report the failure, offer a retry, keep the baseline, and return to waiting (consistent
+with the D9/D10 wait loop). "Save everything" is ambiguous: kept in memory by the running process (in scope), or
+written to disk (persistence, deferred to Phase 11)? What the user loses on exit, why the baseline stays valid, the
+auto-retry risk, and confidence were unanswered. Next: clarify "save" and ask for the unanswered fields.
+
+FOLLOW-UP PROMPT: "save" (a) memory / (b) file; what the user loses on exit; why the baseline is valid for a retry; the
+auto-retry risk; confidence.
+LEARNER ANSWER (verbatim):
+```
+. the baseline memory needs to be held and not thrown out so we can compare it later
+```
+EVALUATION: (a) keep the baseline in memory: CORRECT, and in scope (no persistence). The other fields were unanswered
+again. PATTERN: across the last seven prompts the learner answered one or two lines of multi-field blocks. Next: ask
+the remaining fields one at a time.
+
+SINGLE PROMPT: if find exits at 10:30 instead of offering a retry, what has the user lost / confidence.
+LEARNER ANSWER (verbatim):
+```
+. it has lost the baseline
+```
+EVALUATION: CORRECT on the mechanism: the process exits and the in-memory baseline is gone. The consequence was not
+stated: changes made from 10:00 to 10:30 can no longer be checked, because a new baseline would already contain them.
+Confidence omitted. Next: an R1 trace of restarting find at 10:32.
+
+R1 TRACE PROMPT: 10:00 baseline cli.py=hash_B; 10:15 Claude edits it to hash_C; 10:30 witness fails and find exits;
+10:32 restart takes a new baseline; 10:40 witness hash_C. New baseline value / does the report show the 10:15 edit /
+confidence.
+LEARNER ANSWER (verbatim):
+```
+. hash c 
+so they lost the claimed edits from the baseline to the fail, so we neeed to hold those as well
+```
+EVALUATION: hash_C: CORRECT. The 10:15 edit is lost from the report: CORRECT, implied. "Hold the claimed edits as
+well": NEARLY. The claims are not lost, because they stay in payload_samples.jsonl on disk. What is lost with the
+process is the baseline-time capture-file position (D3), which marks where this session's claims begin. Every change in
+the window is lost too, not just the claimed ones: a shell edit would also be absorbed into the new baseline.
+Confidence omitted. Next: ask where the claims live and what baseline-time state besides the picture find must hold.
+
+STATE PROMPT: are the claims in payload_samples.jsonl lost on exit / what else in memory is lost / confidence.
+LEARNER ANSWER (verbatim):
+```
+. no
+the line that we would read is lost when we exti find
+```
+EVALUATION: Claims not lost: CORRECT. The line position to start reading from (D3) is lost: CORRECT. So the state a
+retry must keep is the baseline picture plus the capture-file position. Confidence omitted. Next: why the baseline is
+still valid for a retry, as a trace of the change window.
+
+WINDOW TRACE PROMPT: 10:00 baseline (position line 40); 10:15 edit; 10:30 witness fails, state kept; 10:31 retry
+succeeds. Does the failure change the 10:00 state / does the 10:31 report show the edit / change window from-to /
+confidence.
+LEARNER ANSWER (verbatim):
+```
+. the failure does not change the baseline picture
+```
+EVALUATION: CORRECT: the failure does not change the baseline. Report-shows-edit, change window, and confidence were
+unanswered. Next: ask for the change window alone.
+
+WINDOW PROMPT: the report's change window from ___ to ___ / confidence.
+LEARNER ANSWER (verbatim):
+```
+. 10 to 10:31
+```
+EVALUATION: CORRECT: 10:00 to 10:31. The window ends at the successful witness, not at the 10:30 failure, which took no
+picture. Confidence omitted. Next: the risk of retrying automatically without asking.
+
+AUTO-RETRY RISK PROMPT: find retries silently every 2 seconds until Git works; one risk / confidence.
+LEARNER ANSWER (verbatim):
+```
+. the problem might not have been fixed so git would still not be working or oserror or permissions
+```
+EVALUATION: CORRECT on the cause: a permanent failure (Git missing, OSError, permissions) never clears by waiting. The
+consequence was left implicit: find loops forever in silence, and the user sees neither an error nor a report. A
+second risk the learner did not raise is that the change window's end keeps moving past the moment the user asked to
+stop (D9). Confidence omitted. Next: the learner states the decision (D15) in their own words.
+
+D15 STATEMENT PROMPT: Case 1 behavior / Case 2 behavior, what is kept, what is asked / confidence.
+LEARNER ANSWER (verbatim, pushback on the auto-retry risk instead of the D15 fields):
+```
+. they would go away if the user goes and fixes them while we wait
+```
+EVALUATION: VALID POINT on its own: a permanent failure can be fixed by the user while find waits. But it does not
+answer the silent-retry risk, because a user can fix only a failure they know about. Silent retry shows no error. The
+point supports telling the user and waiting, not silent retry. Next: ask how the user learns what to fix under silent
+retry.
+
+SILENT-RETRY CHALLENGE PROMPT: under silent retry, how does the user learn what to fix / what would have to be true for
+silent retry to be better / confidence.
+LEARNER ANSWER (verbatim):
+```
+. the user knows nothing, we would juts automatically retry in an infinite loop until it crashes or the user gets tired of waiting
+```
+EVALUATION: CORRECT: the user knows nothing, and find loops until something outside it stops the loop. The learner
+recovered the consequence independently. The reversal condition and confidence were unanswered. Next: ask for the
+reversal condition alone.
+
+REVERSAL PROMPT: what would have to be true about the failures for silent retry to be better / confidence.
+LEARNER ANSWER (verbatim):
+```
+. if somehow every single error was 100 uptime so we never had an error that the user would need to go fix
+```
+EVALUATION: CORRECT in substance: silent retry wins only if every failure is temporary and clears without any user
+action. "100 uptime" is loose wording for that. Confidence omitted. Next: the learner states D15.
+
+D15 STATEMENT PROMPT: Case 1 behavior / Case 2 behavior, what is kept in memory, what is asked / confidence.
+LEARNER DESIGN ANSWER (verbatim):
+```
+. it stops and prints a message for the user 
+it waits and prints a message that it will wait unitl we confirm or deny the try again and it keeps the line where we read the payloads and the claude edits data that we reported
+```
+EVALUATION: Case 1, stop with find's own message: CORRECT. Case 2, keep waiting, print a message, ask to retry:
+CORRECT. Keeps the capture-file line position: CORRECT. "The claude edits data that we reported" is UNCLEAR and, read
+literally, wrong. Nothing has been reported at 10:30, and what must be kept is the 10:00 baseline picture, which is not
+named. What "deny" (n) does is unspecified. Confidence omitted. Next: clarify that phrase and the n branch before
+recording D15.
+
+CLARIFY PROMPT: the other thing kept from 10:00 besides the line position / what n to "try again?" does / confidence.
+LEARNER ANSWER (verbatim):
+```
+. if we have an n for try again then we would print the error message and it hodls the claims of code changes and the verdict,
+```
+EVALUATION: n prints the error message: PARTIAL, because it is unclear whether find then exits or keeps holding state.
+"Holds the claims ... and the verdict": INCORRECT. Claims are read, and verdicts computed, only at witness time (D2,
+D6). The witness failed, so at 10:30 find has read no claims and computed no verdicts. The baseline picture is still
+not named. MISCONCEPTION: the learner believes claim reading and judging happen before the witness picture.
+Blocker: the order of find's steps. Next: an R0 step-order question.
+
+R0 STEP-ORDER PROMPT: A baseline picture, B remember position, C wait for Enter, D witness picture (fails at 10:30), E
+read capture lines, F judge claims, G print report; finished letters / never-ran letters / does find hold claims or
+verdicts / confidence.
+LEARNER ANSWER (verbatim):
+```
+. ok so the claude edits do not exsist yet, so no verdits
+```
+EVALUATION: No verdicts: CORRECT. The misconception is corrected at R0. Wording: "the claude edits do not exist yet" is
+imprecise, because the edits exist on disk and in the capture file; what does not exist yet is find reading them (E).
+Letters and confidence not given. Next: name which finished steps' results a retry must keep, then the n branch.
+
+KEPT-STATE PROMPT: what step A produced / what step B produced / n to "try again?": exit or keep waiting / confidence.
+LEARNER ANSWER (verbatim):
+```
+. it has all the hashes from the files and paths , the repo root, 
+keeps the capture files line
+```
+EVALUATION: Step A, the baseline picture (paths with their hashes) plus the repository root: CORRECT. Step B, the
+capture-file line position: CORRECT. Both pieces of kept state are now named. The n branch and confidence were
+unanswered. Next: ask for the n branch alone.
+
+N-BRANCH PROMPT: after n, exit or keep waiting / what the user loses / confidence.
+LEARNER ANSWER (verbatim):
+```
+. it exits 
+they lose baseline
+```
+EVALUATION: Exits: a CONSISTENT choice. Loses the baseline: CORRECT. The line position and the ability to check
+10:00-10:30 are lost with it (not named, but traced earlier). Confidence omitted throughout Challenge 15/15b.
+
+DESIGN D15 (learner's, under review): Git failure during find.
+- D15a Git fails at baseline: find catches the error, prints its own message saying the baseline picture failed and
+  why, and stops. Nothing is lost; the session had not started.
+- D15b Git fails at the witness: no report (one picture cannot show a change, and a baseline-only report would present
+  a missing measurement as "no changes"). find prints that the witness picture failed and why, keeps the baseline
+  picture (paths, hashes, repository root) and the capture-file line position in memory, and asks "Try again? (y/n)".
+  y retakes only the witness; the change window then ends at the successful witness. n exits, losing the baseline, so
+  changes since the baseline can no longer be checked. No silent automatic retry: permanent failures (Git missing,
+  OSError, permissions, not a repository) never clear by waiting, and the user cannot fix a failure they are not shown.
+  Reversal condition (learner's): silent retry would win only if every failure were temporary and cleared without user
+  action.
+Open challenge: D9 asks "Are you sure?" before the witness, but D15b's n discards the baseline in one keystroke.
+
+D15 CONSISTENCY CHALLENGE PROMPT: D9 confirms an undoable step; D15b's n is permanent with no confirmation.
+Consistent yes/no / what to change in D15b / downside / confidence.
+LEARNER DESIGN ANSWER (verbatim):
+```
+. in the confimration mesage put in that if n is presed then you will lose all baseline data
+```
+EVALUATION: A credible change: warn about the permanent loss in the prompt itself (an informed single choice) rather
+than adding a second confirmation. Consistency yes/no, downside, and confidence were unanswered. "Baseline data" is
+internal wording; a user may not know what losing it costs. Next: ask for the downside alone.
+D15c (learner's, under review): the "Try again? (y/n)" prompt states that n exits and loses the baseline.
+
+WORDING/DOWNSIDE PROMPT: rewrite the prompt for a user who has never heard "baseline" / one downside of a warning
+instead of a second confirmation / confidence.
+LEARNER ANSWER (verbatim):
+```
+. you will lose all inital data from the start of the session
+```
+EVALUATION: NEARLY. "Baseline" is gone, but the rewrite still names data, not the consequence for the user (changes
+made since the session started can no longer be checked). Downside and confidence were unanswered. Next: ask what the
+user can no longer find out after n.
+
+CONSEQUENCE PROMPT: after n, what can the user no longer find out about the last 30 minutes / confidence.
+LEARNER ANSWER (verbatim):
+```
+.  the baseline data
+```
+EVALUATION: INCORRECT for the question. It names the stored thing again, not the lost ability (which files changed,
+and whether Claude's claims hold, from session start until now). Blocker: separating what is stored from what that
+storage lets the user do. Next: R0 on a different surface (a receipt), then map back.
+
+R0 RECEIPT PROMPT: you throw away a jacket receipt; the thing thrown away / one thing you can no longer do / confidence.
+LEARNER ANSWER (verbatim):
+```
+. the recipt 
+return the jacket
+```
+EVALUATION: CORRECT on both: the stored thing (receipt) is separated from the lost ability (return). Confidence
+omitted. Next: map back to find.
+
+MAP-BACK PROMPT: receipt -> baseline, return the jacket -> ?; thing thrown away / what the user can no longer find out /
+rewrite the warning / confidence.
+LEARNER ANSWER (verbatim):
+```
+. you can no longer comapre the baseline to the witness picture
+```
+EVALUATION: NEARLY. It now names a lost ability, not stored data, so the receipt split transferred. The ability is
+still stated in find's internal vocabulary (baseline, witness picture). The rewrite and confidence were unanswered.
+Next: ask only for the user-facing rewrite.
+
+USER-FACING REWRITE PROMPT: one-sentence warning under "Try again? (y/n)" without baseline/witness/picture / confidence.
+LEARNER ANSWER (verbatim):
+```
+.  if n then all data will be lost and you will have to start a new session
+```
+EVALUATION: PARTIAL. It avoids the internal words, and "start a new session" is a real user consequence. But "all data
+will be lost" overstates the loss and can mislead: n does not delete the user's files, Claude's edits, or the capture
+file, only find's in-memory record of the starting state. It still omits the key consequence: even a new session
+cannot show what changed before it started. Confidence omitted. Next: ask whether n deletes the user's files or
+Claude's edits.
+
+OVERSTATEMENT PROMPT: after n, are files and Claude's edits deleted / is payload_samples.jsonl deleted / what "all
+data will be lost" makes a user fear / will a 10:32 session report 10:00-10:30 edits / confidence.
+LEARNER ANSWER (verbatim):
+```
+. not technically but the user would have to have another baseline and that would have the cpature line moved to a more recent line than before, the edits to the file have not been revoked but the reports for them have been
+```
+EVALUATION: CORRECT in substance. Files and edits are not deleted; a new session takes a new baseline with a later
+capture position; the edits remain but can no longer be reported. The learner traced both kept-state items without a
+prompt. Wording: "the reports ... have been [revoked]" is imprecise, because no report existed; what is lost is the
+ability to produce one. The user's likely fear and confidence were unanswered. Next: a fresh unaided rewrite of the
+warning.
+
+UNAIDED REWRITE PROMPT: warning text, one sentence, no hints / confidence.
+LEARNER ANSWER (verbatim):
+```
+. if n then all observational data will be lost
+```
+EVALUATION: INCORRECT (regression to data wording). It names find's internal data again ("observational data"), does
+not say the user's files are safe, and does not say what the user can no longer learn, although the learner had just
+reasoned all three correctly. Blocker: turning a correct consequence into user-facing wording. The reasoning is
+stable; the wording is not. Next: worked-example rescue on a neighboring surface (a text editor closing an unsaved
+file). The learner explains why the good version works, then writes find's warning fresh.
+
+WORKED-EXAMPLE PROMPT: weak "All buffer data will be lost." / better "Your typing since the last save will be gone. The
+saved copy of notes.txt stays as it is."; what is safe / what is lost in user terms / which part the learner's warning
+misses / find's warning using both parts / confidence.
+LEARNER ANSWER (verbatim):
+```
+. the save point will be lsot
+```
+EVALUATION: INCORRECT. The example says the saved copy stays; what is lost is the typing since the save. The learner
+read the kept part as the lost part. Other fields unanswered. Blocker: reading which sentence of the example is safe
+and which is lost. Next: R0, the two sentences split apart and each labeled safe or lost.
+
+R0 SPLIT PROMPT: sentence 1 "Your typing since the last save will be gone." safe or lost / sentence 2 "The saved copy
+of notes.txt stays as it is." safe or lost. (A pause was offered.)
+LEARNER ANSWER (verbatim):
+```
+. lost 
+safe
+```
+EVALUATION: CORRECT on both. Next: climb one rung, find's warning written as two sentences, one lost and one safe.
+
+CLIMB PROMPT: find's warning, sentence 1 what the user loses on n / sentence 2 what stays safe / confidence.
+LEARNER ANSWER (verbatim):
+```
+so the save point will be lost but you will still keep the file edits but we will have no reporot of them
+```
+EVALUATION: MOSTLY CORRECT. Safe: the file edits are kept, CORRECT. Lost: no report of them, CORRECT in user terms.
+Both parts are present for the first time. "Save point" is borrowed from the editor example; find shows the user
+nothing by that name, so it would confuse. Confidence omitted. Succeeded after the worked example and the split, so it
+is NOT independent: retrieve user-facing warning wording (lost ability plus what stays safe) on a new surface later.
+Claude proposed the D15c wording built from the learner's two parts, for the learner to accept or edit.
+
+D15c WORDING PROPOSED:
+```
+Try again? (y/n)
+If you press n, find exits and can no longer report what changed since you started it.
+Your files, including Claude's edits, stay exactly as they are.
+```
+ACCEPT/DOWNSIDE PROMPT: accept or edit / one downside of a warning instead of a second "Are you sure?" / confidence.
+LEARNER ANSWER (verbatim):
+```
+. accepted
+```
+RESULT: D15c wording ACCEPTED by the learner. Downside unanswered for the third time; confidence omitted. Next: ask
+for the downside alone.
+
+DOWNSIDE PROMPT (alone): one downside of a warning instead of a second "Are you sure?" / confidence.
+LEARNER DESIGN ANSWER (verbatim):
+```
+ok add the second confirmation and then put the message in the n second confirmation in case they accidentally hit n or y
+```
+EVALUATION: The learner REVISED the design instead of naming a downside, but the reason does name it: a warning in a
+single prompt does not protect against an accidental keypress (a reflex n loses the session). CORRECT reasoning about
+n. "Or y" is questionable: an accidental y only retries the witness, which can be repeated or answered again, so a
+confirmation on y may add a step for no protection. Confidence omitted.
+D15c REVISED (learner's, under review): after the witness fails, "Try again? (y/n)"; n leads to a second confirmation
+that shows the accepted warning text; the learner also proposed confirming y.
+Next: trace an accidental y, to decide whether y needs confirmation.
+
+ACCIDENTAL-Y TRACE PROMPT: 10:30 witness fails, "Try again? (y/n)", user meant n but hits y; what find does right after
+y / if Git is still broken, what the user sees next / did y lose anything / does y need a second confirmation /
+confidence.
+LEARNER ANSWER (verbatim):
+```
+.  are you sure (y/n)
+```
+EVALUATION: NOT A TRACE. The learner applied the proposed y confirmation instead of tracing y without one. FACILITATOR
+ERROR: the prompt did not say "without a confirmation on y", so the reading was reasonable. The other fields were
+unanswered. Next: restate the trace explicitly with no confirmation on y, one field at a time.
+
+RESTATED TRACE PROMPT (no confirmation on y): y retakes the witness, Git still broken, fails again; what the user sees
+next / did the accidental y lose the session / confidence.
+LEARNER ANSWER (verbatim):
+```
+. anothr try again message but this time adding in the error message
+```
+EVALUATION: CORRECT. The loop returns to the failure message and "Try again? (y/n)", so the user can still press n.
+"Lost the session?" was not stated, though the trace implies no. Confidence omitted. Next: decide whether y needs a
+confirmation.
+
+Y-CONFIRMATION DECISION PROMPT: did accidental y lose anything / does y need a second confirmation / why / confidence.
+LEARNER DESIGN ANSWER (verbatim):
+```
+.  no 
+no
+it will just try again and fail or try again and pass but either way it is a short wait for an accidental y
+```
+EVALUATION: CORRECT on all three. The learner covered both retry outcomes (fail loops back to the prompt; pass gives a
+report) and weighed the cost of a mistake (a short wait) against adding a step. Confidence omitted. The learner withdrew
+confirming y.
+D15c FINAL (learner's, under review): after the witness fails, find prints the failure and asks "Try again? (y/n)".
+y retakes the witness immediately, with no confirmation, because an accidental y costs only a short wait. n leads to
+a second confirmation showing: "If you press n, find exits and can no longer report what changed since you started
+it. Your files, including Claude's edits, stay exactly as they are." Only the choice that cannot be undone is
+confirmed.
+FACILITATOR ERROR: the consistency challenge called D9's Enter "easy to undo" because its confirmation's n returns to
+waiting. That is wrong: pressing Enter and confirming ends the observation window and cannot be undone, which is why D9
+confirms it. The corrected consistency is that D9 and D15c both confirm only irreversible steps. This must be corrected
+to the learner.
+CORRECTION DELIVERED to the learner in session.
+
+### Challenge 16 — D2 against the plan's "no stopgap file store" rule — POSTED
+
+PLAN TEXT SHOWN: IMPLEMENTATION_PLAN.md line 12 ("no background service, event framework, queue, or cross-process
+relay is required"); line 30 ("SQLite and SessionStart/Stop wiring | Defer together; no stopgap file store or durable
+product history"); line 1355 ("Each hook runs as its own short-lived process, so the session-start baseline cannot
+survive until Stop without persistence ... Do not add a stopgap store here.").
+FACTS SHOWN: the capture hook appends each payload to payload_samples.jsonl and exits (installed in Phase 8 for
+sampling; Git-ignored; 209 MB at last count); find only reads it; baseline and witness stay in find's memory.
+PROMPT (verbatim fields):
+```
+who writes payload_samples.jsonl, find or the hook =
+does find write anything to disk to survive between processes, yes or no =
+does D2 break the "no stopgap file store" rule, yes or no =
+why =
+Confidence (0-100) =
+```
+Delivered in steps; first step asked who writes the file and whether find writes anything to disk / confidence.
+LEARNER ANSWER (verbatim):
+```
+. the hook 
+no
+```
+EVALUATION: CORRECT on both: the hook writes the file; find writes nothing to disk. Confidence omitted. Next: does D2
+break the stopgap-store rule, and why.
+
+STOPGAP PROMPT: does D2 break the rule / why, using who writes the file and what find keeps where / confidence.
+LEARNER ANSWER (verbatim):
+```
+.  ni 
+it does not write anything to the disk only reads
+```
+EVALUATION: "ni" = no (typo, not graded). CORRECT: find persists none of its own state; it only reads a file the hook
+writes. The learner did not add that the baseline stays in memory. Confidence omitted. Next: the harder rule, line 12
+"cross-process relay": trace the claim data's path from the hook process to find.
+
+RELAY TRACE PROMPT: 10:15 Claude edits cli.py, PostToolUse hook process receives payload, appends to
+payload_samples.jsonl, exits; 10:30 find reads line 41. Process the claim starts in / ends in / what carries it /
+confidence.
+LEARNER ANSWER (verbatim):
+```
+. it keeps all data in the sesion so when the session is over the data is gone
+```
+EVALUATION: NOT RESPONSIVE to the trace. It restates that find's own state lives in memory for one session (true, and
+the answer to the previous question) but names neither process nor the carrier. Blocker: following one piece of data
+across two processes. Next: R0 with labeled choices, one field at a time.
+
+R0 RELAY PROMPT (diagram: hook process -> writes line 41 -> payload_samples.jsonl -> reads line 41 -> find process):
+starts in (a) hook / (b) find; ends in (a)/(b); carrier (a) shared memory / (b) file on disk; confidence.
+LEARNER ANSWER (verbatim):
+```
+. A 
+V
+the file on disk
+```
+EVALUATION: CORRECT on all three ("V" = b, a typo, not graded): the claim starts in the hook process, ends in find, and
+is carried by the file on disk. Confidence omitted. Next: is that file, by this trace, a cross-process relay, and does
+line 12 forbid one or only say one is not required?
+
+LINE-12 PROMPT: by the trace, does payload_samples.jsonl act as a cross-process relay / does line 12 say a relay is
+(a) forbidden or (b) not required / confidence.
+LEARNER ANSWER (verbatim):
+```
+.  no 
+A
+```
+EVALUATION: Relay "no": INCONSISTENT with the learner's own trace, which has the file carrying the claim from the hook
+process to find, the definition given for a relay. The reason was not stated; the learner may mean that a passive file
+is not an active relay program, which would be a defensible distinction, but it was not argued. Line 12 "(a)
+forbidden": INCORRECT, because the sentence says "no ... relay is required". Two misses: first take the smaller
+reading blocker with an R0 sentence on a different surface ("No umbrella is required today"), then return to the relay
+question and ask for the reason.
+
+R0 UMBRELLA PROMPT: "No umbrella is required today."; bring one anyway, rule broken? / (a) forbid or (b) not needed /
+confidence.
+LEARNER ANSWER (verbatim):
+```
+.  no 
+B
+```
+EVALUATION: CORRECT on both. Confidence omitted. Next: apply back to line 12, then the relay question with a reason.
+
+APPLY-BACK PROMPT: line 12 (a) forbidden or (b) not required / is payload_samples.jsonl a relay / why using the trace /
+confidence.
+LEARNER ANSWER (verbatim):
+```
+. it is a relay but it is not required
+```
+EVALUATION: CORRECT: the file is a cross-process relay, and line 12 says only that a relay is not required, not that
+one is forbidden. The reason was not spelled out with the trace; the trace was established one step earlier.
+Confidence omitted. Consequence for design: because a relay is not required, find must still work when the capture
+hook is absent. Next: trace find with no capture hook installed.
+
+NO-HOOK PROMPT: no capture hook; file missing at 10:00 and still missing at the 10:30 witness; Claude edited cli.py.
+Stop or report / claim shown or not / what to tell the user so they don't think Claude made no claims / confidence.
+LEARNER ANSWER (verbatim, answering the previous "why" instead):
+```
+. it carries the data from one process the hook to the other process find
+```
+EVALUATION: CORRECT as the relay reason (from the hook process to find). The no-hook fields were not answered. Next:
+re-pose them one at a time.
+
+NO-HOOK STEP 1 PROMPT: file missing at 10:00 and at the 10:30 witness; stop with no report, or report / confidence.
+LEARNER DESIGN ANSWER (verbatim):
+```
+.  no report and say that the payload_samples is missing
+```
+EVALUATION / REVIEW: A design position, under challenge. Tensions: (1) the learner just agreed the relay is "not
+required", yet this makes find useless without the capture hook; (2) both pictures succeeded, so the cli.py change is
+observed evidence, and refusing the report hides it (compare D12, "over-reporting, never hiding"); (3) D13b stopped
+because claims might exist but could not be read, whereas here no file ever existed, so no claims could have been
+written. D13a (missing at baseline = position 0) already implied a report. Confidence omitted. Next: ask whether D13b's
+reason holds in this case.
+
+D13b-REASON PROMPT: could any claim have been written this time / does the D13b reason apply / what happens to the
+cli.py change if find refuses / confidence.
+LEARNER ANSWER (verbatim):
+```
+. yes 
+ok so the report should still run with the explicit message that the payloadsmaples were missing so it is just comparing the file changes and provanance cannot be claimed at all
+```
+EVALUATION: "yes" to "could any claim have been written": INCORRECT as stated. With no hook installed, no process
+writes claims, so none could exist. It may instead answer another field; clarify. The REVISION is CORRECT: report
+anyway, say explicitly that the capture file was missing, and compare file changes only, with no claims. Wording:
+"provenance cannot be claimed" is loose, since per D7 find never attributes authorship even with claims; what is
+missing is Claude's reports and their verdicts. Confidence omitted.
+D16 (learner's, under review): capture file missing at both baseline and witness: find still reports every observed
+change, with no claims, and states explicitly that the capture file was missing, so no Claude reports were checked.
+Next: an R0 clarification of the "yes" (with no hook, which process would write a claim?).
+
+R0 WRITER PROMPT: 10:15 Claude edits cli.py, hook NOT INSTALLED, file does not exist; which process would write a
+claim / is it running / could any claim have been written / confidence.
+LEARNER ANSWER (verbatim):
+```
+. none of them 
+no 
+yse 
+but we would not have a record of them
+```
+EVALUATION: "none of them" and "no": CORRECT, since no process writes to the file. "yes, but we would not have a
+record of them": a DEFENSIBLE distinction rather than an error. Claude's tool calls (the events a claim would describe)
+still happened; what is missing is any record of them that find can read. The facilitator's "written" meant written to
+the file. This matches D16's message: Claude's reports were not captured, so none were checked, and not that Claude
+made none. Confidence omitted. Next: the test list.
+
+SESSION EVIDENCE SUMMARY (Challenge 15/15b, 2026-09-15): target-level first answer partial; recovered through R0
+(count pictures; step order) and climb-backs. Transfer (budget app, "do not show $0") CORRECT unprompted. Principle
+stated as the action rule rather than the general rule (NEARLY). MISCONCEPTION recorded: claims and verdicts believed
+to exist before the witness picture; corrected at R0 step order and due for retrieval on a new surface. Recurring
+format issue: the learner answers one line of multi-field blocks and omits confidence.
