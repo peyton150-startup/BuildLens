@@ -2140,6 +2140,131 @@ TEST 3 (learner's, under review) — net changes:
 Test 3 needed R0 per-file scaffolding; the "claims" must-NOT carried over across Tests 2 and 3 (four times). Retrieval
 due: writing a must-NOT line specific to the test's own scenario.
 
+CHECKPOINT: committed and pushed 1b01ab7 at the learner's request.
+
+TEST 4 STEP 1 PROMPT (reconcile.py:141-146 shown; D6 quoted; verdict names from compare.py): 10:00 baseline a.py,
+b.py; 10:10 Write claim on a.py, matches at witness; 10:12 Edit claim on b.py ("x = 1" -> "x = 2"), b.py contains
+"x = 2" at witness. a.py verdict / a.py in report or skipped / b.py verdict / b.py in report or skipped / confidence.
+LEARNER ANSWER (verbatim):
+```
+. claim holds 
+in the report 
+claim holds 
+report
+i am still a little confused on this, if we have a claim that holds we skip it or do we report it and why in simple terms
+```
+EVALUATION: a.py CLAIM_HOLDS: CORRECT. a.py "in the report": INCORRECT under D6; a holding Write claim is the one
+skipped case. b.py CLAIM_HOLDS: CORRECT. b.py reported: CORRECT. The learner asked for a simple explanation of D6,
+which is allowed after the committed answer. Blocker: why a holding Write claim covers the whole file but a holding
+Edit claim does not. Next: a one-concept explanation with a tiny two-file example, then a check question.
+
+EXPLANATION GIVEN: a Write claim states the whole file, so when it holds every byte is accounted for (skip); an Edit
+claim checks one fragment, so the rest of the file is unchecked (report).
+CHECK PROMPT: b.py at witness "x = 2" + shell-added "delete_all_files()"; does the Edit claim hold / if skipped, would
+the user see delete_all_files() / why a holding Write claim is skipped / confidence.
+LEARNER ANSWER (verbatim):
+```
+. ok so a succesful write is skipped becasue every byte is accounted for
+```
+EVALUATION: Write-skip reason: CORRECT, restated in the learner's words right after the explanation, so not yet
+independent. The Edit-side fields (does the claim hold; would the user see the added line) were unanswered. Confidence
+omitted. Next: ask the Edit-side fields alone.
+
+EDIT-SIDE PROMPT: does b.py's Edit claim hold / if skipped, would the user ever see delete_all_files() / confidence.
+LEARNER ANSWER (verbatim):
+```
+. so becasue we only have one line that we know was changed and claim holds the rest of the file is ambiguous and so it needs to be reported
+```
+EVALUATION: CORRECT. The claim holds, only one line is accounted for, the rest of the file is unverified, so it is
+reported. This implies the user would otherwise never see the added line. Confidence omitted. Next: near transfer with
+less scaffolding, applying D6/D6a to a Write claim that does not hold and a Write claim that holds only after
+normalize.
+
+NEAR-TRANSFER PROMPT: c.py Write claim, then a shell command appends a line; d.py Write claim matching except CRLF line
+endings. c.py verdict / skipped or reported and why / d.py verdict / skipped or reported and marked as / confidence.
+LEARNER ANSWER (verbatim):
+```
+. claim does not hold 
+reproted  becasue the file bytes are unaccounted for 
+claim holds after normalize
+repoted but only to say that it was normalized
+```
+EVALUATION: c.py CLAIM_DOES_NOT_HOLD, reported: CORRECT, with a correct reason. d.py CLAIM_HOLDS_AFTER_NORMALIZE,
+reported: CORRECT (D6a). Wording: find does not normalize the file; the report marks the difference as line endings
+only. Confidence omitted. D6/D6a transfer succeeded with fewer hints. Next: the learner writes Test 4's must contain
+and a scenario-specific must NOT for a.py-d.py (retrieval of the must-NOT skill).
+
+TEST 4 EXPECTED-LINES PROMPT (a.py-d.py timeline; broken-find hint: old code skipping every claimed path): must contain
+each reported path with what the report says / must NOT contain / confidence.
+LEARNER ANSWER (verbatim):
+```
+. the claim and the action that was done plus nomalized
+no idea
+```
+EVALUATION: Must contain: VAGUE; no paths are named, and it is not checkable. Must NOT: "no idea". The retrieval of the
+scenario-specific must-NOT skill FAILED without the per-file breakdown (compare Test 3). The learner had just
+classified each file correctly, so the blocker is converting per-file decisions into test lines, not D6 itself.
+Confidence omitted. Next: R0 per-file in/out fill-in, the same rung that worked in Test 3.
+
+R0 PER-FILE PROMPT: a.py in or out / b.py, c.py, d.py in or out and what the report says / must NOT / confidence.
+LEARNER ANSWER (verbatim):
+```
+. not 
+reptoed, verdict is claim holds but the it is changed and i assume we cannot account for hthis change so we miss this 
+reported, claim does not hold because of the changes after the write claim
+repoted but only to label the normalize
+```
+EVALUATION: a.py not reported: CORRECT. b.py reported, CLAIM_HOLDS: CORRECT, but "we miss this" is PARTIAL / unclear:
+find does not miss the extra change. It reports b.py as changed and says other changes are not ruled out (D7); it does
+not identify the added line. c.py: CORRECT. d.py: CORRECT (line-endings-only label). Must NOT not written; a.py is
+implied by the first line. Confidence omitted. Next: clarify "we miss this" (what the user learns about b.py) and have
+the learner state the must-NOT line.
+
+B.PY CLARIFY PROMPT (D7 report for b.py shown): does the user learn there may be more changes / does it say what the
+change is / what find "misses" / Test 4 must NOT / confidence.
+LEARNER ANSWER (verbatim):
+```
+. yes
+no
+it does not know if another change was made and we do not know where 
+an edit that has a change after the edit
+```
+EVALUATION: yes / no: CORRECT. What find misses, whether another change exists and where: CORRECT. Must NOT "an edit
+that has a change after the edit": INCORRECT. That describes b.py, which is reported. The must-NOT is the one file the
+learner already placed outside the report (a.py). Blocker: linking "not in the report" (already answered) to the
+must-NOT line. Confidence omitted. Next: a direct R0 link question.
+
+R0 LINK PROMPT (per-file answers shown, a.py "not"): the path that must NOT appear / why a broken find might report it
+/ confidence.
+LEARNER ANSWER (verbatim):
+```
+.  a file where the claim holds at witness
+```
+EVALUATION: PARTIAL. The direction is right (the skipped file), but the rule is too broad: b.py's Edit claim also
+holds at the witness and b.py is reported. The Write/Edit distinction, the core of D6, is missing, and the path is not
+named. Confidence omitted. Next: contrast a.py and b.py, which both hold, and ask what differs.
+
+CONTRAST PROMPT: a.py and b.py both hold, only a.py stays out; the difference / must-NOT naming the path / confidence.
+LEARNER ANSWER (verbatim):
+```
+. a write claim that hodls at the witness
+```
+EVALUATION: CORRECT: the difference is Write versus Edit, and the must-NOT is the path with the holding Write claim
+(a.py; the path itself was not named). Recovered via contrast. Confidence omitted.
+
+TEST 4 (learner's, under review) — claimed-path coverage policy (D6, D6a, D7):
+- setup: a repository with a.py, b.py, c.py, d.py; capture lines for four claims.
+- action: a.py Write claim that holds; b.py Edit claim that holds, plus a shell-added line; c.py Write claim, then a
+  shell-appended line; d.py Write claim matching except line endings.
+- expected contains: b.py changed, Edit claim holds, other changes not ruled out; c.py changed, Write claim does not
+  hold as of witness; d.py changed, marked line-endings-only.
+- expected must NOT contain: a.py.
+Broken find caught: the old reconcile (skips every claimed path) omits b.py, c.py, and d.py.
+Evidence: D6 classification of new files succeeded with fewer hints after one explanation; turning decisions into
+expected lines needed per-file R0 twice, and the must-NOT line needed a contrast step. Retrieval due: writing a
+must-NOT line on a fresh scenario without a per-file breakdown.
+D8 (several claims on one path) not yet in any test.
+
 SESSION EVIDENCE SUMMARY (Challenge 15/15b, 2026-09-15): target-level first answer partial; recovered through R0
 (count pictures; step order) and climb-backs. Transfer (budget app, "do not show $0") CORRECT unprompted. Principle
 stated as the action rule rather than the general rule (NEARLY). MISCONCEPTION recorded: claims and verdicts believed

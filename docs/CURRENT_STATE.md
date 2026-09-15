@@ -99,7 +99,8 @@ Next, in order:
    - side_effect transfer (weather app) succeeded unaided on the mechanics; the learner wrongly generalized that too few calls also raise StopIteration, then correctly predicted that unused entries pass silently (verified by a run).
    - side_effect principle: the unscaffolded restatement swapped the cases; recovered at R0 with counts named (2 entries/3 calls -> StopIteration; 3 entries/2 calls -> unused silently). Retrieval due on a fresh surface without counts named.
    - Test 3 (net changes) written with the learner: notes.md CREATED, cli.py MODIFIED, old.py DELETED; must not contain README.md (edited then restored, invisible to two pictures). Needed R0 per-file scaffolding. The learner repeated Test 1's "claims" as must-NOT four times across Tests 2-3; retrieve writing scenario-specific must-NOT lines.
-   - **Resume at:** Test 4, claimed-path coverage policy (D6/D6a/D8), then unreadable paths, invalid inputs.
+   - Test 4 (coverage policy D6/D6a/D7) written with the learner: b.py (Edit holds + extra change), c.py (Write does not hold), d.py (line-endings only) reported; a.py (Write holds) must not appear. The learner asked why a holding claim is sometimes reported; explained once (Write = whole file accounted for; Edit = one fragment), then applied it to new files correctly. Expected lines still needed per-file R0 and a Write/Edit contrast for the must-NOT line.
+   - **Resume at:** Test 5, D8 (several claims on one path: the latest by capture-file line order decides), then unreadable paths, invalid inputs.
 
 Known cold from prior evidence, not newly assessed here:
 
