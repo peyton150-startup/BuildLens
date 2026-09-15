@@ -1755,6 +1755,391 @@ still happened; what is missing is any record of them that find can read. The fa
 the file. This matches D16's message: Claude's reports were not captured, so none were checked, and not that Claude
 made none. Confidence omitted. Next: the test list.
 
+CHECKPOINT: committed and pushed 4a5f1cb at the learner's request.
+
+### Test list — find workflow
+
+TEST 1 PROMPT (D16): 10:00 baseline, no payload_samples.jsonl; 10:15 cli.py changes; 10:30 witness succeeds, still no
+file. Setup / action / expected contains / expected must NOT contain / confidence.
+LEARNER ANSWER (verbatim):
+```
+. files that is all 
+cli changed
+cli.py changes
+the claims
+```
+EVALUATION: Setup (repository files only, no capture file): CORRECT. Action (cli.py changed): CORRECT. Must contain
+the cli.py change: CORRECT but INCOMPLETE, because the D16 message (capture file missing, Claude's reports not
+captured, none checked) is not required, so a test would pass even if find stayed silent about it. Must not contain
+claims: CORRECT but weak, since no claims can exist here. The meaningful must-not is wording that says Claude made no
+reports/changes or "no unexpected changes" (D7, D16). Confidence omitted. Next: ask for the message the test must
+require.
+
+BROKEN-FIND PROBE 1: broken find prints only "cli.py changed between 10:00 and 10:30"; does the test fail / what line
+must it require / confidence.
+LEARNER ANSWER (verbatim):
+```
+.  no
+it must conatina the message for missing payloadsamples
+```
+EVALUATION: CORRECT on both: the original test would pass a broken find; it must require the missing-capture-file
+message. Confidence omitted. Next: a probe of the must-NOT side with a broken find that says Claude made no claims.
+
+BROKEN-FIND PROBE 2: broken report adds "Claude made no claims this session"; must-NOT line is "the claims"; does the
+test fail / what is wrong with the last line (D16) / better must-NOT line / confidence.
+LEARNER ANSWER (verbatim):
+```
+. no
+```
+EVALUATION: "no" (the test does not fail): ACCEPTABLE. As a literal phrase, "the claims" does not appear in that line.
+If the learner meant any mention of claims, the test would fail, but for a word match rather than the real defect.
+The other fields were unanswered. Next: ask what is wrong with the last line, alone.
+
+LAST-LINE PROMPT: what is wrong with "Claude made no claims this session" (D16: what find actually knows) / confidence.
+LEARNER ANSWER (verbatim):
+```
+. claide has no claims to include
+```
+EVALUATION: INCORRECT. It repeats the false statement instead of finding its defect. find knows only that no claims
+were captured; Claude may have made reports that were never recorded. The learner stated exactly this distinction
+earlier ("but we would not have a record of them"). Blocker: missing evidence versus observed absence (listed as known
+cold; relapse under test-writing load). Next: R0 choice between "Claude made no claims" and "no claims were captured".
+
+R0 A/B PROMPT: A "Claude made no claims this session." / B "No claims from Claude were captured this session."; which
+find knows is true / why it cannot know the other / confidence.
+LEARNER ANSWER (verbatim):
+```
+.  B 
+becasue there is no payload samples file
+```
+EVALUATION: CORRECT: B. The reason is adequate: with no capture file, find has no evidence about Claude's reports
+either way, so it cannot assert A. Recovered at R0. Confidence omitted. Next: the learner writes Test 1's must-NOT line.
+
+MUST-NOT PROMPT: the report must not contain a statement that ___ / confidence.
+LEARNER ANSWER (verbatim):
+```
+. claims calude made no claims it is that the claims are not avaiable
+```
+EVALUATION: CORRECT: must not state that Claude made no claims; the claims are only unavailable. Confidence omitted.
+
+TEST 1 (learner's, under review) — capture file missing at baseline and witness (D16):
+- setup: a repository with tracked files; no payload_samples.jsonl.
+- action: cli.py changes between baseline and witness.
+- expected contains: the cli.py change; a message that the capture file was missing, so Claude's reports were not
+  captured or checked.
+- expected must NOT contain: any claim verdict, or any statement that Claude made no claims/reports.
+Test-oracle lesson (learner-derived through broken-find probes): a required line is justified only if some broken find
+would pass without it.
+Next: Test 2 (D15b, Git fails at the witness) with fewer prompts.
+
+TEST 2 PROMPT (D15b, fewer hints): 10:00 baseline succeeds; 10:15 cli.py changes; 10:30 Git fails during witness, user
+answers y; 10:31 witness succeeds. Setup / action / must contain / must NOT contain / confidence.
+LEARNER ANSWER (verbatim):
+```
+. the baseline succeeds 
+cli changes 
+the cli changes and a report of the first failure 
+claims
+```
+EVALUATION: Setup "baseline succeeds": PARTIAL, since it is an event, not the starting state. Action "cli changes":
+INCOMPLETE. It omits the Git failure at the witness and the y retry, which are the behavior under test, so a find with
+no retry would never be exercised. Must contain "cli change + report of the first failure": CORRECT; the cli.py change
+would also catch a broken find that retakes the baseline. The change window ending at the successful witness was not
+named. Must NOT "claims": INCORRECT for this case, because claims can legitimately appear here (a capture file may
+exist); the Test 1 answer was carried over. Confidence omitted. Primary blocker: the action must include the event the
+test is about. Next: a broken-find probe (find with no retry that exits on any Git failure) against the learner's
+action.
+
+NO-RETRY PROBE: the learner's action has only "cli.py changes"; broken find exits on any Git failure. Does Git ever fail
+in the test / does the broken find fail the test / what the action is missing / confidence.
+LEARNER ANSWER (verbatim):
+```
+. no 
+no 
+a record of the retry not usre
+```
+EVALUATION: "no" and "no": CORRECT. The test never triggers a Git failure, so a find with no retry passes. What is
+missing: PARTIAL / uncertain. "A record of the retry" names an output, but the gap is an input event: the test must
+make Git fail during the witness and then answer y. Blocker: test action (what the test does to find) versus expected
+output (what find prints). Next: an R0 choice between those two.
+
+R0 ACTION/CHECK PROMPT: (a) report mentions a retry / (b) test makes Git fail during witness then answers y; which the
+test DOES / which it CHECKS / rewrite action / confidence.
+LEARNER ANSWER (verbatim):
+```
+.  B 
+A
+it must make git fail during the witness picture
+```
+EVALUATION: CORRECT: (b) is an action and (a) a check. The rewritten action includes the Git failure during the
+witness; "then answers y" was omitted and is needed to reach the retry. Confidence omitted. Next: the must-NOT line.
+"claims" was carried over from Test 1 and is wrong here; probe with a broken find whose change window ends at the
+failed 10:30 attempt.
+
+WINDOW-BUG PROBE: broken report "cli.py changed between 10:00 and 10:30 / witness picture failed once, retried"; what
+is wrong / does must-NOT "claims" catch it / Test 2 must-NOT line / confidence.
+LEARNER ANSWER (verbatim):
+```
+. we do not know if the retyr passed or failed and if after that the user tried again or stopped
+```
+EVALUATION: PARTIAL. Stating the retry's outcome is a fair wording point, although a printed change report implies
+the retry succeeded. It misses the planted defect: the window ends at 10:30 (the failed attempt) instead of 10:31 (the
+successful witness). Blocker: reading the window's end time against the timeline. Next: an R0 question on the end time
+alone.
+
+R0 END-TIME PROMPT: timeline 10:30 witness failed -> 10:31 retry succeeded; broken report window ends 10:30; correct
+end / why / confidence.
+LEARNER ANSWER (verbatim):
+```
+. 10:31, so the test has to check to make sure that if here is a fail and the retry suceeds to make sure the timestamps are updated to the correct witness time
+```
+EVALUATION: CORRECT: 10:31. The learner turned it into a test check unprompted: after a failure and a successful retry,
+the window must end at the successful witness's time. Confidence omitted.
+
+TEST 2 (learner's, under review) — Git fails at the witness, retry succeeds (D15b/D15c):
+- setup: a repository with tracked files.
+- action: baseline succeeds; cli.py changes; Git fails during the witness picture; the test answers y; the retry
+  witness succeeds.
+- expected contains: the cli.py change (catches a find that retook the baseline); a message that the first witness
+  picture failed; a change window ending at the successful retry's time.
+- expected must NOT contain: a window ending at the failed attempt's time; a report produced from the failed witness.
+Next: how a test can make Git fail exactly once (test double / injection), before the remaining test-list categories.
+
+### Making Git fail once — patch side_effect
+
+CODE SHOWN: tests/test_snapshot.py:134-137, `patch("git_adapter.capture_new_file_diff",
+side_effect=GitCaptureError(...))`; the same pattern applied to capture_tracked_paths for Test 2.
+PREDICTION PROMPT: call 1 (baseline) raises or returns / call 2 (witness) / call 3 (retry) / can Test 2 pass with this
+patch / confidence.
+LEARNER ANSWER (verbatim):
+```
+. returns paths 
+raises 
+returns no
+```
+READING: three lines for four fields: call 1 returns paths, call 2 raises, call 3 returns, can pass: no.
+EVALUATION: Calls 1 and 3 "returns": INCORRECT. A side_effect set to an exception makes EVERY call inside the `with`
+raise, so the baseline fails at call 1. Call 2 "raises": CORRECT. "Can pass: no": CORRECT, but it contradicts the
+learner's own trace (returns, raises, returns is exactly what Test 2 needs). MISCONCEPTION: the patch was read as
+knowing the story (failing only at the witness); a mock has no idea which call is the witness. Next: an R0 micro-example
+of side_effect with one exception called twice, predicted and then run.
+
+R0 MICRO PROMPT: `with patch("os.getcwd", side_effect=ValueError("boom")):` loop n in [1, 2], try os.getcwd() and print
+"returned", except ValueError print "raised"; line for n=1 / n=2 / confidence.
+LEARNER ANSWER (verbatim):
+```
+. the retyr would raise
+```
+EVALUATION: PARTIAL, and it answers the Test 2 trace instead of the micro-example. It revises call 3 (the retry) to
+raise, which is CORRECT, but call 1 (the baseline) is not addressed and the micro fields are unanswered. Next: re-ask
+only the micro prediction, then run it.
+
+R0 MICRO PROMPT (re-asked): line for n=1 / n=2 / confidence.
+LEARNER ANSWER (verbatim):
+```
+. they all raise so we need to have a try and except to make sure we get the test right
+```
+RUN OBSERVED: "1 raised" / "2 raised".
+EVALUATION: "they all raise": CORRECT, verified by the run, so the side_effect misconception is corrected at R0 (every
+call raises). Proposed fix "a try and except in the test": INCORRECT direction. Catching the error in the test does not
+give find a baseline; the fix is a patch that fails only on the second call. Confidence omitted. Next: probe the
+try/except idea (if the test catches the baseline error, does find have a baseline?).
+
+TRY/EXCEPT PROBE: test catches the baseline error; does find have a baseline / can it report the cli.py change at 10:31
+/ what the patch needs to do instead, in plain words / confidence.
+LEARNER ANSWER (verbatim):
+```
+.  no
+ok so the fix would be to have the first one return and then have the second raise and thne if it is the retry retunr, we could do this by haivng a list with [0,1,0] and and 0 is retunr and 1 is the side effet, or any other way of making them return vs riase
+```
+EVALUATION: "no": CORRECT, and the learner dropped the try/except idea on their own. The fix, a per-call sequence
+return / raise / return: CORRECT. The learner independently invented the shape of mock's iterable side_effect (a list
+with one entry per call). Confidence omitted. Next: R1 prediction on side_effect as a list mixing values and an
+exception, then run it.
+
+R1 LIST PROMPT: `with patch("os.getcwd", side_effect=["C:/a", ValueError("boom"), "C:/c"]):` loop n in [1, 2, 3],
+print(n, "returned", os.getcwd()) or print(n, "raised"); lines for n=1/2/3 / confidence.
+LEARNER ANSWER (verbatim):
+```
+. reutnred 
+raised
+returned
+```
+EVALUATION: CORRECT pattern (returned / raised / returned). The returned values ("C:/a", "C:/c") were not stated.
+Confidence omitted. Verified by running (output recorded below).
+RUN OBSERVED: "1 returned C:/a" / "2 raised" / "3 returned C:/c". The prediction matched.
+Next: apply back to Test 2. The learner writes, in words, the three side_effect entries for capture_tracked_paths
+(baseline, witness, retry).
+
+APPLY-BACK PROMPT: entry 1 (baseline) / entry 2 (witness) / entry 3 (retry) / what happens at the retry with only 2
+entries / confidence.
+LEARNER ANSWER (verbatim):
+```
+. it will retunr the tracked paths and then go get the hashes for each 
+will raise and ask for a retry and the test will input y 
+will retunr the tracked paths with the changes that the test will make
+```
+EVALUATION: Entry 1: CORRECT (paths returned, then take_picture hashes each file). Entry 2: CORRECT (raises; find asks;
+the test answers y). Entry 3 "tracked paths with the changes": PARTIAL / MISCONCEPTION. capture_tracked_paths returns
+only path names; cli.py's content change is seen when take_picture hashes the file on disk, so entry 3 is the same path
+list as entry 1. Blocker: path list versus file content/hash. The 2-entry question and confidence were unanswered.
+Next: an R0 question on what capture_tracked_paths returns when only cli.py's content changes.
+
+R0 PATHS PROMPT (take_picture lines 45-52 shown): 10:00 returns ["README.md", "cli.py"]; 10:15 cli.py content changes;
+exact list at 10:31 / which line sees the new content / confidence.
+LEARNER ANSWER (verbatim):
+```
+. the files that are tracked but the filename only
+```
+EVALUATION: CORRECT in concept: names only, so the 10:31 list is unchanged. The exact list and the line that sees the
+content (observe_file) were not stated. Confidence omitted. Next: ask which line sees the new content, alone.
+
+CONTENT-LINE PROMPT: the line that reads cli.py from disk / confidence.
+LEARNER ANSWER (verbatim):
+```
+. the observed = fileobserver line
+```
+EVALUATION: CORRECT: `observed = file_observer.observe_file(...)`. The path list names files and the observer reads
+their content. Confidence omitted. Entry 3 settled as the same path list as entry 1. Next: predict what happens when the
+side_effect list runs out (2 entries, 3 calls), then run it.
+
+EXHAUSTED-LIST PROMPT: `side_effect=["C:/a", ValueError("boom")]`, loop n in [1, 2, 3]; lines for n=1 / n=2 / what
+happens at n=3 / confidence.
+LEARNER ANSWER (verbatim):
+```
+. returned 
+raised
+never ends and crashes
+```
+RUN OBSERVED: "1 returned C:/a", "2 raised", then a traceback ending in `result = next(effect)` / `StopIteration`.
+EVALUATION: n=1 returned, n=2 raised: CORRECT. "Crashes": CORRECT. "Never ends": INCORRECT, because the crash is
+immediate at call 3 (StopIteration, the list is used up); nothing hangs. The StopIteration is not caught by `except
+ValueError`, so it escapes. Confidence omitted.
+
+TEST 2 PATCH (learner-derived, under review): patch git_adapter.capture_tracked_paths with side_effect = [baseline
+path list, GitCaptureError(...), the same path list]; cli.py's changed content is detected by observe_file, not by the
+list. A list shorter than the number of calls crashes with StopIteration rather than failing on a meaningful assertion.
+Next: transfer of per-call side_effect sequences to a different surface, then the remaining test-list categories.
+
+TRANSFER PROMPT (weather app, no hints): fetch_temperature() retried after a timeout, up to 3 tries; test "two timeouts
+then 21". side_effect list in words / how many calls / what a buggy 4th try would show / shared idea with Test 2's
+patch / confidence.
+LEARNER ANSWER (verbatim):
+```
+. you would need 2 raises and then the 3 would be the return case 
+3 times
+it would raise a stopiternation 
+if you have too many calls or not enough you get a stopiteration error
+```
+EVALUATION: List (raise, raise, return): CORRECT; the value 21 was not named. 3 calls: CORRECT. 4th try raises
+StopIteration: CORRECT. Shared idea: PARTIAL. "Too many calls" gives StopIteration, CORRECT. "Not enough calls" is
+INCORRECT: leftover entries are silently unused and nothing is raised, so a test with fewer calls than entries does not
+detect it by itself. Also not stated: the core idea that entries are consumed one per call, in order, and the mock
+does not know the story. Confidence omitted. Transfer succeeded unaided on the mechanics. Next: an R1 prediction with
+fewer calls than entries, then run it.
+
+UNUSED-ENTRY PROMPT: `side_effect=["C:/a", "C:/b", "C:/c"]`, loop n in [1, 2], then print("done"); lines for n=1 / n=2 /
+does anything raise for the unused "C:/c" / confidence.
+LEARNER ANSWER (verbatim):
+```
+. it returns twice adn nothing happens
+```
+EVALUATION: CORRECT: two returns and no error for the unused entry, which corrects the "not enough calls" part of the
+shared idea. Returned values not named; confidence omitted. Verified by running.
+RUN OBSERVED: "1 returned C:/a" / "2 returned C:/b" / "done". The prediction matched.
+Next: the learner restates the shared idea correctly (entries used one per call, in order; too many calls raises
+StopIteration; too few passes silently).
+
+RESTATE PROMPT: how side_effect entries get used, and what happens with too many or too few calls / confidence.
+LEARNER ANSWER (verbatim):
+```
+. if we only had 2 entries then the third retry would never get used
+```
+EVALUATION: INCORRECT / CONFUSED. With 2 entries and 3 calls, the third call raises StopIteration (observed in the
+run). An entry "never gets used" only when there are more entries than calls. The learner swapped which count is
+short. Confidence omitted. Blocker: keeping "entries" and "calls" apart. Next: R0 with the two cases stated as counts.
+
+R0 COUNTS PROMPT: case A 2 entries/3 calls, what happens at call 3 / case B 3 entries/2 calls, what happens to entry 3 /
+confidence.
+LEARNER ANSWER (verbatim):
+```
+. stop iteration 
+last entry not sued
+```
+EVALUATION: CORRECT on both. Recovered at R0 with the counts named. Confidence omitted. Principle stated by Claude
+after the committed answers: entries are used one per call, in order; more calls than entries raises StopIteration;
+fewer calls leaves entries unused silently. Retrieval due on a fresh surface without the counts named, because the
+unscaffolded restatement swapped the cases.
+
+TEST 3 PROMPT (net changes, broken-find self-check expected): 10:00 baseline README.md, cli.py, old.py; 10:10 notes.md
+created; 10:12 cli.py edited; 10:14 old.py deleted; 10:20 README.md edited and at 10:25 restored to exact 10:00
+content; 10:30 witness. Setup / action / must contain (each path with kind) / must NOT contain / confidence.
+LEARNER ANSWER (verbatim):
+```
+.  baseline is read 
+files are created edited and deleted
+eahc file name that was tracked 
+claims
+```
+EVALUATION: Setup "baseline is read": PARTIAL; again an event rather than the starting files (same slip as Test 2).
+Action: CORRECT but vague; the README change-and-restore is not mentioned. Must contain "each file name that was
+tracked": INCORRECT. It requires names without their kinds (a find reporting every kind wrong would pass) and would
+include README.md, which has no net change. Must NOT "claims": carried over a third time and irrelevant here. The key
+must-NOT is README.md, because change-and-restore is invisible to two pictures. Broken-find self-check not applied.
+Confidence omitted. Primary blocker: README.md, whether it belongs in the report and why. Next: ask that alone.
+
+README PROMPT (pause offered): witness hash for README.md / does the comparison see a change / should README.md appear
+in the report / confidence.
+LEARNER ANSWER (verbatim):
+```
+. hash r 
+no 
+yes
+```
+EVALUATION: hash_R: CORRECT. No change seen: CORRECT. "Should appear: yes": INCONSISTENT with the two answers before
+it. find has only the two pictures, and they are equal for README.md, so nothing in find's data shows the edit
+(settled earlier: change-and-restore stays invisible). The learner may mean the report ought to show it, a wish the
+mechanism cannot meet. Confidence omitted. Next: ask what data find would use to report it.
+
+README DATA PROMPT: what in find's data shows the 10:20 edit / can find report README.md as changed / what find would
+need to catch it / confidence.
+LEARNER ANSWER (verbatim):
+```
+. so it ould treat it as no change nad it does not get reported
+```
+EVALUATION: CORRECT: equal pictures mean no change, so README.md is not reported. Recovered. What find would need was
+unanswered (more observations between pictures; deferred and out of scope). Confidence omitted. The pause offer was not
+taken. Next: the learner rewrites Test 3's must contain (path + kind) and must NOT (README.md).
+
+TEST 3 REWRITE PROMPT: must contain each changed path with its kind / must NOT contain / confidence.
+LEARNER ANSWER (verbatim):
+```
+. it gives the filemenae with the path adn the action done to it 
+must not conatain any claims (not sure what elase)
+```
+EVALUATION: Must contain: CORRECT in form (path + kind), but the three concrete entries are not listed, so the line is
+not yet checkable. Must NOT: "claims" a fourth time, with stated uncertainty; README.md, just established as
+unreported, was not connected to the must-NOT line. Blocker: turning a settled fact (README.md is not reported) into a
+test check. Confidence omitted. Next: R0 fill-in per file.
+
+R0 PER-FILE PROMPT: notes.md / cli.py / old.py / README.md: in or out and kind / confidence.
+LEARNER ANSWER (verbatim):
+```
+.  in the report  created 
+cli in the report edited 
+old in report deleted 
+readme not in the report
+```
+EVALUATION: CORRECT on all four ("edited" = MODIFIED; vocabulary not graded). Confidence omitted.
+
+TEST 3 (learner's, under review) — net changes:
+- setup: a repository with README.md, cli.py, old.py.
+- action: create notes.md; edit cli.py; delete old.py; edit README.md and restore its exact original content; witness.
+- expected contains: notes.md CREATED; cli.py MODIFIED; old.py DELETED.
+- expected must NOT contain: README.md (change-and-restore is invisible to two pictures).
+Test 3 needed R0 per-file scaffolding; the "claims" must-NOT carried over across Tests 2 and 3 (four times). Retrieval
+due: writing a must-NOT line specific to the test's own scenario.
+
 SESSION EVIDENCE SUMMARY (Challenge 15/15b, 2026-09-15): target-level first answer partial; recovered through R0
 (count pictures; step order) and climb-backs. Transfer (budget app, "do not show $0") CORRECT unprompted. Principle
 stated as the action rule rather than the general rule (NEARLY). MISCONCEPTION recorded: claims and verdicts believed
