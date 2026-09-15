@@ -2491,6 +2491,524 @@ TEST 5 (learner's, under review) — several claims on one path (D8, D8a, D17):
 Evidence: must contain mostly right unaided; must-NOT retrieval FAILED unaided twice (vague, then inverted) and
 recovered only at R0 allowed/not-allowed. Still due: scenario-specific must-NOT on a fresh surface, early in a session.
 
+CHECKPOINT: committed and pushed 316a99d; learner took a 10-minute break.
+
+### Retrieval — scenario-specific must-NOT lines (fresh surface, after break)
+
+PROMPT (library overdue emails; no per-item breakdown): rule overdue = due before today AND not returned; today March
+10; A due Mar 5 not returned; B due Mar 5 returned Mar 4; C due Mar 20 not returned; D due Mar 8 returned Mar 9.
+Setup / action / must contain / must NOT contain / confidence.
+LEARNER ANSWER (verbatim, first committed):
+```
+. so we have returned overdue 
+returned not eyt due 
+due but not yet returned
+```
+EVALUATION: NOT MAPPED TO THE FIELDS. The learner classified books into categories instead: "returned overdue" = D,
+"returned not yet due" = B, "due but not yet returned" = A. C (not yet due, not returned) is missing, and no book
+letters, must-contain, or must-NOT lines were given. The classification is correct for the three named. Confidence
+omitted. Next: ask for must contain and must NOT using book letters (fields only, no per-item table).
+
+FIELDS PROMPT: must contain (letters) / must NOT contain (letters) / the unplaced book and its list / confidence.
+LEARNER ANSWER (verbatim):
+```
+. and retunred on time
+```
+EVALUATION: NOT RESPONSIVE to the fields. Another category was added ("returned on time", which describes B, already
+covered). C is still unplaced, and no letters were given. Blocker: moving from classifying items to naming the test's
+expected output. Next: one field alone, which books get an email (letters only).
+
+ONE-FIELD PROMPT: books that get an overdue email today (letters).
+LEARNER ANSWER (verbatim):
+```
+. overdue emails for A
+```
+EVALUATION: CORRECT: only A. Next: must NOT, alone.
+
+MUST-NOT PROMPT: books that must NOT get an email (letters) / one bug that would wrongly email one of them / confidence.
+LEARNER ANSWER (verbatim):
+```
+. b and d
+```
+EVALUATION: INCOMPLETE. B and D are correct, but C (due March 20, not returned) is missing, so a broken app that
+ignores the due date and emails every unreturned book (A and C) would pass. The bug field and confidence were
+unanswered. Next: a broken-app probe for exactly that bug.
+
+BROKEN-APP PROBE: buggy rule emails every unreturned book (A, C); does it pass must contain A / must NOT B, D / missing
+book / confidence.
+LEARNER ANSWER (verbatim):
+```
+. c would not get an email yet becasue it is not diue yet
+```
+EVALUATION: CORRECT: C must not get an email because it is not due yet, so the must-NOT list becomes B, C, D. The
+pass yes/no was not stated explicitly. Confidence omitted.
+RETRIEVAL RESULT: NOT INDEPENDENT. After the break, the learner classified items correctly but did not turn them into
+expected lines until the fields were split one at a time, and the must-NOT list missed an item until a broken-app
+probe. Stable pattern: the learner reasons correctly about each item but does not by itself ask "what would a broken
+version wrongly output?" Next retrieval: a fresh surface where the prompt only reminds the learner to run the
+broken-version check, without splitting the fields.
+
+### Test 6 — unreadable paths
+
+PROMPT (reconcile.py:148-164 shown; reminder to run the broken-find check before writing the must-NOT): 10:00 baseline
+g.py and h.py read fine; 10:15 h.py deleted; 10:20 another program locks g.py; 10:30 witness h.py absent, g.py
+UNREADABLE. Setup / action / must contain / must NOT contain / confidence.
+LEARNER ANSWER (verbatim):
+```
+. tracing the code, it reads the path of the status unreadable and thene it appends it to the undetermined list and then the undeteremined path object has the path with the unreable at baseline and wintess
+```
+EVALUATION: CODE TRACE MOSTLY CORRECT: a path in either picture's unreadable set is appended to `undetermined` as an
+UndeterminedPath carrying both flags, then `continue`. Precision: it checks set membership (`path in
+baseline.unreadable`) rather than reading a status. The per-path flag values for g.py were not given, and the test
+fields were unanswered. Next: g.py's two flag values, then must contain / must NOT.
+
+FLAGS/FIELDS PROMPT: g.py unreadable_at_baseline / unreadable_at_witness / must contain (h.py, g.py with what the report
+says) / must NOT (what a broken find would wrongly call g.py) / confidence.
+LEARNER ANSWER (verbatim):
+```
+. false 
+true 
+it contains files that were unreadable or absent 
+it cannot call the abesnt files unreadable
+```
+EVALUATION: Flags False / True: CORRECT. Must contain: VAGUE; it names no paths or kinds (should be h.py DELETED; g.py
+undetermined, unreadable at witness). Must NOT "cannot call the absent files unreadable": PARTIAL. It is a real bug
+direction (h.py wrongly undetermined), but it misses the dangerous direction the code comment names: g.py reported as
+DELETED. Confidence omitted. Next: a broken-find probe printing "g.py DELETED".
+
+BROKEN-FIND PROBE: broken report "h.py DELETED / g.py DELETED"; does the must-NOT catch it / why g.py DELETED is false /
+must contain with paths / must NOT with paths / confidence.
+LEARNER ANSWER (verbatim):
+```
+. no
+i was going to say the other way around but brain fart, 
+delted 
+unreadable = unkonwn status
+```
+EVALUATION: "no": CORRECT. The learner says the intended must-NOT was the reverse, i.e. an unreadable file must not be
+called absent/DELETED, which is the right line; the earlier wording was inverted. Must contain h.py DELETED and g.py
+unreadable = unknown status (undetermined): CORRECT. Confidence omitted. Why g.py DELETED is false was not spelled
+out: find observed that g.py could not be read, not that it was gone.
+
+TEST 6 (learner's, under review) — unreadable paths:
+- setup: a repository with g.py and h.py.
+- action: delete h.py; make g.py unreadable before the witness (locked); witness.
+- expected contains: h.py DELETED; g.py undetermined (unreadable at witness, readable at baseline).
+- expected must NOT contain: g.py as DELETED (or any change kind); h.py as undetermined.
+Next: Test 7, invalid inputs (D12 unparseable capture line; D14 claim outside the repository).
+
+### Test 7 — invalid inputs
+
+LEARNER QUESTION: "how many test s are there?" Answered: 6 written; Test 7 completes the plan's acceptance categories;
+decisions without tests yet (D15a, D13b, D9-D11, D15c, D17) are the learner's call later.
+PROMPT: 10:00 baseline k.py, position line 59; line 60 half-written, not valid JSON (was a Write claim for k.py); line
+61 valid Write claim for C:/Users/nicol/Datum/x.py (outside repo); 10:20 k.py changes; witness. Setup / action / must
+contain / must NOT / confidence.
+LEARNER ANSWER (verbatim):
+```
+.  so we are looking at the payloadsamples and looking if the entries were written corrctly
+```
+EVALUATION: PARTIAL / NOT MAPPED TO FIELDS. It correctly identifies the capture-file entries as the focus. Imprecise:
+the test does not check whether entries were written correctly (find cannot fix or verify that); it checks what find
+does when a line is invalid or out of scope. Fields unanswered. Next: must contain alone, with paths and line numbers.
+
+MUST-CONTAIN PROMPT: what the report says about capture line 60 and about k.py / confidence.
+LEARNER ANSWER (verbatim):
+```
+. it is captured on line 59 and then there is a non valid json about a write claim and then k.py changes
+```
+EVALUATION: NOT AN OUTPUT. It restates the scenario's inputs (position 59, invalid line, k.py changes) instead of what
+the report prints. Blocker (recurring): moving from test input to expected output. Next: R0 choice among three
+candidate report outputs, picking the one D12 requires.
+
+R0 CHOICE PROMPT: report 1 "k.py changed / Write claim (line 60): holds"; report 2 "k.py changed (no claim) / capture
+line 60 skipped: not valid JSON"; report 3 "k.py changed (no claim)"; which follows D12 / what is wrong with the other
+two / confidence.
+LEARNER ANSWER (verbatim):
+```
+. report 2, it was not a valid json but a change was still made
+```
+EVALUATION: Report 2: CORRECT, with a correct reason (the line is invalid, the change is still reported). What is wrong
+with reports 1 and 3 was not stated; those are the must-NOT lines. Confidence omitted. Next: ask what is wrong with 1
+and 3.
+
+WRONG-REPORTS PROMPT: what is wrong with report 1 / report 3 / confidence.
+LEARNER ANSWER (verbatim):
+```
+. makes up that the claim holds becasue a change was made
+does not give enough information
+```
+EVALUATION: Report 1, invents a holding claim from an unparseable line: CORRECT. Report 3, "does not give enough
+information": NEARLY. The specific defect is that it hides that line 60 was skipped, so the user cannot tell a claim
+may have existed (D12's over-report-never-hide). Confidence omitted. Next: line 61, the out-of-repository claim (D14),
+alone.
+
+LINE-61 PROMPT: Write claim for C:/Users/nicol/Datum/x.py, repository root C:/Users/nicol/BuildLens_Project; does it
+enter claimed_paths / a line a broken find might wrongly print / confidence.
+LEARNER ANSWER (verbatim):
+```
+.  no
+that the claim holds for a file outside the repo root
+```
+EVALUATION: CORRECT on both. The claim is excluded (D14), and the broken-find line (a verdict for an out-of-repository
+file) was produced from the prompt's broken-find framing alone, with no per-item breakdown: an improvement in the
+must-NOT skill. Confidence omitted.
+
+TEST 7 (learner's, under review) — invalid inputs (D12, D14):
+- setup: a repository with k.py; capture position recorded at baseline (line 59).
+- action: append line 60 (half-written, not valid JSON) and line 61 (valid Write claim for a path outside the
+  repository); change k.py; witness.
+- expected contains: k.py changed with no claim; "capture line 60 skipped: not valid JSON".
+- expected must NOT contain: any claim or verdict drawn from line 60; any claim or verdict for x.py (outside the
+  repository); a k.py report that is silent about line 60.
+Open detail (D14): whether excluded out-of-repository claims are counted in the output; still undecided.
+All plan acceptance categories now have at least one test (Tests 1-7).
+
+### D14 open detail — reporting excluded out-of-repository claims
+
+PROMPT: 12 claims in range, 9 inside the repository, 3 for C:/Users/nicol/Datum/...; (a) silent / (b) one count line "3
+claims for files outside this repository were ignored." / (c) list each; choice / quality / downside / reversal
+condition / confidence.
+LEARNER DESIGN ANSWER (verbatim):
+```
+. B
+it does not hide anything
+it also tells the user that paths outside the repo root are possible
+```
+EVALUATION: Choice (b). Quality: not hiding (transparency). "Downside" field: the answer, that it tells the user such
+paths are possible, reads as a benefit or is unclear, so no real downside is named. Reversal condition and confidence
+unanswered. Challenge: (b) shows a count without paths, the same shape as D8a's summary, which offers "press i"; is
+"hides nothing" accurate without a way to see which paths?
+D14a (learner's, under review): excluded out-of-repository claims are counted in one line.
+
+CHALLENGE PROMPT: can the user find out which 3 paths were ignored / is "does not hide anything" fully true / one real
+downside / what to change / confidence.
+LEARNER DESIGN ANSWER (verbatim):
+```
+. it costs adding in a place where the users can see the 3 paths, like the press i to see the superseeded claims
+```
+EVALUATION: The yes/no fields were not stated, but the answer implies the user cannot see the paths and that "hides
+nothing" was not fully true. Downside named, a real one: extra report interaction and code, a place to view the paths.
+Change implied: add a way to view them, modeled on D8a's "press i". Confidence omitted.
+D14a REVISED (learner's, under review): count line for excluded out-of-repository claims plus a key to view their paths,
+modeled on D8a.
+Next: one key or two (i for both views, or a separate key)?
+
+KEY PROMPT: (a) i shows both lists / (b) i superseded, o outside paths; choice / downside / reversal / confidence.
+LEARNER DESIGN ANSWER (verbatim):
+```
+. B
+if they only need one or the other it saves code and they can bounce between either if need be
+```
+EVALUATION: Choice (b). The answer gives benefits (the user sees only the list they need and can switch), not a
+downside. "Saves code" is doubtful: two keys mean two handlers and more prompt text than one key showing both lists.
+Downside and reversal condition still unanswered; downsides were repeatedly omitted today until asked alone.
+Confidence omitted.
+D17b (learner's, under review): after the report, i shows unchecked superseded claims and o shows ignored
+out-of-repository claims; Enter asks for exit confirmation.
+Next: ask the downside alone, starting from what the user must read and remember.
+
+DOWNSIDE PROMPT: the two bottom-of-report prompts shown; one downside of (b) from what the user reads and remembers /
+what would make (a) better / confidence.
+LEARNER DESIGN ANSWER (verbatim):
+```
+. B, so the options get larger, could be do it in new lines so it is cleaner 
+(i) unchecked
+(o) claims
+```
+EVALUATION: Downside named, CORRECT: the prompt grows and there are more options to read. A mitigation followed
+unprompted: a one-option-per-line menu. The reversal condition was unanswered. Confidence omitted.
+D17b REVISED: the bottom-of-report options are printed one per line.
+Next: the reversal condition alone.
+
+REVERSAL PROMPT: what would make (a), one key for both lists, the better choice / confidence.
+LEARNER ANSWER (verbatim):
+```
+.  if both lists were very much related
+```
+EVALUATION: CORRECT and credible: one key wins if users nearly always need both lists together. Not named: both lists
+usually being very short. Confidence omitted. D14a and D17b stand, under review, with choice, quality, downside,
+mitigation, and reversal condition all stated (downside only when asked alone).
+Next: the learner decides which untested decisions (D15a, D13b, D9-D11, D15c, D17/D17b) need their own tests.
+
+### Which untested decisions get tests
+
+PROMPT: for D15a, D13b, D9, D10, D11, D15c, D17b, D14a choose own test / fold into Test # / manual check only; why one
+manual choice is not worth automating / confidence.
+LEARNER QUESTION (verbatim):
+```
+. how would i even start to evaualte this
+```
+EVALUATION: No attempt; the learner lacks a method for deciding test value. Blocker: criteria for whether a behavior
+deserves an automated test. Next: give three plain questions as the method (cost if broken; can a test drive it
+cheaply; already exercised by an existing test?), then have the learner apply them to one decision (D15a) before any
+others.
+
+METHOD GIVEN: Q1 cost if broken; Q2 already exercised by Tests 1-7; Q3 drivable without a person (with a patch).
+D15a PROMPT: Q1 / Q2 / Q3 / decision / confidence.
+LEARNER ANSWER (verbatim):
+```
+.  nothing is lost
+no idea
+yes
+can you add in which already have tests
+```
+EVALUATION: Q1 "nothing is lost": PARTIAL. No work is lost, but a broken D15a would show a raw traceback instead of
+find's message, a small cost in clarity. Q2 "no idea", with a reasonable request for the coverage map (facts from
+Tests 1-7, not the answer). Q3 "yes": CORRECT, e.g. a side_effect whose first entry is GitCaptureError. Decision not
+given. Confidence omitted. Next: supply the decision-to-test coverage map and re-ask D15a's decision.
+
+COVERAGE MAP GIVEN: T1 D16; T2 D15b + D15c y; T3 net changes; T4 D6/D6a/D7; T5 D8/D8a; T6 unreadable; T7 D12/D14.
+Uncovered: D15a, D13b, D9, D10, D11, D15c n, D17b keys, D14a count line.
+D15a DECISION PROMPT: own / fold / manual / why / confidence.
+LEARNER DESIGN ANSWER (verbatim):
+```
+. make a test for it only because if it does not print the error then it silently fails
+```
+EVALUATION: Own test: a defensible decision, with a reason grounded in Q1 (a missing message is the failure mode).
+Precision: unhandled, Python would print a traceback rather than fail silently; a truly silent failure would be a
+broken find that catches the error and prints nothing. The test should catch both. Confidence omitted.
+TEST 8 (planned, learner's): D15a, Git fails at the baseline (side_effect first entry GitCaptureError); find prints its
+own baseline-failure message and stops; no report and no traceback.
+Next: D13b with the method and fewer prompts.
+
+D13b DECISION PROMPT: own / fold / manual / why using Q1-Q3 / confidence.
+LEARNER DESIGN ANSWER (verbatim):
+```
+. this needs a test the user needs to know and it losses baseline if the try again does not work
+```
+EVALUATION: Own test: defensible. Reason PARTIAL / CONFLATED. "The user needs to know" fits. "Loses baseline if try
+again does not work" describes D15b's retry; D13b as decided has no retry, it just stops. Not named: the real Q1 cost,
+that a broken D13b reporting anyway would show changes with no claims although claims may exist but are unreadable.
+Possible design gap raised by the conflation: should D13b offer "Try again?" like D15b (a moved or recreated capture
+file may reappear)? Confidence omitted. Next: ask whether the learner means to add a retry to D13b, and what a broken
+D13b would print.
+
+D13b RETRY PROMPT: should D13b offer "Try again?" like D15b / why / Q1, what a report-anyway would wrongly suggest /
+confidence.
+LEARNER ANSWER (verbatim):
+```
+. so no test for it or manual test
+```
+EVALUATION: CONFUSION CAUSED BY THE PROMPT. The learner read the D13b/D15b comparison as rejecting the "own test"
+decision. FACILITATOR NOTE: the prompt mixed the test decision with a new design question. Next: state that the own-test
+decision stands, then ask the retry question alone.
+
+D13b RETRY PROMPT (alone, own-test decision confirmed): should D13b offer "Try again? (y/n)" / why / confidence.
+LEARNER DESIGN ANSWER (verbatim):
+```
+. yes 
+it is still an important piece of information, my only issue is the only time it would fail is if it is not there or we look in the wrong place
+```
+EVALUATION: Yes, with a reason (the claims are important information) and an unprompted downside: most causes (the
+file is gone, or find looks in the wrong place) are permanent, so waiting will not fix them. The learner's own earlier
+point applies here: a user who is shown the failure can fix a permanent cause (restore the file, correct the path)
+before pressing y, which is why D15b asks rather than retrying silently. Confidence omitted.
+D13c (learner's, under review): capture file present at baseline but missing at witness: print that the capture file
+is missing and where find looked, keep the baseline and position, and ask "Try again? (y/n)", with the same n
+confirmation as D15c.
+Next: confirm D13c with the learner's own "user can fix it while find waits" point.
+
+D13c ADDITIONS PROMPT: how printing the path helps a "wrong place" cause / keep both additions, drop one, or change /
+confidence.
+LEARNER REQUEST (verbatim):
+```
+. ok can you manually go thought the rest and make the decisions i want to spend time on finsihing phase 9 but also look to see if we can get phase 10 started soon
+```
+RESULT: The learner delegated the remaining test-coverage decisions to Claude. This is NOT learner evidence. The Phase 9
+assistance level is REVIEWER, so these are recorded as CLAUDE-PROPOSED; the learner must be able to defend or revise
+them at the Phase 9 gate ("Claude chose it" is not an accepted defense).
+
+CLAUDE-PROPOSED TEST DECISIONS (method Q1 cost if broken / Q2 covered / Q3 drivable):
+- D13c: both additions kept (print the path find looked at, which helps the "wrong place" cause; n uses the D15c
+  second confirmation for consistency). OWN TEST, Test 9: capture file present at baseline, missing at witness;
+  message names the path; y after restoring the file produces a report with its claims.
+- D11 (Ctrl+C during the witness): OWN TEST, Test 10. Q1 high: a partial witness would call unread files DELETED.
+  Q3: side_effect KeyboardInterrupt during the witness picture. Must contain the interrupted message; must NOT contain
+  any report or DELETED.
+- D9, D10, D15c n, D17b (i / o / Enter): FOLD into one interaction-flow test, Test 11, driven by scripted input: Enter
+  then n returns to waiting; Ctrl+C then n returns to waiting; failed witness, n, and the second confirmation cancel
+  back to the prompt; after the report, i and o print their lists and Enter asks for exit confirmation. Q1 moderate
+  each; Q3 drivable only if find reads keys through a replaceable input function.
+- D14a count line: FOLD into Test 7 (must contain "1 claim for files outside this repository was ignored"; o shows
+  C:/Users/nicol/Datum/x.py).
+- MANUAL CHECK ONLY: real-console behavior of Enter/Ctrl+C on Windows (key delivery differs from scripted input); part
+  of the release demo.
+Design consequence for implementation: Tests 10-11 require find to take its input source as a parameter (a test seam);
+this is the first implementation design question for the learner.
+
+LEARNER APPROVAL (verbatim):
+```
+. ok i approve those test s whati s next
+```
+RESULT: The learner approved the Claude-proposed test decisions (Tests 9-11, D14a folded into Test 7, manual console
+check). Approval is not a defense; the learner must still explain them at the Phase 9 gate.
+
+## Phase 9 implementation — patch 1 (capture-file reader)
+
+PATCH CONTRACT (drafted by Claude, one blank for the learner): phase 9; objective, choose and defend a file-position
+representation by cost and failure cases; behavior, read_capture_lines(capture_path, position) returns valid PostToolUse
+payloads after position plus the invalid-JSON line numbers (D3, D4, D12, D13a); out of scope D14, D8, reconcile, the
+find loop, report wording; size about 40-80 lines; gate, trace plus transfer.
+FACTS SHOWN: payload_samples.jsonl 1,342 lines, 236,871,896 bytes; json.loads/JSONDecodeError in cli.py:106;
+parse_post_tool_use in claude_adapter.py:166.
+POSITION PROMPT: (a) line count / (b) byte offset; how much (a) must read at baseline / how much (b) must read / which
+already knows line numbers / choice / confidence.
+LEARNER DESIGN ANSWER (verbatim):
+```
+. 237md
+just the size
+A
+A
+```
+EVALUATION: (a) reads the whole file: CORRECT. (b) needs only the size, with no content read: CORRECT. (a) knows line
+numbers: CORRECT. Choice (a). Downside not stated: two full reads of a growing 237 MB file, at baseline and at the
+witness (skipping lines still reads their bytes). Confidence omitted. Per the plan ("any performance claim begins with
+a measurement/hypothesis"), next: the learner predicts the cost, then it is measured before (a) is accepted.
+
+COST PREDICTION PROMPT: seconds to count the lines once / slowest acceptable at baseline before switching to (b) /
+confidence.
+LEARNER ANSWER (verbatim):
+```
+. it costs more reading i would say 1 second
+```
+MEASURED (scratchpad time_count_lines.py, binary-mode line iteration, 3 runs on this machine): 0.423 s, 0.661 s,
+0.420 s for 1,350 lines / 237,237,117 bytes; os.path.getsize took 0.00006-0.00012 s. The file grew from 1,342 to 1,350
+lines during the session, because this session's own hooks append to it (a live demonstration of D3).
+EVALUATION: Prediction of about 1 s: CORRECT order of magnitude (measured about 0.4-0.7 s). Threshold unanswered.
+Confidence omitted. Next: the learner sets the acceptance threshold against the measurement and names when it would
+flip to (b).
+
+THRESHOLD PROMPT: is about 0.5 s at baseline and witness acceptable / the size or wait at which to switch to (b) /
+confidence.
+LEARNER DESIGN ANSWER (verbatim):
+```
+.  so the cost of time is not a huge factor
+```
+EVALUATION: Accepts (a) on measured evidence: CORRECT reasoning. The reversal condition (a size or wait threshold) is
+still missing; the file grows without bound, so it matters. Confidence omitted. Next: the reversal condition alone,
+with the growth fact.
+
+REVERSAL PROMPT: the baseline wait that would trigger a switch to (b) / the size it corresponds to / confidence.
+LEARNER DESIGN ANSWER (verbatim):
+```
+. if the wait time got to 10 seconds
+```
+EVALUATION: A concrete reversal condition: 10 s. The size was not computed; at the measured ~0.42 s per 237 MB that is
+about 24 times the current size, roughly 5.6 GB. Confidence omitted.
+D18 (learner's, under review): the capture position is a line count taken at baseline; at the witness, find skips that
+many lines and reads the rest, so skipped lines can be named by line number (D12). Evidence: measured 0.42-0.66 s per
+count at 237 MB. Reversal: switch to a byte offset if the count takes about 10 s (about 5.6 GB at the measured rate).
+Next: the partial-last-line case for a line count (a hook mid-append at baseline).
+
+PARTIAL-LINE PROMPT: file bytes `{"a": 1}\n{"b":` (no final newline); count lines by iterating a binary handle; what
+count prints / is the second line a full object or a fragment / confidence.
+LEARNER ANSWER (verbatim):
+```
+.  1
+a fragment
+```
+RUN OBSERVED: `1 b'{"a": 1}\n'`, `2 b'{"b":'`, then `2`.
+EVALUATION: Count 1: INCORRECT; it prints 2, because iteration yields the final bytes as a line even without a newline.
+"A fragment": CORRECT. The two answers conflict: the learner saw the fragment as a line but did not count it.
+MISCONCEPTION: a line without a trailing newline is not counted. Confidence omitted. Next: the consequence for D18. At
+the witness the fragment has become a complete claim; skipping 2 lines skips it.
+
+CONSEQUENCE PROMPT: baseline position 2 (line 2 half-written); witness line 2 {"b": 2} complete, line 3 {"c": 3}; which
+lines find reads / is "b" read, skipped, or reported as invalid JSON / what the report could get wrong / confidence.
+LEARNER ANSWER (verbatim):
+```
+.  line 3 
+repoted as an invalid json
+it would be missing a hook
+```
+EVALUATION: Reads line 3 only: CORRECT. "b reported as invalid JSON": INCORRECT. Line 2 is inside the skipped count, so
+find never parses it and never reports it. Invalid-JSON reporting (D12) applies only to lines in the read range.
+"Missing a hook": PARTIAL. Claim b is lost, but the consequence was not traced: b's file change is then reported with
+no claim (over-reporting, the safe direction), not hidden. Confidence omitted. Next: separate skipped from parsed, then
+trace where b's file change ends up.
+
+TRACE PROMPT: claim b (a Write to cli.py) skipped; baseline hash_1, witness hash_2; only claim c read; does cli.py's
+change appear / with or without a claim / hiding or over-reporting / confidence.
+LEARNER ANSWER (verbatim):
+```
+. yes, but as an unclaimed change
+```
+EVALUATION: CORRECT: it appears as an unclaimed change. The hiding-versus-over-reporting field was not stated, but
+"unclaimed change" is the over-reporting outcome. Confidence omitted. Next: the learner chooses between counting a
+partial last line (its claim may be dropped, so over-reporting) and counting only newline-terminated lines (the claim
+is read at the witness, at the cost of an extra check).
+
+PARTIAL-LINE CHOICE PROMPT: (1) count a partial last line (its claim skipped, change shown unclaimed) / (2) count only
+lines ending in \n (the line is read at the witness once complete); choice / downside / reversal / confidence.
+LEARNER DESIGN ANSWER (verbatim):
+```
+. wait so at witness you can see the full json becasue it finished writing and baseline was looking at the line before it so it is included, 2 looks pretty good
+```
+EVALUATION: Mechanism of (2) CORRECT: the baseline counts only complete lines, so the finished line falls inside the
+witness read range and is parsed. Leaning to (2); downside and reversal not given. Confidence omitted.
+D18a (learner's, leaning, under review): the baseline position counts only newline-terminated lines.
+Next: the downside of (2) alone.
+
+DOWNSIDE PROMPT: at the witness, line 3 complete and line 4 `{"d":` still being written; what find does with line 4
+under D12 / one downside of (2) / what would make (1) better / confidence.
+LEARNER DESIGN ANSWER (verbatim):
+```
+. at witness we cannot do the same thing, then the hook has to be either reported not finished or unreadable
+```
+EVALUATION: CORRECT and a real downside: the trick works only at the baseline. At the witness there is no later read,
+so a half-written last line cannot be deferred and must be reported. The learner also separates "not finished" from
+"unreadable", which refines D12: a final line with no newline differs from a corrupted line in the middle of the
+range. The label choice and the reversal condition were not given. Confidence omitted.
+Next: choose the label for an unfinished final line at the witness, and the reversal condition for (2).
+
+LABEL PROMPT: unfinished last line labelled (a) "not valid JSON" or (b) "still being written" / why / reversal for (2) /
+confidence.
+LEARNER DESIGN ANSWER (verbatim):
+```
+.  B
+becasue it still could be a valid json if we waited till it was done wiritng so that is the precident
+```
+EVALUATION: (b), with a correct reason: an unfinished line is not known to be invalid, since waiting could make it
+valid, so labelling it invalid would assert something not observed. Consistent with the baseline treatment in D18a.
+Reversal for (2) still unanswered. Confidence omitted.
+D18b (learner's, under review): at the witness, a final capture line with no trailing newline is skipped and named
+"capture line N still being written", separately from D12's "not valid JSON" for complete corrupted lines; its file's
+change is reported without a claim.
+Next: the reversal condition for (2) alone.
+
+REVERSAL PROMPT: what would make option (1) the better choice / confidence.
+LEARNER ANSWER (verbatim):
+```
+. if we had a way of waiting to see what hte line was which i assume would be persistnece
+```
+EVALUATION: INCORRECT. Waiting for the line to finish is already what option (2) does, inside one running process, and
+it needs no persistence. The condition describes a strength of (2), not a situation where (1) wins. Credible reversal:
+(1) wins if a half-written line at baseline could never happen (e.g. appends always land whole), because (2)'s extra
+check would then be code with no case to handle. Blocker: a reversal condition must name when the rejected option's
+cost disappears or its benefit appears. Confidence omitted. Next: R0, what does (2) cost, and when is that cost wasted?
+
+R0 REVERSAL PROMPT: if appends always landed whole, would (2)'s newline check ever change the count / so (1) is better
+when / confidence.
+LEARNER ANSWER (verbatim):
+```
+.  no 
+the line is never half written
+```
+EVALUATION: CORRECT on both. Recovered at R0: (1) is better when a half-written line can never occur, because (2)'s check
+would then never matter. Confidence omitted.
+D18a CONFIRMED (learner's, under review): count only newline-terminated lines at baseline. Downside: an extra check,
+plus the witness-side case needing its own label (D18b). Reversal: switch to (1) if appends are guaranteed to land
+whole.
+
+EVIDENCE GATHERED (scratchpad classify_capture.py over the real payload_samples.jsonl, parsing each line with json.loads
+and parse_post_tool_use): 399 PostToolUse claims, 302 PreToolUse, 701 BLANK lines, 0 invalid JSON, 0 PostToolUse
+ValueErrors. The blank lines come from the capture hook command `{ cat; echo; } >> payload_samples.jsonl`: the
+payload already ends in a newline, and `echo` adds a second. Consequence: a naive D12 would report 701 blank lines as
+"not valid JSON" (json.loads raises on empty text). Design question for the learner: blank lines in the read range.
+A second question follows: valid JSON that parse_post_tool_use rejects with ValueError (none observed yet, but possible,
+e.g. an unsupported tool_name or a missing field).
+
 SESSION EVIDENCE SUMMARY (Challenge 15/15b, 2026-09-15): target-level first answer partial; recovered through R0
 (count pictures; step order) and climb-backs. Transfer (budget app, "do not show $0") CORRECT unprompted. Principle
 stated as the action rule rather than the general rule (NEARLY). MISCONCEPTION recorded: claims and verdicts believed
