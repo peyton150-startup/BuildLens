@@ -3134,6 +3134,169 @@ unterminated at the end). Downside, reached with scaffolding: a capture that rec
 from a separator, so a lost claim cannot be warned about; its file change still appears unclaimed. Removing echo would
 not fix this and would add a joined-payload risk.
 
+CHECKPOINT: committed and pushed 528135d at the learner's request.
+
+VALUEERROR PROMPT (claude_adapter.py:141-144 shown): capture line 72 is valid JSON PostToolUse with tool_input "path"
+instead of "file_path", so the parser raises ValueError; (a) stop with no report / (b) skip and name / (c) skip
+silently; choice / why (compare D12, D19) / downside / confidence.
+LEARNER DESIGN ANSWER (verbatim):
+```
+. A
+no partail pctures we will only have full pictres,
+```
+EVALUATION: Choice (a), under challenge. The reason misapplies the "no partial picture" rule (D11, "refuse incomplete
+Git listings"). The pictures are the working-tree observations, and both are complete here. An unusable claim line
+does not make a picture partial; its file change is still observed and reported, unclaimed. Inconsistent with the
+learner's D12, where an unparseable line is skipped and named while the report still runs. Downside not given. Next:
+contrast line 60 (D12) with line 72 and ask what differs.
+
+CONTRAST PROMPT: is the witness picture partial for line 72 / what differs from line 60 / what happens to every session
+under (a) after an update / keep or change / confidence.
+LEARNER ANSWER (verbatim):
+```
+. if we have one missing json file path then the entire proces stops
+```
+EVALUATION: The downside of (a) is named CORRECTLY: one unusable line stops the whole process. The other fields
+(picture partial?, the difference from line 60, keep or change, confidence) were unanswered. Next: keep or change,
+alone.
+
+KEEP/CHANGE PROMPT: keep (a) or change to (b)/(c) / why / confidence.
+LEARNER DESIGN ANSWER (verbatim):
+```
+. B
+the path is there but the filepath is missing so we know it is cli.py just not the filepath
+```
+EVALUATION: Change to (b): CORRECT direction, consistent with D12. The reason is RISKY: "we know it is cli.py" reads a
+renamed field as if it meant file_path, which is a guess about an unverified schema. Under (b) the line is skipped and
+named, not reinterpreted. Confidence omitted.
+D20 (learner's, under review): a valid-JSON PostToolUse line that parse_post_tool_use rejects is skipped and named with
+the parser's reason ("capture line N skipped: not a usable claim (<reason>)"); the report still runs.
+Next: check whether the learner intends find to use "path" as the claimed file.
+
+PATH-GUESS PROMPT: under (b), does find turn line 72 into a claim about cli.py / what could go wrong if find guessed
+"path" means file_path / confidence.
+LEARNER ANSWER (verbatim):
+```
+.  yes 
+we could get the wrong folders if test is involved
+```
+EVALUATION: "yes": INCORRECT. Under (b) the line is skipped and named, so no claim is created. The risk is a CREDIBLE
+reason not to guess: an unverified "path" might be relative to a different folder (e.g. Claude working in tests\, cf.
+D14's cwd evidence), so the claim could name the wrong file. The two answers contradict each other: the learner names a
+risk of guessing but would still guess. Blocker: what "skip" does to a line. Next: R0, does a skipped line create a
+claim.
+
+R0 SKIP PROMPT: does a skipped line become a claim / under (b), is cli.py's change reported with a claim or unclaimed /
+confidence.
+LEARNER ANSWER (verbatim):
+```
+. no
+unclaimed
+```
+EVALUATION: CORRECT on both. Recovered at R0. D20 CONFIRMED: skip and name, never reinterpret an unrecognized field.
+The file's change is reported unclaimed. Confidence omitted.
+
+PATCH 1 DESIGN COMPLETE (learner decisions, under review): D3 position at baseline; D4 PostToolUse only; D12 invalid
+JSON skipped and named; D13a missing file at baseline = position 0; D18/D18a position = count of newline-terminated
+lines; D18b unterminated final line at witness named "still being written"; D19 whitespace-only lines skipped
+silently; D20 parser-rejected PostToolUse skipped and named with the parser's reason.
+
+PATCH 1 IMPLEMENTED (2026-09-16, test-first): capture_reader.py (count_complete_lines, read_capture, CapturedClaim,
+SkippedLine, CaptureRead) and tests/test_capture_reader.py (8 tests). Red observed first (ModuleNotFoundError: the
+module did not exist). Green: all 14 test scripts pass. Smoke run on the real capture file: position 1490; the last
+12 lines held 3 claims (this session's own Edit/Write calls) and no skipped lines.
+CLAUDE CHOICES NOT YET REVIEWED BY THE LEARNER: (1) a PostToolUse the parser maps to None (Bash, which names no file)
+is dropped silently; (2) valid JSON that is not an object goes to the parser and is named "not a usable claim (payload
+must be an object)"; (3) OSError other than a missing file at baseline propagates to the caller; (4) invalid UTF-8 counts
+as "not valid JSON".
+MILESTONE PAUSE: implementation stops here for the learner trace, explanation, and transfer (CLAUDE.md).
+
+### Patch 1 milestone gate — trace
+
+WHOLE MODULE SHOWN (capture_reader.py). TRACE PROMPT: position = 2; line 1 PostToolUse Write a.py; line 2 blank; line 3
+PreToolUse Edit; line 4 blank; line 5 "oops"; line 6 PostToolUse Edit b.py; line 7 `{"hook_event_name": "PostTo` with
+no newline. For each line, the first if/try that decides it and the outcome (claim / skipped with reason / ignored
+silently); result.claims line numbers; result.skipped; confidence.
+LEARNER ANSWER (verbatim, first committed):
+```
+.  claim and it should be captured normally, it is a posttooluse and the toon name is write and the filepath exsits
+it is skipped becasue the line is blank and is an echo
+is skipped becasue it is not a claim it is a pretooluse
+it is defeintely reported becasue while the claim might hold this does not account for the entire file byte 
+skipped another echo that is a blank line 
+not sure
+```
+EVALUATION: Six answers for seven lines; the results and confidence were unanswered.
+- Line 1 "claim": INCORRECT. `line_number <= position` (1 <= 2) skips it first; lines before the position belong to
+  earlier sessions. PRIMARY BLOCKER: the position check was not applied.
+- Line 2 "blank echo": outcome right (ignored silently), but the deciding check is the position (2 <= 2), not the
+  blank check.
+- Line 3 PreToolUse ignored: CORRECT.
+- 4th answer: "reported because the claim might hold but does not cover the entire file" applies D6 (Edit claims are
+  reported by reconcile), which is out of the reader's scope. It appears aimed at line 6; the reader simply makes line
+  6 a claim. Line 4 (blank) not answered.
+- 5th answer "another blank echo": fits line 4, not line 5 ("oops" is "not valid JSON").
+- 6th "not sure": line 6 or 7 (7 is "still being written").
+Secondary: mixing the reader's job with reconcile's D6 policy. Next: R0 on the position check alone.
+
+R0 POSITION PROMPT (loop header + `if line_number <= position: continue` shown; position 2): lines 1-3 True/False and
+skip-or-continue / why lines 1-2 are skipped (D3) / confidence.
+LEARNER ANSWER (verbatim):
+```
+. so the first posttooluse is skipped becasue it is not in the position of the baselqine so it would be not in the correct baseline
+```
+EVALUATION: CORRECT in concept: line 1 is skipped because it was already in the file at baseline, before this
+session's range. The per-line True/False values for lines 2-3 were not given. Confidence omitted. Next: climb back to
+the full seven-line trace, one outcome per line.
+
+FULL TRACE RETRY PROMPT: the same seven lines, position 2; outcome per line / result.claims / result.skipped (line +
+reason) / confidence.
+LEARNER ANSWER (verbatim):
+```
+.  skipped 
+skipped
+skipped
+skipped
+skipped
+claim
+skipped, with a message 
+6
+1 not in the baseline postion ,2 blank,3 not a claim ,4 blank ,5 invalid json , 7 invaliud json
+```
+EVALUATION: Per-line outcomes (1-5 not claims, 6 claim, 7 named): CORRECT at the coarse level. result.claims = [6]:
+CORRECT. result.skipped: INCORRECT on two points.
+(1) It lists lines 1-4, but those are ignored silently (`continue` with no `skipped.append`). result.skipped holds
+only [5 "not valid JSON", 7 "still being written"]. Blocker: silent skip versus named skip.
+(2) Line 7's reason "invalid json": INCORRECT. The newline check comes first, so it is "still being written" (the
+learner's own D18b). Line 2's reason should be "position", not "blank" (the position check comes first).
+Confidence omitted. Next: R0, which branches call skipped.append.
+
+R0 BRANCH PROMPT (branches A-F listed with append or continue): branches that add to skipped / silent branches / line
+7's first branch, B or D / result.skipped / confidence.
+LEARNER ANSWER (verbatim):
+```
+. B,d,f
+a,c,e
+b
+is a still being wirtten
+```
+EVALUATION: B, D, F append: CORRECT. A, C, E silent: CORRECT. Line 7 hits B: CORRECT. result.skipped = [7 "still being
+written"]: INCOMPLETE, since line 5 ("oops", branch D, "not valid JSON") is missing. Silent-vs-named recovered at R0.
+Confidence omitted. Next: line 5 alone.
+
+LINE-5 PROMPT: passes A / B / C, which branch it hits, full result.skipped.
+LEARNER ANSWER (verbatim):
+```
+. yes 
+yes 
+yes 
+jsondecodeerror
+```
+EVALUATION: CORRECT: it gets past A, B, and C and hits D (JSONDecodeError). The full list was not restated but follows:
+[5 "not valid JSON", 7 "still being written"]. TRACE RESULT: completed with scaffolding (R0 on position, then on
+append vs silent), so NOT independent. Next: explanation (why the newline check B must come before the JSON check D),
+then a transfer on a different log.
+
 SESSION EVIDENCE SUMMARY (Challenge 15/15b, 2026-09-15): target-level first answer partial; recovered through R0
 (count pictures; step order) and climb-backs. Transfer (budget app, "do not show $0") CORRECT unprompted. Principle
 stated as the action rule rather than the general rule (NEARLY). MISCONCEPTION recorded: claims and verdicts believed
