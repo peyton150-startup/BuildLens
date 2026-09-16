@@ -23,6 +23,7 @@ from datetime import datetime, tzinfo
 from pathlib import Path
 
 import completeflow
+import find_workflow
 import snapshot
 from git_adapter import GitCaptureError
 
@@ -138,6 +139,7 @@ def main(argv: list[str]) -> int:
     parser = argparse.ArgumentParser(prog=argv[0])
     actions = parser.add_subparsers(dest="action", required=True)
     actions.add_parser("analyze")
+    actions.add_parser("find")
     ingest_parser = actions.add_parser("ingest")
     ingest_parser.add_argument("payload", nargs="?")
 
@@ -145,6 +147,12 @@ def main(argv: list[str]) -> int:
 
     if args.action == "ingest":
         return ingest(args.payload)
+
+    if args.action == "find":
+        outcome = find_workflow.run_find(Path.cwd())
+        if outcome.result is not None:
+            find_workflow.review_find_result(outcome.result)
+        return outcome.status
 
     try:
         result = snapshot.capture_snapshot(Path.cwd())

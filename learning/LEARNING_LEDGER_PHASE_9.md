@@ -4477,3 +4477,190 @@ recovered that a validation of version C does not prove facts about different ve
 stop further same-session remediation and continue. Do not mark mastered. DELAYED RETRIEVAL DUE: a later validation
 may suppress earlier evidence only when it is tied to the same observed version; matching hashes compare observations
 at two moments and do not prove no change-and-restore occurred between them.
+
+### Patch 4 — find interaction loop implementation and milestone gate
+
+IMPLEMENTATION EVIDENCE (2026-09-16): Added `find_workflow.py` and focused tests for baseline failure, Enter/n/y
+confirmation, Ctrl+C while waiting, Ctrl+C during witness capture, witness Git retry, confirmed exit after failure,
+no-hook capture behavior, capture-file disappearance/recovery, post-report navigation, and CLI routing. `cli.py` now
+accepts `find`. TDD RED/GREEN cycles were observed for each new production branch. Fresh verification: 17 runnable
+test scripts passed. `tests/test_cli.py` could not run in this shell because Python 3.14 lacks `tzdata`; this is the
+already-documented environment prerequisite, not a code assertion failure. Final report wording remains patch 5.
+
+MILESTONE TRACE PROMPT:
+```
+10:00  baseline succeeds; capture position = line 40
+10:30  user confirms the session should end
+10:30  first witness attempt fails in Git
+10:31  user chooses y to retry
+10:32  second witness succeeds
+
+1. Which 10:00 state survives the failure?
+2. Why is no report produced at 10:30?
+3. What is the final change window?
+4. Why does find retry only the witness instead of taking a new baseline?
+Confidence: 0-100%.
+```
+
+LEARNER ANSWER (verbatim):
+```
+yes&#x20;
+because the git failed so we have to retry because there is no picture
+the final change window is 10:32&#x20;
+you cnanot go back in time to take a new baseline plus the baseline is stored so we can still comapre ut even if the git fails for wintess as long as retyr workds we can compare
+```
+
+EVALUATION: PARTIAL. No report at 10:30 because the witness picture is missing: CORRECT. Retrying only the witness
+because the original baseline still exists and cannot be recreated retrospectively: CORRECT. The first field answers
+"yes" but does not name the retained baseline picture and capture-file position. The window gives only its end; the
+complete window is 10:00 to 10:32. Confidence omitted. PRIMARY BLOCKER: STATE_TRACKING / representation of an interval.
+Next: ask the retained-state fields alone, then the two endpoints alone before a fresh failure transfer.
+
+CONFIDENCE FOLLOW-UP ANSWER (verbatim):
+```
+90
+```
+
+EVALUATION: Confidence 90%. Proceed to retained-state retrieval.
+
+RETAINED-STATE PROMPT: At 10:30 after the witness fails, what two pieces of state from 10:00 remain in memory; name
+both and include confidence.
+
+LEARNER ANSWER (verbatim):
+```
+the hashes and the paths
+```
+
+EVALUATION: PARTIAL. Paths and hashes correctly describe the baseline picture, but they are not two separate session
+state items for this question. The second retained item is the capture-file position that marks where this session's
+claims begin. Confidence omitted. PRIMARY BLOCKER: DATA_REPRESENTATION — contents of one record versus two distinct
+records/values. Descend to R0 labeled selection.
+
+CONFIDENCE FOLLOW-UP ANSWER (verbatim):
+```
+60
+```
+
+EVALUATION: Confidence 60%. Proceed to R0 labeled selection.
+
+R0 RETAINED-STATE PROMPT: A = baseline Picture; B = capture-file position line 40; C = failed witness Picture. Which
+two remain after the failure; confidence.
+
+LEARNER ANSWER (verbatim):
+```
+A,B
+```
+
+EVALUATION: CORRECT. The baseline Picture and capture-file position remain; no failed witness Picture exists.
+Confidence omitted. Next: collect confidence, then retrieve both interval endpoints.
+
+CONFIDENCE FOLLOW-UP ANSWER (verbatim):
+```
+90
+```
+
+EVALUATION: Confidence 90%. Proceed to interval endpoints.
+
+INTERVAL PROMPT: Fill both endpoints of the final change window using the trace times; confidence.
+
+LEARNER ANSWER (verbatim):
+```
+10 -> 10:32
+```
+
+EVALUATION: CORRECT. The successful comparison spans the original 10:00 baseline to the successful 10:32 witness;
+the failed 10:30 attempt contributes no picture and is not an endpoint. Confidence omitted. Proceed to a fresh
+non-Git transfer and require confidence there.
+
+TRANSFER PROMPT — warehouse audit: 08:00 starting inventory snapshot succeeds and scan-log position = 120; 09:00
+ending inventory scan fails; 09:05 retry succeeds. Ask what two state items survive, why no 09:00 change report is
+possible, final window, why a new start would hide information, and confidence.
+
+LEARNER ANSWER (verbatim):
+```
+the baseline line positions and the basleune piscture
+```
+
+EVALUATION: PARTIAL. The starting inventory snapshot and scan-log position are the correct two retained state items.
+The other four requested fields were unanswered. Continue one field at a time, beginning with the missing ending
+measurement.
+
+TRANSFER MISSING-MEASUREMENT PROMPT: Why can no inventory change be reported at 09:00 when the ending scan failed;
+confidence.
+
+LEARNER ANSWER (verbatim):
+```
+because there is nothing to comapre it to
+```
+
+EVALUATION: CORRECT. A single starting snapshot has no successful ending measurement to compare against; reporting
+"no change" would invent a result. Confidence omitted. Next: retrieve the complete successful interval.
+
+TRANSFER INTERVAL PROMPT: What is the final successful comparison window; give both times and confidence.
+
+LEARNER ANSWER (verbatim):
+```
+9 to 9:05
+```
+
+EVALUATION: WRONG. 09:00 is the failed ending scan and produced no snapshot, so it cannot be an interval endpoint.
+The retained successful start is 08:00; the successful retry is 09:05. Confidence omitted. PRIMARY BLOCKER:
+STATE_TRACKING — replacing the retained start with the failed attempt time. Descend to R0 selection of the start.
+
+R0 TRANSFER START PROMPT: Choose the start of the final comparison: A = 08:00 successful starting snapshot; B =
+09:00 failed ending scan; confidence.
+
+LEARNER ANSWER (verbatim):
+```
+A
+```
+
+EVALUATION: CORRECT. The successful 08:00 snapshot remains the start. Confidence omitted. Rebuild the full interval.
+
+CONFIDENCE FOLLOW-UP ANSWER (verbatim):
+```
+90
+```
+
+EVALUATION: Confidence 90%. Proceed to rebuild the complete interval.
+
+REBUILT INTERVAL PROMPT: State the complete final comparison window and confidence.
+
+LEARNER ANSWER (verbatim):
+```
+9 or invenotry snapshot
+9:05 retury succeeds
+```
+
+EVALUATION: PARTIAL/WRONG. The 09:05 successful retry is the correct ending. The start is wrong or ambiguous: the
+scenario states that the successful starting inventory snapshot occurred at 08:00; 09:00 was the failed ending scan.
+Confidence omitted. PRIMARY BLOCKER: STATE_TRACKING / timestamp binding. Ask only the timestamp attached to the
+successful starting snapshot.
+
+START-TIME PROMPT: At what exact time did the successful starting inventory snapshot occur; confidence.
+
+LEARNER ANSWER (verbatim):
+```
+i read it as 9 disregard i know it is 8
+```
+
+EVALUATION: CORRECT clarification. The learner identifies 08:00 and says the prior miss was a reading error rather than
+a changed model. Confidence omitted. The transfer window is therefore 08:00 to 09:05. Ask the remaining consequence:
+why taking a new starting snapshot after the failure would hide information.
+
+TRANSFER CONSEQUENCE PROMPT: Why would taking a new starting snapshot after the 09:00 failure hide audit information;
+confidence.
+
+LEARNER ANSWER (verbatim):
+```
+it would hide the information from 8-9 becasue the capture lkine would be moved to the 9 timme instead of using the 8 and you would need to take another picuter of the inventory
+```
+
+EVALUATION: CORRECT. A new start would absorb the 08:00-09:00 activity into the new baseline and advance the log
+position past the original window; the later comparison could no longer recover it. Confidence omitted.
+
+MILESTONE RESULT: PATCH 4 PASSED WITH ASSISTANCE. The learner correctly explained why a failed witness produces no
+report, why the baseline remains valid, why only the witness is retried, and why recreating the baseline hides the
+earlier interval. Retained-state naming required R0 choices; the transfer's start-time error was identified by the
+learner as a reading error and corrected to 08:00. Not mastered. DELAYED RETRIEVAL DUE: interval endpoints must be
+successful observations; baseline Picture and capture-file position are distinct retained state items.
