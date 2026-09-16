@@ -3009,6 +3009,131 @@ payload already ends in a newline, and `echo` adds a second. Consequence: a naiv
 A second question follows: valid JSON that parse_post_tool_use rejects with ValueError (none observed yet, but possible,
 e.g. an unsupported tool_name or a missing field).
 
+BLANK-LINE PROMPT (re-posted after lunch, 2026-09-16): (a) name blank lines as invalid JSON / (b) skip silently / (c)
+change the hook; choice / why / downside / confidence.
+LEARNER DESIGN ANSWER (verbatim):
+```
+. B or c 
+we do not need to report anything for blank lines, if at all possible can we try to change the hook,
+what is the purpose of the blank line 
+would removing it from the hook mess anything up
+```
+EVALUATION: Rejects (a) with a correct reason (a blank line carries no claim). Prefers (c) and asks two good
+questions before committing: why the blank line exists, and what removing it would break. Downside and confidence not
+yet given.
+FACTS GATHERED FOR THE QUESTIONS: Phase 8 ledger (LEARNING_LEDGER_PHASE_8.md:8872-8874): `echo` replaced a `printf "\n"`
+that broke when written through json.dumps; its purpose is to guarantee each payload ends in a newline so the next
+append starts on its own line. Real file now: 707 non-blank lines, all 707 already end in a newline, and 0 pairs of
+non-blank lines are adjacent. Today, Claude Code's payloads already end in a newline, so the echo only adds blanks.
+The hook lives in .claude/settings.local.json (lines 97, 109), with a Codex mirror in .codex/hooks.json.
+Risk of removing echo: if a future payload arrived without a trailing newline, the next payload would join it on one
+line (invalid JSON under D12, losing both claims), and under D18a/D18b the unterminated last line would read as "still
+being written".
+
+HOOK CHOICE PROMPT: (b) keep echo, find skips blank lines / (c) remove echo / (b + c); choice / why / downside /
+confidence.
+LEARNER DESIGN ANSWER (verbatim):
+```
+. B seems like the best option, when we skip it can we check for a blank line instead of just skipping after echo
+```
+EVALUATION: Choice (b): keep the hook unchanged and skip blank lines in find. The follow-up is a sound robustness
+point, raised unprompted: decide by the line's CONTENT (is it blank?), not by its POSITION (every line after a
+payload), so find does not depend on the hook's layout. Why, downside, and confidence not stated.
+D19 (learner's, under review): the hook is unchanged; find skips a capture line silently only when the line itself is
+blank; any other unparseable complete line stays under D12.
+Open: what counts as blank (only "\n", or whitespace-only such as "\r\n" or spaces).
+
+BLANK-DEFINITION PROMPT: A b"\n", B b"\r\n", C b"   \n", D b"{\n"; which are skipped as blank / what happens to the
+rest / downside of silent skipping / confidence.
+LEARNER ANSWER (verbatim):
+```
+. a-c would be skipped but would a payload even have just a {
+```
+EVALUATION: A-C skipped (whitespace-only): CORRECT. The learner questions whether D is realistic, a fair challenge.
+Answer to give: Claude Code's single-line payloads would not produce it, but pretty-printed (multi-line) JSON or a
+truncated write would. D is in the list to check that the rule does not treat "short" as "blank". What happens to D
+and the downside were not stated. Confidence omitted.
+D19 refined: blank = the line contains only whitespace (bytes.strip() is empty).
+
+LINE-D PROMPT (multi-line JSON example shown): skip D silently or name it under D12 / downside of silent skipping /
+confidence.
+LEARNER ANSWER (verbatim):
+```
+. we cannot skip that then, it would then rely on the next line
+```
+EVALUATION: Do not skip D: CORRECT. The reason is correct: "{" is only meaningful with the following lines, and find
+parses one line at a time, so it cannot be treated as blank. "Named under D12" not stated explicitly. The downside of
+silent skipping is still unanswered (asked repeatedly). Confidence omitted. Next: the downside alone, with a scenario
+(the hook fires but `cat` receives no input, so `echo` writes a blank line that looks exactly like a normal separator).
+
+EMPTY-STDIN PROMPT: the hook fires, cat receives no input, echo writes \n; what line ends up in the file / how it
+differs from a separator / what silent skipping risks / confidence.
+LEARNER ANSWER (verbatim):
+```
+. nothing end up in the capture file
+```
+EVALUATION: INCORRECT. cat writes nothing, but echo still appends "\n", so one blank line is added, byte-for-byte
+identical to a normal separator. Blocker: tracing the two commands in `{ cat; echo; }` separately. Next: R0 prediction
+of the bytes appended, then run it.
+
+R0 TWO-COMMAND PROMPT: bytes cat writes (empty input) / bytes echo writes / does the file gain nothing or one blank line
+/ confidence.
+LEARNER ANSWER (verbatim):
+```
+. blank
+\n that is all , if we checked for the nextline then we could see that these are not relevant to the next payload and then get skipped,
+the risk is skipping something that is real like the "{" for the first line
+```
+RUN OBSERVED: `{ cat; echo; } < /dev/null >> empty_hook.jsonl` produced b'\n'.
+EVALUATION: cat writes nothing, echo writes \n: CORRECT, recovered at R0 and confirmed by the run (the file gains one
+blank line). "Check the next line for relevance": does not apply, because a lost payload's blank line has no content
+to relate to anything. The risk named ("skipping something real like '{'") is already prevented by D19 (only
+whitespace-only lines are skipped), so it is not the downside of this scenario. The actual downside: a capture that
+failed (empty input) is byte-identical to a separator, so find cannot tell the user a claim was lost. Its file change
+still appears as unclaimed, so the cost is a missing warning, not a hidden change. Confidence omitted. Next: state this
+and ask whether D19 is accepted with that downside.
+
+ACCEPT PROMPT: accept D19 with the "failed capture is invisible" downside / if not, what to change / confidence.
+LEARNER ANSWER (verbatim):
+```
+. so my options are that if a hook fails we won't know or if the hook is changed we might miss data
+```
+EVALUATION: An accurate restatement of the tradeoff as posed: (b) makes a failed capture invisible; (c) risks joined
+payloads if a newline is ever missing. Not yet noticed: under (c), an empty-input capture writes NOTHING, which is also
+invisible, so (c) does not fix the downside of (b). The detection gap exists either way. Next: R0 on what (c)'s hook
+writes with empty input.
+
+OPTION-C EMPTY-INPUT PROMPT: (c) hook `{ cat; } >>` with no input writes what / can find tell the capture failed /
+which option has the invisible-failure problem / confidence.
+LEARNER ANSWER (verbatim):
+```
+. or the paylaods would be on the same line
+```
+EVALUATION: NOT RESPONSIVE. It restates (c)'s joined-payload risk instead of tracing (c) with empty input. Next: a
+single field, what `cat` writes with no input under (c).
+
+SINGLE-FIELD PROMPT: under (c), with empty input, the file gains nothing or a blank line.
+LEARNER ANSWER (verbatim):
+```
+. a blank line
+```
+RUN OBSERVED: `{ cat; } < /dev/null >> empty_hook_c.jsonl` left the file as b'' (nothing appended).
+EVALUATION: INCORRECT. With no echo, nothing is written. The learner carried over (b)'s blank line. Evidence shown.
+Consequence: under (c) a failed capture leaves no trace at all, so it is just as invisible as under (b). Both options
+share the detection gap, and only (c) adds the joined-payload risk. Signs of fatigue: last three answers
+non-responsive or carried over.
+
+DECISION PROMPT (break offered): keep D19 (option b) / confidence.
+LEARNER DESIGN ANSWER (verbatim):
+```
+. yes
+```
+D19 ACCEPTED (learner's, under review): the hook stays unchanged; find silently skips capture lines that contain only
+whitespace, judged by content, not position; a non-blank line that fails to parse stays under D12 (or D18b if
+unterminated at the end). Downside, reached with scaffolding: a capture that received no input is indistinguishable
+from a separator, so a lost claim cannot be warned about; its file change still appears unclaimed. Removing echo would
+not fix this and would add a joined-payload risk.
+
 SESSION EVIDENCE SUMMARY (Challenge 15/15b, 2026-09-15): target-level first answer partial; recovered through R0
 (count pictures; step order) and climb-backs. Transfer (budget app, "do not show $0") CORRECT unprompted. Principle
 stated as the action rule rather than the general rule (NEARLY). MISCONCEPTION recorded: claims and verdicts believed
