@@ -4026,6 +4026,53 @@ LEARNER ANSWER (verbatim):
 RESULT: D6a KEPT; the implementation stands (only CLAIM_HOLDS is held). Next: patch 3 explanation, the D23 limit in the
 learner's own words plus its owed reversal condition.
 
+CHECKPOINT: committed and pushed cbc2705 (patch 3 + docs) at the learner's request.
+
+### Patch 3 milestone gate — explanation (D23 defense)
+
+PROMPT (D23 restated on request): one situation where D23 leaves a real change unreported / why re-reading was chosen /
+what would make the witness hash better / confidence.
+LEARNER ANSWER (verbatim):
+```
+. a hash is msiing information, if a change is made a moment after the second check will catch it while the witness will not, we could also add a label saying a moment after witness
+```
+EVALUATION:
+- Situation where D23 hides a change: NOT GIVEN. The answer describes the benefit instead ("the second check will
+  catch" a later change). But a change after the witness lies outside the reported window, and catching it is exactly
+  what can overwrite the witness-time state.
+- Why re-read, "a hash is missing information": PARTIAL. True that a hash cannot yield CLAIM_HOLDS_AFTER_NORMALIZE
+  (bytes are needed), which the report will want (D6a, patch 5). But the held decision uses only CLAIM_HOLDS, which the
+  witness hash can decide.
+- Reversal: NOT GIVEN.
+- NEW LEARNER PROPOSAL, valuable: label a path "changed a moment after witness". This would remove D23's hiding if
+  find detects it by comparing the re-read hash with the witness picture's hash: a mismatch means the file changed
+  after the witness, so the path is not held and is labelled. Next: ask how find would detect "a moment after", and
+  whether that changes the held decision.
+
+DETECTION PROMPT: which two hashes to compare / held or reported with label when they differ / is the appended line
+still hidden / keep D23 as built or add the check / confidence.
+LEARNER DESIGN ANSWER (verbatim):
+```
+. the hash at wintess and then at the second check, i think that is a good idea
+```
+EVALUATION: Detection CORRECT: compare the witness picture's hash with the re-read hash. Chooses to add the check. The
+held/reported and still-hidden fields were not stated but follow from the proposal: reported with the label, so the
+line is no longer hidden. Confidence omitted.
+D23a (learner's, under review): a latest Write claim covers its path only if it holds on re-read AND the re-read hash
+equals the witness picture's hash. When the hashes differ, the path is not held (so reconcile reports the witness-time
+change) and is flagged "changed after the witness" for the report (wording in patch 5). This closes D23's known hiding
+case while keeping the re-read verdict. Implementation shape (Claude): the step also takes the witness picture and
+returns the held set plus the changed-after-witness set.
+
+D23a IMPLEMENTED (2026-09-16, test-first): whole_file_held_paths replaced by whole_file_coverage(selection, witness,
+root) -> WholeFileCoverage(held, changed_after_witness). Tests updated to pass a witness picture; new tests: a
+holding Write that differs from the witness is not held and is flagged; a Write the witness could not read is not
+held. The tests failed first (AttributeError: missing function), then passed. A second red-green cycle, Claude-found:
+the unreadable-at-witness case was being flagged "changed after witness" without evidence. An assertion was added
+(failed), then fixed (no witness hash: neither held nor flagged; reconcile reports it undetermined). All 16 test
+scripts pass. Tooling note: the first scripted test rewrite hit the heredoc backslash trap (memory note) and was
+replaced by a full file write.
+
 SESSION EVIDENCE SUMMARY (Challenge 15/15b, 2026-09-15): target-level first answer partial; recovered through R0
 (count pictures; step order) and climb-backs. Transfer (budget app, "do not show $0") CORRECT unprompted. Principle
 stated as the action rule rather than the general rule (NEARLY). MISCONCEPTION recorded: claims and verdicts believed
