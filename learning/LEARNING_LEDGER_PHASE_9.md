@@ -3297,6 +3297,532 @@ EVALUATION: CORRECT: it gets past A, B, and C and hits D (JSONDecodeError). The 
 append vs silent), so NOT independent. Next: explanation (why the newline check B must come before the JSON check D),
 then a transfer on a different log.
 
+EXPLANATION PROMPT (re-posted after lunch): if D ran before B, the reason line 7 would get / why it is wrong (D18b) /
+what a user could wrongly believe / confidence.
+LEARNER ANSWER (verbatim):
+```
+. b chekcs for if it ends with no \n then it must still be writing
+and d checks for a json decode error
+```
+EVALUATION: Describes what B and D each check: CORRECT. It does not answer the swapped-order question (which reason
+line 7 would get, why that is wrong, what the user would believe). Blocker: reasoning about ORDER, where the first
+matching branch wins. Next: R0 trace of line 7 through the swapped order, one step.
+
+R0 SWAPPED-ORDER PROMPT: D first; json.loads(line 7) raises or parses / reason appended / does B run.
+LEARNER QUESTION (verbatim):
+```
+. what does a json decode error actually entail
+```
+RESULT: Syntax/library-only help requested (CLAUDE.md syntax-only help mode). Pause the order problem; explain only
+what json.loads and JSONDecodeError do, with an R0 example to predict, then rebuild.
+
+EXPLANATION GIVEN: json.loads builds the Python value described by complete, correct JSON text; JSONDecodeError is
+raised at the first point where the text breaks JSON rules, with no guessing. R0 PROMPT: '{"b": 2}' / '{"b":' /
+'oops' / '' each: a value or JSONDecodeError.
+LEARNER ANSWER (verbatim, first committed):
+```
+. a value 
+jsonerror
+avalue
+avalue
+```
+LEARNER REVISION (verbatim, sent while the verification run was starting; the run was aborted):
+```
+. 3rd one is an error
+```
+EVALUATION: '{"b": 2}' value: CORRECT. '{"b":' error: CORRECT. 'oops' value: INCORRECT on first commit, self-corrected
+to error (a JSON string needs quotes, "oops"). '' value: INCORRECT; empty text is not JSON (it is also why D19 skips
+blank lines before json.loads). MISCONCEPTION: any text counts as a JSON value. Next: the '' case, then run all to
+verify.
+
+EMPTY-STRING PROMPT: json.loads('') value or error / why.
+LEARNER ANSWER (verbatim):
+```
+. it is blank, becasue the ' ' is what defines the json text so it is nothing, so why is that enerror
+```
+EVALUATION: Correctly sees that the JSON text is empty, since the quotes belong to Python, not to the JSON. Asks why
+"nothing" is an error, a genuine gap: JSON text must contain exactly one value, and "nothing" is not a value (the JSON
+word for "no value" is `null`).
+RUN OBSERVED: '{"b": 2}' -> {'b': 2}; '{"b":' -> JSONDecodeError "Expecting value: line 1 column 6 (char 5)"; 'oops'
+-> JSONDecodeError "Expecting value ... (char 0)"; '' -> JSONDecodeError "Expecting value ... (char 0)"; 'null' ->
+None; '"oops"' -> 'oops'.
+Next: explain "Expecting value", then return to line 7 in the swapped order.
+
+EXPLANATION GIVEN: JSON text must contain exactly one value; "nothing" is not a value, and JSON writes "no value" as
+null; so the parser reports "Expecting value" at char 0. Line 7 swapped-order fields re-posted.
+LEARNER ANSWER (verbatim):
+```
+.  becasue jsons value for None is null
+```
+EVALUATION: CORRECT restatement (JSON null <-> Python None), which confirms the syntax gap is closed. The line 7 fields
+were not answered. Next: re-ask the line 7 swapped-order fields alone.
+
+SWAPPED-ORDER FIELDS PROMPT: json.loads(line 7) / reason with D first / does B run.
+LEARNER ANSWER (verbatim):
+```
+. json decode error
+is an invalid json
+no
+```
+EVALUATION: CORRECT on all three: JSONDecodeError, reason "not valid JSON", and B never runs because the first matching
+branch wins. The order mechanism is recovered. Next: climb back to the explanation, why that reason is wrong (D18b) and
+what a user could wrongly believe.
+
+EXPLANATION FIELDS PROMPT: why "not valid JSON" is wrong for line 7 / what a user could wrongly believe / confidence.
+LEARNER ANSWER (verbatim):
+```
+. beasue it is finsinhing wirting it has not yet been proven to be not valid
+that line 7 was wrong and the claim or hook payload needs checking
+```
+EVALUATION: CORRECT on both: an unfinished line is not proven invalid, and the wrong label would send the user
+investigating a corrupt hook payload that is merely still being written. EXPLANATION RESULT: completed with
+scaffolding (a syntax-only detour on json.loads and JSONDecodeError; the misconceptions that any text or empty text is
+a JSON value were corrected by a run). Confidence omitted. Next: a transfer on a non-BuildLens log (position,
+first-match order, silent vs named skips).
+
+### Patch 1 milestone gate — transfer
+
+TRANSFER PROMPT (greenhouse sensor log; read_readings code shown with the same check order; position 1): line 1 19.0,
+line 2 blank, line 3 20.5, line 4 warm, line 5 "21." unterminated (the sensor is mid-write of 21.7); readings /
+problems / what line 5 becomes if the try ran before the newline check / why that is worse than find's wrong label /
+confidence.
+LEARNER ANSWER (verbatim):
+```
+. line 1,3,2 skipped 
+line 4,5
+line 5 would become a value with no \n
+it would have a value that has no newline so it might get put in with another report
+```
+EVALUATION: readings: INCORRECT. The answer lists line 3 as skipped, but 3 > 1, it ends in \n, it is not blank, and
+float gives 20.5, so readings = [(3, 20.5)]. Lines 1 (position) and 2 (blank, silent) skipped: CORRECT. problems =
+lines 4 and 5: CORRECT (reasons not stated: "not a number", "still being written"). Line 5 with try first "becomes a
+value": PARTIAL (21.0 not named). Why worse: UNCLEAR. The key point, not reached: the wrong order records a WRONG
+MEASUREMENT (21.0 instead of 21.7) silently as data, whereas find's wrong order only gave a wrong label. Confidence
+omitted. Next: R0 on line 3 through the checks.
+
+R0 LINE-3 PROMPT: 3 <= 1 / ends with \n / blank / float(b"20.5\n") / where line 3 ends up.
+LEARNER ANSWER (verbatim):
+```
+.  so only line 1 is a reading and everything else is not
+```
+EVALUATION: INCORRECT and inverted. Line 1 is the one skipped by the position check (1 <= 1); line 3 is the only
+reading. The step-by-step fields were not answered. The learner applied the position check correctly in the find trace
+earlier, so this looks like reading `position = 1` as "keep line 1" on the new surface. Blocker: evaluating
+`number <= position` for a specific line. Next: one comparison at a time.
+
+R0 COMPARISON PROMPT: line 1: 1 <= 1 True/False, skipped or keeps going / line 3: 3 <= 1.
+LEARNER QUESTION (verbatim):
+```
+. so becasue it is equal to position we move to the next line?
+```
+EVALUATION: CORRECT for line 1, as a checking question: `<=` is true when equal, so `continue` moves to the next line.
+Line 3 not answered. Next: confirm, then line 3 alone.
+
+LINE-3 COMPARISON PROMPT: 3 <= 1 / skipped or goes on.
+LEARNER ANSWER (verbatim):
+```
+.  false 
+it is not skipped
+```
+EVALUATION: CORRECT on both. Recovered at R0. Next: the rest of line 3's checks (reading 20.5), then the
+"wrong measurement" question.
+
+LINE-3 REST PROMPT: ends with \n / blank / float(b"20.5\n") / readings for the whole log.
+LEARNER ANSWER (verbatim):
+```
+. the rest of the checks go as normal how i answered
+```
+EVALUATION: NOT ANSWERED. The earlier answers did not trace line 3 through these checks (they listed it as skipped),
+so "as I answered" does not supply readings. Next: ask for readings alone.
+
+READINGS PROMPT: readings (line number and value).
+LEARNER ANSWER (verbatim):
+```
+. . line 1,3,
+```
+EVALUATION: INCORRECT. It includes line 1, which the learner had just agreed is skipped (1 <= 1), and gives no values.
+Repeated difficulty turning per-check answers into a final result. Next: worked-example rescue (CLAUDE.md). Show lines
+1 and 2 fully solved; the learner completes line 3, then states readings.
+
+WORKED-EXAMPLE PROMPT: lines 1 and 2 solved check by check; fill in line 3's blanks / readings.
+LEARNER ANSWER (verbatim):
+```
+. line 3
+
+not 1
+```
+EVALUATION: readings = line 3, not line 1: CORRECT after the worked example. The value 20.5 and line 3's blanks were
+not filled in. Not independent. Next: the transfer's main point, what the wrong order does to line 5 ("21." -> 21.0
+recorded as a real reading).
+
+WRONG-NUMBER PROMPT: with try first, line 5 ends up in readings as / is 21.0 the recorded temperature / which is
+worse, a wrong label or a wrong number stored as data, and why.
+LEARNER ANSWER (verbatim):
+```
+. no error it is shown as 21.0 and the incorrect value is passed on
+```
+EVALUATION: CORRECT: recorded as 21.0 without error, and an incorrect value is passed on as data. The comparison with
+find's wrong label is implied rather than stated: a wrong number corrupts downstream data silently, while a wrong
+label only misdirects attention.
+
+PATCH 1 MILESTONE GATE RESULT: PASSED WITH ASSISTANCE (2026-09-16). Automated tests green. Trace completed after R0 on
+the position check and on silent vs named skips. Explanation completed after a syntax-only detour (json.loads,
+JSONDecodeError, empty text / null). Transfer (greenhouse sensor log) completed after R0 comparisons and a
+worked-example rescue; the transfer's key idea (the wrong check order stores a wrong value) was stated. Not
+independent. RETRIEVAL DUE on a fresh surface: (1) evaluating `number <= position` and first-match branch order, (2)
+silent skip versus named skip, (3) what json.loads accepts (not bare words, not empty text).
+Still owed: the learner's review of the four Claude choices in patch 1.
+
+CLAUDE-CHOICES REVIEW PROMPT: (1) Bash PostToolUse dropped silently / (2) non-object JSON named not usable / (3) OSError
+propagates to the caller / (4) invalid UTF-8 = not valid JSON; accept or change each.
+LEARNER ANSWER (verbatim):
+```
+. can we look at 1. 
+
+2. approived
+3. approved
+4. approved
+```
+RESULT: Choices 2, 3, 4 APPROVED by the learner. Choice 1 opened for discussion.
+FACTS GATHERED for choice 1: .claude/settings.local.json hooks match "Edit|Write" for both PreToolUse and PostToolUse,
+so Bash tool calls are never captured; the real capture file holds 0 Bash payloads. A Bash PostToolUse could appear
+only if the matcher changed or another tool wrote to the file. Shell edits are caught by the pictures (reported
+unclaimed), not by claims.
+
+CHOICE-1 PROMPT: (a) keep silent drop / (b) name "Bash command, names no file"; choice / why / downside / confidence.
+LEARNER DESIGN ANSWER (verbatim):
+```
+. a
+we cannot confirm or deny anything with this information
+```
+EVALUATION: (a) kept, with a correct reason: a Bash payload names no file, so no verdict can be checked against the
+disk. Downside not given. Confidence omitted. Choice 1 APPROVED by the learner. Next: the downside alone.
+
+CHOICE-1 DOWNSIDE PROMPT: if the hook later included Bash and a command edited cli.py, what the user would not learn
+under (a) / confidence.
+LEARNER ANSWER (verbatim):
+```
+. it would not lear n which file but if the baseline and witness have a change you could allegedly check to see if the bash command is what made the change assuming no one else changed it
+```
+EVALUATION: PARTIAL. It is right that the report cannot say which file a command touched, and right to hedge
+attribution ("allegedly", "assuming no one else changed it"), consistent with D7. Missed: under (a) the report never
+says a Bash command ran at all, so the user would not know to make that check. The downside is losing the "a command
+ran here" hint, while the change itself is still reported unclaimed. Confidence omitted.
+ALL FOUR PATCH 1 CLAUDE CHOICES NOW APPROVED BY THE LEARNER.
+
+## Phase 9 implementation — patch 2 (claim selection: D14, D14a, D8, D8a)
+
+PATCH CONTRACT (drafted by Claude): objective, decide where a shared helper lives when a second module needs it;
+behavior, select_claims(captured_claims, repository_root) returns latest claim per inside path, superseded claims per
+path, and outside claims; out of scope reconcile/D6, the find loop, report wording, reading; size about 40-60 lines.
+HELPER PROMPT (file_observer._relative_to_root signature and docstring shown; underscore = module-private
+convention): (a) import the private function anyway / (b) make it public and import / (c) copy it; choice / why /
+downside / confidence.
+LEARNER DESIGN ANSWER (verbatim):
+```
+. A
+it saves us the most work and if it just works that way then no harm no foul
+```
+EVALUATION: Choice (a), under challenge. The reason ("least work", "if it works, no harm") is the kind the design
+rubric does not accept on its own: it names no requirement or quality, and "it works" only holds until someone changes
+the helper. Downside not given. Next: a scenario where file_observer's owner changes the private helper for its own
+needs; what breaks, and who would know.
+
+PRIVATE-CHANGE SCENARIO PROMPT: _relative_to_root changed to return "(outside)" instead of None; the patch 2 filter
+keeps claims where the result is not None; what happens to the Datum claim / how the changer would know / what (b)
+tells them / keep or change / confidence.
+LEARNER ANSWER (verbatim):
+```
+. the downsiede is we are not respecting pyhton
+```
+EVALUATION: SHALLOW. It names a convention ("respecting Python"), not a mechanism or consequence. The rubric rejects
+"best practice"-style reasons. The scenario fields were unanswered. Blocker: connecting "private" to a concrete failure
+(a hidden dependency that breaks without warning). Next: R0, the first scenario field alone.
+
+R0 SCENARIO PROMPT: "(outside)" is not None True/False / the Datum claim kept as inside or excluded.
+LEARNER DESIGN ANSWER (verbatim):
+```
+. ok so we copy the function into the new file
+```
+EVALUATION: Switches to (c) without answering the trace, so the failure mechanism of (a) was not stated (the Datum
+claim would silently be kept as an inside claim). The switch shows the learner accepts that (a) is risky, but (c) has
+its own downside, not yet examined: two copies drift apart when one is fixed. Next: a bug-fix scenario for (c).
+
+(a)-TRACE + (c) BUG-FIX PROMPT: "(outside)" is not None True/False, kept or excluded / (c) with two copies, after a
+Windows case-insensitivity fix in file_observer's copy only: does patch 2's copy get it / what patch 2 does with
+C:\users\... / how the fixer would know / which option is visible and single-copy / confidence.
+LEARNER ANSWER (verbatim):
+```
+. treu 
+kept
+```
+EVALUATION: (a) trace CORRECT: True, so the Datum claim is kept as if inside the repository, a silent failure. The (c)
+bug-fix fields were unanswered. Next: those fields alone.
+
+(c) BUG-FIX PROMPT (alone): does patch 2's copy get the fix / how the fixer knows a second copy exists / which option
+is visible and single-copy / confidence.
+LEARNER DESIGN ANSWER (verbatim):
+```
+. so if we make it public so anyone can use it then pepole who change it later will know that this function has a few modules that rely on it so maybe do not change it
+```
+EVALUATION: Chooses (b) with a CORRECT mechanism: a public name signals that other modules may depend on it, so a
+future change is made knowing that. Precision: public does not mean "do not change"; it means change deliberately and
+check its callers. The (c) drift fields were skipped (the learner jumped to the conclusion). Downside of (b) not given.
+Confidence omitted.
+D21 (learner's, under review): rename file_observer._relative_to_root to relative_to_root (public) and import it in
+patch 2's module.
+Next: the downside of (b) alone.
+
+(b) DOWNSIDE/REVERSAL PROMPT (usages shown: definition file_observer.py:30, one caller :56): downside of (b) / what
+would make (c) better / confidence.
+LEARNER DESIGN ANSWER (verbatim):
+```
+. if you make a change it might break a few modules 
+if we would actually need to change the function but since phase 10 is the last phase it will not happen
+```
+EVALUATION: Downside CORRECT: a public function couples its callers, so one change can break several modules.
+Reversal PARTIAL: "if we need to change the function" is close; the sharper condition is that the two modules need the
+function to behave DIFFERENTLY (diverging needs), where a copy lets each evolve alone. "Phase 10 is the last phase, so
+it will not happen": INCORRECT. Phase 10 is the last phase of the Core v0.1 release, but the roadmap continues to
+Phase 15, and "it will not change" is a prediction, not evidence. Confidence omitted.
+D21 ACCEPTED (learner's, under review).
+
+PATCH 2 IMPLEMENTED (2026-09-16): refactor first, renaming file_observer._relative_to_root to relative_to_root
+(test_file_observer passed before and after; only one caller). Test-first: tests/test_claim_selection.py (4 tests)
+failed with ModuleNotFoundError, then claim_selection.py (ClaimSelection, select_claims) made them pass; all 15 test
+scripts pass. Smoke run on the real capture file (all 457 claims): 21 inside paths, 12 with superseded claims (max:
+learning/LEARNING_LEDGER_PHASE_9.md, latest line 1625, 192 superseded), 11 outside claims (Claude memory files under
+C:\Users\nicol\.claude). This real-world evidence supports D8a's summary line plus "press i" over listing each claim.
+CLAUDE CHOICE NOT YET REVIEWED: select_claims sorts by line_number rather than trusting input order.
+MILESTONE PAUSE for the patch 2 trace, explanation, and transfer.
+
+### Patch 2 milestone gate — trace
+
+WHOLE MODULE SHOWN (claim_selection.py). TRACE PROMPT: root C:/proj; input order [22 C:/proj/docs/readme.md, 12
+C:/proj/app.py, 19 C:\proj\app.py, 15 C:/other/notes.md]; loop visit order / relative_to_root per claim / latest /
+superseded / outside / confidence.
+LEARNER ANSWER (verbatim, first committed):
+```
+.  12 , 15,19,22
+```
+EVALUATION: Visit order 12, 15, 19, 22: CORRECT (sorted by line_number, ignoring input order). Other fields unanswered.
+Next: relative_to_root results, one field.
+
+RELATIVE_TO_ROOT PROMPT: result for lines 12, 15, 19, 22.
+LEARNER ANSWER (verbatim):
+```
+.  app.py
+None
+app.py
+doc/readme
+```
+EVALUATION: CORRECT on all four ("doc/readme" = docs/readme.md, a transcription slip, not graded), including the
+backslash path matching and None for the outside path. Next: latest / superseded / outside.
+
+RESULTS PROMPT: latest (path -> line) / superseded (path -> lines) / outside (lines) / confidence.
+LEARNER REQUEST (verbatim):
+```
+. give me the resutls to name
+```
+RESULT: Read as a request for the answer format, not the answer (no answer committed yet, so the answer is not
+revealed). Next: show the output shape with placeholder names from a different example, then re-ask.
+
+FORMAT SHOWN (made-up x.py/y/z.md example) and results re-asked.
+LEARNER ANSWER (verbatim):
+```
+. 12,19,22
+app.py
+line 15
+```
+EVALUATION: latest "12, 19, 22": INCORRECT. latest holds one claim per path, the last in its list: {app.py: 19,
+docs/readme.md: 22}; line 12 is superseded. superseded "app.py": PARTIAL (right path, line 12 missing). outside
+[15]: CORRECT. Blocker: what `claims[-1]` and `claims[:-1]` select from a path's list. Next: R0 on those two
+expressions with a tiny list.
+
+R0 INDEXING PROMPT: claims = [12, 19]; claims[-1] / claims[:-1].
+LEARNER ANSWER (verbatim):
+```
+. 12
+```
+EVALUATION: One value for two fields; read as claims[-1] = 12, which is INCORRECT (it is 19; -1 counts from the end).
+claims[:-1] not answered. SYNTAX GAP: negative indexing and slicing. Next: syntax-only help mode (CLAUDE.md): explain
+[-1] and [:-1] only, give an R0 example, have the learner predict, run it.
+
+SYNTAX EXPLANATION GIVEN: list positions from the front (0...) and back (-1...); [:-1] = everything except the last.
+R0 PROMPT: nums = [4, 8, 15]; nums[-1] / nums[:-1].
+LEARNER ANSWER (verbatim):
+```
+.no the latest line would be 19 not 12 my bad
+```
+EVALUATION: Self-correction CORRECT: for app.py, claims[-1] is line 19, not 12. The nums micro-prediction was not
+answered, so [:-1] is still unchecked. Next: the nums prediction.
+
+NUMS PROMPT (re-asked): nums[-1] / nums[:-1].
+LEARNER ANSWER (verbatim):
+```
+.  15 
+[4,8]
+```
+EVALUATION: CORRECT on both; verified by running. Syntax gap closed at R0. Next: climb back to the trace results.
+
+CLIMB-BACK PROMPT: by_path = {"app.py": [12, 19], "docs/readme.md": [22]}; latest / superseded.
+LEARNER ANSWER (verbatim):
+```
+.  19
+it will be = to 1
+```
+EVALUATION: latest "19": PARTIAL. app.py -> 19 is right, but docs/readme.md -> 22 is missing (the dict comprehension
+builds one entry per path). superseded "it will be = to 1": UNCLEAR, possibly "one superseded claim" (app.py -> [12])
+or a reading of `len(claims) > 1`. Blocker: a comprehension runs once per path. Next: per-path rows.
+
+PER-PATH TABLE PROMPT: rows app.py [12, 19] and docs/readme.md [22] with claims[-1], len > 1, claims[:-1]; latest /
+superseded.
+LEARNER ANSWER (verbatim):
+```
+. 19
+12
+```
+EVALUATION: app.py row: latest 19, superseded [12]: CORRECT. docs/readme.md row still not answered (second time).
+Blocker unchanged: the second path. Next: the docs/readme.md row alone.
+
+DOCS ROW PROMPT: claims [22]; claims[-1] / len(claims) > 1 / does docs/readme.md get a superseded entry.
+LEARNER ANSWER (verbatim):
+```
+. this is what threw me off: path: claims[:-1] ... if len(claims) > 1}
+
+becasue it would be 12
+```
+EVALUATION: The learner named the exact syntax that blocked them: the filtering `if` at the end of a dict
+comprehension. SYNTAX GAP: comprehension filters. Next: syntax-only help on `{key: value for ... if condition}`, with
+an R0 example to predict.
+
+SYNTAX EXPLANATION GIVEN: `{k: v for ... if condition}` equals a loop that adds k only when the condition is True.
+R0 PROMPT: ages = {"ana": [3, 5], "ben": [7]}; older = {name: years[:-1] ... if len(years) > 1}; predict older.
+LEARNER QUESTION (verbatim):
+```
+. so the conditon for len would be skipped?
+```
+EVALUATION: A clarifying question showing a mix-up about WHAT is skipped: the condition is always checked, for every
+key, and the ENTRY is skipped when the condition is False. Next: correct that one point, then ask the condition per
+name.
+
+PER-NAME PROMPT: ana [3, 5] / ben [7]: condition True/False, entry added, value; older.
+LEARNER ANSWER (verbatim):
+```
+. ok false instead of skipped
+```
+EVALUATION: Acknowledges the distinction (the condition evaluates False, and the entry is not added). Fields not
+answered. Next: re-ask the two rows briefly.
+
+TWO-ROW PROMPT: ana / ben condition, entry added, value; older.
+LEARNER ANSWER (verbatim):
+```
+. true 3 is added to older[ana]
+false nothing added
+```
+EVALUATION: CORRECT: ana True, entry added; ben False, nothing added. Precision: the value is the list [3]
+(years[:-1] is a slice), not 3. The comprehension filter is recovered at R0. Next: back to docs/readme.md, then the
+final latest / superseded.
+
+FINAL RESULTS PROMPT: latest (every path) / superseded (only len > 1) / confidence.
+LEARNER QUESTION (verbatim):
+```
+so older is a dict
+```
+EVALUATION: CORRECT inference: braces with `key: value` build a dict, a detail of the syntax check. Fields not
+answered. Next: confirm, then re-ask.
+
+FINAL RESULTS PROMPT (re-asked): latest / superseded.
+LEARNER ANSWER (verbatim):
+```
+. 19
+12 , 22
+```
+EVALUATION: latest "19": INCOMPLETE; docs/readme.md -> 22 is missing again. superseded "12, 22": INCORRECT. 22 is
+docs/readme.md's only claim, and len([22]) > 1 is False, so it gets no superseded entry; it is that path's latest. The
+ana/ben R0 did not transfer back: the learner still treats "latest" as a single value rather than one entry per path,
+and puts the single-claim path's line into superseded. Repeated difficulty. Next: map ana -> app.py and ben ->
+docs/readme.md explicitly, one row at a time.
+
+ANA/BEN MAPPING PROMPT: latest["app.py"] / latest["docs/readme.md"] / superseded["app.py"] / does superseded have a
+docs/readme.md entry.
+LEARNER ANSWER (verbatim):
+```
+. 19,22 
+12
+```
+EVALUATION: latest app.py 19, docs/readme.md 22: CORRECT. superseded app.py [12]: CORRECT, and listing only 12 implies no
+docs/readme.md entry. TRACE RESULT: completed with heavy scaffolding (a syntax-only detour on [-1]/[:-1], then on
+comprehension filters, then an explicit analogy mapping). Not independent. Final: latest {app.py: 19, docs/readme.md:
+22}; superseded {app.py: [12]}; outside [15].
+Next: the explanation, combined with the pending review of Claude's sort choice (what latest would be without the
+sort if claims arrived as [19, 12]).
+
+### Patch 2 milestone gate — explanation (+ review of the sort choice)
+
+PROMPT: loop without sorted(); captured_claims = [19 app.py, 12 app.py]; by_path["app.py"] after the loop /
+latest["app.py"] = claims[-1] / which claim should decide per D8 / keep the sort and why / confidence.
+LEARNER ANSWER (verbatim):
+```
+.  line 12 
+line 12 
+line 19 
+keep the sort
+```
+EVALUATION: by_path["app.py"] "line 12": INCOMPLETE (the list is [19, 12]). latest without the sort = 12: CORRECT.
+D8 says 19 should decide: CORRECT. Keep the sort: CORRECT; the why is implied by the previous two answers (without the
+sort, arrival order would silently pick the older claim). Confidence omitted.
+EXPLANATION RESULT: key idea reached (arrival order is not capture order; the sort makes D8 hold). CLAUDE CHOICE (sort
+by line_number) APPROVED by the learner.
+Next: patch 2 transfer on a different surface.
+
+### Patch 2 milestone gate — transfer
+
+TRANSFER PROMPT (warehouse scans; "W1-" = this warehouse; highest scan number = current; earlier = history; other
+warehouses set aside): arrivals #31 W1-A dock, #28 W2-Q truck, #25 W1-A shelf, #33 W1-B dock; processing order /
+current per package / history per package / set aside / what goes wrong in arrival order / confidence.
+LEARNER ANSWER (verbatim):
+```
+. w2 is not of this warehouse
+```
+EVALUATION: Set aside W2-Q (#28): CORRECT. Other fields unanswered. Next: processing order.
+
+ORDER PROMPT: processing order (scan numbers).
+LEARNER ANSWER (verbatim):
+```
+. 25,28,31,33
+w1a = dock 
+w1b = dock
+w2q=truck
+w1a went from shelf to dock 
+then the location would be wrong becasue the current location of the item would be in the last colunm
+```
+EVALUATION: Order 25, 28, 31, 33: CORRECT. Current W1-A dock, W1-B dock: CORRECT. "w2q = truck" as current: INCORRECT,
+inconsistent with the learner's own set-aside answer (another warehouse's scans are set aside, not given a current
+location). History "W1-A went from shelf to dock": CORRECT in substance (history W1-A = [#25 shelf]). Arrival-order
+failure: CORRECT in substance; the last-processed W1-A scan (#25 shelf) would become current, so W1-A would wrongly
+read "shelf". Unaided apart from splitting the first field; one inconsistency (W2-Q).
+
+PATCH 2 MILESTONE GATE RESULT: PASSED WITH ASSISTANCE (2026-09-16). Trace needed heavy syntax scaffolding; explanation
+reached the ordering principle; transfer mostly unaided (sort order, per-key latest, history, and the arrival-order
+failure correct), with one set-aside/current inconsistency. RETRIEVAL DUE: negative indexing and slicing,
+comprehension filters, one dict entry per key, and keeping set-aside items out of the main result.
+
+## Phase 9 implementation — patch 3 (D6 coverage policy)
+
+PATCH CONTRACT (drafted by Claude): objective, decide where a policy lives (inside the general comparison or in a step
+before it); behavior, only paths whose latest claim is a holding Write are excluded from reported changes (D6); out of
+scope report wording (patch 5) and the find loop (patch 4).
+WHERE-D6-LIVES PROMPT (reconcile.py:142-146 shown): (a) change reconcile to take claims + verdicts / (b) a step before
+reconcile builds skip_paths from holding Write claims; choice / why / downside / confidence.
+LEARNER ANSWER (verbatim):
+```
+. no idea
+```
+EVALUATION: No attempt; the learner lacks the concept needed to compare the placements (what a module depends on and
+knows about). Next: R0 on reconcile's current inputs and imports (two pictures + a set of path strings; it imports
+nothing about claims or compare), then re-ask.
+
 SESSION EVIDENCE SUMMARY (Challenge 15/15b, 2026-09-15): target-level first answer partial; recovered through R0
 (count pictures; step order) and climb-backs. Transfer (budget app, "do not show $0") CORRECT unprompted. Principle
 stated as the action rule rather than the general rule (NEARLY). MISCONCEPTION recorded: claims and verdicts believed

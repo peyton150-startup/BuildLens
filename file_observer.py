@@ -27,7 +27,7 @@ class ObservedFile:
     repository_relative_path: str | None
 
 
-def _relative_to_root(file_path: str, repository_root: str | None) -> str | None:
+def relative_to_root(file_path: str, repository_root: str | None) -> str | None:
     """Return file_path relative to repository_root, in Git's forward-slash style.
 
     None when no root was given or the file lies outside it. pathlib compares
@@ -53,7 +53,7 @@ def observe_file(file_path: str, repository_root: str | None = None) -> Observed
     # display concern and happens where a person reads it.
     observed_at = datetime.now(timezone.utc)
     # Status and path are independent facts: an ABSENT file still has a known path.
-    repository_relative_path = _relative_to_root(file_path, repository_root)
+    repository_relative_path = relative_to_root(file_path, repository_root)
     try:
         with open(file_path, "rb") as handle:
             file_bytes = handle.read()
