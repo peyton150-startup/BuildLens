@@ -2383,6 +2383,38 @@ Phase 15 always includes the cumulative final defense regardless of review count
 10. Review unfamiliar code using the same principles.
 ```
 
+### Recall practice for the defense
+
+The defense tests **production from memory**, not recognition. Rereading makes material feel familiar without training recall (`MIT-TLL-RETAIN`), so preparation is roughly 70% retrieval and explanation and 30% checking code and docs. The loop is:
+
+```text
+attempt from memory → check → close the source → attempt again later
+```
+
+| # | Exercise | What to do with BuildLens | Source |
+|---|---|---|---|
+| 1 | Blank-page reconstruction | With everything closed, draw the architecture: problem, entry point, modules, data flow, state, Git boundary, Claude/hook boundary, validation, failure behavior, output. | `CORNELL-LSC-STUDY-STRATEGIES` |
+| 2 | Free-recall dump | See below. | `CMU-EBERLY-RETRIEVAL` |
+| 3 | Short-answer interrogation | Answer "why is this boundary here?"-style questions with no choices or hints. | `CMU-EBERLY-RETRIEVAL` |
+| 4 | Teach it aloud | Explain one subsystem to an examiner who knows nothing about it. | `CMU-EBERLY-RETRIEVAL` |
+| 5 | How/why drill | For one component: what it does, why it exists, why it is separate, what crosses its boundary, what it trusts and refuses to trust, what happens on failure, the alternative, and why this design was chosen. | `MIT-TLL-RETAIN` |
+| 6 | Mock oral | No docs, no IDE, timed: a randomly chosen question answered aloud in 60–90 seconds, with unprepared follow-ups. | `CORNELL-LSC-PRACTICE-EXAMS` |
+| 7 | Correct → wait → retry | After checking, close the answer and retrieve the missed item again later. | `CMU-EBERLY-RETRIEVAL`, `MIT-TLL-RETAIN` |
+| 8 | Space the attempts | Repeat the exercises hours or days apart, not back-to-back. | `MIT-TLL-RETAIN`, `CORNELL-LSC-STUDY-STRATEGIES` |
+
+#### Exercise 2 — Free-recall dump
+
+```text
+1. 10 minutes. No repository, docs, diagrams, notes, or Claude.
+2. Write everything you remember about BuildLens: architecture, execution flow,
+   contracts, state, trust boundaries, failure behavior, decisions, and tradeoffs.
+3. Only afterwards, check against the code and docs.
+4. Record what was missing or wrong, and why it was forgotten; do not copy the answer in.
+5. Repeat after a delay (hours or days later), not immediately after rereading.
+```
+
+Free recall has no prompts, so it exposes gaps across the whole system, and a wrong or missing item followed by a check still strengthens later recall (`CMU-EBERLY-RETRIEVAL`). Record each attempt as an Evidence Record like any other retrieval.
+
 ### WHERE YOU SHOULD BE
 
 You are finished when you can move without hesitation among:

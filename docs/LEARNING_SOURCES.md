@@ -62,10 +62,11 @@ Key BuildLens ideas:
 - recall from memory instead of passive rereading
 - frequent low-stakes practice
 - short answer > simple recognition for many learning goals
+- free recall (no prompts) supports retention of a broader range of material than targeted questions
 - peer teaching
 - concept maps
 - early and repeated retrieval
-- feedback after committing to an answer
+- feedback after committing to an answer; a wrong retrieval attempt followed by feedback still beats rereading
 - transfer to novel contexts
 
 ### CMU-EBERLY-CONCEPT-MAPS
@@ -133,6 +134,45 @@ Key BuildLens ideas:
 - short concept maps
 - predict-observe-explain
 - brief pauses for consolidation rather than long uninterrupted delivery
+
+---
+
+## Learning Science — Retrieval, Spacing, and Exam Practice (other universities)
+
+Checked against the live pages on 2026-09-16. Used by the recall exercises in Phase 15 of `IMPLEMENTATION_PLAN.md`.
+
+### CORNELL-LSC-STUDY-STRATEGIES
+**Cornell Learning Strategies Center — Effective Study Strategies**
+
+https://lsc.cornell.edu/how-to-study/studying-for-and-taking-exams/effective-study-strategies/
+
+Key BuildLens ideas:
+- retrieval practice as "Blank Page Testing": start from a blank page and write, chart, or diagram what you remember
+- then check the source for what is missing or wrong
+- the effort of recalling is part of how learning happens
+- spaced practice instead of cramming
+
+### CORNELL-LSC-PRACTICE-EXAMS
+**Cornell Learning Strategies Center — What To Do With Practice Exams**
+
+https://lsc.cornell.edu/how-to-study/studying-for-and-taking-exams/what-to-do-with-practice-exams/
+
+Key BuildLens ideas:
+- practice under the real conditions: same time limit, only the resources the real exam allows
+- take one attempt early as a baseline and another after study to measure progress
+- testing strengthens later recall (the testing effect)
+
+### MIT-TLL-RETAIN
+**MIT Teaching + Learning Lab — Help Students Retain, Organize and Integrate Knowledge**
+
+https://tll.mit.edu/teaching-resources/how-to-teach/help-students-retain-organize-and-integrate-knowledge/
+
+Key BuildLens ideas:
+- learners tend to choose rereading and cramming, which work less well than retrieval and spacing
+- spaced practice retains better than massed practice
+- self-explanation: ask yourself why and how to connect concepts
+- spacing, interleaving, and retrieval are "desirable difficulties": harder in the moment, better long-term
+- errors made during retrieval help when corrective feedback follows
 
 ---
 
