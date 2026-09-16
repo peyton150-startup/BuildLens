@@ -4078,3 +4078,402 @@ SESSION EVIDENCE SUMMARY (Challenge 15/15b, 2026-09-15): target-level first answ
 stated as the action rule rather than the general rule (NEARLY). MISCONCEPTION recorded: claims and verdicts believed
 to exist before the witness picture; corrected at R0 step order and due for retrieval on a new surface. Recurring
 format issue: the learner answers one line of multi-field blocks and omits confidence.
+
+### Patch 3 milestone gate — D23a explanation resumed after commit 6b220fa
+
+PROMPT:
+```
+Without looking back at the handoff, explain D23a in your own words:
+
+- What could happen between the witness picture and the later re-read?
+- Which two hashes are compared?
+- What incorrect hiding does that comparison prevent?
+- If the hashes differ, is the path held, reported, or flagged?
+
+Include your confidence from 0–100%.
+```
+
+LEARNER ANSWER (verbatim):
+```
+a shell command could finish&#x20;
+the claim hash but first the witness and the observe file after witness&#x20;
+it gets rid of the chance that a command could be finsihsing at the same time as witness
+reported
+```
+
+EVALUATION: PARTIAL. The learner identified a shell command finishing around the witness/re-read interval and correctly
+said the path is reported. The answer called one value "the claim hash" rather than clearly identifying both values
+as observed-file hashes (the hash stored in the witness picture and the hash from the later re-read). It also described
+the check as getting rid of the concurrent-finish chance; the check detects a byte-version mismatch but does not prevent
+the command or make either observation atomic. The required changed-after-witness flag was omitted. Confidence was
+omitted. PRIMARY BLOCKER: BOUNDARY_CONCEPT — expected claim content versus observed version evidence, plus detection
+versus prevention. Next remediation rung: R1, classify three named values before returning to the full explanation.
+
+R1 PROMPT: Given A = hash derived from the Write claim's expected content, B = file hash stored in the witness picture,
+and C = file hash from `observe_file` during the later re-read: which pair determines whether the file changed between
+the two observations; does a mismatch prevent the change, detect the change, or prove who made it; confidence.
+
+LEARNER ANSWER (verbatim):
+```
+it does not prevent anything it makes sure that if a claude bash command is finsihing up that we record the finished product
+```
+
+EVALUATION: PARTIAL. "It does not prevent anything" correctly repairs detection-versus-prevention. The answer still
+omits the requested pair and confidence. "Record the finished product" overstates the implementation: the later read
+supplies comparison evidence, while `WholeFileCoverage` returns path sets rather than preserving the re-read bytes as a
+new picture/version. It also attributes the writer to Claude Bash without evidence; an observed hash mismatch establishes
+that bytes differed between the two reads, not who changed them. PRIMARY BLOCKER remains BOUNDARY_CONCEPT. Descend to R0:
+identify which named values are observations of the file rather than expected claim content.
+
+R0 PROMPT: A = expected content from the Write claim; B = file version observed at the witness; C = file version
+observed during the later re-read. Which two are observations of the actual file at two different times; confidence.
+
+LEARNER ANSWER (verbatim):
+```
+b,c
+```
+
+EVALUATION: CORRECT. B and C are the two observations. Confidence omitted again. Next: fresh same-rung near-transfer
+that separates expected input from two observations; require confidence before climbing.
+
+R0 NEAR-TRANSFER PROMPT: A = quantity promised by a supplier; B = quantity physically counted at 3:00; C = quantity
+physically counted at 3:02. Which two values determine whether inventory changed between the counts; confidence.
+
+LEARNER ANSWER (verbatim):
+```
+b,c
+```
+
+EVALUATION: CORRECT. B and C are the two timed physical observations; A is an expectation. Confidence omitted. The
+target distinction is stable across BuildLens and inventory surfaces. Ask for the missing confidence value before the
+R1 climb.
+
+CONFIDENCE FOLLOW-UP ANSWER (verbatim):
+```
+90
+```
+
+EVALUATION: Confidence 90%. Calibration is reasonable for the correct same-rung near-transfer. Proceed to R1.
+
+R1 PROMPT: At 3:00 the observed inventory count is 12; at 3:02 it is 15. Choose the supported conclusion: supplier
+delivered three; a particular employee added three; or the observed quantity differed and the cause is unknown.
+
+LEARNER ANSWER (verbatim):
+```
+the 15 is suppoted&#x20;
+3
+```
+
+EVALUATION: CORRECT on the requested classification: option 3. The two observations support that the quantity differed,
+not the cause or actor. "The 15 is supported" is imprecise but does not change the explicit selection. Confidence omitted.
+Next: collect confidence, then apply the same inference to D23a at one higher rung.
+
+CONFIDENCE FOLLOW-UP ANSWER (verbatim):
+```
+90
+```
+
+EVALUATION: Confidence 90%. Calibration is reasonable. Proceed to a concrete D23a result trace.
+
+R2 BUILDLENS TRACE PROMPT: The latest Write claim holds on the later re-read; witness hash = 111; later re-read hash =
+222. Is the path added to `held`; is it added to `changed_after_witness`; what can BuildLens conclude about the cause;
+confidence.
+
+LEARNER ANSWER (verbatim):
+```
+yes&#x20;
+yes&#x20;
+nothing
+```
+
+EVALUATION: PARTIAL. `changed_after_witness = yes` is correct, and "nothing" correctly declines to infer a cause or
+actor. `held = yes` is incorrect because D23a requires both the later Write verdict to hold and the later observed hash
+to equal the witness hash. Confidence omitted. PRIMARY BLOCKER: CONDITION_EVALUATION — treating one true condition as
+sufficient despite an `AND`. Descend to R1 with only the conjunction.
+
+R1 PROMPT: A door opens only if `badge_is_valid AND code_matches`. Given True and False, does the door open; confidence.
+
+LEARNER ANSWER (verbatim):
+```
+no
+```
+
+EVALUATION: CORRECT. True AND False evaluates to false, so the door does not open. Confidence omitted. Next: collect
+confidence and give a fresh same-rung conjunction before returning to D23a.
+
+CONFIDENCE FOLLOW-UP ANSWER (verbatim):
+```
+90
+```
+
+EVALUATION: Confidence 90%. Calibration is reasonable. Proceed to fresh same-rung conjunction transfer.
+
+R1 NEAR-TRANSFER PROMPT: A shipment is covered only if `invoice_matches AND seal_is_intact`. Given False and True,
+is it covered; confidence.
+
+LEARNER ANSWER (verbatim):
+```
+no, 90
+```
+
+EVALUATION: CORRECT at 90% confidence. False AND True is false. The condition evaluation is stable across two
+non-BuildLens surfaces. Return to a fresh D23a result trace.
+
+R2 FRESH BUILDLENS TRACE PROMPT: Latest Write verdict on re-read = CLAIM_HOLDS; witness hash = abc; later re-read hash
+= xyz. State whether the path is added to `held`, added to `changed_after_witness`, reported by `reconcile`, and what
+BuildLens knows about the cause; confidence.
+
+LEARNER ANSWER (verbatim):
+```
+no
+yes&#x20;
+no
+nothing
+```
+
+EVALUATION: PARTIAL. `held = no`, `changed_after_witness = yes`, and no conclusion about the cause are correct.
+`reconcile reports = no` is incorrect: paths in `held` are excluded from reconciliation, so a path not in `held`
+remains eligible to be reported from the witness comparison. Confidence omitted. PRIMARY BLOCKER: FUNCTION_CALL_FLOW /
+BOUNDARY_CONCEPT — the output set from coverage controls reconcile's exclusion. Descend to R1 with only set membership
+and routing.
+
+R1 PROMPT: Only paths inside `held` are skipped by reconcile. Given `held = {"a.py"}` and current path `b.py`, is
+`b.py` skipped or allowed through; confidence.
+
+LEARNER ANSWER (verbatim):
+```
+alloed through
+```
+
+EVALUATION: CORRECT. `b.py` is not in `held`, so it is allowed through to reconciliation. Confidence omitted. Next:
+collect confidence, then give a fresh same-rung routing variant before returning to the full trace.
+
+CONFIDENCE FOLLOW-UP ANSWER (verbatim):
+```
+90
+```
+
+EVALUATION: Confidence 90%. Calibration is reasonable. Proceed to fresh same-rung routing variant.
+
+R1 ROUTING NEAR-TRANSFER PROMPT: Given `held = {"a.py", "b.py"}` and current path `b.py`, is `b.py` skipped or
+allowed through for reconciliation; confidence.
+
+LEARNER ANSWER (verbatim):
+```
+allowed 90
+```
+
+EVALUATION: WRONG at 90% confidence. `b.py` is a member of `held`, and the stated routing rule skips members. PRIMARY
+BLOCKER: DATA_REPRESENTATION / CONDITION_EVALUATION — set membership was not checked before applying the routing result.
+Descend to R0 and ask membership only.
+
+R0 MEMBERSHIP PROMPT: Given `held = {"a.py", "b.py"}`, is `b.py` inside `held`; answer yes/no with confidence.
+
+LEARNER ANSWER (verbatim):
+```
+yes held 90
+```
+
+EVALUATION: CORRECT at 90% confidence. `b.py` is a member of the set. Next: fresh same-rung membership check before
+restoring the routing consequence.
+
+R0 MEMBERSHIP NEAR-TRANSFER PROMPT: Given `held = {"a.py", "c.py"}`, is `b.py` inside `held`; answer yes/no with
+confidence.
+
+LEARNER ANSWER (verbatim):
+```
+no 90
+```
+
+EVALUATION: CORRECT at 90% confidence. `b.py` is absent from the set. Membership is stable for present and absent
+cases. Climb to R1 and restore the skip/allow routing consequence.
+
+R1 ROUTING PROMPT: Paths inside `held` are skipped and paths outside are allowed through. Given `held = {"m.py"}` and
+current path `m.py`, is it skipped or allowed through; confidence.
+
+LEARNER ANSWER (verbatim):
+```
+skipped
+```
+
+EVALUATION: CORRECT. `m.py` is in `held`, so it is skipped. Confidence omitted. Next: collect confidence, then test
+the opposite routing case.
+
+CONFIDENCE FOLLOW-UP ANSWER (verbatim):
+```
+90
+```
+
+EVALUATION: Confidence 90%. Calibration is reasonable. Proceed to the nonmember routing case.
+
+R1 ROUTING OPPOSITE-CASE PROMPT: Given `held = {"m.py"}` and current path `n.py`, is `n.py` skipped or allowed
+through; confidence.
+
+LEARNER ANSWER (verbatim):
+```
+allowed
+```
+
+EVALUATION: CORRECT. `n.py` is outside `held`, so it is allowed through to reconciliation. Confidence omitted. Both
+routing directions are now correct; collect confidence, then return to a fresh complete D23a trace.
+
+CONFIDENCE FOLLOW-UP ANSWER (verbatim):
+```
+90
+```
+
+EVALUATION: Confidence 90%. Calibration is reasonable. Return to the complete D23a trace with fresh values.
+
+FRESH TARGET TRACE PROMPT: Baseline hash = base-1; witness hash = witness-2; later re-read hash = reread-3; latest
+Write verdict on re-read = CLAIM_HOLDS. State whether the path is added to `held`, added to
+`changed_after_witness`, skipped by reconcile, reported for the baseline-to-witness change, and attributable to a
+cause; confidence.
+
+LEARNER ANSWER (verbatim):
+```
+yes&#x20;
+yes
+yes
+no
+no
+```
+
+EVALUATION: WRONG/PARTIAL. The final "no" correctly declines to identify a cause. The first answer is wrong: the
+claim verdict holds, but witness-2 != reread-3, so the two-condition `held` rule is false. Consequently the path is not
+skipped and the baseline-to-witness change remains reportable. `changed_after_witness = yes` is correct. Confidence
+omitted. The learner succeeded on isolated AND and routing exercises but did not retain them in composition. Switch to
+WORKED-EXAMPLE RESCUE: one solved neighboring example, learner explains the steps, then one missing-step example, then
+a fresh independent target.
+
+CONFIDENCE FOLLOW-UP ANSWER (verbatim):
+```
+60
+```
+
+EVALUATION: Confidence 60%. This is better calibrated to the incorrect composite answer than the earlier 90% answers.
+Proceed with the worked-example rescue.
+
+WORKED NEIGHBORING EXAMPLE: A returned laptop is fully accounted for only if its return form matches AND its closing
+barcode equals its later barcode. Given form match True, closing K7, later M9, the solved steps state True AND False is
+False; it is not fully accounted; it is not skipped by audit; the closing-time discrepancy is reported; the later
+barcode difference is flagged; actor remains unknown. Prompt: explain the six solved steps in own words; confidence.
+
+LEARNER ANSWER (verbatim):
+```
+the clim holds so it would be added to held
+it was changed after witness so ti would be added to that&#x20;
+the reread would be skipped by reconcile
+it does report the change but we should aslo report the changes made after witness
+no&#x20;
+70
+```
+
+EVALUATION: WRONG at 70% confidence. The learner did not explain the neighboring laptop example and instead returned
+to BuildLens terminology. The central error persisted: a holding claim was treated as sufficient for membership in
+`held`, despite the second condition being false. The answer is also internally inconsistent: it says reconcile skips
+the path and reports it. "Report the changes made after witness" overstates current data: coverage flags a later hash
+difference but does not preserve or diff a second report window. PRIMARY BLOCKER: CONDITION_EVALUATION in composition.
+Continue worked-example rescue with one missing line and the full formula shown.
+
+PARTIAL WORKED-EXAMPLE PROMPT:
+```
+claim_holds = True
+same_as_witness = False
+held = claim_holds AND same_as_witness
+held = ?
+```
+Answer only True/False, then confidence.
+
+LEARNER ANSWER (verbatim):
+```
+no, ok now i understand
+but this is becasue of what
+```
+
+EVALUATION: CORRECT on the missing result: `held = False`. Confidence omitted. The learner explicitly requests the
+causal explanation. Explain only why the second condition is required, then require a teach-back before the fresh
+independent target.
+
+CAUSAL EXPLANATION GIVEN: `claim_holds` describes the later re-read, while reconcile reports the baseline-to-witness
+window. If the later version differs from the witness version, using the later verdict to hold the path could skip a
+witness-time change that the verdict did not account for. Hash equality connects the verdict to the witnessed version.
+
+TEACH-BACK PROMPT: In one sentence, why is `claim_holds` alone insufficient; confidence.
+
+LEARNER ANSWER (verbatim):
+```
+because we need to know that at the time of witness the bytes are the same as the reread if they are then it is safe to assume nothing else happend and we can skip it
+```
+
+EVALUATION: CORRECT/NEARLY. The learner correctly states that the witness and re-read bytes must match before skipping.
+Precision correction: matching hashes support equality at the two observation moments, not that "nothing else happened"
+between them; a change-and-restore remains invisible. Confidence omitted. The key D23a causal model is now present.
+Proceed to the fresh independent target required after worked-example rescue.
+
+FRESH INDEPENDENT TARGET: Baseline hash = 10; witness hash = 20; later re-read hash = 30; latest Write verdict on
+re-read = CLAIM_HOLDS. State held, changed-after-witness, whether reconcile reports the baseline-to-witness change,
+why, and confidence.
+
+LEARNER ANSWER (verbatim):
+```
+no
+yes&#x20;
+yes&#x20;
+becasue that is all reconcile has and we do not hold this becasue the later reread is different
+```
+
+EVALUATION: CORRECT. The learner independently returns `held = no`, `changed_after_witness = yes`, and reconcile
+reports the baseline-to-witness change, with the correct reason that the later re-read is a different observed version.
+Confidence omitted. D23a explanation recovered after worked-example rescue; it is passed WITH ASSISTANCE, not mastered.
+Next: collect confidence, then require a different-domain transfer and shared-principle explanation.
+
+CONFIDENCE FOLLOW-UP ANSWER (verbatim):
+```
+90
+```
+
+EVALUATION: Confidence 90%. Proceed to the different-domain transfer.
+
+TRANSFER PROMPT — warehouse inspection: baseline seal A, inspection seal B, later verification seal C; whole-shipment
+manifest matches at later verification; remove the inspection discrepancy only if manifest matches AND later seal equals
+inspection seal; B != C. Ask whether discrepancy is retained, whether changed-after-inspection is flagged, what may and
+may not be claimed, the deep principle shared with D23a, and confidence.
+
+LEARNER ANSWER (verbatim):
+```
+retained
+yes
+it can claim that there was a change nothing more&#x20;
+they both claim a change but not who did it&#x20;
+90\\
+```
+
+EVALUATION: MOSTLY CORRECT at 90% confidence. Retained, changed-after-inspection flagged, and the evidence boundary
+(difference known, cause/actor unknown) are correct. The shared-principle answer is PARTIAL: it names non-attribution but
+omits the central version link. A later successful validation describes the later version; it may suppress earlier
+evidence only if that later version is also the version previously observed. PRIMARY BLOCKER: BOUNDARY_CONCEPT — scope
+of a validation result across versions. Descend to R1 and ask why manifest match alone is insufficient.
+
+R1 PROMPT: The successful manifest check examined seal version C; inspection recorded version B; B != C. Does the
+manifest result prove inspection-time version B matched; why; confidence.
+
+LEARNER ANSWER (verbatim):
+```
+they do not match, the hash at b was different thanat has c
+```
+
+EVALUATION: CORRECT. The answer implies no and correctly grounds it in B and C being different observed versions.
+Confidence omitted. Next: collect confidence, then give a fresh validation-scope near-transfer.
+
+LEARNER DIRECTION (verbatim):
+```
+ok skip this lets move to the next task, we have confirmed d23a if there is nothing else contineu on
+```
+
+MILESTONE RESULT: PATCH 3 / D23a PASSED WITH ASSISTANCE. The learner independently solved a fresh BuildLens target
+after worked-example rescue. In the warehouse transfer, the learner correctly retained the discrepancy, flagged the
+later difference, and refused actor attribution; the deep-principle wording was partial, then the learner correctly
+recovered that a validation of version C does not prove facts about different version B. Per the learner's direction,
+stop further same-session remediation and continue. Do not mark mastered. DELAYED RETRIEVAL DUE: a later validation
+may suppress earlier evidence only when it is tied to the same observed version; matching hashes compare observations
+at two moments and do not prove no change-and-restore occurred between them.
