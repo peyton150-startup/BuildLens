@@ -3823,6 +3823,209 @@ EVALUATION: No attempt; the learner lacks the concept needed to compare the plac
 knows about). Next: R0 on reconcile's current inputs and imports (two pictures + a set of path strings; it imports
 nothing about claims or compare), then re-ask.
 
+CHECKPOINT: committed and pushed 743ae6f (patch 2 + docs) at the learner's request.
+
+R0 DEPENDENCY PROMPT (reconcile imports and signature shown): does reconcile import anything about claims / what
+claimed_paths holds / what reconcile would need under (a) / confidence.
+LEARNER ANSWER (verbatim):
+```
+.  no 
+just path strings
+compare, claude adapter , understand claims and verdicts
+```
+EVALUATION: CORRECT on all three. The learner sees that (a) would give reconcile new dependencies and knowledge (compare,
+claude_adapter, claims, verdicts). Confidence omitted. Next: re-ask the design choice.
+
+WHERE-D6-LIVES PROMPT (re-asked): (a) / (b); choice / why / downside / confidence.
+LEARNER DESIGN ANSWER (verbatim):
+```
+.  B
+it is not apart of reconciles responsiblity to deal with verdicts and claims 
+we will need to add a new module or change another module
+```
+EVALUATION: (b), with a correct reason (responsibility: reconcile compares pictures; judging claims is a different job)
+and a real downside (an extra step and module). Reached after the R0 dependency check. Confidence omitted.
+D22 (learner's, under review): D6 lives in a step before reconcile that builds the set of paths covered by a holding
+latest Write claim; reconcile stays unaware of claims and verdicts.
+Open consequence: reconcile's parameter name `claimed_paths` would no longer match its contents (Edit-claimed and
+failed-claim paths are not in it). Next: keep or rename.
+
+NAME PROMPT: b.py (Edit holds) in the set? / c.py (Write fails) in the set? / does "claimed_paths" still describe it /
+keep or rename / confidence.
+LEARNER DESIGN ANSWER (verbatim):
+```
+. no
+latest claimedpaths
+```
+EVALUATION: "The name no longer describes the set": CORRECT. The proposed "latest_claimed_paths" is still inaccurate:
+b.py's and c.py's LATEST claims are not in the set either; only holding Write claims are. The b.py/c.py membership
+fields were unanswered, which is where the mismatch would have shown. Confidence omitted. Next: test the proposed name
+against b.py and c.py.
+
+NAME TEST PROMPT: b.py (latest Edit holds) and c.py (latest Write fails) in the set / does "latest_claimed_paths" fit /
+the one thing all paths share (D6) / a name from it.
+LEARNER DESIGN ANSWER (verbatim):
+```
+. no 
+lastest held paths
+```
+EVALUATION: "does not fit": CORRECT. "latest held paths": CLOSER but still inaccurate, because b.py's latest (Edit)
+claim holds and b.py is not in the set. The missing element is Write, i.e. a whole-file claim, which is what makes
+every byte accounted for. The membership fields and the shared-property field were not answered. Next: test "latest
+held" against b.py.
+
+B.PY TEST PROMPT: does b.py's latest claim hold / is b.py in the set / the missing word.
+LEARNER ANSWER (verbatim):
+```
+.  yes 
+no
+the complete file byte, since edit is only part of it but a write would be the whole file byte
+```
+EVALUATION: CORRECT on all three. The missing element is "the whole file is accounted for" (a Write covers every byte;
+an Edit covers only a fragment). The naming principle is recovered. Next: the learner picks a name that carries it.
+
+NAME PICK PROMPT: (1) fully_accounted_paths / (2) whole_file_held_paths / (3) write_held_paths / (4) own; pick / why.
+LEARNER DESIGN ANSWER (verbatim):
+```
+.2
+it does not name a tool and says that every byte is accounted for which is true while also stating what we are looking for which is the while file and that the claim is held
+```
+EVALUATION: Pick (2) with a sound reason: it names the property (a whole-file claim that holds) rather than the tool,
+so it stays true if another whole-file claim type appears.
+D22a (learner's, under review): reconcile's `claimed_paths` parameter is renamed `whole_file_held_paths`.
+Next: how the verdict is judged, against the witness picture's hash or by reading the file again.
+
+VERDICT-SOURCE PROMPT: (a) sha256(claim) == witness.hashes[path] / (b) re-read with observe_file + compare_write;
+timing trace: 10:30:00 witness cli.py = hash_X (Write content + shell-appended line); 10:30:02 the line is removed, so
+the file equals the Write; 10:30:03 D6 judges. (a) holds/skipped? / (b) holds/skipped? / which option matches the
+report's moment / choice + why / confidence.
+LEARNER DESIGN ANSWER (verbatim):
+```
+. claim holds, cli skipped 
+not held and reported 
+i like B becasue it will look a moment after and we can say that a change was made a moment after witness if that ever happens which i think it will never happen
+```
+EVALUATION: The traces are SWAPPED. Under (a) the claim is compared with hash_X, which includes the appended line, so
+it does NOT hold and cli.py is reported. Under (b) the re-read at 10:30:02 matches the Write, so the claim HOLDS and
+cli.py is SKIPPED, hiding the change the witness picture recorded. The same-moment field was unanswered. Choice (b)
+rests on the swapped trace; "it will never happen" is a prediction, not evidence. Blocker: which content each option
+actually looks at. Next: R0, the content each option compares against.
+
+R0 SOURCE PROMPT: (a) compares against hash_X or the 10:30:03 file / (b) against which.
+LEARNER ANSWER (verbatim):
+```
+. claim at hash x
+claim at file 03
+```
+EVALUATION: CORRECT on both: (a) uses hash_X, (b) uses the file as it is at 10:30:03. Next: climb to the verdict and
+the skip/report outcome for each.
+
+OUTCOME PROMPT: (a) holds? skipped/reported / (b) holds? skipped/reported / which option hides the appended line.
+LEARNER ANSWER (verbatim):
+```
+. ok i read that wrong i thought the shell made a change that would make hash x wrong
+```
+EVALUATION: Explains the earlier swap as a misreading of the scenario: the learner took the shell's later removal as
+making hash_X wrong, when hash_X is a correct record of 10:30:00. A useful self-diagnosis. Fields not answered.
+Next: confirm that hash_X is a correct record of its moment, then re-ask.
+
+OUTCOME PROMPT (re-asked): (a) / (b) holds and skipped/reported / which hides the appended line.
+LEARNER ANSWER (verbatim):
+```
+. does not hold repoted
+holds skipped
+```
+EVALUATION: CORRECT: (a) does not hold, so reported; (b) holds, so skipped. The "which hides" field was not stated but
+follows: (b). Next: re-ask the choice with the corrected trace.
+
+CHOICE PROMPT (re-asked, with the normalize hint): choice / why / downside / confidence.
+LEARNER QUESTION (verbatim):
+```
+. so we are looking for correlation ot witness instead of giving the correct answer?
+```
+EVALUATION: A good conceptual challenge: why prefer agreement with the witness over the "current truth" on disk? The
+answer to give: both are true, but of different moments. A report must describe one moment consistently, because the
+change row comes from the witness picture. The learner's own earlier settlement (D5 note): "all claims are judged
+against one witness-time observation". The disk at 10:30:03 can change again, and no read is the final truth. Next:
+answer this, then re-ask the choice.
+
+ANSWER GIVEN (different moments; one-moment consistency; D5's witness-time judgement). CHOICE re-asked.
+LEARNER DESIGN ANSWER (verbatim):
+```
+. the correct answer is B, even if it does not match witness it is the most accurate compare
+```
+EVALUATION: Keeps (b). A legitimate position under REVIEWER (the learner decides), but it is under challenge:
+(1) "most accurate" does not say about WHICH moment; (b) is accurate about 10:30:03 while the reported window ends at
+10:30:00. (2) The learner's own trace showed (b) skips cli.py, so the appended line recorded at the witness is never
+reported, which contradicts the over-report-never-hide rule (D12). (3) It contradicts the learner's D5 settlement
+(judge every claim against one witness-time observation). No downside or confidence given. Next: put the D5 conflict
+and the hidden line to the learner: revise D5, or revise the choice.
+
+D5/D12 CONFLICT PROMPT: under (b), does the user learn a line was appended / keep (b) and revise D5+D12 or switch to
+(a) / what would make (b) better / confidence.
+LEARNER DESIGN ANSWER (verbatim):
+```
+.  but it would be incorrect becasue the user would then go to the cli.py file a moment later to find that the appended line was removed a moment after witness
+```
+EVALUATION: A REAL concern, raised against (a): under (a) the report says the claim does not hold, but a user who opens
+cli.py a moment later finds it matching, so the report looks wrong. This is partly answered by the learner's own D7
+wording ("does not hold AS OF WITNESS", with the change window stated). The report is true for its stated moment,
+while (b) gives the user no signal at all. Next: compare the two failure modes directly (a time-stamped statement
+that no longer matches the disk vs silence about a change that existed).
+
+FAILURE-MODE PROMPT: which is worse, a time-stamped statement the disk no longer matches or silence / final choice /
+confidence.
+LEARNER DESIGN DECISION (verbatim):
+```
+. i want b make it happen
+```
+D23 (LEARNER'S DECISION, made over Claude's challenge; under review at the Phase 9 gate): the D6 step judges each
+latest Write claim by READING THE FILE AGAIN (file_observer.observe_file + compare.compare_write), not against the
+witness picture's hash. Only CLAIM_HOLDS puts a path in whole_file_held_paths.
+KNOWN DOWNSIDE, recorded honestly: if a file changes between the witness picture and the re-read, the verdict describes
+a later moment than the reported window. A change the witness recorded can then be skipped and never reported
+(traced: a shell line appended before the witness and removed right after is hidden). This revises the D5 settlement
+("judge all claims against one witness-time observation") and is an exception to D12's never-hide rule for that timing
+window. The learner's stated reason: a user checking the file afterwards should not find the report contradicting it.
+The learner must defend this at the gate, including a reversal condition (not yet given).
+
+PATCH 3 IMPLEMENTED (2026-09-16): refactor first, renaming reconcile's `claimed_paths` to `whole_file_held_paths` in
+reconcile.py and tests/test_reconcile.py (tests passed before and after); the skip comment rewritten to say why only
+whole-file claims qualify. Test-first: tests/test_whole_file_coverage.py (5 tests: holding Write covers; failing Write
+does not; holding Edit does not; normalize-only Write does not; the latest claim decides over an earlier holding Write)
+failed with ModuleNotFoundError, then whole_file_coverage.py (whole_file_held_paths) made them pass; all 16 test scripts
+pass. The D23 limit is stated in the module docstring.
+MILESTONE PAUSE for the patch 3 trace, explanation, and transfer.
+
+### Patch 3 milestone gate — trace
+
+WHOLE MODULE SHOWN (whole_file_coverage.py). TRACE PROMPT: latest api.py Write "ok\n" (disk exactly "ok\n"); ui.py
+Edit red->blue (disk contains blue); db.py Write "rows\n" (disk: deleted); log.py Write "start\n" (disk
+"start\nextra\n"); the deciding line, verdict, added to held / held / confidence.
+LEARNER ANSWER (verbatim, first committed):
+```
+.  claim holds , and it is a write it is added 
+skipped it is an edit 
+absent so not added 
+claim does not hold so skipped
+my questoin is about normalize as that should be added as well
+```
+EVALUATION: TRACE CORRECT and UNAIDED on all four: api.py CLAIM_HOLDS, added; ui.py skipped by the tool_name check;
+db.py FILE_ABSENT, not added; log.py CLAIM_DOES_NOT_HOLD, not added. held = {api.py} is implied. Confidence omitted.
+First unscaffolded trace in this implementation run.
+LEARNER QUESTION: normalize-only paths "should be added as well". This conflicts with the learner's own D6a (a
+CLAIM_HOLDS_AFTER_NORMALIZE path is reported, marked line-endings-only, because the bytes differ). Next: show D6a and
+what adding it to held would do (the path is skipped entirely, so the line-endings mark is never shown), then let the
+learner keep or revise D6a.
+
+D6a REMINDER PROMPT: keep D6a (report, marked line-endings-only) or revise (skip) / why / what is lost.
+LEARNER ANSWER (verbatim):
+```
+. ok fair enough
+```
+RESULT: D6a KEPT; the implementation stands (only CLAIM_HOLDS is held). Next: patch 3 explanation, the D23 limit in the
+learner's own words plus its owed reversal condition.
+
 SESSION EVIDENCE SUMMARY (Challenge 15/15b, 2026-09-15): target-level first answer partial; recovered through R0
 (count pictures; step order) and climb-backs. Transfer (budget app, "do not show $0") CORRECT unprompted. Principle
 stated as the action rule rather than the general rule (NEARLY). MISCONCEPTION recorded: claims and verdicts believed

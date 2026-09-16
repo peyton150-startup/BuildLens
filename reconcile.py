@@ -110,7 +110,7 @@ class ScanResult:
 def reconcile(
     baseline: Picture,
     witness: Picture,
-    claimed_paths: set[str],
+    whole_file_held_paths: set[str],
 ) -> ScanResult:
     """Return every change between two pictures that no claim covers.
 
@@ -139,10 +139,11 @@ def reconcile(
     )
 
     for path in sorted(every_path):
-        if path in claimed_paths:
-            # A claim already accounts for this path, and PostToolUse has
-            # already produced a verdict for it. Reporting it again would state
-            # the same change twice under two different names.
+        if path in whole_file_held_paths:
+            # A whole-file claim held for this path, so every byte is accounted
+            # for. An Edit claim covers only its fragments and is never in this
+            # set: which paths qualify is decided before reconcile (D6), so this
+            # module stays unaware of claims and verdicts.
             continue
 
         unreadable_at_baseline = path in baseline.unreadable
