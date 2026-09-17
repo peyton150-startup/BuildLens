@@ -5516,3 +5516,180 @@ would be a lie; which modules produce user-facing text and so could break the in
 Scored so far (rubric dimensions, provisional): Behavior 3, Execution 3 (start_flow traced unaided), State/Authority 2
 (recovered after a missing-evidence relapse), Design Decision 2 so far on D6 (mechanism crisp; alternative and evidence
 not yet given), Communication 2.
+
+DEFENSE RESUMED (2026-09-17). D6 CONCRETE-CASE PROMPT: the case a holding Edit hides / strongest case for the rejected
+rule / evidence / confidence.
+LEARNER ANSWER (verbatim):
+```
+. the case is that we only can have a claude claim that it changed a certain number of old string into new strings there is no way in that case to account for the entire file because claude is only clamiing to change a string in the entire fie.
+```
+EVALUATION: Restates the mechanism (fragment containment cannot account for the file) rather than giving the concrete
+missed case. Still wanted: a file where the Edit holds AND a separate change exists, so the simpler rule hides it.
+
+D6 CONCRETE-CASE PROMPT (b.py with a holding Edit shown): one more thing that could have happened / what the user sees
+under the rejected rule / what they needed to see / confidence.
+LEARNER ANSWER (verbatim):
+```
+. we could have edited the file again to make the name runfast() and it would never be reported if we did not check the entire file again
+```
+EVALUATION: CORRECT and concrete: a rename elsewhere in b.py coexists with a holding Edit, and the simpler rule would
+skip the path so the rename is never reported. The missed-case half of the D6 defense is now made.
+Next: Round 3 (strongest case for the rejected rule) and Round 4 (evidence).
+
+D6 ROUNDS 3-4 NOT ANSWERED: the learner asked to move to higher-level questions before making the case for the rejected
+rule or naming evidence. Design Decision on D6 therefore stands at 2 (requirement and mechanism given, concrete failure
+given; alternative and evidence outstanding).
+
+BOUNDARIES PROMPT: why both ingest and find exist / processes BuildLens does not control / why reconcile knows nothing
+about claims / confidence.
+LEARNER ANSWERS (verbatim):
+```
+.  both exsist becasue of the way the 2 flows work, ingest starts with the payload, also ingest is not on the annotations for the cli.py
+```
+```
+. find looks at all the cpatured file written by the hook cross a timed session, that hte user decides the time, ingest only get one payload
+```
+EVALUATION: find's side CORRECT (a whole window of claims, bounded by a user-chosen start and end, rather than one
+payload). The ingest side is not yet given (works with no hook and no capture file; judges one claim at the moment it
+arrives). VALID FINDING, credited: cli.py's module docstring contract still lists only `analyze`, so `ingest` and
+`find` are undocumented there; the contract went stale as commands were added. Q2 and Q3 outstanding.
+
+NO-HOOK PROMPT: which of ingest/find still works without the capture hook and why it matters / which processes
+BuildLens does not control / what it can never assume about claims / confidence.
+LEARNER ANSWER (verbatim):
+```
+. ingest still works becasue it is not required baut i do nt know why
+```
+EVALUATION: PARTIAL, with an honest "I do not know why" (credited under Communication). Missing: ingest needs only the
+payload handed to it, no file on disk; and D2's consequence, that find must work with no capture hook at all, which is
+exactly what D16 encodes. Q2 and Q3 outstanding. Next: narrow to what ingest needs, and to naming the processes.
+
+NARROWED PROMPT: what ingest needs / which decision covers a missing capture file / which processes BuildLens does not
+control / confidence.
+LEARNER ANSWER (verbatim):
+```
+. the path and the payload
+i forgot 
+buildlens does not control a change claude made, it dose not control if a file is deleted or added during that session,
+```
+EVALUATION: Q1 CORRECT (a path and a payload, no hook required). Q2 not recalled by label (D16, the decision the
+learner wrote Test 1 for this morning). Q3 names uncontrolled EVENTS, not processes; the processes are Claude Code
+itself, the separate hook process that appends to the capture file, Git run as a subprocess, and the user's own editor
+or shell. Next: ask Q2 behaviourally rather than by label, and reframe Q3 as "which programs are running".
+
+D16 BEHAVIOURAL PROMPT: what find prints with no capture file, and what it is forbidden from printing.
+LEARNER ANSWER (verbatim):
+```
+. it only prints the unclaimed changes and it is forbidden from printing a claim
+```
+EVALUATION: PARTIAL. Correct that every observed change is reported with no claims attached. Missing the two halves
+that make D16 what it is: find must SAY the capture file was missing so no Claude reports were checked, and it is
+forbidden from saying Claude made no changes or no claims (missing evidence versus observed absence).
+
+D16 WORDING PROMPT: what find must say about the capture file / what it is forbidden to print / which programs run.
+LEARNER ANSWER (verbatim):
+```
+. it must say thaat it is missing and that claude has no claims to chekc
+```
+EVALUATION: RELAPSE, the same one recorded when Test 1 was first written: "Claude has no claims to check" asserts an
+absence find cannot observe. With no capture file there may well be claims; they were not captured, so none were read.
+Correct wording: the capture file was missing, so no Claude reports were checked. Next: challenge directly.
+
+D16 RELAPSE CHALLENGE (hook never installed, twenty Edits, no capture file): does Claude have claims / is "no claims to
+check" true / fix the sentence.
+LEARNER ANSWER (verbatim):
+```
+. yes 
+no
+the capture file does not exist, so no claue reports were checked
+```
+EVALUATION: RECOVERED, unaided once the scenario was concrete: claims existed, the sentence was false, and the fixed
+wording states only what find can know. Pattern for the record: this distinction holds under a concrete scenario and
+slips in abstract phrasing.
+
+PROCESS PROMPT (third ask): which programs run during a find session besides BuildLens / what find can never assume
+about the capture file's last line.
+LEARNER ANSWER (verbatim):
+```
+.  no idea for both
+```
+EVALUATION: No attempt, stated honestly. Gap: the runtime/process view of the system (rubric G, Systems Depth) is not
+held, although the learner decided D18a/D18b, which exist precisely because another process appends concurrently.
+Next: scaffold with one named process and a concrete mid-append picture.
+
+SCAFFOLDED PROCESS PROMPT: who edits during the wait / who appends to the capture file / list the processes.
+LEARNER ANSWER (verbatim):
+```
+.  the user inside of claude code 
+every time an edit is completed fully and successfully a posttoolhook is send and another program picks it up and puts it into the capture file, as well as claude's hook is recieved and reocreded,
+```
+EVALUATION: CORRECT with the scaffold: edits happen inside Claude Code, outside find's process, and a separate hook
+program appends each PostToolUse line. The explicit list (find's process, Claude Code, one hook process per tool call,
+Git as a subprocess) and the last-line question are next.
+
+D18a/D18b PROMPT: what a half-written last line looks like / what find does at baseline and says at witness / why not
+count it.
+LEARNER ANSWER (verbatim):
+```
+. it marks the baseline as that line and we wait till witness to see what the line said after it finished wiritng
+```
+EVALUATION: MOSTLY CORRECT on behaviour (the line is left for the witness). Two details unstated: what makes the line
+recognisable (no trailing newline, so count_complete_lines does not count it), and D18b's witness wording, "capture
+line N still being written" rather than "not valid JSON", because it may still become valid. Q3 (why counting it would
+be wrong) outstanding.
+
+D18a DETAIL PROMPT: what is physically missing from an unfinished line / trace the claim if the position counted it.
+LEARNER ANSWER (verbatim):
+```
+. \n is missing 
+that claim would be completely ignored and we would miss a claim on a piotental change
+```
+EVALUATION: CORRECT on both, unaided: the missing newline is the signal, and counting the line would push the position
+past a claim that is never read, losing it silently. D18a is defended (requirement, mechanism, failure).
+
+D22 PROMPT: why claims stay out of reconcile / what was wrong with the name claimed_paths / what would break if D6
+moved inside reconcile.
+LEARNER ANSWER (verbatim):
+```
+. because we can only look at the paths that we can tottaly acconut for the changes so we would first need to make sure that it is  a write so we have the whole fiel and then after that the calim would have to hold
+```
+EVALUATION: Q2 answered in substance and CORRECT: the set means "the whole file is accounted for", which "claimed"
+does not say, so the name would invite an Edit-claimed path to be skipped. Q1 and Q3 outstanding.
+
+D22 BOUNDARY PROMPT: reconcile's job in one sentence without "claim" / what it would need to know if D6 moved inside.
+LEARNER ANSWER (verbatim):
+```
+. to report changes to the working tree
+it would need to know about claims and filter through the edits vs the writes
+```
+EVALUATION: CORRECT on both halves; reconcile's job stated without reference to claims, and the added knowledge named.
+Remaining: why that added knowledge is a cost (second responsibility, claim fixtures in its tests, D6 changes forcing
+reconcile changes).
+
+COST PROMPT: name a concrete later cost of moving claims into reconcile.
+LEARNER ANSWER (verbatim):
+```
+. that is not the responisilbity of reconcile
+```
+EVALUATION: A LABEL, not a cost; the rubric rejects reciting "responsibility" without the mechanism. Pressing once for
+the concrete cost (claim fixtures in every reconcile test; a D6 change forcing edits and re-tests in reconcile; losing
+a picture-only comparison).
+
+COST PROMPT (narrowed): what every reconcile test would have to construct.
+LEARNER ANSWER (verbatim):
+```
+.  it would have to construct claims that hold and some that dont and they would have edits and writes
+```
+EVALUATION: CORRECT, the concrete cost named. D22 defended.
+
+DEFENSE SCORED (2026-09-17, rubric dimensions): A Behavior 3; B Execution 3; C State/Authority 2; D Tests 2;
+E Failure 2; F Design Decision 2 overall (D18a defended at 3; D6 stalled at 2, no case for the rejected rule and no
+evidence named); G Systems Depth 1; H Communication 2; I Security/Trust 2; J Operability/Evidence 1.
+Clears the late-project bar except Systems Depth and Operability; does NOT meet final-interview mode (all >= 2, five
+3s). Specific gaps: the runtime/process view (four programs touch a find session) and citing evidence (tests exist and
+were never invoked as support).
+Defended today: D18a (requirement, mechanism, silent-loss failure), D22/D22a (boundary, rename, concrete test cost),
+the authorship limit, D16's wording after a concrete-scenario challenge, provenance's honest source.
+Outstanding: D6 Rounds 3-4; the provenance field a careless UnclaimedChange would carry; which modules produce
+user-facing text; D23a; D15b/D15c retry paths.
+LEARNER INSTRUCTION for the next defense: stay high level first, the flow and the processes, before depth.
