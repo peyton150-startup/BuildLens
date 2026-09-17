@@ -23,6 +23,7 @@ from datetime import datetime, tzinfo
 from pathlib import Path
 
 import completeflow
+import find_report
 import find_workflow
 import snapshot
 from git_adapter import GitCaptureError
@@ -151,6 +152,10 @@ def main(argv: list[str]) -> int:
     if args.action == "find":
         outcome = find_workflow.run_find(Path.cwd())
         if outcome.result is not None:
+            for line in find_report.format_find_report(
+                outcome.result, format_time=format_local_time
+            ):
+                print(line)
             find_workflow.review_find_result(outcome.result)
         return outcome.status
 

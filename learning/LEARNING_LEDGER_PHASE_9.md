@@ -5380,3 +5380,11 @@ EVALUATION: CORRECT and unaided: a test builds its own FindResult and checks the
 whole session. Patch 5 Test 1 is GREEN with the minimum implementation (change lines from scan.changes; the
 missing-capture sentence only when capture_missing is True). Not mastered; the model was rebuilt today through many
 R0 rungs (print vs return, signatures, booleans, exact substring, any/not, string literal vs identifier).
+
+CLAUDE-WRITTEN WORK (2026-09-17, learner instruction: "if you want to write the rest of the tests right now do so but
+we are moving on"). NOT learner evidence. Added 8 further tests to tests/test_find_report.py (net changes and window,
+no attribution / other changes not ruled out, D23a changed-after-witness flag, undetermined versus DELETED, skipped
+capture lines, D8a superseded summary, D14a outside count, empty-scan wording), implemented them in find_report.py,
+wired cli.py to print the returned lines before the review menu, and added a wiring test to tests/test_find_cli.py.
+All 19 test scripts pass. Every wording choice here is Claude-proposed and must be defended or revised by the learner
+at the Phase 9 gate or the final defense.
