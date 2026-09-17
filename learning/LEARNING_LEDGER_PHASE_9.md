@@ -5388,3 +5388,131 @@ capture lines, D8a superseded summary, D14a outside count, empty-scan wording), 
 wired cli.py to print the returned lines before the review menu, and added a wiring test to tests/test_find_cli.py.
 All 19 test scripts pass. Every wording choice here is Claude-proposed and must be defended or revised by the learner
 at the Phase 9 gate or the final defense.
+
+## Phase 9 / release architectural defense (2026-09-17)
+
+DEFENSE R1 PROMPT (whole project, no code): what BuildLens is for / CLI commands today / modules sorted by boundary /
+the single invariant / confidence.
+LEARNER ANSWER (verbatim):
+```
+. cl;aude code is a tool that peopel use to code, but when the changes are made you cannot see the fiels that have been changed or what the stage looks like, enter buildldens an app that lets you create a session and track all the changes you have made, today the cli had analyze and find will be coming soson. git adapter talks to git , claude adapter talks to claude, cli is the midule that will deal with the command line interface, classify is in charge of classifying a line of the diff tesxt to see if it is metadata added removed or context, session is the module that is responsible for the coding session and everyhting that goes into it the changes and the history of the changes, summarize is in charge of summarizing the entire diff text and returns an object with the fields files changes lines added and removed, snapshot uses summarize to get a snapshot of the unstaged and staged code in the git repo, compare takes a claim payload from claude adapter and compares it to  the observed fule form file obersver who opens the file and reads the bytes and a hash, then comapre takes the 2 and compares them to see if the claim holds, startflow orchestrates all of this from calling the git adapter to observing the file to comparing them and then returning a complete compare.
+
+the whole system is build to make sure that the user knows what the changes are and have some idea of who made them, claude can claim and we can check them but it is not 100 percent.
+```
+EVALUATION: Behavior and module ownership STRONG and unaided: git_adapter, claude_adapter, cli, classify, session,
+summarize, snapshot, compare, file_observer and start_flow each described with the right responsibility, including
+compare's two inputs (claim vs observation) and start_flow as orchestrator. Gaps: `ingest` omitted from the command
+list and `find` called "coming soon" though it is implemented and wired into cli.py today. Invariant answer WEAK and in
+tension with the learner's own D7: "some idea of who made them" is attribution, which D7 forbids; the hedge "it is not
+100 percent" is right in spirit. Next: challenge the invariant against D7.
+
+DEFENSE R1 CHALLENGE (invariant vs D7): does any line say who changed a file / what a holding Write establishes and
+what it does not / restate the invariant the code enforces / confidence.
+LEARNER ANSWER (verbatim):
+```
+no modidfed does not say who unless it is claimed, unclaimed changes also is a lsit
+the claim has been held at the witness but could still change on the reread
+```
+EVALUATION: PARTIAL. Correct that a change line names no author and that unclaimed changes are their own list
+(UnclaimedChange). But "unless it is claimed" reintroduces attribution: under D7 even a claimed path is reported as a
+claim plus a verdict, never as authorship. Q2 names only the D23a timing gap; it does not state the deeper limit, that
+a holding claim establishes the file matches what the claim described, not who produced those bytes, and rules nothing
+out about the rest of the window. Q3 not answered. Next: force the authorship distinction with a concrete scenario.
+
+DEFENSE R1 CHALLENGE 2 (hand-typed content matching a failed Write): verdict / is it wrong / what a holding claim
+establishes about authorship / is "claimed by Claude" printable / confidence.
+LEARNER ANSWER (verbatim):
+```
+. there still could be an issue of claudes write fails and you made the edit by hand it will still report that claude made the edits and that will be the wrong edit, there is also a similar issue if an edit is made by claide and then you make another edit and then revert that edit, it will be like claude only made the one change on the report 
+holding a claim is just a claim it is not fact
+```
+EVALUATION: STRONG. The learner reasoned that attributing the change would be WRONG in the hand-typed case, and
+volunteered the change-and-restore blind spot (their own D6/D23 downside) unprompted. "Holding a claim is just a claim,
+it is not fact" is the authorship limit stated in their own words. Q4 implied, not stated. Next: ask for the invariant
+in one sentence and where in the code it is enforced.
+
+DEFENSE R1 CHALLENGE 3: state the invariant in one sentence / where it could be broken / which dataclass deliberately
+lacks a field / confidence.
+LEARNER ANSWER (verbatim):
+```
+.  the claim is just a claim it does not tell then whole truth so you cannot take it as fact
+```
+EVALUATION: Q1 ACCEPTABLE as a spoken invariant (a claim is evidence of a report, not of an act; the record asserts
+only what was observed). Q2 and Q3 not answered. Next: show UnclaimedChange's fields and ask which field a naive
+version would add.
+
+DEFENSE R2 (start_flow trace): the learner traced parse_post_tool_use -> None short-circuit -> repository root ->
+observe_file -> CompleteCompare with compare's verdict and provenance=CLAUDE, with the reason "a PostToolUse payload is
+Claude's report". CORRECT and unaided; only `_base_version_for` was omitted.
+
+PROVENANCE TENSION PROMPT: why provenance is honest in CompleteCompare / why it would be a lie in UnclaimedChange /
+the general rule / confidence.
+LEARNER ANSWER (verbatim):
+```
+. beasue claude is the only option so either no one changed the code which would reutnr none or claude changed the code
+because these are changes with no claim so that would mean a tool that made no hook call and claude has hooks to call
+if there is a claim for the change, if the file changeed but no claude hook it is unclaimed, if the file changed and claude made a hook then there is a claim
+```
+EVALUATION: Q1 PARTIAL: the honest reason is that a CompleteCompare is built FROM a Claude payload, so provenance names
+the record's source, known by construction, not the file's author; "Claude is the only option" is a weaker reason that
+would not survive a second provider. Q2/Q3 contain a RELAPSE to missing evidence versus observed absence: the learner
+treats "no claim" as "not Claude", although their own D16 (no hook, edits still happen) and D19 (a lost claim is
+byte-identical to a separator) say an unclaimed change may well be Claude's. Next: challenge with D19's lost claim.
+
+RELAPSE CHALLENGE (D16/D19 quoted): can an unclaimed change be Claude's / what "unclaimed" means / provider-independent
+reason for provenance=CLAUDE / confidence.
+LEARNER ANSWER (verbatim):
+```
+. yes, but we will not record it as a claude change, if we do not know where it came from explicitly then it is unclaimed
+```
+EVALUATION: RECOVERED. Yes, an unclaimed change may be Claude's; "unclaimed" means no readable claim covers it, not
+"not Claude", and the record stays silent rather than guessing. Q3 still open.
+
+PROVIDER-INDEPENDENCE PROMPT: honest reason a CompleteCompare may carry provenance if a second AI tool existed / where
+that value comes from (observed about the file, or something else) / confidence.
+LEARNER ANSWER (verbatim):
+```
+. so that we can differentiate the 2 and it would be an easy place for complete compare to check
+```
+EVALUATION: PARTIAL. Differentiating providers is a use, not a justification. The crux, still unstated: the value comes
+from the payload stream the record was built from, so it is known by construction and describes the RECORD's origin,
+never an inference about who edited the file. Next: ask the source question alone.
+
+SOURCE PROMPT: does setting provenance require observing the file / where the value comes from / finish "provenance is
+honest because it describes ___, not ___" / confidence.
+LEARNER ANSWER (verbatim):
+```
+. no it is just a default setting but we could make it look at whic hadapter it called to get the claim so it could be addeed in ther 
+it comes from the payload, so we could look at the payload to see which it came from
+```
+EVALUATION: CORRECT: no observation of the file is involved; the value comes from the payload/adapter stream, and is a
+constant today only because one adapter exists. The learner also named the extension point for a second provider. The
+closing sentence (describes the record's source, not the file's author) still to be stated.
+
+SENTENCE + D6 REQUIREMENT PROMPT.
+LEARNER ANSWER (verbatim):
+```
+. claim not fact
+```
+EVALUATION: Terse but on target for the sentence (the record carries what was claimed and its source, not an
+established fact about the file). D6 requirement question unanswered; re-asked.
+
+D6 ROUND 1 PROMPT: what failure rejected "any holding claim means skip" / what an Edit claim lacks that a Write has /
+confidence.
+LEARNER ANSWER (verbatim):
+```
+. we do this beaseue a write claim is accountign for the entire file while an edit claim is just a few lines that could be edited and does not account for the whole file
+```
+EVALUATION: Q2 CORRECT and crisp (whole-file equality versus fragment containment). Q1 implied but not made concrete
+(the missed case: a separate change elsewhere in the file, e.g. an appended line, hidden behind a holding Edit).
+Next: Rounds 3 and 4, strongest case for the rejected rule and the evidence.
+
+DEFENSE PAUSED (2026-09-17, learner stopped for dinner). Open questions at the pause, all on D6:
+  1. the concrete missed case behind a holding Edit claim (appended line elsewhere in the file);
+  2. Round 3, the strongest case FOR the rejected rule (skip every holding claim);
+  3. Round 4, the evidence for D6 (test, trace, measurement, or none).
+Also still open from earlier in the defense: which field a careless UnclaimedChange would add (provenance) and why it
+would be a lie; which modules produce user-facing text and so could break the invariant in wording.
+Scored so far (rubric dimensions, provisional): Behavior 3, Execution 3 (start_flow traced unaided), State/Authority 2
+(recovered after a missing-evidence relapse), Design Decision 2 so far on D6 (mechanism crisp; alternative and evidence
+not yet given), Communication 2.
