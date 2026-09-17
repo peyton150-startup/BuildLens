@@ -4726,3 +4726,244 @@ LEARNER ANSWER (verbatim):
 EVALUATION: No attempt. The D22 placement principle (responsibility) did not transfer to formatting vs printing on this
 surface. Blocker: how a function's OUTPUT CHANNEL (printing vs returning) affects testing. Next: R0 with two tiny
 functions, one printing and one returning.
+
+R0 PROMPT (output channel): greet_print(name) prints "Hi " + name; greet_text(name) returns it. Test:
+`result = ???("Ana")` then `assert result == "Hi Ana"`. Fill: which function passes / what `result` holds with the
+other / where the other's text went / confidence.
+LEARNER ANSWER (verbatim):
+```
+. so i would want a sepreate function to retunr the lines
+```
+EVALUATION: Skipped the R0 fields and jumped to the design choice, leaning (b) (a separate function that returns the
+lines). The direction matches the target principle, but no reasoning, no None value, no stdout destination, and no
+confidence were given, so the mechanism is not yet evidenced. Next: ask for the reason behind the choice via the R0
+items before accepting (b).
+
+FOLLOW-UP PROMPT: same R0 fields re-asked (which passes / value of `result` with the other / where the text went /
+confidence).
+LEARNER ANSWER (verbatim):
+```
+. beczsue just printing the lines does not make it so that i can reference them later or have another function read the lines when needed
+```
+EVALUATION: Core principle CORRECT and in the learner's own words: printed text is not a value the caller can hold,
+pass on, or check; a returned value is. Still unanswered: the concrete value `result` holds for greet_print (None) and
+where the text went (the terminal/stdout). Next: ask only those two, no new concepts.
+
+MICRO-CHECK PROMPT: after `result = greet_print("Ana")`, what value is in `result` / where did "Hi Ana" end up /
+confidence.
+LEARNER ANSWER (verbatim):
+```
+. None
+on the cmd for the user to see
+```
+EVALUATION: CORRECT on both (None; stdout/terminal). Confidence omitted. Together with the previous answer, the R0
+output-channel model is RECOVERED WITH ASSISTANCE (split over three prompts). Not mastered. Next: return to the target
+design question (a)/(b) without hints; ask for the downside of (b) and confidence.
+
+TARGET PROMPT (re-asked, no hints): (a) run_find calls write_output per report line / (b) format_find_report(result)
+-> list[str], cli.py prints; choice / what a wording test looks like under (a) vs (b) / one real downside / confidence.
+LEARNER ANSWER (verbatim):
+```
+.  B
+we can have a physical place where they are stored and can be used by other functions while alos making it possible to print them 
+we have to write another function and hold the items but they are not that large
+```
+EVALUATION: Choice (b) with a reason grounded in reuse (returned lines can be used by other functions and also
+printed): CORRECT direction. Test comparison: NOT ANSWERED (no description of either test). Downside: PARTIAL; an extra
+function is real, and memory is dismissed correctly as small, but it is a weak downside. Confidence omitted again.
+"Physical place where they are stored" is imprecise (it is a returned value, not storage). Next: challenge. run_find
+already takes an injected write_output and tests pass messages.append, so (a) is testable too; ask what then really
+separates (a) from (b), and what would make (a) better.
+
+CHALLENGE PROMPT: run_find already takes write_output and tests pass messages.append. Is "(b) testable, (a) not" still
+true / what does (b) give that (a) does not / what would make (a) better / confidence.
+(Learner first asked which Python file was shown; answered: tests/test_find_workflow.py calling run_find in
+find_workflow.py.)
+LEARNER ANSWER (verbatim):
+```
+. no, you can test thre output 
+another place to store the output 
+if we did not need the lines and printing was acceptable only
+```
+EVALUATION: Q1 CORRECT (a is testable through the injected write_output). Q3 CORRECT reversal condition (nothing but
+the terminal ever needs the report text). Q2 VAGUE: "another place to store the output" does not name the mechanism.
+The real difference is setup cost: under (a) a wording test must drive the whole session (baseline, input, witness,
+capture read) to reach the report; under (b) it calls one function with a hand-built result. Confidence omitted for the
+third prompt in a row. Next: one targeted question on what each test must set up.
+
+TARGETED PROMPT: to test the sentence "claim does not hold as of witness": under (a) (written inside run_find), what
+must the test set up or fake before run_find reaches that line / under (b), what must it set up before calling
+format_find_report / confidence.
+LEARNER ANSWER (verbatim):
+```
+. it has to create that line 
+it needs to know the line number 
+80
+```
+EVALUATION: INCORRECT, confidence 80 (miscalibrated). Misconception: read "set up" as producing the output line or
+knowing a source line number, not as supplying the inputs a function consumes before it reaches the code under test.
+Primary blocker: a test must provide everything a function reads on the path to the checked line (here: repository
+root, baseline picture, keypresses, witness, capture file). Next: lower rung, R0 with a two-prompt function versus a
+one-argument function; count what each test must supply.
+
+R0 PROMPT (inputs before the checked code): make_receipt(read_input) calls read_input three times (Name?, Table?,
+Item?) and returns "Receipt: " + item; receipt_text(item) returns "Receipt: " + item. Test wants "Receipt: tea".
+How many answers must a fake read_input return and which is "tea" / what does the test pass to receipt_text /
+confidence.
+LEARNER ANSWER (verbatim):
+```
+. a needs all of the fielfds of the line while b just needs the line number
+```
+EVALUATION: PARTIAL. "a needs all of the fields" points toward make_receipt needing every answer. "b just needs the line
+number" repeats the misconception: receipt_text needs the item value ("tea"), not a line number. No counts given,
+no confidence. Blocker may be reading what a function parameter receives. Next: lower rung, trace concrete calls
+value by value.
+
+TRACE PROMPT: Trace 1 make_receipt with fake answers "Ana", "4", "tea" (name / table / item / returns); Trace 2
+receipt_text("tea") (item / returns); confidence.
+LEARNER ANSWER (verbatim):
+```
+.  ana
+4
+tea
+
+tea
+tea
+70
+```
+EVALUATION: Trace 1 name/table/item CORRECT; returns left blank. Trace 2 item CORRECT; returns "tea" is INCOMPLETE,
+the function returns "Receipt: tea" (the + joins the two strings). Parameter binding is now evidenced: an argument
+value ("tea") lands in the parameter, which removes the line-number reading. Next: confirm the + result, then climb
+back to counting what each test must supply.
+
+COUNT PROMPT: exact shared return / values supplied to make_receipt test vs receipt_text test / which make_receipt
+values are unrelated to the receipt text / confidence.
+LEARNER ANSWER (verbatim):
+```
+. Reciept: tea
+3
+0
+name and table
+```
+EVALUATION: return "Receipt: tea" CORRECT (typo not graded). make_receipt needs 3 CORRECT. receipt_text needs 0
+INCORRECT: the test supplies 1 value, the argument "tea". Unrelated inputs name and table CORRECT, which is the core
+of the target idea. Confidence omitted (fourth time). Next: ask whether the argument "tea" counts as supplied, then
+return to the find report question.
+ADDENDUM: learner sent confidence separately (verbatim): `. 70`. Calibration: reasonable for 3 of 4 correct.
+
+TARGET RETURN PROMPT: values supplied to receipt_text("tea") / under (a), which of baseline, Enter/y keypresses,
+witness picture, capture-file read are the "name and table" for a one-sentence report test / under (b), what the test
+passes to format_find_report / confidence.
+LEARNER ANSWER (verbatim):
+```
+. one value 
+name would be the name of the file and table is capture file number 
+a results string in a list of strings
+```
+EVALUATION: Q1 CORRECT (one value). Q2 INCORRECT: mapped the analogy literally (name -> file name, table -> capture
+file number) instead of by role (inputs consumed before the checked code that do not shape the sentence: all four
+steps). Q3 INCORRECT: confuses the input with the output; format_find_report receives a result object and returns
+list[str]. Confidence omitted. Primary blocker: analogy mapped by surface instead of role. Next: classify each run_find
+step as "shapes the sentence" or "only needed to reach it". Q3 (signature input vs output) deferred.
+ADDENDUM: learner sent confidence separately (verbatim): `. 50`. Calibration: reasonable (1 of 3 correct).
+
+CLASSIFY PROMPT: for the sentence "claim does not hold as of witness", mark each run_find step shapes / only to reach:
+baseline picture, Enter and y keypresses, witness picture, capture-file read; confidence.
+LEARNER ANSWER (verbatim):
+```
+.  shaoes 
+only to reach 
+shaoes 
+inly to reach 
+60
+```
+EVALUATION: 3 of 4 CORRECT. Baseline shapes (it decides whether the path counts as changed), keypresses only to reach,
+witness shapes (the verdict is judged against it): CORRECT. Capture-file read "only to reach": INCORRECT, the claim in
+the sentence comes from a capture-file line. Confidence 60, calibrated. The role-based mapping is now working. Next:
+the shaping steps affect the sentence only through the data they produce; ask what a (b) test hands
+format_find_report instead of running them (revisits the deferred input/output question).
+
+DATA PROMPT: under (b), what a test hands format_find_report instead of taking pictures and reading the capture file /
+what it hands back / confidence.
+LEARNER ANSWER (verbatim):
+```
+.  an item 
+the itne reciept 
+80
+```
+EVALUATION: INCORRECT at confidence 80 (miscalibrated). Answers stayed on the receipt surface ("item", "receipt")
+instead of reading the BuildLens signature. Primary blocker: syntax, reading `def name(param) -> ReturnType` (what
+goes in vs what comes out). Next: syntax-only help on the parameter list and the `->` annotation with an R0 example,
+then read format_find_report's signature.
+
+SYNTAX R0 PROMPT: read `def count_words(text: str) -> int:` parameter name / type in / type out / confidence.
+LEARNER ANSWER (verbatim):
+```
+.  text 
+a string 
+an int
+90
+```
+EVALUATION: CORRECT on all three, confidence 90 calibrated. Signature reading recovered on the R0 surface. Next: climb
+one rung to the real signature format_find_report(result: FindResult) -> list[str] with FindResult's fields.
+
+SIGNATURE CLIMB PROMPT: format_find_report(result: FindResult) -> list[str] with FindResult fields shown. Type in /
+type out / fields holding baseline, witness, capture-read output / does a (b) wording test take real pictures and
+what does it build instead / confidence.
+LEARNER ANSWER (verbatim):
+```
+. a find result calss object
+a list of strings
+baseline: Picture
+    witness: Picture
+capture: CaptureRead
+no, it builds a report for the lines
+```
+EVALUATION: Type in (FindResult object) CORRECT; type out (list of strings) CORRECT; fields baseline, witness, capture
+CORRECT. "No real pictures" CORRECT. "Builds a report for the lines" IMPRECISE: the test builds the argument, a
+hand-made FindResult, and format_find_report builds the lines. Confidence omitted. Next: one short check on what the
+test itself constructs.
+
+CONSTRUCT PROMPT: `result = ???` / `lines = format_find_report(result)` / assert on lines[0]. What goes on the ??? line /
+which (a) steps are skipped entirely / confidence.
+LEARNER ANSWER (verbatim):
+```
+. it gas to put the verdict of the cmopare so we have a claim verdict 
+the lines = are entirely skipped
+```
+EVALUATION: Q1 PARTIAL: the claim verdict must be present, but the thing built is a FindResult holding that data.
+Q2 INCORRECT: the `lines =` call is not skipped; skipped are the session steps (baseline picture, keypresses, witness
+picture, capture read). Confidence omitted. Repeated difficulty over many prompts: worked-example rescue on a neighbor
+surface (cafe order), then learner explains a step and completes the missing find step.
+
+WORKED-EXAMPLE PROMPT (cafe Order, receipt_lines(order) -> list[str]; (a)-style test scripts Ana/4/tea and captures
+output; (b)-style builds Order by hand, calls receipt_lines, asserts). Explain what step 1 replaces / fill
+`result = ____` for find / confidence.
+LEARNER ANSWER (verbatim):
+```
+. it does not build the input object by hand it is already built for a
+findresult object
+```
+EVALUATION: Q1 PARTIAL, read charitably as correct in substance: in the (a) style the object is not built by hand, the
+session builds it (run_find constructs FindResult at the end); the phrase "step 1 replaces running the session" was not
+stated outright. Q2 CORRECT: a FindResult object. Confidence omitted. Next: fresh unaided example on a new surface
+(worked example must not substitute for retrieval).
+
+FRESH UNAIDED PROMPT (Reading(city, temperature), forecast_lines(reading) -> list[str]; sensor takes 30 s): write the
+three test lines producing ["Oslo: 4 degrees"] without the sensor / confidence.
+LEARNER RESPONSE (verbatim, not an attempt):
+```
+. it seems like you are pusing me towards a because it does not rebuild the findresult object aggain
+```
+EVALUATION: No attempt. Reveals a confusion: the learner reads "build the object by hand" as (a) and as a duplicate
+rebuild of FindResult. Clarified: the hand-built object belongs to the (b) test only; in the real program run_find
+builds FindResult once and cli.py passes that same object to format_find_report. The learner's (b) choice stands.
+Fresh prompt re-offered.
+
+LEARNER STATEMENT after clarification (verbatim):
+```
+. and it would be easier to test becasue we would be building one that we can control instead of relying on a findresult object
+```
+EVALUATION: Principle CORRECT in the learner's words: the (b) test controls its input. Imprecise: it is still a
+FindResult, but one the test controls, instead of one produced by running a real session. Oslo exercise still
+unattempted; re-asked.
