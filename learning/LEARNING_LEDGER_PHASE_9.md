@@ -4664,3 +4664,65 @@ report, why the baseline remains valid, why only the witness is retried, and why
 earlier interval. Retained-state naming required R0 choices; the transfer's start-time error was identified by the
 learner as a reading error and corrected to 08:00. Not mastered. DELAYED RETRIEVAL DUE: interval endpoints must be
 successful observations; baseline Picture and capture-file position are distinct retained state items.
+
+### Delayed retrieval — version-linked suppression (2026-09-17)
+
+CONTEXT: Claude resumed from a stale point (patch 3 D23a explanation) without seeing that the D23a gate (2893268) and
+patch 4 (2579c9e) had already been completed in another session. The exercise below therefore does NOT reopen or
+re-grade the patch 3 gate; it is recorded as the delayed retrieval that gate left due (version-linked suppression and
+the change-and-restore limit). Checkpoint f96f79d added source-grounded recall exercises to the Phase 15 docs.
+
+D23a EXPLANATION PROMPT (resumed 2026-09-17; code block shown): witness_hash == observed.content_hash True/False /
+held or changed_after_witness / is the appended line reported / what D23 problem this fixes / confidence.
+LEARNER ANSWER (verbatim):
+```
+. false 
+changed
+yes
+if the command is finishing then it has time to finish and we miss nothing
+```
+EVALUATION: False, changed_after_witness, reported: CORRECT and unaided. What it fixes: NEARLY. "We miss nothing" is
+right, but the mechanism is framed as giving a command time to finish. The actual fix: a file that changed after the
+witness is no longer judged by its later content and skipped; the hash mismatch keeps the witness-time change reported.
+Confidence omitted. EXPLANATION RESULT: substantially complete. Next: the patch 3 transfer.
+
+Transfer on a fresh surface:
+
+TRANSFER PROMPT (grocery shelf-label audit): verified only if the 9:05 scan matches the price list AND the 9:00 photo;
+milk photo 3.99 / scan 3.99 / list 3.99; eggs photo 4.49 / scan 2.99 / list 2.99 (label swapped at 9:02); bread photo
+unreadable / scan 2.50 / list 2.50; each verified, flagged, or neither / what trusting the scan alone would miss for
+eggs / confidence.
+LEARNER ANSWER (verbatim):
+```
+.  verfied 
+changerd after photo
+neither 
+it would miss the inital phto
+90
+```
+EVALUATION: milk verified, eggs flagged "changed after photo", bread neither: CORRECT on all three, UNAIDED, including
+the no-evidence case (unreadable photo gives neither). What is missed: NEARLY; "the initial photo" points the right
+way. The concrete loss is that eggs showed a wrong price (4.49) at the photo moment. Confidence 90, stated for the
+first time in a long while, and calibrated.
+
+DELAYED RETRIEVAL RESULT: version-linked suppression RECOVERED UNAIDED on two surfaces (code trace; grocery audit),
+including the no-evidence case, at calibrated confidence 90. The mechanism wording ("time to finish") is still
+imprecise. Other retrievals due are unchanged (indexing/slicing, comprehension filters, first-match order,
+successful-observation endpoints, baseline Picture versus capture-file position).
+
+## Phase 9 implementation — patch 5 (find report wording)
+
+FINDING (2026-09-17): after patch 4, `find` prints no main report; cli.py goes straight from run_find to the i/o/Enter
+review menu.
+PATCH CONTRACT (drafted by Claude): objective, separate formatting from printing and test wording without a terminal;
+behavior, the main report before the menu (D7, D8a, D12/D18b/D20, D14a, D16, D23a, undetermined paths); out of scope
+detection changes, the session loop, persistence.
+WHERE-WORDING-LIVES PROMPT: (a) write_output calls inside run_find / (b) format_find_report(result) -> list[str],
+printed by cli.py; choice / why (what each needs to be tested) / downside / confidence.
+LEARNER ANSWER (verbatim):
+```
+. no idea
+```
+EVALUATION: No attempt. The D22 placement principle (responsibility) did not transfer to formatting vs printing on this
+surface. Blocker: how a function's OUTPUT CHANNEL (printing vs returning) affects testing. Next: R0 with two tiny
+functions, one printing and one returning.
