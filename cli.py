@@ -1,12 +1,17 @@
 """Run BuildLens from a shell.
 
 Contract:
-    in        a command line: analyze
+    in        a command line: analyze, ingest [payload], or find
               the repository is resolved from the current working directory
-    out       the resolved repository root, then separately labelled UNSTAGED
-              and STAGED sections, three counts each
-    status    0 when the whole snapshot was produced
-              1 when any snapshot component failed
+    out       analyze: the resolved repository root, then separately labelled
+              UNSTAGED and STAGED sections, three counts each
+              ingest: one claim's verdict, or nothing when the payload named
+              no file to observe
+              find: the report's lines, then the review menu
+    status    0 when the command produced what it promises
+              1 when a component failed: any snapshot component, a payload that
+              cannot be read, parsed or flowed, or a find session that reached
+              no witness
               2 when argparse rejects the command line
     errors    reported on stderr as readable lines; never a raw traceback
               no partial summary is ever printed
