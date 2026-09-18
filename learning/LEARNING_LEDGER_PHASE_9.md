@@ -5902,3 +5902,34 @@ two sittings; the missing-evidence-versus-observed-absence distinction relapsed 
 only under concrete scenarios. A cold, single-sitting re-run is the evidence that would show it holds.
 Open, not blocking: the provenance field a careless UnclaimedChange would carry; which modules produce user-facing text;
 D23a; the D15b/D15c retry paths; user-value evidence for D6 (real-session counts).
+
+## find demo (2026-09-18)
+
+First end-to-end run of `python cli.py find` on real Claude activity, the learner driving find and Claude acting as
+the edited agent in a scratch folder `demo_find/` (deleted afterwards). Not learner evidence: the learner did not
+answer the prediction prompts.
+
+Run 1 (accidental): Claude reset the scratch files after the learner's baseline, believing find was not running.
+Report: "No changes were observed between the two pictures." plus "demo_find/twice.py has 1 unchecked superseded
+claims." A live instance of the change-and-restore limit.
+
+Run 2 (planned), report verbatim:
+```
+Changes between 12:36 PM Eastern Daylight Time and 12:37 PM Eastern Daylight Time:
+MODIFIED demo_find/appended.py
+CREATED demo_find/by_hand.txt
+MODIFIED demo_find/edited.py
+demo_find/twice.py has 1 unchecked superseded claims. Press i to see them.
+This report covers what the two pictures and the capture file showed. Other changes are not ruled out.
+```
+Every file behaved as designed: written.py (holding Write) and twice.py (latest Write holds) skipped under D6/D23a;
+edited.py reported despite a holding Edit (D6); appended.py reported because a shell append broke its Write; by_hand.txt
+CREATED with no claim; twice.py's earlier Write summarised (D8a).
+DEFECTS SEEN IN THE DEMO: (1) held paths vanish silently, with no line saying a Write claim accounts for them, so a
+reader cannot tell "skipped because held" from "nothing happened" (D7 not built); (2) reported paths show no claim or
+verdict (edited.py's Edit held, appended.py's Write did not hold), the same D7 gap; (3) "1 unchecked superseded claims"
+is not pluralised correctly.
+FIX (Claude-written at the learner's request, not learner evidence): defect (1) fixed test-first in find_report.py; each held
+path gets "<path>: not listed as a change; the Write claim on capture line N held at the witness.", and the empty-scan
+sentence becomes "No changes were observed apart from the paths below." when held paths exist, because a held path may
+have changed. Defects (2) and (3) remain.

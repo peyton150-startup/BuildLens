@@ -242,6 +242,27 @@ def test_claims_outside_the_repository_get_one_count_line_and_a_key():
     assert not any("x.py" in line for line in lines)
 
 
+def test_a_held_path_is_named_with_the_claim_that_accounts_for_it():
+    """D6: a held path is skipped as a change, but never silently.
+
+    Without a line, "skipped because a Write claim accounts for it" reads the
+    same as "nothing happened to it". The line names the claim and its
+    verdict, and never says who wrote the file.
+    """
+    result = make_result()
+    result.coverage.held.add("written.py")
+    result.selection.latest["written.py"] = make_claim(42, "written.py")
+
+    lines = format_find_report(result, format_time=fixed_time)
+
+    assert any(
+        "written.py" in line and "capture line 42" in line and "held" in line
+        for line in lines
+    )
+    assert not any("MODIFIED written.py" in line for line in lines)
+    assert not any("Claude wrote" in line for line in lines)
+
+
 def test_no_observed_changes_says_what_was_observed_not_that_nothing_happened():
     """Two pictures that agree establish no change, not an untouched tree."""
     result = make_result()
@@ -261,5 +282,6 @@ test_an_unreadable_path_is_undetermined_and_not_called_deleted()
 test_a_skipped_capture_line_is_named_with_its_reason()
 test_superseded_claims_are_summarised_with_a_count_and_a_key()
 test_claims_outside_the_repository_get_one_count_line_and_a_key()
+test_a_held_path_is_named_with_the_claim_that_accounts_for_it()
 test_no_observed_changes_says_what_was_observed_not_that_nothing_happened()
 print("all tests passed")

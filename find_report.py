@@ -35,8 +35,11 @@ def format_find_report(
         + ":"
     ]
 
-    if not result.scan.changes:
+    if not result.scan.changes and not result.coverage.held:
         lines.append("No changes were observed between the two pictures.")
+    elif not result.scan.changes:
+        # A held path may have changed; "no changes" would then be false.
+        lines.append("No changes were observed apart from the paths below.")
 
     for change in result.scan.changes:
         line = change.kind.name + " " + change.repository_relative_path
@@ -45,6 +48,18 @@ def format_find_report(
             # the witness. The witness saw one version, the re-read another.
             line += " (changed after the witness)"
         lines.append(line)
+
+    for path in sorted(result.coverage.held):
+        # D6: skipped as a change, never silently. Without this line a held
+        # path reads the same as an untouched one. The claim and its verdict
+        # are stated; who produced the bytes is not.
+        line_number = result.selection.latest[path].line_number
+        lines.append(
+            path
+            + ": not listed as a change; the Write claim on capture line "
+            + str(line_number)
+            + " held at the witness."
+        )
 
     for undetermined in result.scan.undetermined:
         # A finding about the scan's reach, never about the tree: calling an
