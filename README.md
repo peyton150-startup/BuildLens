@@ -43,15 +43,87 @@ This list matches the End Game in `docs/IMPLEMENTATION_PLAN.md`, which remains t
 
 ## Current status
 
-**Phase 8 — Claude boundary closed (2026-09-13).** The major cumulative review passed on 2026-09-14. Next is Phase 9's single-process observation workflow.
+**Phase 9 — the single-process `find` workflow is built (2026-09-17)** and the architectural defense is under way. `docs/CURRENT_STATE.md` has the exact status.
 
-The CLI supports `python cli.py analyze` (staged/unstaged counts) and `python cli.py ingest [payload.json]` (PostToolUse comparison; stdin when omitted). PreToolUse parsing, version metadata, working-tree pictures, and reconciliation also exist as Python code. Reconciliation has no CLI workflow yet; PreToolUse proposals are not routed through `ingest`.
+The CLI supports `python cli.py analyze` (staged/unstaged counts), `python cli.py ingest [payload.json]` (PostToolUse comparison; stdin when omitted), and `python cli.py find` (a baseline -> edits -> witness session reported against Claude's captured claims). PreToolUse proposals are not routed through `ingest`. See [Running BuildLens on your machine](#running-buildlens-on-your-machine).
 
 **Core v0.1 target:** finish a single-process baseline -> edits -> witness -> report workflow, then add one tracing archetype only if time permits. Learning gates, transfer, evidence recording, and oral defense can remain facilitator-run. No automatic SessionStart/Stop continuity, durable product history, API, dashboard, collaborative editor, or automated mastery/interview system is included.
 
-Known limits: comparisons establish observed content, not authorship; Edit checks fragments; pictures are not atomic. The current scan skips claimed paths and can miss later changes to them. Its coverage policy must be fixed or explicitly surfaced before release. `docs/CURRENT_STATE.md` is authoritative for implementation status and remaining work.
+Known limits: comparisons establish observed content, not authorship; Edit checks fragments; pictures are not atomic. `find` skips a path only when a Write claim holds on re-read and matches the witness picture (D6, D23a); every other changed path is reported, and a change made and undone between the two pictures stays invisible. `docs/CURRENT_STATE.md` is authoritative for implementation status and remaining work.
 
-Tests live in `tests/`; run any one by path, for example `python tests/test_reconcile.py`, from any folder. Verification on 2026-09-14: all 13 test scripts passed on the development machine. On 2026-09-13 a separate environment lacked `tzdata` for `test_cli.py`. Reproducible Python/Git setup and time-zone test prerequisites remain release work; do not claim the whole suite currently passes in a fresh environment.
+Tests live in `tests/`; run any one by path, for example `python tests/test_reconcile.py`, from any folder. Verification on 2026-09-17: all 19 test scripts passed on the development machine. A fresh-machine setup has not been verified; see the requirements below.
+
+## Running BuildLens on your machine
+
+### Requirements
+
+| Needed for | Requirement | Notes |
+|---|---|---|
+| everything | **Python 3.10 or later** | The code uses `X \| None` annotations, which need 3.10+. Developed and tested on Python 3.14 only. |
+| everything | **Git** on your `PATH` | BuildLens runs `git` as a subprocess to find the repository root, diffs, and tracked/untracked paths. Tested with Git 2.55 for Windows. |
+| `find` claims only | **Claude Code** | Without it, `find` still reports every change and says no Claude reports were checked. |
+| `find` claims only | **A POSIX shell for the hook command** | The capture hook uses `cat`, `echo` and `>>`. On Windows, that is the Git Bash that Claude Code uses for hooks. |
+| `tests/test_cli.py` only | **`tzdata`** (`python -m pip install tzdata`) | Windows has no system time-zone database for `zoneinfo`. The product itself does not need it. |
+
+There are no third-party packages to install for the product itself: everything else is the Python standard library. Only Windows has been verified; a fresh-machine setup has not been tested end to end.
+
+### Commands
+
+Run each command from inside the Git repository you want to observe. Pass the path to BuildLens's `cli.py` if that repository is not BuildLens itself.
+
+```bash
+python path/to/BuildLens/cli.py analyze
+python path/to/BuildLens/cli.py ingest payload.json
+python path/to/BuildLens/cli.py find
+```
+
+`analyze` needs no setup. `find` keeps its session in memory: start it before the work you want covered, leave its terminal open, then press Enter and confirm with `y` to get the report.
+
+### Capturing Claude's claims for `find`
+
+A clone does not include a capture hook: `.claude/settings.local.json` is local and is not committed. Without it, `find` works but reports that the capture file was missing. To capture claims in a repository:
+
+1. Add `payload_samples.jsonl` to that repository's `.gitignore`. Otherwise `find` reports the capture file itself as a changed file, because pictures include untracked files that are not ignored.
+2. Add a PostToolUse hook to that repository's `.claude/settings.local.json` (merge it into an existing file rather than replacing it), with the path changed to that repository's root. On Windows, write it in Git Bash form, `/c/...`:
+
+   ```json
+   {
+     "hooks": {
+       "PostToolUse": [
+         {
+           "matcher": "Edit|Write",
+           "hooks": [
+             {
+               "type": "command",
+               "command": "{ { cat; echo; } >> \"/c/path/to/your/repo/payload_samples.jsonl\"; } 2>/dev/null || true",
+               "statusMessage": "Capturing payload"
+             }
+           ]
+         }
+       ]
+     }
+   }
+   ```
+
+3. Start a **new** Claude Code session in that repository. Hooks are read when a session starts.
+
+`find` reads `payload_samples.jsonl` from the root of the repository it runs in. If the report says the capture file was missing, the hook path is wrong or the Claude session predates the hook.
+
+### Running the tests
+
+Each test script runs by path from any folder:
+
+```bash
+python tests/test_find_report.py
+```
+
+On the development machine, all 19 scripts in `tests/` pass (2026-09-17).
+
+### What `find` does not report yet
+
+- A verdict for each claimed path ("Edit claim, holds as of witness"): decision D7 is not implemented.
+- Line-endings-only marking for Write claims (D6a).
+- Anything across sessions: nothing is saved to disk.
 
 The curriculum uses selected CMU and MIT material as an academic backbone while BuildLens implementation continues to determine when each concept is introduced.
 
