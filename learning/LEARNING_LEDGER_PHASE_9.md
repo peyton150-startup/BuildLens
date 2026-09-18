@@ -5693,3 +5693,157 @@ the authorship limit, D16's wording after a concrete-scenario challenge, provena
 Outstanding: D6 Rounds 3-4; the provenance field a careless UnclaimedChange would carry; which modules produce
 user-facing text; D23a; D15b/D15c retry paths.
 LEARNER INSTRUCTION for the next defense: stay high level first, the flow and the processes, before depth.
+
+## Architectural defense round 2 — high level (2026-09-18)
+
+Note: the facilitator drew the process diagram and the three-command table on 2026-09-17, so this is short-delay
+retrieval, not a cold recall.
+
+HL-Q1 PROMPT: three commands and the question each answers / programs involved per command, controlled or not / find
+flow as steps / confidence.
+LEARNER ANSWER (verbatim):
+```
+. the 3 commands are find analyze and ingest,
+find: tkaes a baseline picture at the start of a coding session and then a winttess picture at the end and comapres the 2 and reports back changes, generally speaking 
+ingest: takes a payload and tells the user whether the claim holds at the time of ingest 
+analyze: looks at a git repo and tells the user about the uncommited changes how many filse lines added and removed
+```
+EVALUATION: Part 1 CORRECT for all three, in the learner's own words. ingest's "whether the claim holds at the time of
+ingest" is precise. find's description omits the claims half (what Claude reported, checked against the witness).
+Parts 2-3 and confidence not given.
+
+HL-Q1 FOLLOW-UP PROMPT: what find reads besides the pictures and what it does with it / programs per command,
+controlled or not / confidence.
+LEARNER ANSWER (verbatim):
+```
+. it reads the capture files and reports any unclaimed changes
+```
+EVALUATION: PARTIAL. Correct that find reads the capture file. What it does with it is under-stated: claims decide
+which paths are skipped (a latest Write that holds and matches the witness), and superseded and out-of-repository
+claims are counted in the report. The programs question was skipped for the second time in this round.
+
+HL-Q1 SKIP-RULE PROMPT: when does a claim make find leave a changed path out / programs per command / confidence.
+LEARNER ANSWER (verbatim):
+```
+. when the claim for a write holds and it matches witness
+```
+EVALUATION: CORRECT and precise (D6 plus D23a). The programs question skipped a third time; possible avoidance or an
+unclear prompt. Next: ask it alone, as fill-in-the-blank.
+
+HL-PROGRAMS FILL-IN PROMPT: analyze: BuildLens and __ / ingest: BuildLens and __ / find: BuildLens, __, __, __ / which
+BuildLens starts itself / confidence.
+LEARNER ANSWER (verbatim, after a lunch break):
+```
+.git
+git 
+buildlesn git claude and  not usre
+```
+EVALUATION: analyze Git CORRECT; ingest Git CORRECT (repository root and base version); find: Git and Claude Code
+CORRECT, fourth unknown (the hook process), although the learner described it with scaffolding on 2026-09-17 ("another
+program picks it up and puts it into the capture file"). Which one BuildLens starts (Git) not answered. Improvement over
+round 1, where no program was named unaided.
+
+HL-FOURTH-PROGRAM PROMPT: who writes the capture line, and its name / which of the four BuildLens starts / confidence.
+LEARNER ANSWER (verbatim):
+```
+. i forgot what it is called but the capture lines are what i thought of
+```
+EVALUATION: Knows the role (what produces the capture lines) but not the name; the facilitator supplied it: the
+PostToolUse hook, a separate short-lived process per tool call. Terminology, not model. "Which one BuildLens starts"
+still unanswered.
+
+HL-WHO-STARTS PROMPT: which of the four BuildLens starts itself / which starts the hook / confidence.
+LEARNER ANSWER (verbatim):
+```
+.  find 
+claude code
+90
+```
+EVALUATION: Q2 CORRECT (Claude Code starts the hook). Q1 INCORRECT at confidence 90: find IS BuildLens, started by the
+user typing the command; the program BuildLens starts is Git, run as a subprocess by git_adapter. Miscalibrated.
+
+HL-GIT-PROCESS PROMPT: which program BuildLens starts / why Git being a separate program matters / confidence.
+LEARNER ANSWER (verbatim):
+```
+. ok so git is started by buildlens
+i am not sure
+```
+EVALUATION: Q1 CORRECT after the correction. Q2 not known. The learner's own D15a/D15b (Git fails at baseline/witness)
+exist for exactly this reason, so the next prompt anchors there.
+
+HL-GIT-FAILURE PROMPT (anchored on D15a/D15b): a failure a separate Git program has that a Python function in the same
+file does not / what BuildLens gets back instead / confidence.
+LEARNER ANSWER (verbatim):
+```
+. if git is not insalled or if the file is npot a repo there will be an error,  it gets a gitcaptureerror
+i am not sure about the pythoin function part
+```
+EVALUATION: CORRECT: Git missing and not-a-repository named as failures, and GitCaptureError as what comes back. The
+contrast with an in-process function was not drawn; the facilitator explained it briefly (a function cannot be
+missing, has no exit status, returns objects not bytes, and cannot hang in another process).
+
+HL-Q2 PROMPT (claim/observation boundary): what find learns by looking vs by being told / which may appear as fact and
+how the other is shown / confidence.
+LEARNER ANSWER (verbatim):
+```
+. the observed file looks for the file on path and the claude adapter is telling it about the payload
+the observed file is fact and the other kind must be shown as a claim not fact because it cannot be completely verified
+```
+EVALUATION: CORRECT at module level: observation via file_observer (and the pictures built on it), claims via
+claude_adapter; observations may be stated as fact, claims only as claims. Unaided, and consistent with round 1's
+"a claim is just a claim". Confidence omitted.
+
+HL-Q3 PROMPT (state): where the baseline and capture position live / what is lost on an accidental close / why find
+does not save to disk / confidence.
+LEARNER ANSWER (verbatim):
+```
+. they live in the session and when we close the session they are gone forever 
+the baseline is lost and so is the position of the capture file, althouhg the file is not deleted the position you wree at is gone, so you will need to get another baseline and start over
+```
+EVALUATION: Q2 CORRECT and precise: the baseline and position are lost, while the capture file itself survives on disk.
+Q1 CORRECT in substance; "the session" should be "find's process memory". Q3 (why no persistence) not answered.
+
+HL-Q3 DECISION PROMPT: why saving the baseline/position was not built / strongest case for it / reversal condition /
+confidence.
+LEARNER ANSWER (verbatim):
+```
+. ok so the process memeory holds the baseline and the capture file positon, the scope was that we were not going to requier anything to be saved on disk, it makes more sense when we think about how persistence was in a later patch that we will not get to, but the file would get too big and would not make much sense to have, i cannot think of anything else 
+
+the user would gain persistence but the security of the file would be another question, with the file being open on the pc it could be changed or malformed easily, i would add it if we were not pursing persistence 
+80
+```
+EVALUATION: Q1 CORRECT: the release scope excluded storing to disk and deferred persistence to a later phase. "The file
+would get too big" is an UNSUPPORTED claim (a baseline is paths plus hashes, small; no measurement exists). Q2 STRONG
+and unprompted: a saved baseline becomes an untrusted input that could be edited or malformed, a real trust concern
+(an edited baseline could hide a change). Q3 unclear ("if we were not pursuing persistence" reads backwards). Next:
+challenge the size claim for evidence, sharpen the reversal condition.
+
+HL-Q3 CHALLENGE PROMPT: evidence for "too big" / state the reversal as "I'd add saving to disk if ___" / confidence.
+LEARNER ANSWER (verbatim):
+```
+.  it is a guess but i think that after using it for years and years of baselines and wintesses and any other data we might add it would be as big as other programs and would need to be reoutinly cleaned
+
+the future was not in perisistnece
+```
+EVALUATION: Q1 HONEST ("it is a guess", credited), but the reasoning conflates saving one in-flight session (small,
+replaced each run) with keeping years of history (a durable store). Q2 still no reversal condition, and a FACTUAL
+ERROR: persistence is on the roadmap as Phase 11, deferred from Core v0.1, not abandoned.
+
+HL-Q3 REVERSAL PROMPT (shape modelled on an unrelated pytest decision): "I'd add saving find's session to disk if ___,
+or if ___" / confidence.
+LEARNER ANSWER (verbatim):
+```
+. it was necessary for us to have it like process memory owuld not be a viable option or if the session was very prone to closing unexpectidly
+```
+EVALUATION: Second condition CORRECT and concrete (sessions frequently lost to unexpected closes). First condition
+CIRCULAR ("if it were necessary"); the concrete version is "if a session had to span processes, e.g. SessionStart/Stop
+hooks starting and ending it", which is exactly why persistence and that wiring are deferred together.
+
+ROUND 2 SCORED (2026-09-18, high level only): A Behavior 3 (unchanged); C State/Authority 3 (up from 2); F Design
+Decision 2 (unchanged: scope reason and one real reversal condition, but an unsupported size claim and one circular
+condition); G Systems Depth 2 (up from 1: three of four processes named unaided, the hook's name supplied, who starts
+whom correct after one correction); H Communication 2 (honest "it is a guess"; the programs question was skipped three
+times before an answer); I Security/Trust 3 (up from 2: volunteered that a saved baseline is a tamperable input that
+could hide a change). Not re-tested this round: B, D, E, J (J stays 1 from round 1).
+Remaining for a final-standard pass: Operability/Evidence to 2 (cite tests or runtime evidence for a decision) and
+Design Decision to 3 on one major choice (D6 Rounds 3-4 still open).
