@@ -53,6 +53,8 @@ Known limits: comparisons establish observed content, not authorship; Edit check
 
 Tests live in `tests/`; run any one by path, for example `python tests/test_reconcile.py`, from any folder. Verification on 2026-09-17: all 19 test scripts passed on the development machine. A fresh-machine setup has not been verified; see the requirements below.
 
+The curriculum uses selected CMU and MIT material as an academic backbone while BuildLens implementation continues to determine when each concept is introduced.
+
 ## Running BuildLens on your machine
 
 ### Requirements
@@ -124,8 +126,6 @@ On the development machine, all 19 scripts in `tests/` pass (2026-09-17).
 - A verdict for each claimed path ("Edit claim, holds as of witness"): decision D7 is not implemented.
 - Line-endings-only marking for Write claims (D6a).
 - Anything across sessions: nothing is saved to disk.
-
-The curriculum uses selected CMU and MIT material as an academic backbone while BuildLens implementation continues to determine when each concept is introduced.
 
 ## Core rule
 
