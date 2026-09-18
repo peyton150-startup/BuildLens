@@ -1,12 +1,12 @@
 # BuildLens — Current State
 
-Last updated: 2026-09-14 — major cumulative review 2 passed; tests and docs layout patches done; Phase 9 started (idempotence lesson done, learner-led workflow design in progress).
+Last updated: 2026-09-18 — Phase 9 `find` workflow built (patches 1-5) and wired into the CLI; architectural defense round 1 held and scored; setup documented in the README.
 
 This file is the current snapshot. The [prior accumulated state notes](history/CURRENT_STATE-before-core-v0.1-2026-09-13.md) are preserved byte-for-byte for historical context, not current instructions. Exact historical prompts and learner answers remain in `learning/LEARNING_LEDGER.md`; none were changed by this scope revision.
 
 ## Phase and active release
 
-**Phase 8 is CLOSED** (2026-09-13, composite gate EV-P8-PHASE-GATE-460). Phases 7 and 8 are complete. **Phase 9 STARTED 2026-09-14** (reduced Core v0.1 scope); no Phase 9 product code yet. The latest recorded product commits are `c78b1b6` (PreToolUse parser) and `bb92ba5` (optional PostToolUse tool-call ID); no product code changed while the gate ran.
+**Phase 8 is CLOSED** (2026-09-13, composite gate EV-P8-PHASE-GATE-460). Phases 7 and 8 are complete. **Phase 9 is IN PROGRESS** (reduced Core v0.1 scope, started 2026-09-14): the single-process `find` workflow is implemented test-first in five patches (capture reader, claim selection, whole-file coverage, the interaction loop, the report). The Phase 9 knowledge gate has not been run; patch milestone gates 1-4 passed with assistance.
 
 The active scope at the top of `IMPLEMENTATION_PLAN.md` is authoritative: finish the observation core and a single-process reconciliation workflow, then attempt one tracing archetype only if time permits. Facilitator-run gates are the release fallback. Persistence, API/UI, collaborative editing (including Phase 9 merge primitives), automated mastery, and automated interviews are deferred. Phase numbers are preserved. No counter was reset.
 
@@ -19,14 +19,19 @@ The active scope at the top of `IMPLEMENTATION_PLAN.md` is authoritative: finish
 | `git_adapter.py` | Repository resolution, staged/unstaged/new-file diffs, NUL-separated tracked/untracked paths, HEAD commit/blob context |
 | `snapshot.py` | Assemble separate staged/unstaged summaries; no partial summary on capture failure |
 | `claude_adapter.py` | Separate `ClaimedEdit`/`ProposedEdit`, PostToolUse/PreToolUse parsing, shared field validation, optional report ID and required proposal ID |
-| `file_observer.py` | Read bytes, SHA-256, UTC observation time, repository-relative path; READ/ABSENT/UNREADABLE |
+| `file_observer.py` | Read bytes, SHA-256, UTC observation time, repository-relative path; READ/ABSENT/UNREADABLE; public `relative_to_root` (D21) |
 | `compare.py` | Write equality and Edit fragment checks, separate normalized-line-ending verdict, explicit absent/unknown outcomes |
 | `completeflow.py` | PostToolUse -> claim -> Git context -> file observation -> comparison and metadata record |
-| `reconcile.py` | Compare two pictures for created/modified/deleted and undetermined paths, currently excluding claimed paths |
-| `working_tree_picture.py` | Build a picture from real Git path listings and disk reads |
-| `cli.py` | `analyze` and `ingest [payload]`; stdin when payload omitted |
+| `working_tree_picture.py` | Build a picture from real Git path listings (tracked + untracked, not ignored) and disk reads |
+| `reconcile.py` | Compare two pictures for created/modified/deleted and undetermined paths, skipping only `whole_file_held_paths` (D22) |
+| `capture_reader.py` | Count complete capture-file lines at baseline; read PostToolUse claims after that position; name skipped lines (D3, D4, D12, D18-D20) |
+| `claim_selection.py` | Latest claim per repository path, superseded claims, claims outside the repository (D8, D14) |
+| `whole_file_coverage.py` | Hold a path only when its latest Write holds on re-read and matches the witness hash; flag it otherwise (D6, D23, D23a) |
+| `find_workflow.py` | Baseline, wait, confirmation, witness, retry and capture read; `FindResult`; the post-report i/o/Enter menu (D9-D11, D13, D15-D17) |
+| `find_report.py` | Pure `format_find_report(result) -> list[str]`: window, changes, undetermined paths, skipped lines, superseded and outside counts, missing-capture sentence |
+| `cli.py` | `analyze`, `ingest [payload]` (stdin when omitted), and `find` |
 
-PreToolUse capture is configured in machine-local, Git-excluded `.claude/settings.local.json`; this is not a portable product installation. There is no PreToolUse CLI route, reconciliation CLI flow, gate engine, database, API, or editor.
+Capture is configured in machine-local, Git-excluded `.claude/settings.local.json`, so a clone has no capture hook; the README documents how to add one. There is no PreToolUse CLI route, gate engine, database, API, or editor. `find` does not yet print a per-path claim verdict (D7) or mark line-endings-only Writes (D6a).
 
 ## Execution paths
 
@@ -38,27 +43,31 @@ python cli.py ingest [payload.json] (or stdin)
   -> JSON decoding -> completeflow -> parse_post_tool_use
   -> Git repository context -> observe_file -> compare -> verdict/observation output
 
+python cli.py find
+  -> find_workflow.run_find: baseline take_picture + capture line count
+  -> wait for Enter (or Ctrl+C) and y -> witness take_picture (retry on failure)
+  -> read_capture after the position -> select_claims -> whole_file_coverage
+  -> reconcile(baseline, witness, whole_file_held_paths) -> FindResult
+  -> find_report.format_find_report -> printed by cli.py
+  -> review_find_result: i / o / Enter
+
 parse_pre_tool_use(payload) -> ProposedEdit (or None for supported no-file tool)
   [callable parser; not connected to a decision or persistence system]
-
-take_picture(repository) -> git_adapter + file_observer -> Picture
-reconcile(baseline, witness, claimed_paths) -> ScanResult
-  [callable machinery; no user-facing lifecycle yet]
 ```
 
-Separate `ingest` invocations do not share state. Automatic SessionStart/Stop wiring requires persistence, still assigned to future Phase 11. Core v0.1 will hold baseline and witness in one running process; its exact interaction remains to be designed with the learner.
+Separate `ingest` invocations do not share state, and a `find` session lives only in its own process: closing it loses the session. Automatic SessionStart/Stop wiring requires persistence, still assigned to future Phase 11.
 
 ## Known release issues and limits
 
-- `reconcile()` skips a claimed path before checking its witness hash or unreadability. A later shell mutation to that path can disappear from the report. Reproduced in the scope review. Plan version-aware accounting and a regression scenario; if deferred, explicitly narrow and surface the coverage limitation. Do not report complete coverage without resolving it.
+- Resolved in patch 3: `reconcile` no longer skips every claimed path. Only a latest Write that holds on re-read AND matches the witness hash is skipped (D6, D23a); every other changed path is reported. Remaining limit: a change made and undone between the two pictures is invisible.
 - Pictures are sequential, not atomic. Changes restored between pictures are invisible. Untracked ignored paths are excluded; tracked files remain in scope even if an ignore pattern matches them.
 - Write comparison concerns observed content; Edit comparison checks fragments, not exact patch execution. Neither proves authorship. CLAUDE provenance labels the report stream.
 - `analyze` produces counts, not a diff browser. Base-version metadata is available in records but is not all printed by `ingest`.
-- Reproducible Python/Git setup and applicable failure handling are release work; no new runtime infrastructure is needed to document or test the supported boundary.
+- Setup is documented in the README (Python 3.10+, Git, a capture hook for claims, `tzdata` for `test_cli.py` on Windows), but has only been verified on the development machine; a fresh clone has not been set up end to end.
 
 ## Verification evidence
 
-Tests live in `tests/` (moved 2026-09-14, EV-LAYOUT-PREDICT-468). Each test script puts the repository root first on `sys.path`, so any one runs by path from any folder, for example `python tests/test_reconcile.py`. On 2026-09-14 all 13 scripts passed on this machine, run from the repository root, from `tests/`, and from an unrelated folder, including `test_cli.py`. The 2026-09-13 scope-review environment lacked `tzdata` for `test_cli.py`; a fresh-environment setup procedure is still release work, so do not claim a fresh environment passes.
+Tests live in `tests/` (moved 2026-09-14, EV-LAYOUT-PREDICT-468). Each test script puts the repository root first on `sys.path`, so any one runs by path from any folder, for example `python tests/test_reconcile.py`. On 2026-09-17 all 19 scripts passed on this machine (Python 3.14.7, Git 2.55 for Windows), including `test_cli.py` and the new `test_find_report.py`. A fresh environment has not been verified.
 
 ## Learning evidence and exact restart point
 
@@ -171,7 +180,7 @@ Uncertain / due for retrieval:
 - Next retrieval: unaided two-path architecture redraw (ingest path and picture/reconcile path, with data on arrows); ObservedFile vs observe_file unprompted on a fresh surface; argument vs return value unprompted; CONDITION_EVALUATION on another surface; naming concrete validation checks. Ask for confidence inside every answer block — still often omitted.
 - Architecture reset study targets (EV-CR2-ARCH-467): `take_picture` calls `git_adapter` (root, tracked + untracked listings) then `file_observer.observe_file` per path; `git_adapter` and `file_observer` are shared by both paths; `claimed_paths` is reconcile's third input; `reconcile` calls no other BuildLens module; no session-end trigger exists.
 - Next architecture reset: by the seven-active-day clock or the next major transition.
-- Next implementation step: finish the learner's design review (see item 3 above), then tests first. No design is approved yet. Retrieval due from Phase 9 so far: event identity vs thing identity; relative links from the linking file's folder; file path form vs `-m`.
+- Next step: the second, high-level architectural defense round (see **Resume at** above), then D7 per-path verdicts only if time remains. Retrieval due from Phase 9 so far: event identity vs thing identity; relative links from the linking file's folder; file path form vs `-m`.
 - Final release reserve: setup, tests/defects, documentation, demo, static architecture view, manual defense. Phase 10's narrow extension begins only after the observation workflow is ready.
 
-Files the learner should be able to teach: `compare.py`, `completeflow.py`, `reconcile.py`, and `working_tree_picture.py`. `claude_adapter.py`'s adapter boundary is gated (459, 460) but not mastered; retrieval is due.
+Files the learner should be able to teach: `compare.py`, `completeflow.py`, `reconcile.py`, `working_tree_picture.py`, and from Phase 9 `capture_reader.py`, `claim_selection.py`, `whole_file_coverage.py`, `find_workflow.py` and `find_report.py` (the last written largely by Claude on 2026-09-17; its wording is Claude-proposed). `claude_adapter.py`'s adapter boundary is gated (459, 460) but not mastered; retrieval is due.

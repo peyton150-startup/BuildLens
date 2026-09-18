@@ -13,6 +13,8 @@ This section controls the current release. The full end game and phase numbering
 3. Only after that workflow is complete, attempt Phase 10's narrow extension: one source-grounded tracing archetype with fresh variants, a transfer variant, and human-reviewed reasoning. Automatically checking a predicted result is allowed; passing a value check alone is not passing a knowledge gate.
 4. Reserve the final working day for reproducible setup, verification, defects, accurate docs, a demo, a static architecture view, and a manual oral defense. Do not spend that reserve on a new framework.
 
+**Status (2026-09-18):** item 1 is done (Phase 8 closed 2026-09-13; the major cumulative review passed 2026-09-14). Item 2 is built as `python cli.py find`, though Phase 9's knowledge gate has not been run yet. Item 3 has not started. From item 4, setup documentation is in the README and the first manual defense round was held; the demo and the static architecture view are still to do. `CURRENT_STATE.md` has the details.
+
 If the narrow learning extension does not fit, ship the observation core with facilitator-run knowledge gates and evidence recorded in the existing learning ledger. Describe that fallback honestly; do not claim an implemented learning engine or completion of Phase 10.
 
 ### Keep, reduce, defer
@@ -35,7 +37,7 @@ If the narrow learning extension does not fit, ship the observation core with fa
 
 ### Required reliability and coverage decisions
 
-- The current `reconcile()` skips any path in `claimed_paths`. A later shell change to an already-claimed file can be hidden. Before claiming complete coverage of net changes within the watched scope, implement and test version-aware accounting against the last observation. If that does not fit, explicitly exclude these paths from the coverage promise and surface the limitation in the report/demo; do not imply that no findings proves no further changes.
+- **Resolved 2026-09-16 (D6, D22, D23a):** `reconcile()` now skips only `whole_file_held_paths`, meaning paths whose latest Write holds on re-read and matches the witness hash; every other changed path is reported. The original requirement follows. The earlier `reconcile()` skipped any path in `claimed_paths`, so a later shell change to an already-claimed file could be hidden. Before claiming complete coverage of net changes within the watched scope, implement and test version-aware accounting against the last observation. If that does not fit, explicitly exclude these paths from the coverage promise and surface the limitation in the report/demo; do not imply that no findings proves no further changes.
 - Preserve the distinction between absent and unreadable, and refuse incomplete Git listings rather than inferring deletions. Keep repository-relative path handling and ensure pictures belong to the same intended working tree.
 - Define the supported input/lifecycle and relevant failure behavior before adding event types. A repeated payload may cause a fresh disk observation; deduplication must not silently erase new evidence. Tool-call identity alone does not prove observation identity.
 - Pictures are sequential reads, not atomic snapshots. Changes restored between pictures are invisible. Edit comparison checks fragments, not exact patch application. `provenance = CLAUDE` labels the report stream, not authorship of all observed bytes.
