@@ -71,13 +71,26 @@ There are no third-party packages to install for the product itself: everything 
 
 ### Commands
 
-Run each command from inside the Git repository you want to observe. Pass the path to BuildLens's `cli.py` if that repository is not BuildLens itself.
+BuildLens is not installed as a command, so a bare `find` or `buildlens find` will not work. Every command is Python running BuildLens's `cli.py`, which means each one has two parts:
+
+1. **`cd` into the repository you want to observe.** BuildLens observes the Git repository of the folder you run it from, not the folder BuildLens lives in.
+2. **Run `python` with the full path to BuildLens's `cli.py`**, followed by the command.
+
+For example, to observe a repository at `C:\Users\you\my_project` with BuildLens cloned to `C:\Users\you\BuildLens_Project`:
 
 ```bash
-python path/to/BuildLens/cli.py analyze
-python path/to/BuildLens/cli.py ingest payload.json
-python path/to/BuildLens/cli.py find
+cd C:\Users\you\my_project
+python C:/Users/you/BuildLens_Project/cli.py find
 ```
+
+The same pattern works for the other two commands:
+
+```bash
+python C:/Users/you/BuildLens_Project/cli.py analyze
+python C:/Users/you/BuildLens_Project/cli.py ingest payload.json
+```
+
+When the repository you want to observe is BuildLens itself, the path shortens to `python cli.py find`.
 
 `analyze` needs no setup. `find` keeps its session in memory: start it before the work you want covered, leave its terminal open, then press Enter and confirm with `y` to get the report.
 
