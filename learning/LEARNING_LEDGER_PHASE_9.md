@@ -5847,3 +5847,58 @@ times before an answer); I Security/Trust 3 (up from 2: volunteered that a saved
 could hide a change). Not re-tested this round: B, D, E, J (J stays 1 from round 1).
 Remaining for a final-standard pass: Operability/Evidence to 2 (cite tests or runtime evidence for a decision) and
 Design Decision to 3 on one major choice (D6 Rounds 3-4 still open).
+
+## Defense: D6 Rounds 3-4 (2026-09-18)
+
+D6 R3/R4 PROMPT: forty holding Edits across twelve files; the report under D6 / under the rejected rule / argue for the
+rejected rule / which test fails under the rejected rule / what it proves and does not / confidence.
+LEARNER ANSWER (verbatim):
+```
+.  it looks like appy.py was modified
+then the timestamp 
+then if the capture file is missing
+it looks like a claimed path, if the edit or write were held then they would be added to claimed paths
+```
+EVALUATION: Q1 described the report's line format, not the outcome (under D6 all twelve files appear as MODIFIED).
+Q2 described the mechanism (held claims join the skip set) rather than the outcome (the twelve files vanish from the
+report). Q3-Q6 not answered. Blocker: answering with mechanics instead of the user-visible result. Next: reduce to
+counts, how many of the twelve files appear under each rule.
+
+D6 R3 COUNTS PROMPT: twelve files, forty holding Edits, nothing else changed; how many files appear under D6 / under
+the rejected rule / argue for the rejected rule / confidence.
+LEARNER ANSWER (verbatim):
+```
+. all of those edit claims apprear in the repot
+all would be skipped 
+the rejected rule would tel lthe user that other thna the edits made most it has nothing else to report for that file, but you would be missing the big fact that the entire file would be unaccounted for and we would only know about hte edits and be ignorant to the other changes that could have been made
+```
+EVALUATION: Q1 CORRECT (all twelve appear); Q2 CORRECT (all skipped). Q3 PARTIAL steelman: named the rejected rule's
+benefit (nothing else to report for those files) before rebutting it with D6's reason. The strongest form, noise
+burying the one unexpected change among twelve expected lines, was not stated; the facilitator named it. Round 4
+(evidence) next.
+
+D6 R4/R5 PROMPT: which test fails under the rejected rule / does it prove the rule is better for users, and what
+evidence would / what would make the rejected rule win / confidence.
+LEARNER ANSWER (verbatim):
+```
+.  test_an_edit_never_covers_its_path_even_when_it_holds
+not sure 
+the edit claims would have to hold the entire file
+```
+EVALUATION: Q1 CORRECT, unaided: the test that pins D6 against the rejected rule. Q2 "not sure", honest: the test proves
+the code follows the rule, not that the rule serves users; user-value evidence would come from real sessions (how often
+a holding-Edit path carried an extra change, versus how much noise the twelve-line case adds). Q3 STRONG, concrete
+reversal: if an Edit claim could account for the whole file (e.g. the payload carried the whole post-edit content or
+hash), the rejected rule's blind spot closes.
+D6 NOW: requirement, mechanism, concrete failure (runfast rename), partial steelman, code evidence (a named test),
+missing user evidence acknowledged, concrete reversal condition. Design Decision on D6 raised to 3 (borderline: the
+steelman needed completing). Operability/Evidence raised to 2 (a specific test cited as evidence).
+
+DEFENSE OUTCOME (2026-09-18), combined across rounds 1-2 and the D6 completion: A 3, B 3, C 3, D 2, E 2, F 3 (D6,
+borderline), G 2, H 2, I 3, J 2. Every applicable dimension >= 2 and five at 3, which meets the rubric's
+final-interview standard ON PAPER.
+RECORDED AS: PASSED WITH ASSISTANCE, NOT MASTERED. Reasons: several 3s were reached with prompting; the scores combine
+two sittings; the missing-evidence-versus-observed-absence distinction relapsed twice under abstract phrasing and held
+only under concrete scenarios. A cold, single-sitting re-run is the evidence that would show it holds.
+Open, not blocking: the provenance field a careless UnclaimedChange would carry; which modules produce user-facing text;
+D23a; the D15b/D15c retry paths; user-value evidence for D6 (real-session counts).
